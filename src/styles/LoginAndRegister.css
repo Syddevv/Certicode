@@ -4,7 +4,7 @@
     box-sizing: border-box;
 }
 
-body {
+.auth-page {
     font-family: system-ui, sans-serif;
     background: linear-gradient(135deg, #fff7f1 0%, #fffdf8 100%);
     display: flex;
@@ -313,10 +313,7 @@ body {
 }
 
 
-body {
-  
-  background: #f6f7fb;
-  
+.auth-page {
   color: #1f2937;
 }
 
@@ -834,14 +831,8 @@ tr:hover {
 }
 
 
-.auth-page body {
+.auth-page {
   font-family: system-ui, sans-serif;
-  background: linear-gradient(135deg, #fff7f1 0%, #fffdf8 100%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 20px;
 }
 
 
