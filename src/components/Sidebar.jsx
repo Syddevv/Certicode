@@ -13,6 +13,7 @@ const Sidebar = () => {
       </label>
 
       <div className="menu">
+        {/* MAIN MENU */}
         <ul className="menu-top">
           <li className="active">
             <a href="#">Dashboard</a>
@@ -26,6 +27,13 @@ const Sidebar = () => {
           <li>
             <a href="#">Customers</a>
           </li>
+        </ul>
+
+        {/* SYSTEM LABEL */}
+        <div className="menu-section-label">SYSTEM</div>
+
+        {/* SYSTEM MENU */}
+        <ul className="menu-bottom">
           <li>
             <a href="#">Settings</a>
           </li>
@@ -34,6 +42,7 @@ const Sidebar = () => {
           </li>
         </ul>
 
+        {/* PROFILE */}
         <div className="profile-item">
           <div className="profile">
             <img
@@ -42,7 +51,7 @@ const Sidebar = () => {
             />
             <div>
               <strong>Alex Rivera</strong>
-              <small>Admin</small>
+              <small> Admin</small>
             </div>
           </div>
           <button className="logout">⎋</button>
