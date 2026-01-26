@@ -31,11 +31,12 @@ const Register = () => {
   };
 
   return (
-    <div className="login-container">
-      {/* LEFT PANEL */}
-      <div className="left-panel">
-        <h1 className="login-title">Sign Up</h1>
-        <p className="login-subtitle">Create your account</p>
+    <div className="auth-page">
+      <div className="login-container">
+        {/* LEFT PANEL */}
+        <div className="left-panel">
+          <h1 className="login-title">Sign Up</h1>
+          <p className="login-subtitle">Create your account</p>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -141,9 +142,14 @@ const Register = () => {
         </div>
       </div>
 
-      <div className="right-panel">
-        <div className="logo-container">
-          <img src={certicodeIcon} alt="Certicode logo" className="logo-image" />
+        <div className="right-panel">
+          <div className="logo-container">
+            <img
+              src={certicodeIcon}
+              alt="Certicode logo"
+              className="logo-image"
+            />
+          </div>
         </div>
       </div>
     </div>
