@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import "../styles/Footer.css";
 import CerticodeLogo from "../assets/certicodeicon3.png";
 import FacebookIcon from "../assets/fb-gray.png";
@@ -82,12 +83,12 @@ const Footer = () => {
             © 2026 Certicode Marketplace. All rights reserved.
           </div>
           <div className="footer__legal">
-            <a className="footer__legalLink" href="#">
+            <Link className="footer__legalLink" to="/privacy-policy">
               Privacy Policy
-            </a>
-            <a className="footer__legalLink" href="#">
+            </Link>
+            <Link className="footer__legalLink" to="/terms">
               Terms & Conditions
-            </a>
+            </Link>
             <a className="footer__legalLink" href="#">
               Cookie Policy
             </a>
