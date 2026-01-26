@@ -20,14 +20,13 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-page">
-      <div className="login-container">
-        {/* LEFT PANEL */}
-        <div className="left-panel">
-          <h1 className="login-title">Log In</h1>
-          <p className="login-subtitle">
-            Welcome back! please enter your details
-          </p>
+    <div className="login-container">
+      {/* LEFT PANEL */}
+      <div className="left-panel">
+        <h1 className="login-title">Log In</h1>
+        <p className="login-subtitle">
+          Welcome back! please enter your details
+        </p>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
@@ -76,34 +75,33 @@ const Login = () => {
           </div>
         </form>
 
-          <div className="divider">
-            <span className="divider-text">Or Continue With</span>
-          </div>
-
-          <div className="social-buttons">
-            <button type="button" className="social-button">
-              <img src={googleIcon} alt="Google" className="google-icon" />
-              <span>Google</span>
-            </button>
-            <button type="button" className="social-button">
-              <img src={facebookLogo} alt="Facebook" className="facebook-icon" />
-              <span>Facebook</span>
-            </button>
-          </div>
-
-          <div className="signup-link">
-            Don't have account? <Link to="/register">Sign up</Link>
-          </div>
+        <div className="divider">
+          <span className="divider-text">Or Continue With</span>
         </div>
 
-        <div className="right-panel">
-          <div className="logo-container">
-            <img
-              src={certicodeIcon}
-              alt="Certicode logo"
-              className="logo-image"
-            />
-          </div>
+        <div className="social-buttons">
+          <button type="button" className="social-button">
+            <img src={googleIcon} alt="Google" className="google-icon" />
+            <span>Google</span>
+          </button>
+          <button type="button" className="social-button">
+            <img src={facebookLogo} alt="Facebook" className="facebook-icon" />
+            <span>Facebook</span>
+          </button>
+        </div>
+
+        <div className="signup-link">
+          Don't have account? <Link to="/register">Sign up</Link>
+        </div>
+      </div>
+
+      <div className="right-panel">
+        <div className="logo-container">
+          <img
+            src={certicodeIcon}
+            alt="Certicode logo"
+            className="logo-image"
+          />
         </div>
       </div>
     </div>

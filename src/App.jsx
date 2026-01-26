@@ -17,7 +17,7 @@ function App() {
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
 
         {/* PUBLIC PAGES / USER */}
-        <Route path="/landing-page" element={<LandingPage />} />
+        <Route path="/" element={<LandingPage />} />
       </Routes>
     </BrowserRouter>
   );
