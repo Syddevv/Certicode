@@ -2,6 +2,7 @@ import SearchIcon from "../assets/lucide_search.png";
 import MoonIcon from "../assets/lucide_moon.png";
 import "../styles/nav.css";
 import CerticodeLogo from "../assets/certicodeicon.png";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   return (
@@ -12,9 +13,9 @@ const Navbar = () => {
         </div>
 
         <nav className="nav__links">
-          <a className="nav__link is-active" href="#">
+          <Link className="nav__link is-active" to="/">
             Home
-          </a>
+          </Link>
           <a className="nav__link" href="#">
             Marketplace
           </a>
