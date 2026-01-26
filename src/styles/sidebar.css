@@ -4,101 +4,143 @@
   width: 260px;
   background: #ffffff;
   border-right: 1px solid #e5e7eb;
-  padding: 24px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease-in-out;
 }
 
-/* LOGO */
+/* ================= LOGO ================= */
+
 .logo {
   display: flex;
   align-items: center;
-  margin-bottom: 40px;
+  margin-bottom: none; 
 }
 
 .logo img {
-  width: 100%;
-  max-width: 120px;
-  height: auto;
-  object-fit: contain;
+  width: 160px !important;
+  max-width: none !important;
+  height: 60px !important;
   display: block;
 }
+/* ================= MENU ================= */
 
-/* MENU */
 .menu {
   display: flex;
   flex-direction: column;
   flex: 1;
-  justify-content: space-between;
 }
 
-/* IMPORTANT: remove bullets + default spacing */
-.menu-top {
+/* MAIN MENU */
+.menu-top,
+.menu-bottom {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.menu-top li {
-  padding: 12px 14px;
-  border-radius: 10px;
-  margin-bottom: 8px;
+.menu-top li,
+.menu-bottom li {
+  padding: 8px 12px; 
+  border-radius: 8px;
+  margin-bottom: 4px;
+  font-size: 14px;
   color: #6b7280;
   cursor: pointer;
 }
 
-.menu-top li a {
+.menu-top li a,
+.menu-bottom li a {
   text-decoration: none;
   color: inherit;
   display: block;
 }
 
+/* ACTIVE */
 .menu-top li.active {
   background: #fff1e6;
   color: #f97316;
   font-weight: 600;
 }
 
-/* PROFILE */
+/* ================= SECTION LABEL ================= */
+
+.menu-section-label {
+  margin: 14px 0 6px; /* reduced */
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #9ca3af;
+}
+
+/* ================= PROFILE ================= */
+
 .profile-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 14px;
+  padding: 10px 12px;
   border-radius: 10px;
+  margin-top: 245px; 
 }
 
 .profile {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .profile img {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
 }
 
 .profile strong {
-  font-size: 14px;
+  font-size: 13px;
   color: #374151;
 }
 
 .profile small {
-  font-size: 12px;
+  font-size: 11px;
   color: #9ca3af;
 }
 
+/* LOGOUT */
 .logout {
   background: none;
   border: none;
-  font-size: 18px;
+  font-size: 16px;
   cursor: pointer;
 }
 
-/* TOGGLE BUTTONS */
+/* ================= MOBILE ================= */
+
 .close-btn {
   display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transform: translateX(-100%);
+    z-index: 1000;
+  }
+
+  #sidebar-toggle:checked ~ .layout .sidebar {
+    transform: translateX(0);
+  }
+
+  .close-btn {
+    display: block;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 22px;
+    cursor: pointer;
+  }
 }
