@@ -4,6 +4,8 @@ import AdminDashboard from "./pages/admin/adminDashboard";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import LandingPage from "./pages/public/LandingPage";
+import TermsAndConditions from "./pages/public/TermsAndConditions";
+import PrivacyPolicy from "./pages/public/PrivacyPolicy";
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
 
         {/* PUBLIC PAGES / USER */}
         <Route path="/" element={<LandingPage />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       </Routes>
     </BrowserRouter>
   );
