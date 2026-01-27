@@ -19,6 +19,7 @@ const assets = [
     description:
       "Complete multivendor marketplace solution with admin dashboard and analytics.",
     price: "$999",
+    path: "/marketplace/e-commerce-saas-template",
     tags: [
       { label: "Node.js", tone: "green" },
       { label: "React", tone: "blue" },
@@ -249,13 +250,32 @@ const Marketplace = () => {
                             {asset.price}
                           </span>
                         </div>
-                        <button className="marketplace__action" type="button">
-                          <img
-                            src={ViewProduct}
-                            alt="View product"
-                            className="marketplace__actionIcon"
-                          />
-                        </button>
+                        {asset.path ? (
+                          <Link
+                            className="marketplace__actionLink"
+                            to={asset.path}
+                            aria-label={`View ${asset.title}`}
+                          >
+                            <button
+                              className="marketplace__action"
+                              type="button"
+                            >
+                              <img
+                                src={ViewProduct}
+                                alt=""
+                                className="marketplace__actionIcon"
+                              />
+                            </button>
+                          </Link>
+                        ) : (
+                          <button className="marketplace__action" type="button">
+                            <img
+                              src={ViewProduct}
+                              alt="View product"
+                              className="marketplace__actionIcon"
+                            />
+                          </button>
+                        )}
                       </div>
                     </div>
                   </article>
