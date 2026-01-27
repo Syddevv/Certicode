@@ -2,7 +2,7 @@ import SearchIcon from "../assets/lucide_search.png";
 import MoonIcon from "../assets/lucide_moon.png";
 import "../styles/nav.css";
 import CerticodeLogo from "../assets/certicodeicon.png";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 const Navbar = () => {
   return (
@@ -13,21 +13,47 @@ const Navbar = () => {
         </div>
 
         <nav className="nav__links">
-          <Link className="nav__link is-active" to="/">
+          <NavLink
+            className={({ isActive }) =>
+              `nav__link${isActive ? " is-active" : ""}`
+            }
+            to="/"
+            end
+          >
             Home
-          </Link>
-          <a className="nav__link" href="#">
+          </NavLink>
+          <NavLink
+            className={({ isActive }) =>
+              `nav__link${isActive ? " is-active" : ""}`
+            }
+            to="/marketplace"
+          >
             Marketplace
-          </a>
-          <a className="nav__link" href="#">
+          </NavLink>
+          <NavLink
+            className={({ isActive }) =>
+              `nav__link${isActive ? " is-active" : ""}`
+            }
+            to="/categories"
+          >
             Categories
-          </a>
-          <a className="nav__link" href="#">
+          </NavLink>
+          <NavLink
+            className={({ isActive }) =>
+              `nav__link${isActive ? " is-active" : ""}`
+            }
+            to="/how-it-works"
+          >
             How It Works
-          </a>
-          <a className="nav__link" href="#">
+          </NavLink>
+          <NavLink
+            className={({ isActive }) =>
+              `nav__link${isActive ? " is-active" : ""}`
+            }
+            to="/fa"
+          >
             FAQ
-          </a>
+          </NavLink>
         </nav>
 
         <div className="nav__actions">
