@@ -58,12 +58,19 @@
   color: var(--color-neutral-500);
   font-size: 13px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .marketplace__tab--active {
   background: var(--color-primary-500);
   color: #fff;
   border-color: var(--color-primary-500);
+}
+
+.marketplace__tab:not(.marketplace__tab--active):hover {
+  border-color: var(--color-primary-500);
+  color: var(--color-primary-500);
+  transform: translateY(-1px);
 }
 
 .marketplace__tabLabel {
@@ -84,6 +91,7 @@
   border-radius: 14px;
   padding: 18px;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+  transition: box-shadow 0.2s ease;
 }
 
 .marketplace__search {
@@ -199,11 +207,17 @@
   font-size: 12px;
   color: var(--color-neutral-500);
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .marketplace__sort strong {
   color: #111827;
   font-weight: 600;
+}
+
+.marketplace__sort:hover {
+  border-color: var(--color-primary-500);
+  color: var(--color-primary-500);
 }
 
 .marketplace__sortIcon {
@@ -222,6 +236,12 @@
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.marketplace__card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
 }
 
 .marketplace__cardMedia {
@@ -346,6 +366,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.marketplace__action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 127, 22, 0.4);
 }
 
 .marketplace__actionLink {
@@ -376,12 +402,18 @@
   color: var(--color-neutral-500);
   font-size: 12px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .marketplace__page--active {
   background: var(--color-primary-500);
   color: #fff;
   border-color: var(--color-primary-500);
+}
+
+.marketplace__page:not(.marketplace__page--active):hover {
+  border-color: var(--color-primary-500);
+  color: var(--color-primary-500);
 }
 
 .marketplace__pageEllipsis {

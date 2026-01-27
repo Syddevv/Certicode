@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -9,11 +9,14 @@ import VerifiedIcon from "../../assets/Verified.png";
 import CustomerSupportIcon from "../../assets/CustomerSupport.png";
 import UpdatesIcon from "../../assets/Updates.png";
 import LicensedIcon from "../../assets/Licensed.png";
-import ReactIcon from "../../assets/React.png";
-import TailwindIcon from "../../assets/Tailwind.png";
-import TypeScriptIcon from "../../assets/TypeScript.png";
+import ProductOverview from "../../components/ProductOverview";
+import ProductTechStack from "../../components/ProductTechStack";
+import ProductFeatures from "../../components/ProductFeatures";
+import ProductReviews from "../../components/ProductReviews";
 
 const ProductDetails = () => {
+  const [activeTab, setActiveTab] = useState("overview");
+
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, []);
@@ -115,69 +118,53 @@ const ProductDetails = () => {
 
           <section className="product__details">
             <div className="product__tabs">
-              <button className="product__tab product__tab--active" type="button">
+              <button
+                className={`product__tab${
+                  activeTab === "overview" ? " product__tab--active" : ""
+                }`}
+                type="button"
+                onClick={() => setActiveTab("overview")}
+              >
                 Overview
               </button>
-              <button className="product__tab" type="button">
+              <button
+                className={`product__tab${
+                  activeTab === "tech" ? " product__tab--active" : ""
+                }`}
+                type="button"
+                onClick={() => setActiveTab("tech")}
+              >
                 Tech Stack
               </button>
-              <button className="product__tab" type="button">
+              <button
+                className={`product__tab${
+                  activeTab === "features" ? " product__tab--active" : ""
+                }`}
+                type="button"
+                onClick={() => setActiveTab("features")}
+              >
                 Features
               </button>
-              <button className="product__tab" type="button">
+              <button
+                className={`product__tab${
+                  activeTab === "reviews" ? " product__tab--active" : ""
+                }`}
+                type="button"
+                onClick={() => setActiveTab("reviews")}
+              >
                 Reviews (12)
               </button>
             </div>
 
-            <div className="product__overview">
-              <h2>E-commerce SaaS Template</h2>
-              <p>
-                Complete multivendor marketplace solution with admin dashboard
-                and full control over vendors, products, orders, and payouts.
-              </p>
-
-              <div className="product__section">
-                <h3>Tech Stack</h3>
-                <div className="product__stackGrid">
-                  <div className="product__stackCard">
-                    <span>Framework</span>
-                    <img src={ReactIcon} alt="" />
-                    <strong>React 18</strong>
-                  </div>
-                  <div className="product__stackCard">
-                    <span>Styling</span>
-                    <img src={TailwindIcon} alt="" />
-                    <strong>Tailwind 3</strong>
-                  </div>
-                  <div className="product__stackCard">
-                    <span>Language</span>
-                    <img src={TypeScriptIcon} alt="" />
-                    <strong>TypeScript</strong>
-                  </div>
-                </div>
-              </div>
-
-              <div className="product__section">
-                <h3>Core Features</h3>
-                <ul className="product__features">
-                  <li>
-                    <span className="product__featureDot" /> Payment integration
-                    to provide seamless transactions
-                  </li>
-                  <li>
-                    <span className="product__featureDot" /> Highly modular
-                    components and clear folder structure
-                  </li>
-                  <li>
-                    <span className="product__featureDot" /> Real-time data
-                    visualization with Chart.js
-                  </li>
-                  <li>
-                    <span className="product__featureDot" /> Full authentication
-                    flow (Login, Register, Forgot Password)
-                  </li>
-                </ul>
-              </div>
+            <div className="product__tabContent">
+              {activeTab === "overview" && <ProductOverview />}
+              {activeTab === "tech" && <ProductTechStack />}
+              {activeTab === "features" && (
+                <ProductFeatures />
+              )}
+              {activeTab === "reviews" && (
+                <ProductReviews />
+              )}
             </div>
           </section>
 

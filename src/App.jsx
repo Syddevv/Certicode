@@ -6,6 +6,8 @@ import Register from "./pages/auth/Register";
 import LandingPage from "./pages/public/LandingPage";
 import TermsAndConditions from "./pages/public/TermsAndConditions";
 import PrivacyPolicy from "./pages/public/PrivacyPolicy";
+import Marketplace from "./pages/public/Marketplace";
+import ProductDetails from "./pages/public/ProductDetails";
 
 function App() {
   return (
@@ -22,6 +24,11 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/marketplace" element={<Marketplace />} />
+        <Route
+          path="/marketplace/e-commerce-saas-template"
+          element={<ProductDetails />}
+        />
       </Routes>
     </BrowserRouter>
   );
