@@ -348,6 +348,11 @@
   justify-content: center;
 }
 
+.marketplace__actionLink {
+  display: inline-flex;
+  text-decoration: none;
+}
+
 .marketplace__actionIcon {
   height: 14px;
   width: auto;
