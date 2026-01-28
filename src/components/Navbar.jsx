@@ -1,10 +1,14 @@
 import SearchIcon from "../assets/lucide_search.png";
 import MoonIcon from "../assets/lucide_moon.png";
+import CartIcon from "../assets/NavCart.png";
+import AvatarImg from "../assets/Avatar.png";
 import "../styles/nav.css";
 import CerticodeLogo from "../assets/certicodeicon.png";
 import { Link, NavLink } from "react-router-dom";
 
 const Navbar = () => {
+  const isLoggedIn = true;
+
   return (
     <header className="nav">
       <div className="nav__inner">
@@ -61,16 +65,30 @@ const Navbar = () => {
             <img className="iconImg" src={SearchIcon} alt="" />
           </button>
 
+          {isLoggedIn && (
+            <button className="iconBtn" aria-label="Cart" type="button">
+              <Link to="/cart">
+                <img className="iconImg" src={CartIcon} alt="" />
+              </Link>
+            </button>
+          )}
+
           <button className="iconBtn" aria-label="Theme" type="button">
             <img className="iconImg" src={MoonIcon} alt="" />
           </button>
 
-          <button className="btn btn--ghost" type="button">
+          {isLoggedIn && (
+            <button className="iconBtn" aria-label="Profile" type="button">
+              <img className="iconImg nav__avatar" src={AvatarImg} alt="" />
+            </button>
+          )}
+
+          {/* <button className="btn btn--ghost" type="button">
             Login
           </button>
           <button className="btn btn--light" type="button">
             Sign Up
-          </button>
+          </button> */}
         </div>
       </div>
     </header>
