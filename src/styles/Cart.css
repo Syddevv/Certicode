@@ -241,6 +241,7 @@
   cursor: pointer;
   padding: 0;
   display: inline-flex;
+  text-decoration: none;
 }
 
 .cart__summaryDetails h3 {
@@ -290,6 +291,7 @@
   justify-content: center;
   gap: 8px;
   cursor: pointer;
+  text-decoration: none;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease;

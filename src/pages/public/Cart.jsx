@@ -134,10 +134,10 @@ const Cart = () => {
                 </div>
               </div>
 
-              <button className="cart__checkout" type="button">
+              <Link className="cart__checkout" to="/checkout">
                 <img src={CheckoutCart} alt="" aria-hidden="true" />
                 Proceed to Checkout
-              </button>
+              </Link>
               <p className="cart__note">
                 By proceeding, you agree to our{" "}
                 <Link to="/terms">Terms &amp; Conditions</Link> and{" "}
