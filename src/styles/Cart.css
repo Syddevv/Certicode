@@ -240,6 +240,7 @@
   width: fit-content;
   cursor: pointer;
   padding: 0;
+  display: inline-flex;
 }
 
 .cart__summaryDetails h3 {
@@ -289,7 +290,9 @@
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .cart__checkout img {
@@ -355,7 +358,9 @@
   border-radius: 14px;
   border: 1px solid var(--color-neutral-100);
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .cart__recCard:hover {
@@ -438,7 +443,9 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .cart__recCart img {
