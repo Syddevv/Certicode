@@ -78,6 +78,13 @@
   display: block;
 }
 
+.nav__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  object-fit: cover;
+}
+
 .btn {
   border: 1px solid transparent;
   height: 40px;

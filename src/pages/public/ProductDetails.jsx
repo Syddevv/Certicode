@@ -84,9 +84,12 @@ const ProductDetails = () => {
                   </ul>
                 </div>
 
-                <button className="product__cta" type="button">
-                  Buy Now
-                </button>
+                <Link to="/cart">
+                  <button className="product__cta" type="button">
+                    Buy Now
+                  </button>
+                </Link>
+
                 <button className="product__ghost" type="button">
                   Contact CertiCode
                 </button>
@@ -159,12 +162,8 @@ const ProductDetails = () => {
             <div className="product__tabContent">
               {activeTab === "overview" && <ProductOverview />}
               {activeTab === "tech" && <ProductTechStack />}
-              {activeTab === "features" && (
-                <ProductFeatures />
-              )}
-              {activeTab === "reviews" && (
-                <ProductReviews />
-              )}
+              {activeTab === "features" && <ProductFeatures />}
+              {activeTab === "reviews" && <ProductReviews />}
             </div>
           </section>
 
@@ -172,7 +171,10 @@ const ProductDetails = () => {
             <div className="product__relatedHeader">
               <div>
                 <h3>You may also like</h3>
-                <p>Explore similar high-quality digital assets for your next project.</p>
+                <p>
+                  Explore similar high-quality digital assets for your next
+                  project.
+                </p>
               </div>
               <button className="product__viewAll" type="button">
                 View All
@@ -191,8 +193,16 @@ const ProductDetails = () => {
                   price: "$450",
                   rating: "4.5",
                 },
-                { title: "Job Board Fullstack App", price: "$799", rating: "4.9" },
-                { title: "AI Marketing Platform UI", price: "$850", rating: "4.8" },
+                {
+                  title: "Job Board Fullstack App",
+                  price: "$799",
+                  rating: "4.9",
+                },
+                {
+                  title: "AI Marketing Platform UI",
+                  price: "$850",
+                  rating: "4.8",
+                },
               ].map((item) => (
                 <article key={item.title} className="product__relatedCard">
                   <div className="product__relatedMedia" />
@@ -203,9 +213,14 @@ const ProductDetails = () => {
                         <img src={CerticodeBoxIcon} alt="" />
                         CertiCode
                       </span>
-                      <span className="product__relatedPrice">{item.price}</span>
+                      <span className="product__relatedPrice">
+                        {item.price}
+                      </span>
                     </div>
-                    <div className="product__relatedDivider" aria-hidden="true" />
+                    <div
+                      className="product__relatedDivider"
+                      aria-hidden="true"
+                    />
                     <div className="product__relatedFooter">
                       <div className="product__rating">
                         <span className="product__star">★</span>

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom"; 
+import { Link } from "react-router-dom";
 import logo from "../assets/certicodeicon.png";
 import "../styles/sidebar.css";
-import logout from "../assets/logout.webp";
+import logout from "../assets/logout.png";
 import LogoutModal from "./LogoutModal";
 
 const Sidebar = ({ activePage }) => {
@@ -22,7 +22,7 @@ const Sidebar = ({ activePage }) => {
         <div className="menu">
           <ul className="menu-top">
             <li className={activePage === "dashboard" ? "active" : ""}>
-              <Link to="/dashboard">Dashboard</Link>
+              <Link to="/admin-dashboard">Dashboard</Link>
             </li>
             <li className={activePage === "inventory" ? "active" : ""}>
               <Link to="/inventory">Inventory</Link>
@@ -58,10 +58,7 @@ const Sidebar = ({ activePage }) => {
               </div>
             </div>
 
-            <button
-              className="logout"
-              onClick={() => setShowLogout(true)}
-            >
+            <button className="logout" onClick={() => setShowLogout(true)}>
               <img src={logout} alt="Logout" />
             </button>
           </div>
