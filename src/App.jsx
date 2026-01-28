@@ -8,6 +8,10 @@ import TermsAndConditions from "./pages/public/TermsAndConditions";
 import PrivacyPolicy from "./pages/public/PrivacyPolicy";
 import Marketplace from "./pages/public/Marketplace";
 import ProductDetails from "./pages/public/ProductDetails";
+import Cart from "./pages/public/Cart";
+import PromoCodes from "./pages/public/PromoCodes";
+import Checkout from "./pages/public/Checkout";
+import OrderSuccess from "./pages/public/OrderSuccess";
 
 function App() {
   return (
@@ -25,6 +29,10 @@ function App() {
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/marketplace" element={<Marketplace />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/promo-codes" element={<PromoCodes />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/order-success" element={<OrderSuccess />} />
         <Route
           path="/marketplace/e-commerce-saas-template"
           element={<ProductDetails />}
