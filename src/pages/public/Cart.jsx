@@ -110,9 +110,9 @@ const Cart = () => {
                     Apply
                   </button>
                 </div>
-                <button className="cart__promoLink" type="button">
+                <Link className="cart__promoLink" to="/promo-codes">
                   View promo codes
-                </button>
+                </Link>
               </div>
 
               <div className="cart__summaryDetails">
