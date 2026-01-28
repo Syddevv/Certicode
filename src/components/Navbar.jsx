@@ -4,10 +4,23 @@ import CartIcon from "../assets/NavCart.png";
 import AvatarImg from "../assets/Avatar.png";
 import "../styles/nav.css";
 import CerticodeLogo from "../assets/certicodeicon.png";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 
 const Navbar = () => {
   const isLoggedIn = true;
+  const location = useLocation();
+  const isLanding = location.pathname === "/";
+
+  const isActiveHash = (hash) =>
+    isLanding && (location.hash === hash || (!location.hash && hash === "#hero"));
+
+  const handleSectionClick = (sectionId) => {
+    if (!isLanding) return;
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   return (
     <header className="nav">
@@ -17,15 +30,13 @@ const Navbar = () => {
         </div>
 
         <nav className="nav__links">
-          <NavLink
-            className={({ isActive }) =>
-              `nav__link${isActive ? " is-active" : ""}`
-            }
-            to="/"
-            end
+          <Link
+            className={`nav__link${isActiveHash("#hero") ? " is-active" : ""}`}
+            to="/#hero"
+            onClick={() => handleSectionClick("hero")}
           >
             Home
-          </NavLink>
+          </Link>
           <NavLink
             className={({ isActive }) =>
               `nav__link${isActive ? " is-active" : ""}`
@@ -34,30 +45,31 @@ const Navbar = () => {
           >
             Marketplace
           </NavLink>
-          <NavLink
-            className={({ isActive }) =>
-              `nav__link${isActive ? " is-active" : ""}`
-            }
-            to="/categories"
+          <Link
+            className={`nav__link${
+              isActiveHash("#categories") ? " is-active" : ""
+            }`}
+            to="/#categories"
+            onClick={() => handleSectionClick("categories")}
           >
             Categories
-          </NavLink>
-          <NavLink
-            className={({ isActive }) =>
-              `nav__link${isActive ? " is-active" : ""}`
-            }
-            to="/how-it-works"
+          </Link>
+          <Link
+            className={`nav__link${
+              isActiveHash("#process") ? " is-active" : ""
+            }`}
+            to="/#process"
+            onClick={() => handleSectionClick("process")}
           >
             How It Works
-          </NavLink>
-          <NavLink
-            className={({ isActive }) =>
-              `nav__link${isActive ? " is-active" : ""}`
-            }
-            to="/fa"
+          </Link>
+          <Link
+            className={`nav__link${isActiveHash("#faq") ? " is-active" : ""}`}
+            to="/#faq"
+            onClick={() => handleSectionClick("faq")}
           >
             FAQ
-          </NavLink>
+          </Link>
         </nav>
 
         <div className="nav__actions">
