@@ -94,104 +94,97 @@
   margin-top: 22px;
 }
 
-.search {
-  display: grid;
-  grid-template-columns: 38px minmax(220px, 1fr) auto auto;
+.hero__search .search {
+  display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px;
-}
+  gap: 12px;
+  padding: 10px 12px;
 
-.search {
-  display: grid;
-  grid-template-columns: 38px minmax(0, 1fr) auto auto; /* key: minmax(0,1fr) */
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-
-  width: 640px; /* match figma feel */
-  max-width: 100%;
+  width: min(760px, 100%);
   background: var(--color-neutral-0);
-  border: 1px solid var(--color-neutral-100);
-  border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(35, 39, 46, 0.06);
-
-  overflow: hidden; /* keeps everything inside */
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
 }
 
-.search__icon img {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-  display: block;
-}
-
-.search__input {
-  width: 100%;
-  min-width: 220px;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 13px;
-  color: var(--color-neutral-950);
-  font-weight: 600;
-}
-
-.search__input::placeholder {
-  color: var(--color-neutral-400);
-  font-weight: 600;
-}
-
-.search__select {
-  height: 38px;
-  border-radius: 12px;
-  border: 1px solid var(--color-neutral-100);
-  background: var(--color-neutral-0);
-  padding: 0 10px;
-  font-weight: 700;
-  font-size: 13px;
-  color: var(--color-neutral-800);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  white-space: nowrap;
-}
-
-.search__select img {
+.hero__search .search__icon img {
   width: 16px;
   height: 16px;
   object-fit: contain;
   display: block;
-  opacity: 0.75;
 }
 
-.btn {
+.hero__search .search__input {
+  width: 100%;
+  min-width: 260px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--color-neutral-950);
+  font-weight: 500;
+  flex: 1 1 320px;
+}
+
+.hero__search .search__input::placeholder {
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.hero__search .search__select {
+  height: 40px;
+  border-radius: 0;
+  border: none;
+  background: transparent;
+  padding: 0 16px 0 18px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #334155;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  border-left: none;
+  flex-shrink: 0;
+}
+
+.hero__search .search__select img {
+  width: 10px;
+  height: 10px;
+  object-fit: contain;
+  display: block;
+  opacity: 0.6;
+}
+
+.hero__search .btn {
   border: 1px solid transparent;
-  height: 38px;
-  padding: 0 14px;
-  border-radius: 10px;
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 12px;
   font-weight: 700;
   font-size: 13px;
   cursor: pointer;
 }
 
-.btn--primary {
+.hero__search .btn--primary {
   background: var(--color-primary-500);
   color: var(--color-neutral-0);
 }
 
-.search__cta {
-  height: 38px;
+.hero__search .search__cta {
+  height: 40px;
   border-radius: 12px;
-  padding: 0 16px;
+  padding: 0 22px;
+  flex-shrink: 0;
 }
 
-.btn--primary:hover {
+.hero__search .btn--primary:hover {
   filter: brightness(0.98);
 }
 
-.btn--primary:active {
+.hero__search .btn--primary:active {
   transform: translateY(1px);
 }
 
@@ -820,85 +813,4 @@
   padding: 10px 18px;
   border-radius: 999px;
   cursor: pointer;
-}
-
-/* ================= RESPONSIVE ================= */
-@media (max-width: 980px) {
-  .hero__inner {
-    grid-template-columns: 1fr;
-  }
-
-  .heroCard {
-    height: 380px;
-  }
-
-  .floatBadge {
-    left: 14px;
-  }
-
-  .categories__header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .categories__grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .process__steps {
-    grid-template-columns: 1fr;
-  }
-
-  .process__steps::before {
-    display: none;
-  }
-
-  .testimonials__grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 560px) {
-  .hero__title {
-    font-size: 40px;
-  }
-
-  .search {
-    grid-template-columns: 38px 1fr;
-    gap: 10px;
-  }
-
-  .search__select,
-  .search__cta {
-    grid-column: 1 / -1;
-  }
-
-  .stats__inner {
-    grid-template-columns: 1fr;
-    gap: 22px;
-  }
-
-  .categories__grid {
-    grid-template-columns: 1fr;
-  }
-
-  .process__title {
-    font-size: 24px;
-  }
-
-  .testimonials__title {
-    font-size: 24px;
-  }
-
-  .faq__title {
-    font-size: 26px;
-  }
-
-  .ctaCard {
-    padding: 38px 26px;
-  }
-
-  .ctaCard__title {
-    font-size: 22px;
-  }
 }
