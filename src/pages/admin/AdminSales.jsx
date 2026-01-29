@@ -8,15 +8,15 @@ const Icons = {
   Export: "📥",
   Filter: "⚡",
   Edit: "📝",
-  Settings: "⚙️", 
-  Dot: "●" 
+  Settings: "⚙️",
+  Dot: "●"
 };
 
 // Avatar Helper
 const Avatar = ({ name }) => (
-  <img 
-    src={`https://ui-avatars.com/api/?name=${name}&background=random&color=fff`} 
-    alt={name} 
+  <img
+    src={`https://ui-avatars.com/api/?name=${name}&background=random&color=fff`}
+    alt={name}
     className="user-avatar"
   />
 );
@@ -36,7 +36,7 @@ const AdminSales = () => {
             <label htmlFor="sidebar-toggle" className="hamburger">
               &#9776;
             </label>
-            
+
             {/* FIXED SEARCH BAR WITH ICON */}
             <div className="search-wrapper">
               <span className="search-icon">
@@ -51,7 +51,7 @@ const AdminSales = () => {
             <div className="topbar-actions">
               <button className="notification">{Icons.Bell}</button>
               <button className="btn primary">
-                 {Icons.Export} Export
+                {Icons.Export} Export
               </button>
             </div>
           </div>
@@ -103,7 +103,7 @@ const AdminSales = () => {
 
           {/* FILTERS & TABLE CONTAINER */}
           <div className="table-wrapper">
-            
+
             {/* FILTER BAR */}
             <div className="filter-bar">
               <div className="filter-inputs">
@@ -209,8 +209,8 @@ const AdminSales = () => {
                     </span>
                   </td>
                   <td className="actions-cell">
-                     <button>{Icons.Edit}</button>
-                     <button>{Icons.Settings}</button>
+                    <button>{Icons.Edit}</button>
+                    <button>{Icons.Settings}</button>
                   </td>
                 </tr>
 
@@ -240,8 +240,8 @@ const AdminSales = () => {
                     </span>
                   </td>
                   <td className="actions-cell">
-                     <button>{Icons.Edit}</button>
-                     <button>{Icons.Settings}</button>
+                    <button>{Icons.Edit}</button>
+                    <button>{Icons.Settings}</button>
                   </td>
                 </tr>
 
@@ -271,8 +271,8 @@ const AdminSales = () => {
                     </span>
                   </td>
                   <td className="actions-cell">
-                     <button>{Icons.Edit}</button>
-                     <button>{Icons.Settings}</button>
+                    <button>{Icons.Edit}</button>
+                    <button>{Icons.Settings}</button>
                   </td>
                 </tr>
 

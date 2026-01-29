@@ -8,7 +8,7 @@ const Icons = {
   More: "⋮",
   Filter: "⚙️",
   Edit: "📝",
-  Settings: "⚙️", 
+  Settings: "⚙️",
   Web: "🌐",
   Mobile: "📱",
   Design: "🎨",
@@ -30,7 +30,7 @@ const AdminInventory = () => {
             <label htmlFor="sidebar-toggle" className="hamburger">
               &#9776;
             </label>
-            
+
             <div className="search-wrapper">
               <span className="search-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -206,8 +206,8 @@ const AdminInventory = () => {
                   </td>
                 </tr>
 
-                 {/* ROW 5 */}
-                 <tr>
+                {/* ROW 5 */}
+                <tr>
                   <td>
                     <div className="asset-cell">
                       <div className="asset-icon blue">{Icons.Mobile}</div>
