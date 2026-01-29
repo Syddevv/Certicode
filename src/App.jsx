@@ -12,6 +12,9 @@ import Cart from "./pages/public/Cart";
 import PromoCodes from "./pages/public/PromoCodes";
 import Checkout from "./pages/public/Checkout";
 import OrderSuccess from "./pages/public/OrderSuccess";
+import BuyerDashboard from "./pages/public/BuyerDashboard";
+import MyPurchases from "./pages/public/MyPurchases";
+import BillingInvoices from "./pages/public/BillingInvoices";
 import AdminInventory from "./pages/admin/AdminInventory";
 import AdminSales from "./pages/admin/AdminSales";
 import AdminCustomers from "./pages/admin/AdminCustomers";
@@ -39,6 +42,9 @@ function App() {
         <Route path="/promo-codes" element={<PromoCodes />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order-success" element={<OrderSuccess />} />
+        <Route path="/buyer-dashboard" element={<BuyerDashboard />} />
+        <Route path="/my-purchases" element={<MyPurchases />} />
+        <Route path="/billing-invoices" element={<BillingInvoices />} />
         <Route
           path="/marketplace/e-commerce-saas-template"
           element={<ProductDetails />}
