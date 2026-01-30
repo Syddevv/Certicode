@@ -1,14 +1,6 @@
 import React from "react";
 import "../../styles/adminDashboard.css";
 import Sidebar from "../../components/Sidebar";
-import revenueIcon from "../../assets/revenue.png";
-import totalProjectsIcon from "../../assets/total-projects.png";
-import newCustomerIcon from "../../assets/new-customer.png";
-import assetUpdatedIcon from "../../assets/asset-updated.png";
-import newSaleIcon from "../../assets/new-sale-e-commerce.png";
-import auditCompletedIcon from "../../assets/audit-completed.png";
-import addedNewProjectIcon from "../../assets/added-new-project.png";
-import notifIcon from "../../assets/notif.png";
 
 const Icons = {
   Bell: "🔔",
@@ -55,9 +47,7 @@ const AdminDashboard = () => {
             </div>
 
             <div className="topbar-actions">
-              <button className="notification">
-                <img src={notifIcon} alt="Notification" className="notification-icon" />
-              </button>
+              <button className="notification">{Icons.Bell}</button>
               <button className="btn primary">+ Add New Asset</button>
             </div>
           </div>
@@ -72,9 +62,7 @@ const AdminDashboard = () => {
           <section className="cards">
             <div className="card">
               <div className="card-top">
-                <div className="card-icon blue">
-                  <img src={revenueIcon} alt="Revenue" className="revenue-icon" />
-                </div>
+                <div className="card-icon blue">💰</div>
                 <span className="badge positive">+12.5%</span>
               </div>
               <span className="card-label">TOTAL REVENUE</span>
@@ -83,9 +71,7 @@ const AdminDashboard = () => {
 
             <div className="card">
               <div className="card-top">
-                <div className="card-icon purple">
-                  <img src={totalProjectsIcon} alt="Total Projects" className="total-projects-icon" />
-                </div>
+                <div className="card-icon purple">📁</div>
                 <span className="badge neutral">Stable</span>
               </div>
               <span className="card-label">TOTAL PROJECTS</span>
@@ -94,9 +80,7 @@ const AdminDashboard = () => {
 
             <div className="card">
               <div className="card-top">
-                <div className="card-icon orange">
-                  <img src={newCustomerIcon} alt="New Customer" className="new-customer-icon" />
-                </div>
+                <div className="card-icon orange">👤</div>
                 <span className="badge positive">+5.2%</span>
               </div>
               <span className="card-label">TOTAL CUSTOMERS</span>
@@ -105,9 +89,7 @@ const AdminDashboard = () => {
 
             <div className="card">
               <div className="card-top">
-                <div className="card-icon green">
-                  <img src={assetUpdatedIcon} alt="Asset Updated" className="asset-updated-icon" />
-                </div>
+                <div className="card-icon green">🛒</div>
                 <span className="badge positive">+2.8%</span>
               </div>
               <span className="card-label">AVG. ORDER VALUE</span>
@@ -171,45 +153,35 @@ const AdminDashboard = () => {
 
               <ul className="activities-list">
                 <li>
-                  <div className="activity-icon blue">
-                    <img src={newSaleIcon} alt="New Sale" className="activity-icon-img" />
-                  </div>
+                  <div className="activity-icon blue">⚡</div>
                   <div className="activity-info">
                     <strong>New Sale: E-commerce SaaS..</strong>
                     <small>2 mins ago by Admin</small>
                   </div>
                 </li>
                 <li>
-                  <div className="activity-icon green">
-                    <img src={assetUpdatedIcon} alt="Asset Updated" className="activity-icon-img" />
-                  </div>
+                  <div className="activity-icon green">🛒</div>
                   <div className="activity-info">
                     <strong>Asset Updated: Foodie Express..</strong>
                     <small>45 mins ago</small>
                   </div>
                 </li>
                 <li>
-                  <div className="activity-icon orange">
-                    <img src={newCustomerIcon} alt="New Customer" className="activity-icon-img" />
-                  </div>
+                  <div className="activity-icon orange">👤</div>
                   <div className="activity-info">
                     <strong>New Customer Registered</strong>
                     <small>3 hours ago</small>
                   </div>
                 </li>
                 <li>
-                  <div className="activity-icon purple">
-                    <img src={auditCompletedIcon} alt="Audit Completed" className="activity-icon-img" />
-                  </div>
+                  <div className="activity-icon purple">✔</div>
                   <div className="activity-info">
                     <strong>Audit Completed</strong>
                     <small>5 hours ago</small>
                   </div>
                 </li>
                 <li>
-                  <div className="activity-icon yellow">
-                    <img src={addedNewProjectIcon} alt="Added New Project" className="activity-icon-img" />
-                  </div>
+                  <div className="activity-icon yellow">📦</div>
                   <div className="activity-info">
                     <strong>Added New Project Completed</strong>
                     <small>8 hours ago</small>
@@ -241,9 +213,7 @@ const AdminDashboard = () => {
                   <tr>
                     <td>
                       <div className="asset-cell">
-                        <div className="asset-icon blue">
-                          <img src={newSaleIcon} alt="New Sale" className="asset-icon-img" />
-                        </div>
+                        <div className="asset-icon blue">📦</div>
                         <div>
                           <strong>E-commerce SaaS Template</strong>
                           <small>React + Node.js + Stripe</small>

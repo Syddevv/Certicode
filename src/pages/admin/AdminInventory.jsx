@@ -1,18 +1,6 @@
 import React from "react";
 import "../../styles/adminInventory.css";
 import Sidebar from "../../components/Sidebar";
-import webappsIcon from "../../assets/webapps.png";
-import mobileIcon from "../../assets/mobile.png";
-import notifIcon from "../../assets/notif.png";
-import uiUxIcon from "../../assets/ui-ux.png";
-import settingsCustomIcon from "../../assets/settings-custom.png";
-import newSaleIcon from "../../assets/new-sale-e-commerce.png";
-import assetUpdatedIcon from "../../assets/asset-updated.png";
-import fintechIcon from "../../assets/fintech-banking.png";
-import developerIcon from "../../assets/developer-portfolio.png";
-import fitlifeIcon from "../../assets/fitlife-tracker.png";
-import totalValueIcon from "../../assets/total-value.png";
-import lastAuditIcon from "../../assets/last-audit.png";
 
 const Icons = {
   Bell: "🔔",
@@ -54,9 +42,7 @@ const AdminInventory = () => {
             </div>
 
             <div className="topbar-actions">
-              <button className="notification">
-                <img src={notifIcon} alt="Notification" className="notification-icon" />
-              </button>
+              <button className="notification">{Icons.Bell}</button>
               <button className="btn primary">{Icons.Add} Add New Asset</button>
             </div>
           </div>
@@ -80,24 +66,16 @@ const AdminInventory = () => {
             <div className="filter-group">
               <button className="filter-pill active">All Assets</button>
               <button className="filter-pill">
-                <span>
-                  <img src={webappsIcon} alt="Web Apps" className="filter-icon" />
-                </span> Web Apps
+                <span>{Icons.Web}</span> Web Apps
               </button>
               <button className="filter-pill">
-                <span>
-                  <img src={mobileIcon} alt="Mobile Apps" className="filter-icon" />
-                </span> Mobile Apps
+                <span>{Icons.Mobile}</span> Mobile Apps
               </button>
               <button className="filter-pill">
-                <span>
-                  <img src={uiUxIcon} alt="UI/UX Kits" className="filter-icon" />
-                </span> UI/UX Kits
+                <span>{Icons.Design}</span> UI/UX Kits
               </button>
               <button className="filter-pill">
-                <span>
-                  <img src={settingsCustomIcon} alt="Custom Projects" className="filter-icon" />
-                </span> Custom Projects
+                <span>{Icons.Settings}</span> Custom Projects
               </button>
             </div>
 
@@ -124,9 +102,7 @@ const AdminInventory = () => {
                 <tr>
                   <td>
                     <div className="asset-cell">
-                      <div className="asset-icon blue">
-                        <img src={newSaleIcon} alt="New Sale" className="asset-icon-img" />
-                      </div>
+                      <div className="asset-icon blue">{Icons.Web}</div>
                       <div>
                         <strong>E-commerce SaaS Template</strong>
                         <small>Updated 2 days ago</small>
@@ -153,9 +129,7 @@ const AdminInventory = () => {
                 <tr>
                   <td>
                     <div className="asset-cell">
-                      <div className="asset-icon green">
-                        <img src={assetUpdatedIcon} alt="Asset Updated" className="asset-icon-img" />
-                      </div>
+                      <div className="asset-icon green">{Icons.Mobile}</div>
                       <div>
                         <strong>Foodie Express Delivery App</strong>
                         <small>Updated 2 days ago</small>
@@ -182,9 +156,7 @@ const AdminInventory = () => {
                 <tr>
                   <td>
                     <div className="asset-cell">
-                      <div className="asset-icon orange">
-                        <img src={fintechIcon} alt="Fintech Banking" className="asset-icon-img" />
-                      </div>
+                      <div className="asset-icon orange">{Icons.Design}</div>
                       <div>
                         <strong>Fintech Banking Dashboard</strong>
                         <small>Updated 2 days ago</small>
@@ -211,9 +183,7 @@ const AdminInventory = () => {
                 <tr>
                   <td>
                     <div className="asset-cell">
-                      <div className="asset-icon purple">
-                        <img src={developerIcon} alt="Developer Portfolio" className="asset-icon-img" />
-                      </div>
+                      <div className="asset-icon purple">{Icons.Web}</div>
                       <div>
                         <strong>Developer Portfolio Website</strong>
                         <small>Updated 2 days ago</small>
@@ -240,9 +210,7 @@ const AdminInventory = () => {
                 <tr>
                   <td>
                     <div className="asset-cell">
-                      <div className="asset-icon blue">
-                        <img src={fitlifeIcon} alt="FitLife Tracker" className="asset-icon-img" />
-                      </div>
+                      <div className="asset-icon blue">{Icons.Mobile}</div>
                       <div>
                         <strong>FitLife Tracker Mobile App</strong>
                         <small>Updated 2 days ago</small>
@@ -283,9 +251,7 @@ const AdminInventory = () => {
 
           <div className="bottom-stats">
             <div className="stat-card">
-              <div className="stat-icon-circle orange">
-                <img src={totalValueIcon} alt="Total Value" className="stat-icon-img" />
-              </div>
+              <div className="stat-icon-circle orange">{Icons.Value}</div>
               <div>
                 <small>TOTAL VALUE</small>
                 <h3>$24,850.00</h3>
@@ -293,9 +259,7 @@ const AdminInventory = () => {
             </div>
 
             <div className="stat-card">
-              <div className="stat-icon-circle green">
-                <img src={assetUpdatedIcon} alt="Monthly Sales" className="stat-icon-img" />
-              </div>
+              <div className="stat-icon-circle green">{Icons.Sales}</div>
               <div>
                 <small>MONTHLY SALES</small>
                 <h3>112 Items</h3>
@@ -303,9 +267,7 @@ const AdminInventory = () => {
             </div>
 
             <div className="stat-card">
-              <div className="stat-icon-circle blue">
-                <img src={lastAuditIcon} alt="Last Audit" className="stat-icon-img" />
-              </div>
+              <div className="stat-icon-circle blue">{Icons.Audit}</div>
               <div>
                 <small>LAST AUDIT</small>
                 <h3>14h Ago</h3>
