@@ -11,7 +11,6 @@ const PlatformSetting = () => {
       <Sidebar activePage="settings" />
       
       <main className="main-content">
-        {/* --- Topbar --- */}
         <div className="topbar">
           <div className="search-wrapper">
             <span className="search-icon">🔍</span>
@@ -23,14 +22,12 @@ const PlatformSetting = () => {
           </div>
         </div>
 
-        {/* --- Header --- */}
         <div className="page-header">
           <h2>Settings</h2>
         </div>
                   <p className="subtitle">Manage your platform's public identity and core regional preferences.</p>
 
 
-        {/* --- Tabs --- */}
         <div className="tabs">
           <button className="tab" onClick={() => navigate("/settings")}>
             My Account
@@ -38,15 +35,11 @@ const PlatformSetting = () => {
           <button className="tab active">Platform Settings</button>
         </div>
 
-        {/* --- GRID LAYOUT --- */}
         <div className="settings-grid">
           
-          {/* LEFT COLUMN */}
           <div className="settings-left">
             
-            {/* Card 1: Platform Identity */}
             <div className="settings-card">
-              {/* FIX: Using card-header-start to force them side-by-side */}
               <div className="card-header-start">
                 <div className="icon-circle blue">🖥️</div>
                 <div>
@@ -83,9 +76,7 @@ const PlatformSetting = () => {
               </div>
             </div>
 
-            {/* Card 2: Security */}
             <div className="settings-card">
-              {/* Using card-header-between for text vs badge */}
               <div className="card-header-between">
                 <div className="header-group">
                   <div className="icon-circle orange">🛡️</div>

@@ -8,21 +8,16 @@ body {
   margin: 0;
 }
 
-/* --- CHANGED: Layout to allow full page scrolling --- */
 .layout {
   display: flex;
-  min-height: 100vh; /* Changed from height to min-height */
-  /* overflow: hidden;  <-- REMOVED to stop clipping */
+  min-height: 100vh; 
 }
 
-/* --- CHANGED: Main Content to grow naturally --- */
 .main-content {
   flex: 1;
   padding: 30px 40px;
-  /* overflow-y: auto; <-- REMOVED to stop internal scrollbar */
 }
 
-/* --- Topbar --- */
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -107,7 +102,6 @@ body {
   margin-top: 8px;
 }
 
-/* --- Page Header --- */
 .page-header h2 {
   font-size: 28px;
   font-weight: 800;
@@ -121,7 +115,6 @@ body {
   margin: 8px 0 0 0;
 }
 
-/* --- Tabs --- */
 .tabs {
   display: flex;
   gap: 32px;
@@ -145,7 +138,6 @@ body {
   border-bottom-color: #f97316;
 }
 
-/* --- Layout Grid --- */
 .settings-grid {
   display: grid;
   grid-template-columns: 1fr 380px;
@@ -170,7 +162,6 @@ body {
   height: 100%;
 }
 
-/* --- HEADER FIX --- */
 .card-header-left {
   display: flex;
   align-items: center;        
@@ -235,7 +226,6 @@ body {
   font-size: 18px;
 }
 
-/* --- Profile Section --- */
 .profile-row {
   display: flex;
   gap: 40px;
@@ -265,7 +255,6 @@ body {
   margin-top: 4px;
 }
 
-/* --- Forms --- */
 .form-section {
   flex: 1;
   display: grid;
@@ -316,7 +305,6 @@ body {
   opacity: 0.5;
 }
 
-/* --- Security Items --- */
 .security-item {
   display: flex;
   justify-content: space-between;
@@ -343,7 +331,6 @@ body {
   color: #6b7280;
 }
 
-/* --- Activity List --- */
 .activity-list {
   list-style: none;
   padding: 0;
@@ -406,7 +393,6 @@ body {
   text-transform: uppercase;
 }
 
-/* --- Toggle Switch --- */
 .switch {
   position: relative;
   display: inline-block;

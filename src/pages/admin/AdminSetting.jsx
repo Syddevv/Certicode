@@ -11,7 +11,6 @@ const AdminSetting = () => {
       <Sidebar activePage="settings" />
       <main className="main-content">
         
-        {/* --- Top Bar --- */}
         <div className="topbar">
           <div className="search-wrapper">
             <span className="search-icon">🔍</span>
@@ -23,13 +22,11 @@ const AdminSetting = () => {
           </div>
         </div>
 
-        {/* --- Page Header --- */}
         <div className="page-header">
           <h2>Settings</h2>
         </div>
         
 
-        {/* --- Tabs --- */}
         <div className="tabs">
           <button className="tab active">My Account</button>
           <button className="tab" onClick={() => navigate("/platform-settings")}>
@@ -37,15 +34,11 @@ const AdminSetting = () => {
           </button>
         </div>
 
-        {/* --- Main Grid --- */}
         <div className="settings-grid">
           
-          {/* LEFT COLUMN */}
           <div className="settings-left">
             
-            {/* Account Information Card */}
             <div className="settings-card">
-              {/* IMPORTANT: Renamed class to 'card-header-left' and added inline style for safety */}
               <div className="card-header-left" style={{ justifyContent: 'flex-start' }}>
                 <div className="icon-circle orange">👤</div>
                 <div className="header-text-group">
@@ -81,7 +74,6 @@ const AdminSetting = () => {
               </div>
             </div>
 
-            {/* Security Settings Card */}
             <div className="settings-card">
               <div className="card-header-left" style={{ justifyContent: 'flex-start' }}>
                 <div className="icon-circle orange">🛡️</div>
@@ -89,7 +81,6 @@ const AdminSetting = () => {
                   <h4>Security Settings</h4>
                   <p className="card-sub">Configure authentication protocols and session policies.</p>
                 </div>
-                {/* This div pushes the badge to the right */}
                 <div className="push-right">
                   <span className="badge success">ENFORCED</span>
                 </div>
@@ -116,7 +107,6 @@ const AdminSetting = () => {
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Activity Log */}
           <div className="settings-right">
             <div className="settings-card h-full">
               <div className="card-header-left" style={{ justifyContent: 'flex-start' }}>
