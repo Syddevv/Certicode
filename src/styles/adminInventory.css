@@ -69,12 +69,6 @@ body {
   cursor: pointer;
 }
 
-.notification-icon {
-  width: 20px;
-  height: 20px;
-  object-fit: contain;
-}
-
 .btn.primary {
   background: #f97316;
   color: #fff;
@@ -144,15 +138,6 @@ body {
   background: #fff;
   font-size: 13px;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.filter-icon {
-  width: 16px;
-  height: 16px;
-  object-fit: contain;
 }
 
 .filter-pill.active {
@@ -202,12 +187,6 @@ td {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.asset-icon-img {
-  width: 20px;
-  height: 20px;
-  object-fit: contain;
 }
 
 .asset-icon.orange { background: #fff7ed; color: #f97316; }
@@ -278,12 +257,6 @@ td {
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.stat-icon-img {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
 }
 
 .stat-icon-circle.orange { background: #fff7ed; color: #f97316; }
