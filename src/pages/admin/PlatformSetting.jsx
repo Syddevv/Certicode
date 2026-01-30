@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom"; 
-import Sidebar from "../../components/Sidebar";
+import Sidebar from "../../components/Sidebar"; 
 import "../../styles/platformSetting.css";
 
 const PlatformSetting = () => {
@@ -9,6 +9,7 @@ const PlatformSetting = () => {
   return (
     <div className="layout">
       <Sidebar activePage="settings" />
+      
       <main className="main-content">
         <div className="topbar">
           <div className="search-wrapper">
@@ -16,143 +17,117 @@ const PlatformSetting = () => {
             <input className="search-input" placeholder="Search anything..." />
           </div>
           <div className="topbar-actions">
-            <button className="icon-btn">🔔</button>
-            <button className="btn primary">Save Changes</button>
+            <button className="notification-btn">
+              🔔<span className="dot"></span>
+            </button>
+            <button className="btn-save">Save Changes</button>
           </div>
         </div>
 
-        <div className="page-header">
-          <h2>Settings</h2>
-        </div>
-          <p className="subtitle">Manage your platform's public identity and core regional preferences.</p>
+        <div className="content-wrapper">
+          <div className="page-header">
+            <h2>Settings</h2>
+          </div>
+            <p className="subtitle">Manage your platform's public identity and core regional preferences.</p>
 
+          <div className="tabs">
+            <button className="tab" onClick={() => navigate("/settings")}>My Account</button>
+            <button className="tab active">Platform Settings</button>
+          </div>
 
-        <div className="tabs">
-          <button className="tab" onClick={() => navigate("/settings")}>
-            My Account
-          </button>
-          <button className="tab active">Platform Settings</button>
-        </div>
-
-        <div className="settings-grid">
-          <div className="settings-left">
+          <div className="settings-container">
+            
             <div className="settings-card">
-              <div className="card-header">
-                <div className="icon-circle orange">🖥️</div>
-                <div>
+              <div className="card-header-start">
+                <div className="icon-box orange-bg">
+                  <span>🖥️</span> 
+                </div>
+                <div className="header-text">
                   <h4>Platform Identity</h4>
-                  <p className="card-sub">Basic identification details for the admin console and user portal.</p>
+                  <p>Basic identification details for the admin console and user portal.</p>
                 </div>
               </div>
 
-              <div className="platform-form-grid">
+              <div className="form-grid">
                 <div className="input-group">
                   <label>Platform Name</label>
                   <input type="text" defaultValue="CertiCode" />
-                  <span className="input-hint">Appears in email footers and browser tabs.</span>
+                  <p className="helper-text">Appears in email footers and browser tabs.</p>
                 </div>
                 <div className="input-group">
                   <label>Support Email Address</label>
                   <input type="email" defaultValue="support@certicode.com" />
-                  <span className="input-hint">Used for automated system communications.</span>
+                  <p className="helper-text">Used for automated system communications.</p>
                 </div>
                 <div className="input-group">
                   <label>Default Currency</label>
-                  <select className="full-select">
+                  <select>
                     <option>USD-US-Dollar</option>
+                    <option>EUR-Euro</option>
                   </select>
-                  <span className="input-hint">Base currency for all billing calculations.</span>
+                  <p className="helper-text">Base currency for all billing calculations.</p>
                 </div>
                 <div className="input-group">
                   <label>Timezone</label>
-                  <select className="full-select">
+                  <select>
                     <option>(UTC-05:00) Eastern Time (US & Canada)</option>
+                    <option>(UTC+00:00) London</option>
                   </select>
-                  <span className="input-hint">System wide date and time reporting.</span>
+                  <p className="helper-text">System wide date and time reporting.</p>
                 </div>
               </div>
             </div>
 
             <div className="settings-card">
-              <div className="card-header-flex">
+              <div className="card-header space-between">
                 <div className="header-left">
-                  <div className="icon-circle orange">🛡️</div>
-                  <div>
+                  <div className="icon-box orange-bg">
+                    <span>🛡️</span>
+                  </div>
+                  <div className="header-text">
                     <h4>Security & Access</h4>
-                    <p className="card-sub">Configure authentication protocols and session policies.</p>
+                    <p>Configure authentication protocols and session policies.</p>
                   </div>
                 </div>
-                <span className="badge success">ENFORCED</span>
+                <span className="badge-enforced">ENFORCED</span>
               </div>
 
-              <div className="security-item">
-                <div className="sec-info">
-                  <strong>Multi-Factor Authentication (MFA)</strong>
-                  <p>Require MFA for all administrative accounts</p>
+              <div className="security-list">
+                <div className="security-row">
+                  <div className="row-info">
+                    <strong>Multi-Factor Authentication (MFA)</strong>
+                    <p>Require MFA for all administrative accounts</p>
+                  </div>
+                  <label className="switch">
+                    <input type="checkbox" defaultChecked />
+                    <span className="slider"></span>
+                  </label>
                 </div>
-                <label className="switch">
-                  <input type="checkbox" defaultChecked />
-                  <span className="slider"></span>
-                </label>
-              </div>
 
-              <div className="security-item">
-                <div className="sec-info">
-                  <strong>Automatic Session Timeout</strong>
-                  <p>Require MFA for all administrative accounts</p>
+                <div className="security-row">
+                  <div className="row-info">
+                    <strong>Automatic Session Timeout</strong>
+                    <p>Require MFA for all administrative accounts</p>
+                  </div>
+                  <select className="row-select">
+                    <option>30 Minutes</option>
+                    <option>1 Hour</option>
+                  </select>
                 </div>
-                <select className="mini-select">
-                  <option>30 Minutes</option>
-                </select>
-              </div>
 
-              <div className="security-item no-border">
-                <div className="sec-info">
-                  <strong>IP Whitelisting</strong>
-                  <p>Limit admin access to specific IP ranges</p>
+                <div className="security-row no-border">
+                  <div className="row-info">
+                    <strong>IP Whitelisting</strong>
+                    <p>Limit admin access to specific IP ranges</p>
+                  </div>
+                  <label className="switch">
+                    <input type="checkbox" />
+                    <span className="slider"></span>
+                  </label>
                 </div>
-                <label className="switch">
-                  <input type="checkbox" disabled />
-                  <span className="slider"></span>
-                </label>
               </div>
             </div>
-          </div>
-
-          <div className="settings-right">
-            <div className="settings-card h-full">
-              <div className="card-header-simple">
-                <h4>Admin Activity Log</h4>
-                <span className="icon-grey">🕒</span>
-              </div>
-              <ul className="activity-list">
-                <li className="activity-item">
-                  <div className="act-icon blue">✏️</div>
-                  <div className="act-content">
-                    <strong>Updated E-commerce SaaS Price</strong>
-                    <p>Modified subscription tiers for enterprise tier assets.</p>
-                    <small>TODAY, 10:45 AM</small>
-                  </div>
-                </li>
-                <li className="activity-item">
-                  <div className="act-icon orange">⚙️</div>
-                  <div className="act-content">
-                    <strong>Change System Settings</strong>
-                    <p>Updated global notification and preferences.</p>
-                    <small>YESTERDAY, 4:20 PM</small>
-                  </div>
-                </li>
-                <li className="activity-item">
-                  <div className="act-icon green">✅</div>
-                  <div className="act-content">
-                    <strong>Authorized Payout</strong>
-                    <p>Approved monthly revenue distribution.</p>
-                    <small>DEC 31, 2025, 9:00 AM</small>
-                  </div>
-                </li>
-              </ul>
-              <button className="btn full-outline">View Complete Audit Log</button>
-            </div>
+            
           </div>
         </div>
       </main>
