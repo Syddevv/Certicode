@@ -24,6 +24,7 @@
 .logo {
   display: flex;
   align-items: center;
+  margin-bottom: 24px; 
 }
 
 .logo img {
@@ -54,24 +55,45 @@
   font-size: 14px;
   color: #6b7280;
   cursor: pointer;
+  transition: background 0.2s, color 0.2s;
 }
 
 .menu-top li a,
 .menu-bottom li a {
   text-decoration: none;
   color: inherit;
-  display: block;
+  display: flex;     
+  align-items: center;
+  gap: 12px;         
+  width: 100%;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-top li:hover,
+.menu-bottom li:hover {
+  background: #f9fafb;
+  color: #111827;
 }
 
 .menu-top li.active {
   background: #fff1e6;
-  color: #f97316;
+  color: #f97316; 
   font-weight: 600;
+}
+
+.menu-top li svg,
+.menu-bottom li svg {
+  transition: stroke 0.2s;
 }
 
 
 .menu-section-label {
-  margin: 14px 0 6px;
+  margin: 20px 0 8px 12px; /* Adjusted spacing */
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -85,8 +107,8 @@
   align-items: center;
   padding: 10px 12px;
   border-radius: 10px;
-
-  margin-top: 540px;
+  
+  margin-top: auto; 
 }
 
 .profile {
@@ -96,14 +118,16 @@
 }
 
 .profile img {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
+  object-fit: cover;
 }
 
 .profile strong {
   font-size: 13px;
   color: #374151;
+  display: block;
 }
 
 .profile small {

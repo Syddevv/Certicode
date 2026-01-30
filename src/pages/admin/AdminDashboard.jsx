@@ -15,9 +15,9 @@ const Icons = {
 };
 
 const Avatar = ({ name }) => (
-  <img 
-    src={`https://ui-avatars.com/api/?name=${name}&background=random&color=fff&size=128`} 
-    alt={name} 
+  <img
+    src={`https://ui-avatars.com/api/?name=${name}&background=random&color=fff&size=128`}
+    alt={name}
     className="user-avatar"
   />
 );
@@ -56,8 +56,8 @@ const AdminDashboard = () => {
             <h2>Admin Dashboard Overview</h2>
           </div>
           <p className="subtitle">
-              Welcome back, Admin. Here's what's happening with CertiCode today.
-            </p>
+            Welcome back, Admin. Here's what's happening with CertiCode today.
+          </p>
 
           <section className="cards">
             <div className="card">
@@ -98,7 +98,7 @@ const AdminDashboard = () => {
           </section>
 
           <section className="content">
-            
+
             <div className="box sales-box">
               <div className="box-header">
                 <div>
@@ -150,7 +150,7 @@ const AdminDashboard = () => {
                 <h4>Recent Activities</h4>
                 <a href="#" className="view-all">View All</a>
               </div>
-              
+
               <ul className="activities-list">
                 <li>
                   <div className="activity-icon blue">⚡</div>
