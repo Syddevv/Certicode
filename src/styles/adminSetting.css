@@ -208,6 +208,36 @@ body {
   flex-shrink: 0;
 }
 
+.icon-image {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.act-icon-image {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.icon-grey {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.topbar-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.search-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
 .icon-circle.orange {
   background: #ffedd5;
   color: #f97316;

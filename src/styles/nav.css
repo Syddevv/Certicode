@@ -22,7 +22,7 @@
 }
 
 .certicode-logo {
-  height: 44px;
+  height: 60px;
   width: auto;
   display: block;
 }
@@ -76,6 +76,13 @@
   height: 18px;
   object-fit: contain;
   display: block;
+}
+
+.nav__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  object-fit: cover;
 }
 
 .btn {
