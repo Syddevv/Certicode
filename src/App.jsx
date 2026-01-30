@@ -1,0 +1,51 @@
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import AdminDashboard from "./pages/admin/adminDashboard";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
+import LandingPage from "./pages/public/LandingPage";
+import TermsAndConditions from "./pages/public/TermsAndConditions";
+import PrivacyPolicy from "./pages/public/PrivacyPolicy";
+import Marketplace from "./pages/public/Marketplace";
+import ProductDetails from "./pages/public/ProductDetails";
+import Cart from "./pages/public/Cart";
+import PromoCodes from "./pages/public/PromoCodes";
+import Checkout from "./pages/public/Checkout";
+import OrderSuccess from "./pages/public/OrderSuccess";
+import AdminInventory from "./pages/admin/AdminInventory";
+import AdminSales from "./pages/admin/AdminSales";
+import AdminCustomers from "./pages/admin/AdminCustomers";
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/*LOGIN & REGISTRATION */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* ADMIN */}
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/inventory" element={<AdminInventory />} />
+        <Route path="/sales" element={<AdminSales />} />
+        <Route path="/customers" element={<AdminCustomers />} />
+
+        {/* PUBLIC PAGES / USER */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/terms" element={<TermsAndConditions />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/marketplace" element={<Marketplace />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/promo-codes" element={<PromoCodes />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/order-success" element={<OrderSuccess />} />
+        <Route
+          path="/marketplace/e-commerce-saas-template"
+          element={<ProductDetails />}
+        />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;
