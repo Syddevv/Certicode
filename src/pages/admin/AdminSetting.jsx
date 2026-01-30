@@ -1,7 +1,16 @@
 import React from "react";
-import { useNavigate } from "react-router-dom"; 
-import Sidebar from "../../components/Sidebar";
+import { useNavigate } from "react-router-dom";
 import "../../styles/adminSetting.css";
+import Sidebar from "../../components/Sidebar";
+import orangeProfileIcon from "../../assets/orangeprofile.png";
+import securityIcon from "../../assets/security-and-access.png";
+import activityLogIcon from "../../assets/activity-log.png";
+import updatedEcommerceIcon from "../../assets/updated-e-commerce.png";
+import orangeSettingsIcon from "../../assets/orangesettings.png";
+import authorizedPayoutIcon from "../../assets/authorized-payout.png";
+import updatedFitlifeIcon from "../../assets/updated-fitlife.png";
+import notifIcon from "../../assets/notif.png";
+import searchIcon from "../../assets/Search.png";
 
 const AdminSetting = () => {
   const navigate = useNavigate();
@@ -12,11 +21,13 @@ const AdminSetting = () => {
       <main className="main-content">
         <div className="topbar">
           <div className="search-wrapper">
-            <span className="search-icon">🔍</span>
+            <img src={searchIcon} alt="Search" className="search-icon" />
             <input className="search-input" placeholder="Search anything..." />
           </div>
           <div className="topbar-actions">
-            <button className="icon-btn">🔔</button>
+            <button className="icon-btn">
+              <img src={notifIcon} alt="Notifications" className="topbar-icon" />
+            </button>
             <button className="btn primary">Save Changes</button>
           </div>
         </div>
@@ -37,7 +48,9 @@ const AdminSetting = () => {
           <div className="settings-left">
             <div className="settings-card">
               <div className="card-header">
-                <div className="icon-circle orange">👤</div>
+                <div className="icon-circle orange">
+                  <img src={orangeProfileIcon} alt="Account Settings" className="icon-image" />
+                </div>
                 <div>
                   <h4>Account Information</h4>
                   <p className="card-sub">View and update your personal details and account information.</p>
@@ -74,7 +87,9 @@ const AdminSetting = () => {
             <div className="settings-card">
               <div className="card-header-flex">
                 <div className="header-left">
-                  <div className="icon-circle orange">🛡️</div>
+                  <div className="icon-circle orange">
+                    <img src={securityIcon} alt="Security Settings" className="icon-image" />
+                  </div>
                   <div>
                     <h4>Security Settings</h4>
                     <p className="card-sub">Configure authentication protocols and session policies.</p>
@@ -108,11 +123,13 @@ const AdminSetting = () => {
             <div className="settings-card h-full">
               <div className="card-header-simple">
                 <h4>Admin Activity Log</h4>
-                <span className="icon-grey">🕒</span>
+                <img src={activityLogIcon} alt="Activity Log" className="icon-grey" />
               </div>
               <ul className="activity-list">
                 <li className="activity-item">
-                  <div className="act-icon blue">✏️</div>
+                  <div className="act-icon blue">
+                    <img src={updatedEcommerceIcon} alt="Updated E-commerce" className="act-icon-image" />
+                  </div>
                   <div className="act-content">
                     <strong>Updated E-commerce SaaS Price</strong>
                     <p>Modified subscription tiers for enterprise tier assets.</p>
@@ -120,7 +137,9 @@ const AdminSetting = () => {
                   </div>
                 </li>
                 <li className="activity-item">
-                  <div className="act-icon orange">⚙️</div>
+                  <div className="act-icon orange">
+                    <img src={orangeSettingsIcon} alt="Orange Settings" className="act-icon-image" />
+                  </div>
                   <div className="act-content">
                     <strong>Change System Settings</strong>
                     <p>Updated global notification and preferences for the platform</p>
@@ -128,7 +147,9 @@ const AdminSetting = () => {
                   </div>
                 </li>
                 <li className="activity-item">
-                  <div className="act-icon green">✅</div>
+                  <div className="act-icon green">
+                    <img src={authorizedPayoutIcon} alt="Authorized Payout" className="act-icon-image" />
+                  </div>
                   <div className="act-content">
                     <strong>Authorized Payout</strong>
                     <p>Approved monthly revenue distribution to dev partners.</p>
@@ -136,7 +157,9 @@ const AdminSetting = () => {
                   </div>
                 </li>
                 <li className="activity-item">
-                  <div className="act-icon blue">✏️</div>
+                  <div className="act-icon blue">
+                    <img src={updatedFitlifeIcon} alt="Updated FitLife" className="act-icon-image" />
+                  </div>
                   <div className="act-content">
                     <strong>Updated FitLife Tracker Mobile App Price</strong>
                     <p>Modified subscription tiers for enterprise tier assets.</p>
