@@ -23,8 +23,9 @@ const PlatformSetting = () => {
 
         <div className="page-header">
           <h2>Settings</h2>
-          <p className="subtitle">Manage your platform's public identity and core regional preferences.</p>
         </div>
+          <p className="subtitle">Manage your platform's public identity and core regional preferences.</p>
+
 
         <div className="tabs">
           <button className="tab" onClick={() => navigate("/settings")}>

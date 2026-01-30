@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import "../../styles/landingPage.css";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -19,20 +19,8 @@ import Wallet from "../../assets/wallet.png";
 import Lightning from "../../assets/lightning.png";
 import SearchCheck from "../../assets/search-check.png";
 import Avatar from "../../assets/Avatar.png";
-import { useLocation } from "react-router-dom";
 
 const LandingPage = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    if (!location.hash) return;
-    const targetId = location.hash.replace("#", "");
-    const section = document.getElementById(targetId);
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  }, [location.hash]);
-
   const items = [
     { src: TechFlow, name: "TechFlow" },
     { src: SkyScale, name: "SkyScale" },
@@ -122,7 +110,7 @@ const LandingPage = () => {
   return (
     <div>
       <Navbar />
-      <section className="hero" id="hero">
+      <section className="hero">
         <div className="container hero__inner">
           <div className="hero__left">
             <span className="pill">B2B Digital Asset Marketplace</span>
@@ -217,7 +205,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      <section className="categories" id="categories">
+      <section className="categories">
         <div className="container categories__inner">
           <div className="categories__header">
             <div>
@@ -246,7 +234,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      <section className="process" id="process">
+      <section className="process">
         <div className="container process__inner">
           <h2 className="process__title">Simple. Secure. Instant.</h2>
           <p className="process__subtitle">
@@ -319,7 +307,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      <section className="faq" id="faq">
+      <section className="faq">
         <div className="container faq__inner">
           <h2 className="faq__title">Frequently Asked Questions</h2>
           <p className="faq__subtitle">
