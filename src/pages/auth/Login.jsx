@@ -6,6 +6,7 @@ import eye2 from "../../assets/eye2.png";
 import googleIcon from "../../assets/googleicon.png";
 import facebookLogo from "../../assets/facebooklogo.png";
 import certicodeIcon from "../../assets/certicodeicon.png";
+import { api } from "../../services/api";
 
 const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -14,15 +15,42 @@ const Login = () => {
 
   const togglePassword = () => setPasswordVisible(!passwordVisible);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login attempt:", { email, password });
+    
+    try {
+      const credentials = {
+        email: email,
+        password: password
+      };
+
+      const data = await api.login(credentials);
+      
+      console.log("Login successful:", data);
+      
+      if (data.token) {
+        localStorage.setItem('auth_token', data.token);
+      }
+      
+      alert('Login successful!');
+      
+    } catch (error) {
+      console.error("Login error:", error);
+      alert(error.message || 'Login failed. Please try again.');
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+        window.location.href = 'http://127.0.0.1:8000/api/auth/google';
+        } catch (error) {
+          alert('Google login failed. Please try again.');
+    }
   };
 
   return (
     <div className="login-page-center">
       <div className="login-container">
-        {/* LEFT PANEL */}
         <div className="left-panel">
           <h1 className="login-title">Log In</h1>
           <p className="login-subtitle">
@@ -89,7 +117,7 @@ const Login = () => {
           </div>
 
           <div className="social-buttons">
-            <button type="button" className="social-button">
+            <button type="button" className="social-button" onClick={handleGoogleLogin}>
               <img src={googleIcon} alt="Google" className="google-icon" />
               <span>Google</span>
             </button>

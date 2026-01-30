@@ -6,6 +6,7 @@ import eye2 from "../../assets/eye2.png";
 import googleIcon from "../../assets/googleicon.png";
 import facebookLogo from "../../assets/facebooklogo.png";
 import certicodeIcon from "../../assets/certicodeicon.png";
+import { api } from "../../services/api";
 
 const Register = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -17,7 +18,7 @@ const Register = () => {
 
   const togglePassword = () => setPasswordVisible(!passwordVisible);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       alert("Passwords do not match");
@@ -27,13 +28,47 @@ const Register = () => {
       alert("Please accept the terms and conditions");
       return;
     }
-    console.log("Signup attempt:", { fullname, email, password });
+
+    try {
+      const userData = {
+        name: fullname,
+        email: email,
+        password: password,
+        password_confirmation: confirmPassword
+      };
+
+      const data = await api.register(userData);
+      
+      console.log("Registration successful:", data);
+      alert('Registration successful!');
+      if (data.token) {
+        localStorage.setItem('auth_token', data.token);
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      alert(error.message || 'Registration failed. Please try again.');
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+        window.location.href = 'http://127.0.0.1:8000/api/auth/google';
+        } catch (error) {
+          alert('Google login failed. Please try again.');
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    try {
+      window.location.href = 'http://127.0.0.1:8000/api/auth/facebook';
+      } catch (error) {
+        alert('Facebook login failed. Please try again.');
+    }
   };
 
   return (
     <div className="login-page-center">
       <div className="login-container">
-        {/* LEFT PANEL */}
         <div className="left-panel">
           <h1 className="login-title">Sign Up</h1>
           <p className="login-subtitle">Create your account</p>
@@ -139,11 +174,15 @@ const Register = () => {
           </div>
 
           <div className="social-buttons">
-            <button type="button" className="social-button">
-              <img src={googleIcon} alt="Google" className="google-icon" />
+            <button type="button" className="social-button" onClick={handleGoogleLogin}>
+              <img 
+              src={googleIcon} 
+              alt="Google" 
+              className="google-icon"
+              />
               <span>Google</span>
             </button>
-            <button type="button" className="social-button">
+            <button type="button" className="social-button" onClick={handleFacebookLogin}>
               <img
                 src={facebookLogo}
                 alt="Facebook"
