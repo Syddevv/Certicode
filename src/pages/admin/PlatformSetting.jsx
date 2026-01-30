@@ -1,12 +1,7 @@
 import React from "react";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import "../../styles/platformSetting.css";
-import searchIcon from "../../assets/Search.png";
-import notifIcon from "../../assets/notif.png";
-import platformIcon from "../../assets/platform-identity.png";
-import securityIcon from "../../assets/security-and-access.png";
-import activityLogIcon from "../../assets/activity-log.png";
 
 const PlatformSetting = () => {
   const navigate = useNavigate();
@@ -14,25 +9,28 @@ const PlatformSetting = () => {
   return (
     <div className="layout">
       <Sidebar activePage="settings" />
+      
       <main className="main-content">
+        {/* --- Topbar --- */}
         <div className="topbar">
           <div className="search-wrapper">
-            <img src={searchIcon} alt="Search" className="search-icon" />
+            <span className="search-icon">🔍</span>
             <input className="search-input" placeholder="Search anything..." />
           </div>
           <div className="topbar-actions">
-            <button className="icon-btn">
-              <img src={notifIcon} alt="Notifications" className="topbar-icon" />
-            </button>
+            <button className="icon-btn">🔔</button>
             <button className="btn primary">Save Changes</button>
           </div>
         </div>
 
+        {/* --- Header --- */}
         <div className="page-header">
           <h2>Settings</h2>
-          <p className="subtitle">Manage your platform's public identity and core regional preferences.</p>
         </div>
+                  <p className="subtitle">Manage your platform's public identity and core regional preferences.</p>
 
+
+        {/* --- Tabs --- */}
         <div className="tabs">
           <button className="tab" onClick={() => navigate("/settings")}>
             My Account
@@ -40,13 +38,17 @@ const PlatformSetting = () => {
           <button className="tab active">Platform Settings</button>
         </div>
 
+        {/* --- GRID LAYOUT --- */}
         <div className="settings-grid">
+          
+          {/* LEFT COLUMN */}
           <div className="settings-left">
+            
+            {/* Card 1: Platform Identity */}
             <div className="settings-card">
-              <div className="card-header">
-                <div className="icon-circle orange">
-                  <img src={platformIcon} alt="Platform Settings" className="icon-image" />
-                </div>
+              {/* FIX: Using card-header-start to force them side-by-side */}
+              <div className="card-header-start">
+                <div className="icon-circle blue">🖥️</div>
                 <div>
                   <h4>Platform Identity</h4>
                   <p className="card-sub">Basic identification details for the admin console and user portal.</p>
@@ -67,7 +69,7 @@ const PlatformSetting = () => {
                 <div className="input-group">
                   <label>Default Currency</label>
                   <select className="full-select">
-                    <option>USD-US-Dollar</option>
+                    <option>USD - US Dollar</option>
                   </select>
                   <span className="input-hint">Base currency for all billing calculations.</span>
                 </div>
@@ -81,12 +83,12 @@ const PlatformSetting = () => {
               </div>
             </div>
 
+            {/* Card 2: Security */}
             <div className="settings-card">
-              <div className="card-header-flex">
-                <div className="header-left">
-                  <div className="icon-circle orange">
-                    <img src={securityIcon} alt="Security Settings" className="icon-image" />
-                  </div>
+              {/* Using card-header-between for text vs badge */}
+              <div className="card-header-between">
+                <div className="header-group">
+                  <div className="icon-circle orange">🛡️</div>
                   <div>
                     <h4>Security & Access</h4>
                     <p className="card-sub">Configure authentication protocols and session policies.</p>
@@ -111,7 +113,7 @@ const PlatformSetting = () => {
                   <strong>Automatic Session Timeout</strong>
                   <p>Require MFA for all administrative accounts</p>
                 </div>
-                <select className="mini-select">
+                <select className="full-select" style={{ width: "auto", padding: "6px 12px" }}>
                   <option>30 Minutes</option>
                 </select>
               </div>
@@ -129,41 +131,8 @@ const PlatformSetting = () => {
             </div>
           </div>
 
-          <div className="settings-right">
-            <div className="settings-card h-full">
-              <div className="card-header-simple">
-                <h4>Admin Activity Log</h4>
-                <img src={activityLogIcon} alt="Activity Log" className="icon-grey" />
-              </div>
-              <ul className="activity-list">
-                <li className="activity-item">
-                  <div className="act-icon blue">✏️</div>
-                  <div className="act-content">
-                    <strong>Updated E-commerce SaaS Price</strong>
-                    <p>Modified subscription tiers for enterprise tier assets.</p>
-                    <small>TODAY, 10:45 AM</small>
-                  </div>
-                </li>
-                <li className="activity-item">
-                  <div className="act-icon orange">⚙️</div>
-                  <div className="act-content">
-                    <strong>Change System Settings</strong>
-                    <p>Updated global notification and preferences.</p>
-                    <small>YESTERDAY, 4:20 PM</small>
-                  </div>
-                </li>
-                <li className="activity-item">
-                  <div className="act-icon green">✅</div>
-                  <div className="act-content">
-                    <strong>Authorized Payout</strong>
-                    <p>Approved monthly revenue distribution.</p>
-                    <small>DEC 31, 2025, 9:00 AM</small>
-                  </div>
-                </li>
-              </ul>
-              <button className="btn full-outline">View Complete Audit Log</button>
-            </div>
-          </div>
+          
+
         </div>
       </main>
     </div>

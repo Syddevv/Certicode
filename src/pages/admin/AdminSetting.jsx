@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import "../../styles/adminSetting.css";
 
@@ -10,6 +10,8 @@ const AdminSetting = () => {
     <div className="layout">
       <Sidebar activePage="settings" />
       <main className="main-content">
+        
+        {/* --- Top Bar --- */}
         <div className="topbar">
           <div className="search-wrapper">
             <span className="search-icon">🔍</span>
@@ -21,11 +23,13 @@ const AdminSetting = () => {
           </div>
         </div>
 
+        {/* --- Page Header --- */}
         <div className="page-header">
           <h2>Settings</h2>
         </div>
-        <p className="subtitle">Manage your platform's public identity and core regional preferences.</p>
+        
 
+        {/* --- Tabs --- */}
         <div className="tabs">
           <button className="tab active">My Account</button>
           <button className="tab" onClick={() => navigate("/platform-settings")}>
@@ -33,12 +37,18 @@ const AdminSetting = () => {
           </button>
         </div>
 
+        {/* --- Main Grid --- */}
         <div className="settings-grid">
+          
+          {/* LEFT COLUMN */}
           <div className="settings-left">
+            
+            {/* Account Information Card */}
             <div className="settings-card">
-              <div className="card-header">
+              {/* IMPORTANT: Renamed class to 'card-header-left' and added inline style for safety */}
+              <div className="card-header-left" style={{ justifyContent: 'flex-start' }}>
                 <div className="icon-circle orange">👤</div>
-                <div>
+                <div className="header-text-group">
                   <h4>Account Information</h4>
                   <p className="card-sub">View and update your personal details and account information.</p>
                 </div>
@@ -71,16 +81,18 @@ const AdminSetting = () => {
               </div>
             </div>
 
+            {/* Security Settings Card */}
             <div className="settings-card">
-              <div className="card-header-flex">
-                <div className="header-left">
-                  <div className="icon-circle orange">🛡️</div>
-                  <div>
-                    <h4>Security Settings</h4>
-                    <p className="card-sub">Configure authentication protocols and session policies.</p>
-                  </div>
+              <div className="card-header-left" style={{ justifyContent: 'flex-start' }}>
+                <div className="icon-circle orange">🛡️</div>
+                <div className="header-text-group">
+                  <h4>Security Settings</h4>
+                  <p className="card-sub">Configure authentication protocols and session policies.</p>
                 </div>
-                <span className="badge success">ENFORCED</span>
+                {/* This div pushes the badge to the right */}
+                <div className="push-right">
+                  <span className="badge success">ENFORCED</span>
+                </div>
               </div>
 
               <div className="security-item">
@@ -104,12 +116,16 @@ const AdminSetting = () => {
             </div>
           </div>
 
+          {/* RIGHT COLUMN: Activity Log */}
           <div className="settings-right">
             <div className="settings-card h-full">
-              <div className="card-header-simple">
+              <div className="card-header-left" style={{ justifyContent: 'flex-start' }}>
                 <h4>Admin Activity Log</h4>
-                <span className="icon-grey">🕒</span>
+                <div className="push-right">
+                   <span className="icon-grey">🕒</span>
+                </div>
               </div>
+              
               <ul className="activity-list">
                 <li className="activity-item">
                   <div className="act-icon blue">✏️</div>
