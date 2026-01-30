@@ -1,6 +1,7 @@
 import React from "react";
 import "../../styles/adminSales.css";
 import Sidebar from "../../components/Sidebar";
+import notifIcon from "../../assets/notif.png";
 
 // Icons
 const Icons = {
@@ -49,7 +50,9 @@ const AdminSales = () => {
             </div>
 
             <div className="topbar-actions">
-              <button className="notification">{Icons.Bell}</button>
+              <button className="notification">
+                <img src={notifIcon} alt="Notification" className="notification-icon" />
+              </button>
               <button className="btn primary">
                 {Icons.Export} Export
               </button>

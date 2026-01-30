@@ -1,6 +1,12 @@
 import React from "react";
 import "../../styles/adminCustomers.css";
 import Sidebar from "../../components/Sidebar";
+import notifIcon from "../../assets/notif.png";
+import totalCustomersIcon from "../../assets/total-customers.png";
+import activeCustomersIcon from "../../assets/active-customers.png";
+import totalRevenueIcon from "../../assets/total-revenue.png";
+import avgCustomerSpentIcon from "../../assets/avg-customer-spent.png";
+import filterIcon from "../../assets/filter.png";
 
 const Icons = {
   Bell: "🔔",
@@ -49,8 +55,10 @@ const AdminCustomers = () => {
             </div>
 
             <div className="topbar-actions">
-              <button className="notification">{Icons.Bell}</button>
-              <button className="btn primary">A
+              <button className="notification">
+                <img src={notifIcon} alt="Notification" className="notification-icon" />
+              </button>
+              <button className="btn primary">
                 {Icons.Export} Export
               </button>
             </div>
@@ -68,7 +76,9 @@ const AdminCustomers = () => {
           <div className="stats-grid">
             <div className="stat-card">
               <div className="card-top">
-                <div className="icon-box green">{Icons.Users}</div>
+                <div className="icon-box green">
+                  <img src={totalCustomersIcon} alt="Total Customers" className="stat-icon-img" />
+                </div>
                 <span className="badge positive">+12%</span>
               </div>
               <small>TOTAL CUSTOMERS</small>
@@ -77,7 +87,9 @@ const AdminCustomers = () => {
 
             <div className="stat-card">
               <div className="card-top">
-                <div className="icon-box orange">{Icons.UserCheck}</div>
+                <div className="icon-box orange">
+                  <img src={activeCustomersIcon} alt="Active Customers" className="stat-icon-img" />
+                </div>
                 <span className="badge positive">+5%</span>
               </div>
               <small>ACTIVE CUSTOMERS</small>
@@ -86,7 +98,9 @@ const AdminCustomers = () => {
 
             <div className="stat-card">
               <div className="card-top">
-                <div className="icon-box blue">{Icons.Dollar}</div>
+                <div className="icon-box blue">
+                  <img src={totalRevenueIcon} alt="Total Revenue" className="stat-icon-img" />
+                </div>
                 <span className="badge positive">+18%</span>
               </div>
               <small>TOTAL REVENUE</small>
@@ -95,7 +109,9 @@ const AdminCustomers = () => {
 
             <div className="stat-card">
               <div className="card-top">
-                <div className="icon-box purple">{Icons.Receipt}</div>
+                <div className="icon-box purple">
+                  <img src={avgCustomerSpentIcon} alt="Avg Customer Spent" className="stat-icon-img" />
+                </div>
                 <span className="badge negative">-2%</span>
               </div>
               <small>AVG. CUSTOMER SPENT</small>
@@ -112,7 +128,9 @@ const AdminCustomers = () => {
                   <button className="tab-btn">Active</button>
                   <button className="tab-btn">Suspended</button>
                 </div>
-                <button className="icon-btn">{Icons.Filter}</button>
+                <button className="icon-btn">
+                  <img src={filterIcon} alt="Filter" className="filter-icon" />
+                </button>
               </div>
 
               <div className="right-controls">
