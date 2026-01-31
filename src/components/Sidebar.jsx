@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import logo from "../assets/certicodeicon.png";
+import logo from "../assets/certicodeadminpanel.png";
 import "../styles/sidebar.css";
 import logout from "../assets/logout.png";
 import Dashboard from "../assets/logout.png";

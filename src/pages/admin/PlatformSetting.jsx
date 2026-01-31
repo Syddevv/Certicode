@@ -2,6 +2,11 @@ import React from "react";
 import { useNavigate } from "react-router-dom"; 
 import Sidebar from "../../components/Sidebar";
 import "../../styles/platformSetting.css";
+import searchIcon from "../../assets/Search.png";
+import notifIcon from "../../assets/notif.png";
+import platformIcon from "../../assets/platform-identity.png";
+import securityIcon from "../../assets/security-and-access.png";
+import activityLogIcon from "../../assets/activity-log.png";
 
 const PlatformSetting = () => {
   const navigate = useNavigate();
@@ -12,11 +17,13 @@ const PlatformSetting = () => {
       <main className="main-content">
         <div className="topbar">
           <div className="search-wrapper">
-            <span className="search-icon">🔍</span>
+            <img src={searchIcon} alt="Search" className="search-icon" />
             <input className="search-input" placeholder="Search anything..." />
           </div>
           <div className="topbar-actions">
-            <button className="icon-btn">🔔</button>
+            <button className="icon-btn">
+              <img src={notifIcon} alt="Notifications" className="topbar-icon" />
+            </button>
             <button className="btn primary">Save Changes</button>
           </div>
         </div>
@@ -37,7 +44,9 @@ const PlatformSetting = () => {
           <div className="settings-left">
             <div className="settings-card">
               <div className="card-header">
-                <div className="icon-circle orange">🖥️</div>
+                <div className="icon-circle orange">
+                  <img src={platformIcon} alt="Platform Settings" className="icon-image" />
+                </div>
                 <div>
                   <h4>Platform Identity</h4>
                   <p className="card-sub">Basic identification details for the admin console and user portal.</p>
@@ -75,7 +84,9 @@ const PlatformSetting = () => {
             <div className="settings-card">
               <div className="card-header-flex">
                 <div className="header-left">
-                  <div className="icon-circle orange">🛡️</div>
+                  <div className="icon-circle orange">
+                    <img src={securityIcon} alt="Security Settings" className="icon-image" />
+                  </div>
                   <div>
                     <h4>Security & Access</h4>
                     <p className="card-sub">Configure authentication protocols and session policies.</p>
@@ -122,7 +133,7 @@ const PlatformSetting = () => {
             <div className="settings-card h-full">
               <div className="card-header-simple">
                 <h4>Admin Activity Log</h4>
-                <span className="icon-grey">🕒</span>
+                <img src={activityLogIcon} alt="Activity Log" className="icon-grey" />
               </div>
               <ul className="activity-list">
                 <li className="activity-item">

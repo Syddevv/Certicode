@@ -2,6 +2,10 @@ import React from "react";
 import { useNavigate } from "react-router-dom"; 
 import Sidebar from "../../components/Sidebar";
 import "../../styles/supportDesk.css";
+import urgentIcon from "../../assets/urgent.png";
+import volumeIcon from "../../assets/volume.png";
+import searchIcon from "../../assets/Search.png";
+import notifIcon from "../../assets/notif.png";
 
 const SupportDesk = () => {
   const navigate = useNavigate(); 
@@ -12,13 +16,15 @@ const SupportDesk = () => {
       <main className="main-content">
         <div className="topbar">
           <div className="search-wrapper">
-            <span className="search-icon">🔍</span>
+            <img src={searchIcon} alt="Search" className="search-icon" />
             <input className="search-input" placeholder="Search anything..." />
           </div>
           <div className="topbar-actions">
             <button className="btn primary">Assign</button>
             <button className="btn outline">Bulk Close</button>
-            <button className="icon-btn">🔔</button>
+            <button className="icon-btn">
+              <img src={notifIcon} alt="Notifications" className="topbar-icon" />
+            </button>
             <img src="https://i.pravatar.cc/150?u=alex" className="user-avatar-small" alt="user" />
           </div>
         </div>
@@ -108,7 +114,10 @@ const SupportDesk = () => {
 
           <div className="support-sidebar">
             <div className="sidebar-box">
-              <h5 className="side-title">📊 VOLUME BY CATEGORY</h5>
+              <h5 className="side-title">
+                <img src={volumeIcon} alt="Volume" className="side-icon" />
+                VOLUME BY CATEGORY
+              </h5>
               <div className="progress-list">
                 <div className="prog-item">
                   <div className="prog-info"><span>API</span> <span>42%</span></div>
@@ -123,7 +132,10 @@ const SupportDesk = () => {
 
             <div className="sidebar-box transparent">
               <div className="side-header">
-                <h5 className="side-title">📌 URGENT ITEMS</h5>
+                <h5 className="side-title">
+                  <img src={urgentIcon} alt="Urgent" className="side-icon" />
+                  URGENT ITEMS
+                </h5>
                 <span className="badge live">3 LIVE</span>
               </div>
 

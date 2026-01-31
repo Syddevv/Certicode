@@ -70,18 +70,24 @@
   width: 40px;
   height: 40px;
   border-radius: 6px;
-  border: none;
   background: transparent;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
   color: #6b7280;
+  transition: background-color 0.2s;
+  border: none;
 }
 
 .notification:hover {
-  background: #f3f4f6;
+  background-color: #f3f4f6;
+}
+
+.notification-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .hamburger {
@@ -154,6 +160,12 @@
   align-items: center;
   justify-content: center;
   font-size: 18px;
+}
+
+.stat-icon-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .icon-box.green {
@@ -266,6 +278,12 @@
   align-items: center;
   justify-content: center;
   color: #6b7280;
+}
+
+.filter-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
 }
 
 .view-toggle {
