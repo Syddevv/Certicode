@@ -28,7 +28,7 @@ function App() {
         <Route path="/register" element={<Register />} />
 
         {/* ADMIN */}
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/dashboard" element={<AdminDashboard />} />
         <Route path="/inventory" element={<AdminInventory />} />
         <Route path="/sales" element={<AdminSales />} />
         <Route path="/customers" element={<AdminCustomers />} />
