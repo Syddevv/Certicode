@@ -18,6 +18,10 @@ import OrderSuccess from "./pages/public/OrderSuccess";
 import BuyerDashboard from "./pages/public/BuyerDashboard";
 import MyPurchases from "./pages/public/MyPurchases";
 import BillingInvoices from "./pages/public/BillingInvoices";
+import InvoiceDetails from "./pages/public/InvoiceDetails";
+import BuyerAccountSettings from "./pages/public/BuyerAccountSettings";
+import About from "./pages/public/About";
+import PurchasedAssetDetail from "./pages/public/PurchasedAssetDetail";
 
 // Admin
 import AdminInventory from "./pages/admin/AdminInventory";
@@ -28,6 +32,7 @@ import PlatformSetting from "./pages/admin/PlatformSetting";
 import SupportDesk from "./pages/admin/SupportDesk";
 import TicketDetail from "./pages/admin/TicketDetail";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+
 function App() {
   return (
     <BrowserRouter>
@@ -54,7 +59,17 @@ function App() {
         <Route path="/order-success" element={<OrderSuccess />} />
         <Route path="/buyer-dashboard" element={<BuyerDashboard />} />
         <Route path="/my-purchases" element={<MyPurchases />} />
+        <Route
+          path="/my-purchases/e-commerce-saas-template"
+          element={<PurchasedAssetDetail />}
+        />
         <Route path="/billing-invoices" element={<BillingInvoices />} />
+        <Route
+          path="/billing-invoices/inv-8273"
+          element={<InvoiceDetails />}
+        />
+        <Route path="/account-settings" element={<BuyerAccountSettings />} />
+        <Route path="/about" element={<About />} />
         <Route
           path="/marketplace/e-commerce-saas-template"
           element={<ProductDetails />}
