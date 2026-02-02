@@ -1,10 +1,10 @@
-import { Link } from "react-router-dom";
 import "../styles/Footer.css";
 import CerticodeLogo from "../assets/certicodeicon3.png";
 import FacebookIcon from "../assets/fb-gray.png";
 import MailIcon from "../assets/mail-gray.png";
 import LinkedInIcon from "../assets/linkedin-gray.png";
 import SendIcon from "../assets/send-icon.png";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -48,9 +48,9 @@ const Footer = () => {
 
           <div className="footer__col">
             <div className="footer__heading">Company</div>
-            <a className="footer__link" href="#">
+            <Link to="/about" className="footer__link">
               About Certicode
-            </a>
+            </Link>
             <a className="footer__link" href="#">
               Success Stories
             </a>
@@ -83,12 +83,12 @@ const Footer = () => {
             © 2026 Certicode Marketplace. All rights reserved.
           </div>
           <div className="footer__legal">
-            <Link className="footer__legalLink" to="/privacy-policy">
+            <a className="footer__legalLink" href="#">
               Privacy Policy
-            </Link>
-            <Link className="footer__legalLink" to="/terms">
+            </a>
+            <a className="footer__legalLink" href="#">
               Terms & Conditions
-            </Link>
+            </a>
             <a className="footer__legalLink" href="#">
               Cookie Policy
             </a>

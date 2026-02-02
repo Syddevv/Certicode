@@ -6,17 +6,21 @@ import eye2 from "../../assets/eye2.png";
 import googleIcon from "../../assets/googleicon.png";
 import facebookLogo from "../../assets/facebooklogo.png";
 import certicodeIcon from "../../assets/certicodeicon.png";
+import registerIllustration from "../../assets/Login Image.png";
+import arrowLeft from "../../assets/arrowleft.png";
 import { api } from "../../services/api";
 
 const Register = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [fullname, setFullname] = useState("");
+  const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
 
   const togglePassword = () => setPasswordVisible(!passwordVisible);
+  const toggleConfirmPassword = () =>
+    setConfirmPasswordVisible(!confirmPasswordVisible);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,28 +71,17 @@ const Register = () => {
   };
 
   return (
-    <div className="login-page-center">
+    <div className="auth-page login-page register-page">
       <div className="login-container">
         <div className="left-panel">
-          <h1 className="login-title">Sign Up</h1>
-          <p className="login-subtitle">Create your account</p>
+          <div className="login-header">
+            <h1 className="login-title">Sign Up</h1>
+            <p className="login-subtitle">
+              Let&apos;s start your journey with CertiCode!
+            </p>
+          </div>
 
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label className="form-label" htmlFor="fullname">
-                Full Name
-              </label>
-              <input
-                type="text"
-                id="fullname"
-                className="form-input"
-                placeholder="Enter your full name"
-                value={fullname}
-                onChange={(e) => setFullname(e.target.value)}
-                required
-              />
-            </div>
-
+          <form className="login-form" onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label" htmlFor="email">
                 Email
@@ -136,15 +129,28 @@ const Register = () => {
               <label className="form-label" htmlFor="confirm-password">
                 Confirm Password
               </label>
-              <input
-                type="password"
-                id="confirm-password"
-                className="form-input"
-                placeholder="Confirm your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
+              <div className="password-wrapper">
+                <input
+                  type={confirmPasswordVisible ? "text" : "password"}
+                  id="confirm-password"
+                  className="form-input"
+                  placeholder="Confirm your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={toggleConfirmPassword}
+                >
+                  <img
+                    src={confirmPasswordVisible ? eye2 : eye1}
+                    alt="Toggle password visibility"
+                    className="eye-icon-img"
+                  />
+                </button>
+              </div>
             </div>
 
             <div className="form-group terms-group">
@@ -158,7 +164,7 @@ const Register = () => {
                 />
                 <span className="terms-text">
                   By signing the account, you accept our{" "}
-                  <a href="#">Terms &amp; Condition</a> and{" "}
+                  <a href="#">Terms &amp; Conditions</a> and{" "}
                   <a href="#">Privacy Policy</a>
                 </span>
               </label>
@@ -167,46 +173,64 @@ const Register = () => {
             <button type="submit" className="login-button">
               Sign Up
             </button>
-          </form>
 
-          <div className="divider">
-            <span className="divider-text">Or Continue With</span>
-          </div>
+            <div className="divider">
+              <span className="divider-text">Or Continue With</span>
+            </div>
 
-          <div className="social-buttons">
-            <button type="button" className="social-button" onClick={handleGoogleLogin}>
-              <img 
+            <div className="social-buttons">
+              <button type="button" className="social-button" onClick={handleGoogleLogin}>
+                <img 
               src={googleIcon} 
               alt="Google" 
               className="google-icon"
               />
-              <span>Google</span>
-            </button>
-            <button type="button" className="social-button" onClick={handleFacebookLogin}>
-              <img
-                src={facebookLogo}
-                alt="Facebook"
-                className="facebook-icon"
-              />
-              <span>Facebook</span>
-            </button>
-          </div>
+                <span>Google</span>
+              </button>
+              <button type="button" className="social-button" onClick={handleFacebookLogin}>
+                <img
+                  src={facebookLogo}
+                  alt="Facebook"
+                  className="facebook-icon"
+                />
+                <span>Facebook</span>
+              </button>
+            </div>
+          </form>
 
           <div className="signup-link">
-            Already have an account? <Link to="/">Log in</Link>
+            Already have an account? <Link to="/login">Login</Link>
           </div>
+
         </div>
 
         <div className="right-panel">
-          <div className="logo-container">
+          <div className="brand-row">
             <img
               src={certicodeIcon}
               alt="Certicode logo"
-              className="logo-image"
+              className="brand-logo"
             />
           </div>
+          <h2 className="marketing-title">
+            Supercharge Your Business
+            <span>with Our Digital Systems</span>
+          </h2>
+          <p className="marketing-text">
+            Get access to premium templates and applications designed to power
+            up your online business.
+          </p>
+          <img
+            src={registerIllustration}
+            alt="E-commerce dashboard illustration"
+            className="marketing-illustration"
+          />
         </div>
       </div>
+      <Link to="/" className="back-home">
+        <img src={arrowLeft} alt="" className="back-home-icon" />
+        Back to Home
+      </Link>
     </div>
   );
 };

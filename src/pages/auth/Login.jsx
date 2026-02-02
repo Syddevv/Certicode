@@ -6,6 +6,8 @@ import eye2 from "../../assets/eye2.png";
 import googleIcon from "../../assets/googleicon.png";
 import facebookLogo from "../../assets/facebooklogo.png";
 import certicodeIcon from "../../assets/certicodeicon.png";
+import loginIllustration from "../../assets/Login Image.png";
+import arrowLeft from "../../assets/arrowleft.png";
 import { api } from "../../services/api";
 
 const Login = () => {
@@ -49,15 +51,17 @@ const Login = () => {
   };
 
   return (
-    <div className="login-page-center">
+    <div className="auth-page login-page">
       <div className="login-container">
         <div className="left-panel">
-          <h1 className="login-title">Log In</h1>
-          <p className="login-subtitle">
-            Welcome back! please enter your details
-          </p>
+          <div className="login-header">
+            <h1 className="login-title">Log In</h1>
+            <p className="login-subtitle">
+              Welcome back! Please enter your details.
+            </p>
+          </div>
 
-          <form onSubmit={handleSubmit}>
+          <form className="login-form" onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="form-label" htmlFor="email">
                 Email
@@ -101,51 +105,69 @@ const Login = () => {
               </div>
             </div>
 
-            <button type="submit" className="login-button">
-              Login
-            </button>
-
             <div className="forgot-password">
               <a href="#" className="forgot-password-link">
                 Forgot Password?
               </a>
             </div>
+
+            <button type="submit" className="login-button">
+              Log in
+            </button>
+
+            <div className="divider">
+              <span className="divider-text">Or Continue With</span>
+            </div>
+
+            <div className="social-buttons">
+              <button type="button" className="social-button" onClick={handleGoogleLogin}>
+                <img src={googleIcon} alt="Google" className="google-icon" />
+                <span>Google</span>
+              </button>
+              <button type="button" className="social-button">
+                <img
+                  src={facebookLogo}
+                  alt="Facebook"
+                  className="facebook-icon"
+                />
+                <span>Facebook</span>
+              </button>
+            </div>
           </form>
 
-          <div className="divider">
-            <span className="divider-text">Or Continue With</span>
-          </div>
-
-          <div className="social-buttons">
-            <button type="button" className="social-button" onClick={handleGoogleLogin}>
-              <img src={googleIcon} alt="Google" className="google-icon" />
-              <span>Google</span>
-            </button>
-            <button type="button" className="social-button">
-              <img
-                src={facebookLogo}
-                alt="Facebook"
-                className="facebook-icon"
-              />
-              <span>Facebook</span>
-            </button>
-          </div>
-
           <div className="signup-link">
-            Don't have account? <Link to="/register">Sign up</Link>
+            Don&apos;t have account? <Link to="/register">Sign up</Link>
           </div>
+
         </div>
 
         <div className="right-panel">
-          <div className="logo-container">
+          <div className="brand-row">
             <img
               src={certicodeIcon}
               alt="Certicode logo"
-              className="logo-image"
+              className="brand-logo"
             />
           </div>
+          <h2 className="marketing-title">
+            Supercharge Your Business
+            <span>with Our Digital Systems</span>
+          </h2>
+          <p className="marketing-text">
+            Get access to premium templates and applications designed to power
+            up your online business.
+          </p>
+          <img
+            src={loginIllustration}
+            alt="E-commerce dashboard illustration"
+            className="marketing-illustration"
+          />
         </div>
       </div>
+      <Link to="/" className="back-home">
+        <img src={arrowLeft} alt="" className="back-home-icon" />
+        Back to Home
+      </Link>
     </div>
   );
 };
