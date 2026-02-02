@@ -92,16 +92,11 @@ const Navbar = () => {
 
           {isLoggedIn && (
             <button className="iconBtn" aria-label="Profile" type="button">
-              <img className="iconImg nav__avatar" src={AvatarImg} alt="" />
+              <Link to="/buyer-dashboard">
+                <img className="iconImg nav__avatar" src={AvatarImg} alt="" />
+              </Link>
             </button>
           )}
-
-          {/* <button className="btn btn--ghost" type="button">
-            Login
-          </button>
-          <button className="btn btn--light" type="button">
-            Sign Up
-          </button> */}
         </div>
       </div>
     </header>
