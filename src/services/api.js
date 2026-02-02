@@ -112,6 +112,35 @@ export const api = {
     }
     
     return data;
-},
+  },
+
+  async getProductById(id) {
+    console.log(`Fetching product with ID: ${id}`);
+    
+    const response = await fetch(`${API_URL}/products/${id}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+    
+    console.log('Response status:', response.status);
+    
+    const data = await response.json();
+    console.log('Raw response data:', data);
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch product');
+    }
+    
+    // Try different response structures
+    if (data.success && data.data) {
+      console.log('Returning data.data:', data.data);
+      return data.data;
+    }
+    
+    console.log('Returning raw data:', data);
+    return data;
+  },
 
 };

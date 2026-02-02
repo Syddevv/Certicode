@@ -70,10 +70,8 @@ function App() {
         />
         <Route path="/account-settings" element={<BuyerAccountSettings />} />
         <Route path="/about" element={<About />} />
-        <Route
-          path="/marketplace/e-commerce-saas-template"
-          element={<ProductDetails />}
-        />
+        <Route path="/marketplace/:id" element={<ProductDetails />} />
+        
         {/* Settings - Both point to /settings in Sidebar, but have unique paths */}
         <Route path="/settings" element={<AdminSetting />} />
         <Route path="/platform-settings" element={<PlatformSetting />} />

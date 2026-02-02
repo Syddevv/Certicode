@@ -6,14 +6,6 @@ import { Link } from "react-router-dom";
 import ViewProduct from "../../assets/ViewProduct.png";
 import { api } from "../../services/api";
 
-const categoryTabs = [
-  "All Assets",
-  "Website Apps",
-  "Mobile Apps",
-  "UI/UX Design",
-  "Custom Projects",
-];
-
 const getToneColor = (tech) => {
   const colorMap = {
     'React': 'blue',
@@ -45,6 +37,7 @@ const Marketplace = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTechs, setSelectedTechs] = useState([]);
   const [availableTechs, setAvailableTechs] = useState([]);
+  const [availableAssetTypes, setAvailableAssetTypes] = useState([]);
   const [selectedPriceRange, setSelectedPriceRange] = useState("");
   const [pagination, setPagination] = useState({
     current_page: 1,
@@ -61,18 +54,25 @@ const Marketplace = () => {
 
   useEffect(() => {
     applyFilters();
-  }, [selectedTechs, selectedPriceRange, assets]);
+  }, [selectedTechs, selectedPriceRange, assets, activeTab]);
 
   const fetchAllTechs = async () => {
     try {
       const result = await api.getProducts();
       const allTechsSet = new Set();
+      const assetTypesSet = new Set();
+      
       result.data.forEach(product => {
         if (product.technologies) {
           product.technologies.forEach(tech => allTechsSet.add(tech));
         }
+        if (product.asset_type) {
+          assetTypesSet.add(product.asset_type);
+        }
       });
+      
       setAvailableTechs(Array.from(allTechsSet).sort());
+      setAvailableAssetTypes(Array.from(assetTypesSet).sort());
     } catch (error) {
       console.error("Error fetching technologies:", error);
     }
@@ -83,18 +83,25 @@ const Marketplace = () => {
       setLoading(true);
       const result = await api.getProducts(search, assetType, page);
       
+      // In your fetchProducts function, update the formatting:
       const formattedAssets = result.data.map(product => ({
+        id: product.id, // ADD THIS - CRITICAL!
         title: product.name,
         description: product.description,
         price: parseFloat(product.price),
         originalPrice: `$${product.price}`,
         path: `/marketplace/${product.id}`,
+        asset_type: product.asset_type || "Uncategorized",
         tags: product.technologies ? 
           product.technologies.map(tech => ({
             label: tech,
             tone: getToneColor(tech)
           })) : [],
-        technologies: product.technologies || []
+        technologies: product.technologies || [],
+        // Add other fields that ProductDetails might need
+        rating: product.rating || "4.8",
+        image_urls: product.images || [],
+        features: product.features || []
       }));
       
       setAssets(formattedAssets);
@@ -115,6 +122,11 @@ const Marketplace = () => {
 
   const applyFilters = () => {
     let filtered = [...assets];
+
+    // Filter by selected tab (asset_type)
+    if (activeTab !== "All Assets") {
+      filtered = filtered.filter(asset => asset.asset_type === activeTab);
+    }
 
     if (selectedTechs.length > 0) {
       filtered = filtered.filter(asset =>
@@ -236,17 +248,29 @@ const Marketplace = () => {
           </div>
 
           <div className="marketplace__tabs">
-            {categoryTabs.map((tab) => (
+            <button
+              key="All Assets"
+              type="button"
+              className={`marketplace__tab${
+                activeTab === "All Assets" ? " marketplace__tab--active" : ""
+              }`}
+              onClick={() => handleTabClick("All Assets")}
+              aria-pressed={activeTab === "All Assets"}
+            >
+              <span className="marketplace__tabLabel">All Assets</span>
+            </button>
+            
+            {availableAssetTypes.map((assetType) => (
               <button
-                key={tab}
+                key={assetType}
                 type="button"
                 className={`marketplace__tab${
-                  activeTab === tab ? " marketplace__tab--active" : ""
+                  activeTab === assetType ? " marketplace__tab--active" : ""
                 }`}
-                onClick={() => handleTabClick(tab)}
-                aria-pressed={activeTab === tab}
+                onClick={() => handleTabClick(assetType)}
+                aria-pressed={activeTab === assetType}
               >
-                <span className="marketplace__tabLabel">{tab}</span>
+                <span className="marketplace__tabLabel">{assetType}</span>
               </button>
             ))}
           </div>
