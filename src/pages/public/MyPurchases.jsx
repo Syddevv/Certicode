@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/MyPurchases.css";
@@ -49,6 +49,21 @@ const assets = [
 ];
 
 const MyPurchases = () => {
+  const navigate = useNavigate();
+
+  const handleItemClick = (title) => {
+    if (title === "E-commerce SaaS Template") {
+      navigate("/my-purchases/e-commerce-saas-template");
+    }
+  };
+
+  const handleItemKeyDown = (event, title) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleItemClick(title);
+    }
+  };
+
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, []);
@@ -177,7 +192,26 @@ const MyPurchases = () => {
 
               <div className="purchases-list">
                 {assets.map((asset) => (
-                  <article key={asset.title} className="purchases-item">
+                  <article
+                    key={asset.title}
+                    className={`purchases-item${
+                      asset.title === "E-commerce SaaS Template"
+                        ? " purchases-item--link"
+                        : ""
+                    }`}
+                    role={
+                      asset.title === "E-commerce SaaS Template"
+                        ? "button"
+                        : undefined
+                    }
+                    tabIndex={
+                      asset.title === "E-commerce SaaS Template" ? 0 : -1
+                    }
+                    onClick={() => handleItemClick(asset.title)}
+                    onKeyDown={(event) =>
+                      handleItemKeyDown(event, asset.title)
+                    }
+                  >
                     <div className="purchases-item__media" />
                     <div className="purchases-item__body">
                       <div className="purchases-item__tags">
@@ -206,7 +240,11 @@ const MyPurchases = () => {
                       </span>
                       <span className="purchases-updated">{asset.updated}</span>
                     </div>
-                    <button className="purchases-download" type="button">
+                    <button
+                      className="purchases-download"
+                      type="button"
+                      onClick={(event) => event.stopPropagation()}
+                    >
                       <img src={WhiteDownload} alt="" aria-hidden="true" />
                       Download
                     </button>
@@ -214,6 +252,7 @@ const MyPurchases = () => {
                       className="purchases-more"
                       type="button"
                       aria-label="More options"
+                      onClick={(event) => event.stopPropagation()}
                     >
                       ...
                     </button>
