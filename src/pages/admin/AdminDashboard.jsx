@@ -1,6 +1,8 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "../../styles/adminDashboard.css";
 import Sidebar from "../../components/Sidebar";
+import AdminTopbar from "../../components/AdminTopbar";
 import revenueIcon from "../../assets/revenue.png";
 import totalProjectsIcon from "../../assets/total-projects.png";
 import newCustomerIcon from "../../assets/new-customer.png";
@@ -8,7 +10,7 @@ import assetUpdatedIcon from "../../assets/asset-updated.png";
 import newSaleIcon from "../../assets/new-sale-e-commerce.png";
 import auditCompletedIcon from "../../assets/audit-completed.png";
 import addedNewProjectIcon from "../../assets/added-new-project.png";
-import notifIcon from "../../assets/notif.png";
+import notifBell from "../../assets/NotifBell.png";
 
 const Icons = {
   Bell: "🔔",
@@ -39,28 +41,13 @@ const AdminDashboard = () => {
         <Sidebar activePage="dashboard" />
 
         <main className="main">
-          <div className="topbar">
-            <label htmlFor="sidebar-toggle" className="hamburger">
-              &#9776;
-            </label>
-
-            <div className="search-wrapper">
-              <span className="search-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-              </span>
-              <input className="search-input" placeholder="Search anything..." />
-            </div>
-
-            <div className="topbar-actions">
-              <button className="notification">
-                <img src={notifIcon} alt="Notification" className="notification-icon" />
-              </button>
-              <button className="btn primary">+ Add New Asset</button>
-            </div>
-          </div>
+          <AdminTopbar showHamburger>
+            <Link to="/admin-notification" className="notification-link" aria-label="Notifications">
+              <img src={notifBell} alt="Notifications" className="notification-icon" />
+              <span className="notification-dot" />
+            </Link>
+            <button className="btn primary">+ Add New Asset</button>
+          </AdminTopbar>
 
           <div className="page-header">
             <h2>Admin Dashboard Overview</h2>
@@ -276,3 +263,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

@@ -18,6 +18,7 @@ body {
 .main {
   flex: 1;
   padding: 24px 32px;
+  --admin-topbar-edge-x: 32px;
 }
 
 .topbar {

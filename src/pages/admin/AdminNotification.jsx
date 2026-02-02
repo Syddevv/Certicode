@@ -1,9 +1,10 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
+import AdminTopbar from "../../components/AdminTopbar";
 import "../../styles/adminNotification.css";
 import searchIcon from "../../assets/Search.png";
-import notifIcon from "../../assets/notif.png";
+import notifBell from "../../assets/NotifBell.png";
 import salesIcon from "../../assets/large-transac.png";
 import systemIcon from "../../assets/black-settings.png";
 import projectIcon from "../../assets/new-custom.png";
@@ -25,30 +26,24 @@ const AdminNotification = () => {
 
       <main className="notifications-main">
         {/* Topbar */}
-        <header className="topbar notif-topbar">
-          <div className="search-wrapper">
+        <AdminTopbar
+          className="notif-topbar"
+          searchIcon={
             <img src={searchIcon} alt="Search" className="search-icon" />
-            <input className="search-input" placeholder="Search anything..." />
+          }
+        >
+          <Link
+            to="/admin-notification"
+            className="notification-link"
+            aria-label="Notifications"
+          >
+            <img src={notifBell} alt="Notifications" className="topbar-icon" />
+            <span className="notification-dot" />
+          </Link>
+          <div className="user-profile">
+            <img src="https://i.pravatar.cc/150?u=alex" alt="Admin" />
           </div>
-
-          <div className="topbar-actions">
-            <button
-              className="icon-btn-notif"
-              type="button"
-              onClick={() => navigate("/notifications")}
-            >
-              <img
-                src={notifIcon}
-                alt="Notifications"
-                className="topbar-icon"
-              />
-              <span className="notif-dot" />
-            </button>
-            <div className="user-profile">
-              <img src="https://i.pravatar.cc/150?u=alex" alt="Admin" />
-            </div>
-          </div>
-        </header>
+        </AdminTopbar>
 
         <section className="notifications-header">
           <div>
@@ -191,3 +186,4 @@ const AdminNotification = () => {
 };
 
 export default AdminNotification;
+
