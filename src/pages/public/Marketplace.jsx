@@ -4,6 +4,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { Link } from "react-router-dom";
 import ViewProduct from "../../assets/ViewProduct.png";
+import { api } from "../../services/api";
 
 const categoryTabs = [
   "All Assets",
@@ -13,78 +14,203 @@ const categoryTabs = [
   "Custom Projects",
 ];
 
-const assets = [
-  {
-    title: "E-commerce SaaS Template",
-    description:
-      "Complete multivendor marketplace solution with admin dashboard and analytics.",
-    price: "$999",
-    path: "/marketplace/e-commerce-saas-template",
-    tags: [
-      { label: "Node.js", tone: "green" },
-      { label: "React", tone: "blue" },
-    ],
-  },
-  {
-    title: "FoodieExpress Delivery App",
-    description:
-      "Ready to launch food delivery mobile application for iOS and Android.",
-    price: "$1,499",
-    tags: [
-      { label: "Firebase", tone: "pink" },
-      { label: "Flutter", tone: "purple" },
-      { label: "Node.js", tone: "green" },
-    ],
-  },
-  {
-    title: "Fintech Banking Dashboard",
-    description:
-      "Premium UI kit with over 100+ high-quality screens and fully layered files.",
-    price: "$450",
-    tags: [
-      { label: "Adobe XD", tone: "violet" },
-      { label: "Figma", tone: "rose" },
-    ],
-  },
-  {
-    title: "Developer Portfolio Website",
-    description:
-      "Minimalist and fast portfolio template for designers and developers.",
-    price: "$199",
-    tags: [
-      { label: "React", tone: "blue" },
-      { label: "Tailwind", tone: "orange" },
-    ],
-  },
-  {
-    title: "SmartLMS - Education Suite",
-    description:
-      "Robust LMS with course builder, student portal, and payment integration.",
-    price: "$2,100",
-    tags: [
-      { label: "Django", tone: "green" },
-      { label: "Node.js", tone: "mint" },
-      { label: "Python", tone: "gold" },
-    ],
-  },
-  {
-    title: "FitLife Tracker Mobile App",
-    description:
-      "iOS native fitness tracking application with workout plans and nutrition logs.",
-    price: "$1,250",
-    tags: [
-      { label: "Flutter", tone: "purple" },
-      { label: "Swift", tone: "indigo" },
-    ],
-  },
-];
+const getToneColor = (tech) => {
+  const colorMap = {
+    'React': 'blue',
+    'Node.js': 'green',
+    'Python': 'gold',
+    'Django': 'green',
+    'Flutter': 'purple',
+    'Firebase': 'pink',
+    'Swift': 'indigo',
+    'Figma': 'rose',
+    'Adobe XD': 'violet',
+    'Tailwind': 'orange',
+    'Laravel': 'red',
+    'Vue.js': 'green',
+    'HTML': 'orange',
+    'CSS': 'blue',
+    'JavaScript': 'yellow',
+    'Stripe': 'violet',
+  };
+  
+  return colorMap[tech] || 'green';
+};
 
 const Marketplace = () => {
   const [activeTab, setActiveTab] = useState("All Assets");
+  const [assets, setAssets] = useState([]);
+  const [filteredAssets, setFilteredAssets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTechs, setSelectedTechs] = useState([]);
+  const [availableTechs, setAvailableTechs] = useState([]);
+  const [selectedPriceRange, setSelectedPriceRange] = useState("");
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    last_page: 1,
+    per_page: 6,
+    total: 0
+  });
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    fetchAllTechs();
+    fetchProducts();
   }, []);
+
+  useEffect(() => {
+    applyFilters();
+  }, [selectedTechs, selectedPriceRange, assets]);
+
+  const fetchAllTechs = async () => {
+    try {
+      const result = await api.getProducts();
+      const allTechsSet = new Set();
+      result.data.forEach(product => {
+        if (product.technologies) {
+          product.technologies.forEach(tech => allTechsSet.add(tech));
+        }
+      });
+      setAvailableTechs(Array.from(allTechsSet).sort());
+    } catch (error) {
+      console.error("Error fetching technologies:", error);
+    }
+  };
+
+  const fetchProducts = async (search = "", assetType = "", page = 1) => {
+    try {
+      setLoading(true);
+      const result = await api.getProducts(search, assetType, page);
+      
+      const formattedAssets = result.data.map(product => ({
+        title: product.name,
+        description: product.description,
+        price: parseFloat(product.price),
+        originalPrice: `$${product.price}`,
+        path: `/marketplace/${product.id}`,
+        tags: product.technologies ? 
+          product.technologies.map(tech => ({
+            label: tech,
+            tone: getToneColor(tech)
+          })) : [],
+        technologies: product.technologies || []
+      }));
+      
+      setAssets(formattedAssets);
+      setFilteredAssets(formattedAssets);
+      
+      setPagination({
+        current_page: result.current_page,
+        last_page: result.last_page,
+        per_page: result.per_page,
+        total: result.total
+      });
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const applyFilters = () => {
+    let filtered = [...assets];
+
+    if (selectedTechs.length > 0) {
+      filtered = filtered.filter(asset =>
+        selectedTechs.some(tech => asset.technologies.includes(tech))
+      );
+    }
+
+    if (selectedPriceRange) {
+      filtered = filtered.filter(asset => {
+        const price = asset.price;
+        switch(selectedPriceRange) {
+          case "Under $500": return price < 500;
+          case "$500 - $2,000": return price >= 500 && price <= 2000;
+          case "$2,000 - $5,000": return price >= 2000 && price <= 5000;
+          default: return true;
+        }
+      });
+    }
+
+    setFilteredAssets(filtered);
+  };
+
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    const assetType = activeTab === "All Assets" ? "" : activeTab;
+    fetchProducts(value, assetType, 1);
+  };
+
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
+    const assetType = tab === "All Assets" ? "" : tab;
+    fetchProducts(searchTerm, assetType, 1);
+  };
+
+  const handleTechChange = (tech) => {
+    if (selectedTechs.includes(tech)) {
+      setSelectedTechs(selectedTechs.filter(t => t !== tech));
+    } else {
+      setSelectedTechs([...selectedTechs, tech]);
+    }
+  };
+
+  const handlePriceChange = (range) => {
+    setSelectedPriceRange(range === selectedPriceRange ? "" : range);
+  };
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > pagination.last_page || page === pagination.current_page) return;
+    const assetType = activeTab === "All Assets" ? "" : activeTab;
+    fetchProducts(searchTerm, assetType, page);
+  };
+
+  const renderPagination = () => {
+    const { current_page, last_page } = pagination;
+    const pages = [];
+    
+    if (last_page <= 3) {
+      for (let i = 1; i <= last_page; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1, 2, 3);
+      if (last_page > 3) {
+        pages.push(last_page);
+      }
+    }
+    
+    const paginationItems = [];
+    let prevPage = 0;
+    
+    pages.forEach(page => {
+      if (page - prevPage > 1 && prevPage !== 0) {
+        paginationItems.push(
+          <span key={`ellipsis-${page}`} className="marketplace__pageEllipsis">
+            ...
+          </span>
+        );
+      }
+      
+      paginationItems.push(
+        <button
+          key={page}
+          className={`marketplace__page ${current_page === page ? "marketplace__page--active" : ""}`}
+          type="button"
+          onClick={() => handlePageChange(page)}
+        >
+          {page}
+        </button>
+      );
+      
+      prevPage = page;
+    });
+    
+    return paginationItems;
+  };
 
   return (
     <div>
@@ -117,7 +243,7 @@ const Marketplace = () => {
                 className={`marketplace__tab${
                   activeTab === tab ? " marketplace__tab--active" : ""
                 }`}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => handleTabClick(tab)}
                 aria-pressed={activeTab === tab}
               >
                 <span className="marketplace__tabLabel">{tab}</span>
@@ -140,6 +266,8 @@ const Marketplace = () => {
                   type="text"
                   placeholder="Search anything..."
                   className="marketplace__searchInput"
+                  value={searchTerm}
+                  onChange={handleSearch}
                 />
               </div>
 
@@ -160,21 +288,14 @@ const Marketplace = () => {
 
               <div className="marketplace__filterGroup">
                 <h4>Tech Stack</h4>
-                {[
-                  "Adobe XD",
-                  "Django",
-                  "Figma",
-                  "Firebase",
-                  "Flutter",
-                  "Node.js",
-                  "Python",
-                  "React",
-                  "Swift",
-                  "Tailwind",
-                ].map((item) => (
-                  <label key={item} className="marketplace__check">
-                    <input type="checkbox" />
-                    <span>{item}</span>
+                {availableTechs.map((tech) => (
+                  <label key={tech} className="marketplace__check">
+                    <input 
+                      type="checkbox" 
+                      checked={selectedTechs.includes(tech)}
+                      onChange={() => handleTechChange(tech)}
+                    />
+                    <span>{tech}</span>
                   </label>
                 ))}
               </div>
@@ -182,10 +303,14 @@ const Marketplace = () => {
               <div className="marketplace__filterGroup">
                 <h4>Price Range</h4>
                 {["Under $500", "$500 - $2,000", "$2,000 - $5,000"].map(
-                  (item) => (
-                    <label key={item} className="marketplace__check">
-                      <input type="checkbox" />
-                      <span>{item}</span>
+                  (range) => (
+                    <label key={range} className="marketplace__check">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedPriceRange === range}
+                        onChange={() => handlePriceChange(range)}
+                      />
+                      <span>{range}</span>
                     </label>
                   ),
                 )}
@@ -217,92 +342,93 @@ const Marketplace = () => {
 
             <div className="marketplace__results">
               <div className="marketplace__resultsHeader">
-                <span>Showing 24 assets found</span>
+                <span>Showing {filteredAssets.length} out of {pagination.total} assets</span>
                 <button className="marketplace__sort" type="button">
                   Sort by: <strong>Newest First</strong>
                   <span className="marketplace__sortIcon">▾</span>
                 </button>
               </div>
 
-              <div className="marketplace__cards">
-                {assets.map((asset) => (
-                  <article key={asset.title} className="marketplace__card">
-                    <div className="marketplace__cardMedia" />
-                    <div className="marketplace__cardBody">
-                      <div className="marketplace__tags">
-                        {asset.tags.map((tag) => (
-                          <span
-                            key={tag.label}
-                            className={`marketplace__tag marketplace__tag--${tag.tone}`}
-                          >
-                            {tag.label}
-                          </span>
-                        ))}
-                      </div>
-                      <h3>{asset.title}</h3>
-                      <p>{asset.description}</p>
-                      <div className="marketplace__cardFooter">
-                        <div>
-                          <span className="marketplace__priceLabel">
-                            Starting from
-                          </span>
-                          <span className="marketplace__price">
-                            {asset.price}
-                          </span>
-                        </div>
-                        {asset.path ? (
-                          <Link
-                            className="marketplace__actionLink"
-                            to={asset.path}
-                            aria-label={`View ${asset.title}`}
-                          >
-                            <button
-                              className="marketplace__action"
-                              type="button"
+              {loading ? (
+                <div className="marketplace__loading"></div>
+              ) : (
+                <div className="marketplace__cards">
+                  {filteredAssets.map((asset) => (
+                    <article key={asset.title} className="marketplace__card">
+                      <div className="marketplace__cardMedia" />
+                      <div className="marketplace__cardBody">
+                        <div className="marketplace__tags">
+                          {asset.tags.map((tag) => (
+                            <span
+                              key={tag.label}
+                              className={`marketplace__tag marketplace__tag--${tag.tone}`}
                             >
+                              {tag.label}
+                            </span>
+                          ))}
+                        </div>
+                        <h3>{asset.title}</h3>
+                        <p>{asset.description}</p>
+                        <div className="marketplace__cardFooter">
+                          <div>
+                            <span className="marketplace__priceLabel">
+                              Starting from
+                            </span>
+                            <span className="marketplace__price">
+                              {asset.originalPrice}
+                            </span>
+                          </div>
+                          {asset.path ? (
+                            <Link
+                              className="marketplace__actionLink"
+                              to={asset.path}
+                              aria-label={`View ${asset.title}`}
+                            >
+                              <button
+                                className="marketplace__action"
+                                type="button"
+                              >
+                                <img
+                                  src={ViewProduct}
+                                  alt=""
+                                  className="marketplace__actionIcon"
+                                />
+                              </button>
+                            </Link>
+                          ) : (
+                            <button className="marketplace__action" type="button">
                               <img
                                 src={ViewProduct}
-                                alt=""
+                                alt="View product"
                                 className="marketplace__actionIcon"
                               />
                             </button>
-                          </Link>
-                        ) : (
-                          <button className="marketplace__action" type="button">
-                            <img
-                              src={ViewProduct}
-                              alt="View product"
-                              className="marketplace__actionIcon"
-                            />
-                          </button>
-                        )}
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  </article>
-                ))}
-              </div>
+                    </article>
+                  ))}
+                </div>
+              )}
 
               <div className="marketplace__pagination">
-                <button className="marketplace__page" type="button">
+                <button 
+                  className="marketplace__page" 
+                  type="button"
+                  onClick={() => handlePageChange(pagination.current_page - 1)}
+                  disabled={pagination.current_page === 1}
+                >
                   ‹
                 </button>
-                <button
-                  className="marketplace__page marketplace__page--active"
+                
+                {renderPagination()}
+                
+                <button 
+                  className="marketplace__page" 
                   type="button"
+                  onClick={() => handlePageChange(pagination.current_page + 1)}
+                  disabled={pagination.current_page === pagination.last_page}
                 >
-                  1
-                </button>
-                <button className="marketplace__page" type="button">
-                  2
-                </button>
-                <button className="marketplace__page" type="button">
-                  3
-                </button>
-                <span className="marketplace__pageEllipsis">...</span>
-                <button className="marketplace__page" type="button">
-                  12
-                </button>
-                <button className="marketplace__page" type="button">
                   ›
                 </button>
               </div>

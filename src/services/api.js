@@ -90,8 +90,15 @@ export const api = {
     return data;
   },
 
-  async getProducts() {
-    const response = await fetch(`${API_URL}/products`, {
+  async getProducts(search = "", assetType = "", page = 1) {
+    const params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (assetType) params.append('asset_type', assetType);
+    params.append('page', page); // Always specify page 1 when searching
+    
+    const url = `${API_URL}/products?${params.toString()}`;
+      
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -105,6 +112,6 @@ export const api = {
     }
     
     return data;
-  },
+},
 
 };
