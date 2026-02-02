@@ -10,7 +10,6 @@ import ChartBar from "../../assets/ChartBar.png";
 import OrangeBag from "../../assets/orangeBag.png";
 import OrangeDownload from "../../assets/orangeDownload.png";
 import GrayWallet from "../../assets/graywallet.png";
-import billingSupport from "../../assets/billingSupport.png";
 import OrangeStar from "../../assets/orangestar.png";
 import SearchIcon from "../../assets/lucide_search.png";
 
@@ -57,7 +56,11 @@ const BillingInvoices = () => {
           <div className="billing-profile">
             <div className="billing-profile__info">
               <div className="billing-profile__avatarWrap">
-                <img className="billing-profile__avatar" src={Avatar} alt="Jane Doe" />
+                <img
+                  className="billing-profile__avatar"
+                  src={Avatar}
+                  alt="Jane Doe"
+                />
                 <span className="billing-profile__status" aria-hidden="true" />
               </div>
               <div>
@@ -176,10 +179,18 @@ const BillingInvoices = () => {
                       <span className="billing-status">Paid</span>
                     </span>
                     <div className="billing-row__actions">
-                      <button className="billing-iconBtn" type="button" aria-label="Download">
+                      <button
+                        className="billing-iconBtn"
+                        type="button"
+                        aria-label="Download"
+                      >
                         <img src={OrangeDownload} alt="" aria-hidden="true" />
                       </button>
-                      <button className="billing-iconBtn" type="button" aria-label="View">
+                      <button
+                        className="billing-iconBtn"
+                        type="button"
+                        aria-label="View"
+                      >
                         <svg viewBox="0 0 24 24">
                           <path
                             d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"
@@ -214,7 +225,12 @@ const BillingInvoices = () => {
               <div className="billing-card">
                 <div className="billing-card__header">
                   <h4>Billing Details</h4>
-                  <img className="billing-card__icon" src={InvoiceIcon} alt="" aria-hidden="true" />
+                  <img
+                    className="billing-card__icon"
+                    src={InvoiceIcon}
+                    alt=""
+                    aria-hidden="true"
+                  />
                 </div>
 
                 <div className="billing-section">
@@ -251,12 +267,20 @@ const BillingInvoices = () => {
               <div className="billing-card billing-support">
                 <div className="billing-support__content">
                   <h5>Need Billing Support?</h5>
-                  <p>Our finance team typically responds within 4 hours during business days.</p>
+                  <p>
+                    Our finance team typically responds within 4 hours during
+                    business days.
+                  </p>
                   <button className="billing-primary" type="button">
                     Contact Support
                   </button>
                 </div>
-                <img className="billing-support__spark" src={OrangeStar} alt="" aria-hidden="true" />
+                <img
+                  className="billing-support__spark"
+                  src={OrangeStar}
+                  alt=""
+                  aria-hidden="true"
+                />
               </div>
             </aside>
           </div>
