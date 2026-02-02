@@ -7,6 +7,7 @@ import googleIcon from "../../assets/googleicon.png";
 import facebookLogo from "../../assets/facebooklogo.png";
 import certicodeIcon from "../../assets/certicodeicon.png";
 import loginIllustration from "../../assets/Login Image.png";
+import arrowLeft from "../../assets/arrowleft.png";
 
 const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -108,6 +109,7 @@ const Login = () => {
           <div className="signup-link">
             Don&apos;t have account? <Link to="/register">Sign up</Link>
           </div>
+
         </div>
 
         <div className="right-panel">
@@ -133,6 +135,10 @@ const Login = () => {
           />
         </div>
       </div>
+      <Link to="/" className="back-home">
+        <img src={arrowLeft} alt="" className="back-home-icon" />
+        Back to Home
+      </Link>
     </div>
   );
 };

@@ -1108,9 +1108,11 @@ tr:hover {
 .auth-page.login-page {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 24px;
+  padding: 40px 24px 48px;
+  gap: 18px;
   background:
     radial-gradient(
       circle at top right,
@@ -1245,6 +1247,18 @@ tr:hover {
   border-color: var(--login-border);
   font-weight: 600;
   color: #1f2937;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.auth-page.login-page .social-button:hover {
+  border-color: rgba(255, 122, 26, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(16, 24, 40, 0.12);
+}
+
+.auth-page.login-page .social-button:focus-visible {
+  outline: 2px solid rgba(255, 122, 26, 0.5);
+  outline-offset: 2px;
 }
 
 .auth-page.login-page .signup-link {
@@ -1256,6 +1270,31 @@ tr:hover {
 
 .auth-page.login-page .signup-link a {
   color: var(--login-orange);
+}
+
+.auth-page.login-page .back-home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+  align-self: center;
+  color: #667085;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.auth-page.login-page .back-home:hover {
+  color: var(--login-orange);
+  transform: translateY(-1px);
+}
+
+.auth-page.login-page .back-home-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 .auth-page.login-page .right-panel {
@@ -1311,7 +1350,8 @@ tr:hover {
 }
 
 .auth-page.login-page .marketing-illustration {
-  width: min(440px, 100%);
+  max-height: 440px;
+  height: auto;
   align-self: center;
   margin-top: auto;
   object-fit: contain;
