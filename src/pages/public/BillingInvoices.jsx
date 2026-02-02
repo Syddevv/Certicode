@@ -186,21 +186,39 @@ const BillingInvoices = () => {
                       >
                         <img src={OrangeDownload} alt="" aria-hidden="true" />
                       </button>
-                      <button
-                        className="billing-iconBtn"
-                        type="button"
-                        aria-label="View"
-                      >
-                        <svg viewBox="0 0 24 24">
-                          <path
-                            d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.8"
-                          />
-                          <circle cx="12" cy="12" r="3" fill="currentColor" />
-                        </svg>
-                      </button>
+                      {row.id === "#INV-8273" ? (
+                        <Link
+                          className="billing-iconBtn"
+                          to="/billing-invoices/inv-8273"
+                          aria-label="View"
+                        >
+                          <svg viewBox="0 0 24 24">
+                            <path
+                              d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                            />
+                            <circle cx="12" cy="12" r="3" fill="currentColor" />
+                          </svg>
+                        </Link>
+                      ) : (
+                        <button
+                          className="billing-iconBtn"
+                          type="button"
+                          aria-label="View"
+                        >
+                          <svg viewBox="0 0 24 24">
+                            <path
+                              d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6z"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.8"
+                            />
+                            <circle cx="12" cy="12" r="3" fill="currentColor" />
+                          </svg>
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
