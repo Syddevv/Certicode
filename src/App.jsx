@@ -32,6 +32,7 @@ import PlatformSetting from "./pages/admin/PlatformSetting";
 import SupportDesk from "./pages/admin/SupportDesk";
 import TicketDetail from "./pages/admin/TicketDetail";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminNotification from "./pages/admin/AdminNotification";
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
         <Route path="/inventory" element={<AdminInventory />} />
         <Route path="/sales" element={<AdminSales />} />
         <Route path="/customers" element={<AdminCustomers />} />
+        <Route path="/admin-notification" element={<AdminNotification />} />
 
         {/* PUBLIC PAGES / USER */}
         <Route path="/" element={<LandingPage />} />
@@ -64,10 +66,7 @@ function App() {
           element={<PurchasedAssetDetail />}
         />
         <Route path="/billing-invoices" element={<BillingInvoices />} />
-        <Route
-          path="/billing-invoices/inv-8273"
-          element={<InvoiceDetails />}
-        />
+        <Route path="/billing-invoices/inv-8273" element={<InvoiceDetails />} />
         <Route path="/account-settings" element={<BuyerAccountSettings />} />
         <Route path="/about" element={<About />} />
         <Route
