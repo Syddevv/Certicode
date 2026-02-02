@@ -90,7 +90,9 @@ const BillingInvoices = () => {
               Billing &amp; Invoices
             </button>
             <button className="billing-tab" type="button">
-              Account Settings
+              <Link className="buyer-tab" to="/account-settings">
+                Account Settings
+              </Link>
             </button>
             <button className="billing-tab" type="button">
               Support

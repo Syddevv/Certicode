@@ -116,7 +116,9 @@ const MyPurchases = () => {
               Billing & Invoices
             </Link>
             <button className="purchases-tab" type="button">
-              Account Settings
+              <Link className="buyer-tab" to="/account-settings">
+                Account Settings
+              </Link>
             </button>
             <button className="purchases-tab" type="button">
               Support
@@ -208,9 +210,7 @@ const MyPurchases = () => {
                       asset.title === "E-commerce SaaS Template" ? 0 : -1
                     }
                     onClick={() => handleItemClick(asset.title)}
-                    onKeyDown={(event) =>
-                      handleItemKeyDown(event, asset.title)
-                    }
+                    onKeyDown={(event) => handleItemKeyDown(event, asset.title)}
                   >
                     <div className="purchases-item__media" />
                     <div className="purchases-item__body">
