@@ -130,9 +130,9 @@ const BuyerDashboard = () => {
             <Link className="buyer-tab" to="/billing-invoices">
               Billing & Invoices
             </Link>
-            <button className="buyer-tab" type="button">
+            <Link className="buyer-tab" to="/account-settings">
               Account Settings
-            </button>
+            </Link>
             <button className="buyer-tab" type="button">
               Support
             </button>
