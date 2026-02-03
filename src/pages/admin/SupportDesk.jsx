@@ -1,11 +1,12 @@
 import React from "react";
-import { useNavigate } from "react-router-dom"; 
+import { Link, useNavigate } from "react-router-dom"; 
 import Sidebar from "../../components/Sidebar";
+import AdminTopbar from "../../components/AdminTopbar";
 import "../../styles/supportDesk.css";
 import urgentIcon from "../../assets/urgent.png";
 import volumeIcon from "../../assets/volume.png";
 import searchIcon from "../../assets/Search.png";
-import notifIcon from "../../assets/notif.png";
+import notifBell from "../../assets/NotifBell.png";
 
 const SupportDesk = () => {
   const navigate = useNavigate(); 
@@ -14,20 +15,15 @@ const SupportDesk = () => {
     <div className="layout">
       <Sidebar activePage="support" />
       <main className="main-content">
-        <div className="topbar">
-          <div className="search-wrapper">
-            <img src={searchIcon} alt="Search" className="search-icon" />
-            <input className="search-input" placeholder="Search anything..." />
-          </div>
-          <div className="topbar-actions">
-            <button className="btn primary">Assign</button>
-            <button className="btn outline">Bulk Close</button>
-            <button className="icon-btn">
-              <img src={notifIcon} alt="Notifications" className="topbar-icon" />
-            </button>
-            <img src="https://i.pravatar.cc/150?u=alex" className="user-avatar-small" alt="user" />
-          </div>
-        </div>
+        <AdminTopbar searchIcon={<img src={searchIcon} alt="Search" className="search-icon" />}>
+          <button className="btn primary">Assign</button>
+          <button className="btn outline">Bulk Close</button>
+          <Link to="/admin-notification" className="notification-link" aria-label="Notifications">
+            <img src={notifBell} alt="Notifications" className="topbar-icon" />
+            <span className="notification-dot" />
+          </Link>
+          <img src="https://i.pravatar.cc/150?u=alex" className="user-avatar-small" alt="user" />
+        </AdminTopbar>
 
         <div className="page-header-row">
           <div>
@@ -165,3 +161,4 @@ const SupportDesk = () => {
 };
 
 export default SupportDesk;
+

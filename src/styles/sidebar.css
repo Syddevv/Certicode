@@ -3,7 +3,7 @@
   width: 260px;
   background: #ffffff;
   border-right: 1px solid #e5e7eb;
-  padding: 16px;
+  padding: 0 16px 8px;
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease-in-out;
@@ -24,7 +24,8 @@
 .logo {
   display: flex;
   align-items: center;
-  margin-bottom: 24px; 
+  margin-bottom: 2px; 
+  padding-top: 8px;
 }
 
 .logo img {
