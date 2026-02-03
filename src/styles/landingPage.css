@@ -148,6 +148,7 @@
   white-space: nowrap;
   border-left: none;
   flex-shrink: 0;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .hero__search .search__select img {
@@ -186,6 +187,11 @@
 
 .hero__search .btn--primary:active {
   transform: translateY(1px);
+}
+
+.hero__search .search__select:hover {
+  color: var(--color-primary-500);
+  transform: translateY(-1px);
 }
 
 /* ================= HERO RIGHT VISUAL ================= */
@@ -317,6 +323,12 @@
   color: var(--color-primary-900);
   font-weight: 800;
   font-size: 20px;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.logoItem:hover {
+  transform: translateY(-2px);
+  color: var(--color-primary-500);
 }
 
 .logoItem__icon {
@@ -403,6 +415,12 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.categories__link:hover {
+  color: #ff8a2b;
+  transform: translateX(2px);
 }
 
 .categories__grid {
@@ -418,6 +436,14 @@
   border-radius: 18px;
   padding: 26px;
   box-shadow: 0 16px 30px rgba(20, 28, 60, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.categoryCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 36px rgba(20, 28, 60, 0.08);
+  border-color: rgba(255, 127, 22, 0.25);
 }
 
 .categoryCard__icon {
@@ -497,6 +523,11 @@
   text-align: center;
   position: relative;
   z-index: 1;
+  transition: transform 0.2s ease;
+}
+
+.processStep:hover {
+  transform: translateY(-3px);
 }
 
 .processStep__iconWrap {
@@ -588,6 +619,18 @@
   box-shadow: 0 16px 30px rgba(20, 28, 60, 0.04);
   display: grid;
   gap: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.testimonialCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 22px 36px rgba(20, 28, 60, 0.1);
+  border-color: rgba(255, 127, 22, 0.25);
+}
+
+.testimonialCard--featured:hover {
+  box-shadow: 0 24px 40px rgba(8, 6, 42, 0.2);
 }
 
 .testimonialCard--featured {
@@ -654,11 +697,17 @@
   border: none;
   background: rgba(8, 6, 42, 0.1);
   cursor: pointer;
+  transition: width 0.2s ease, background 0.2s ease, transform 0.2s ease;
 }
 
 .pagerDot--active {
   width: 26px;
   background: var(--color-primary-500);
+}
+
+.pagerDot:hover {
+  background: rgba(255, 127, 22, 0.4);
+  transform: translateY(-1px);
 }
 
 /* ================= FAQ ================= */
@@ -702,6 +751,18 @@
   gap: 16px;
   cursor: pointer;
   box-shadow: 0 12px 28px rgba(20, 28, 60, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.faqItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px rgba(20, 28, 60, 0.08);
+  border-color: rgba(255, 127, 22, 0.25);
+}
+
+.faqItem:hover .faqItem__chevron {
+  opacity: 1;
 }
 
 .faqItem__text {
@@ -744,6 +805,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.faq__button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.2);
+  filter: brightness(1.05);
 }
 
 /* ================= CTA ================= */
@@ -817,4 +886,12 @@
   padding: 10px 18px;
   border-radius: 999px;
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.ctaCard__button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+  filter: brightness(0.98);
 }
