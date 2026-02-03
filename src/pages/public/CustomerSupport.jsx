@@ -90,13 +90,6 @@ const CustomerSupport = () => {
           <div className="support-hero__media">
             <img src={SupportHero} alt="Customer support" />
           </div>
-          <div className="support-hero__content">
-            <h1>Welcome to Certicode Customer Support</h1>
-            <p>
-              Get support for Certicode software, services, and technical
-              concerns. Our team is here to help.
-            </p>
-          </div>
         </div>
       </section>
 
@@ -155,6 +148,21 @@ const CustomerSupport = () => {
                 </article>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="support-cta">
+        <div className="support-cta__inner">
+          <div className="support-cta__card">
+            <h2>Need Custom Software of Technical Support?</h2>
+            <p>
+              Our experts are ready to assist you with secure and scalable
+              solutions.
+            </p>
+            <button className="support-cta__btn" type="button">
+              Contact Certicode
+            </button>
           </div>
         </div>
       </section>
