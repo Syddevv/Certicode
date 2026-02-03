@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -6,15 +6,32 @@ import "../../styles/BuyerAccountSettings.css";
 import Avatar from "../../assets/Avatar.png";
 import OrangeBadge from "../../assets/orangeBadge.png";
 import DeleteIcon from "../../assets/Delete.png";
+import AlertTriangle from "../../assets/AlertTriangle.png";
 import ProfileIcon from "../../assets/orangeprofile.png";
 import NotificationIcon from "../../assets/NotifBell.png";
 import MoonIcon from "../../assets/OrangeMoon.png";
 import WalletIcon from "../../assets/wallet.png";
 
 const BuyerAccountSettings = () => {
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsDeleteOpen(false);
+      }
+    };
+
+    if (isDeleteOpen) {
+      document.addEventListener("keydown", handleKeyDown);
+      return () => document.removeEventListener("keydown", handleKeyDown);
+    }
+    return undefined;
+  }, [isDeleteOpen]);
 
   return (
     <div>
@@ -284,12 +301,72 @@ const BuyerAccountSettings = () => {
                 </p>
               </div>
             </div>
-            <button className="account-danger" type="button">
+            <button
+              className="account-danger"
+              type="button"
+              onClick={() => setIsDeleteOpen(true)}
+            >
               Delete Account
             </button>
           </div>
         </div>
       </section>
+      {isDeleteOpen && (
+        <div
+          className="account-dialog__backdrop"
+          role="presentation"
+          onClick={() => setIsDeleteOpen(false)}
+        >
+          <div
+            className="account-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-account-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="account-dialog__header">
+              <h3 id="delete-account-title">Delete your account</h3>
+            </div>
+            <p className="account-dialog__intro">
+              Are you sure you want to permanently delete your CertiCode
+              account? This action will:
+            </p>
+            <ul className="account-dialog__list">
+              <li>Permanently remove your account and profile information</li>
+              <li>Revoke access to all purchased software and services</li>
+              <li>Delete associated certificates and verification history</li>
+            </ul>
+            <div className="account-dialog__alert">
+              <img src={AlertTriangle} alt="" aria-hidden="true" />
+              <span>This action cannot be undone</span>
+            </div>
+            <label className="account-dialog__label" htmlFor="delete-password">
+              Please enter your password to confirm.
+            </label>
+            <input
+              id="delete-password"
+              type="password"
+              placeholder="Enter your password"
+              className="account-dialog__input"
+            />
+            <div className="account-dialog__actions">
+              <button
+                className="account-dialog__btn account-dialog__btn--ghost"
+                type="button"
+                onClick={() => setIsDeleteOpen(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="account-dialog__btn account-dialog__btn--danger"
+                type="button"
+              >
+                Delete Account
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <Footer />
     </div>
   );
