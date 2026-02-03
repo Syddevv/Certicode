@@ -43,6 +43,8 @@
   color: var(--color-neutral-500);
   text-decoration: none;
   font-weight: 700;
+  position: relative;
+  transition: color 0.2s ease;
 }
 
 .nav__link:hover {
@@ -51,6 +53,26 @@
 
 .nav__link.is-active {
   color: var(--color-primary-500);
+}
+
+.nav__link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -8px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 999px;
+  opacity: 0;
+  transform: scaleX(0.6);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.nav__link:hover::after,
+.nav__link.is-active::after {
+  opacity: 1;
+  transform: scaleX(1);
 }
 
 .nav__actions {
@@ -69,6 +91,13 @@
   justify-content: center;
   cursor: pointer;
   padding: 0;
+  border-radius: 999px;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.iconBtn:hover {
+  background-color: var(--color-neutral-50);
+  transform: translateY(-1px);
 }
 
 .iconImg {
