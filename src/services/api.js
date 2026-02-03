@@ -2,7 +2,6 @@ const API_URL = 'http://127.0.0.1:8000/api';
 
 export const api = {
 
-  // Registration
   async register(userData) {
     const response = await fetch(`${API_URL}/register`, {
       method: 'POST',
@@ -22,7 +21,6 @@ export const api = {
     return data;
   },
 
-  // Login
   async login(credentials) {
     const response = await fetch(`${API_URL}/login`, {
       method: 'POST',
@@ -39,10 +37,18 @@ export const api = {
       throw new Error(data.message || 'Login failed');
     }
     
+    if (data.token) {
+      localStorage.setItem('auth_token', data.token);
+      if (data.user && data.user.id) {
+        window.location.href = `/marketplace?id=${data.user.id}`;
+      } else {
+        window.location.href = '/marketplace';
+      }
+    }
+    
     return data;
   },
 
-  // Google OAuth methods
   async googleRedirect() {
     window.location.href = `${API_URL}/auth/google`;
   },
@@ -63,10 +69,18 @@ export const api = {
       throw new Error(data.message || 'Google login failed');
     }
     
+    if (data.token) {
+      localStorage.setItem('auth_token', data.token);
+      if (data.user && data.user.id) {
+        window.location.href = `/marketplace?id=${data.user.id}`;
+      } else {
+        window.location.href = '/marketplace';
+      }
+    }
+    
     return data;
   },
 
-  // Facebook OAuth methods
   async facebookRedirect() {
     window.location.href = `${API_URL}/auth/facebook`;
   },
@@ -87,6 +101,15 @@ export const api = {
       throw new Error(data.message || 'Facebook login failed');
     }
     
+    if (data.token) {
+      localStorage.setItem('auth_token', data.token);
+      if (data.user && data.user.id) {
+        window.location.href = `/marketplace?id=${data.user.id}`;
+      } else {
+        window.location.href = '/marketplace';
+      }
+    }
+    
     return data;
   },
 
@@ -94,7 +117,7 @@ export const api = {
     const params = new URLSearchParams();
     if (search) params.append('search', search);
     if (assetType) params.append('asset_type', assetType);
-    params.append('page', page); // Always specify page 1 when searching
+    params.append('page', page);
     
     const url = `${API_URL}/products?${params.toString()}`;
       
@@ -133,7 +156,6 @@ export const api = {
       throw new Error(data.message || 'Failed to fetch product');
     }
     
-    // Try different response structures
     if (data.success && data.data) {
       console.log('Returning data.data:', data.data);
       return data.data;

@@ -35,7 +35,6 @@ const Register = () => {
 
     try {
       const userData = {
-        name: fullname,
         email: email,
         password: password,
         password_confirmation: confirmPassword
@@ -45,9 +44,7 @@ const Register = () => {
       
       console.log("Registration successful:", data);
       alert('Registration successful!');
-      if (data.token) {
-        localStorage.setItem('auth_token', data.token);
-      }
+      window.location.href = '/login';
     } catch (error) {
       console.error("Registration error:", error);
       alert(error.message || 'Registration failed. Please try again.');
@@ -56,7 +53,7 @@ const Register = () => {
 
   const handleGoogleLogin = async () => {
     try {
-        window.location.href = 'http://127.0.0.1:8000/api/auth/google';
+        await api.googleRedirect();
         } catch (error) {
           alert('Google login failed. Please try again.');
     }
@@ -64,7 +61,7 @@ const Register = () => {
 
   const handleFacebookLogin = async () => {
     try {
-      window.location.href = 'http://127.0.0.1:8000/api/auth/facebook';
+      await api.facebookRedirect();
       } catch (error) {
         alert('Facebook login failed. Please try again.');
     }

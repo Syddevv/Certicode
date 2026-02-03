@@ -37,14 +37,16 @@ const Marketplace = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTechs, setSelectedTechs] = useState([]);
   const [availableTechs, setAvailableTechs] = useState([]);
-  const [availableAssetTypes, setAvailableAssetTypes] = useState([]);
   const [selectedPriceRange, setSelectedPriceRange] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
   const [pagination, setPagination] = useState({
     current_page: 1,
     last_page: 1,
     per_page: 6,
     total: 0
   });
+
+  const tabs = ["All Assets", "Mobile App", "Website", "UI Kit", "Custom Projects"];
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -60,49 +62,52 @@ const Marketplace = () => {
     try {
       const result = await api.getProducts();
       const allTechsSet = new Set();
-      const assetTypesSet = new Set();
       
       result.data.forEach(product => {
         if (product.technologies) {
           product.technologies.forEach(tech => allTechsSet.add(tech));
         }
-        if (product.asset_type) {
-          assetTypesSet.add(product.asset_type);
-        }
       });
       
       setAvailableTechs(Array.from(allTechsSet).sort());
-      setAvailableAssetTypes(Array.from(assetTypesSet).sort());
     } catch (error) {
       console.error("Error fetching technologies:", error);
     }
   };
 
-  const fetchProducts = async (search = "", assetType = "", page = 1) => {
+  const fetchProducts = async (search = "", assetType = "", page = 1, sortOrder = sortBy) => {
     try {
       setLoading(true);
-      const result = await api.getProducts(search, assetType, page);
-      
-      // In your fetchProducts function, update the formatting:
-      const formattedAssets = result.data.map(product => ({
-        id: product.id, // ADD THIS - CRITICAL!
-        title: product.name,
-        description: product.description,
-        price: parseFloat(product.price),
-        originalPrice: `$${product.price}`,
-        path: `/marketplace/${product.id}`,
-        asset_type: product.asset_type || "Uncategorized",
-        tags: product.technologies ? 
-          product.technologies.map(tech => ({
-            label: tech,
-            tone: getToneColor(tech)
-          })) : [],
-        technologies: product.technologies || [],
-        // Add other fields that ProductDetails might need
-        rating: product.rating || "4.8",
-        image_urls: product.images || [],
-        features: product.features || []
-      }));
+      const result = await api.getProducts(search, assetType, page, sortOrder);
+      const formattedAssets = result.data.map(product => {
+        const assetType = product.asset_type || "Uncategorized";
+        let mappedAssetType;
+        
+        if (assetType === "Mobile App" || assetType === "Website" || assetType === "UI Kit") {
+          mappedAssetType = assetType;
+        } else {
+          mappedAssetType = "Custom Projects";
+        }
+        
+        return {
+          id: product.id,
+          title: product.name,
+          description: product.description,
+          price: parseFloat(product.price),
+          originalPrice: `$${product.price}`,
+          path: `/marketplace/${product.id}`,
+          asset_type: mappedAssetType,
+          tags: product.technologies ? 
+            product.technologies.map(tech => ({
+              label: tech,
+              tone: getToneColor(tech)
+            })) : [],
+          technologies: product.technologies || [],
+          rating: product.rating || "4.8",
+          image_urls: product.images || [],
+          features: product.features || []
+        };
+      });
       
       setAssets(formattedAssets);
       setFilteredAssets(formattedAssets);
@@ -123,9 +128,17 @@ const Marketplace = () => {
   const applyFilters = () => {
     let filtered = [...assets];
 
-    // Filter by selected tab (asset_type)
     if (activeTab !== "All Assets") {
-      filtered = filtered.filter(asset => asset.asset_type === activeTab);
+      if (activeTab === "Custom Projects") {
+        filtered = filtered.filter(asset => 
+          asset.asset_type === "Custom Projects" ||
+          (asset.asset_type !== "Mobile App" && 
+           asset.asset_type !== "Website" && 
+           asset.asset_type !== "UI Kit")
+        );
+      } else {
+        filtered = filtered.filter(asset => asset.asset_type === activeTab);
+      }
     }
 
     if (selectedTechs.length > 0) {
@@ -152,14 +165,24 @@ const Marketplace = () => {
   const handleSearch = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-    const assetType = activeTab === "All Assets" ? "" : activeTab;
-    fetchProducts(value, assetType, 1);
+    let assetType = activeTab === "All Assets" ? "" : activeTab;
+    
+    if (assetType === "Custom Projects") {
+      assetType = "";
+    }
+    
+    fetchProducts(value, assetType, 1, sortBy);
   };
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
-    const assetType = tab === "All Assets" ? "" : tab;
-    fetchProducts(searchTerm, assetType, 1);
+    let assetType = tab === "All Assets" ? "" : tab;
+    
+    if (assetType === "Custom Projects") {
+      assetType = "";
+    }
+    
+    fetchProducts(searchTerm, assetType, 1, sortBy);
   };
 
   const handleTechChange = (tech) => {
@@ -176,8 +199,25 @@ const Marketplace = () => {
 
   const handlePageChange = (page) => {
     if (page < 1 || page > pagination.last_page || page === pagination.current_page) return;
-    const assetType = activeTab === "All Assets" ? "" : activeTab;
-    fetchProducts(searchTerm, assetType, page);
+    let assetType = activeTab === "All Assets" ? "" : activeTab;
+    
+    if (assetType === "Custom Projects") {
+      assetType = "";
+    }
+    
+    fetchProducts(searchTerm, assetType, page, sortBy);
+  };
+
+  const handleSortChange = () => {
+    const newSort = sortBy === 'newest' ? 'oldest' : 'newest';
+    setSortBy(newSort);
+    
+    let assetType = activeTab === "All Assets" ? "" : activeTab;
+    if (assetType === "Custom Projects") {
+      assetType = "";
+    }
+    
+    fetchProducts(searchTerm, assetType, 1, newSort);
   };
 
   const renderPagination = () => {
@@ -248,29 +288,17 @@ const Marketplace = () => {
           </div>
 
           <div className="marketplace__tabs">
-            <button
-              key="All Assets"
-              type="button"
-              className={`marketplace__tab${
-                activeTab === "All Assets" ? " marketplace__tab--active" : ""
-              }`}
-              onClick={() => handleTabClick("All Assets")}
-              aria-pressed={activeTab === "All Assets"}
-            >
-              <span className="marketplace__tabLabel">All Assets</span>
-            </button>
-            
-            {availableAssetTypes.map((assetType) => (
+            {tabs.map((tab) => (
               <button
-                key={assetType}
+                key={tab}
                 type="button"
                 className={`marketplace__tab${
-                  activeTab === assetType ? " marketplace__tab--active" : ""
+                  activeTab === tab ? " marketplace__tab--active" : ""
                 }`}
-                onClick={() => handleTabClick(assetType)}
-                aria-pressed={activeTab === assetType}
+                onClick={() => handleTabClick(tab)}
+                aria-pressed={activeTab === tab}
               >
-                <span className="marketplace__tabLabel">{assetType}</span>
+                <span className="marketplace__tabLabel">{tab}</span>
               </button>
             ))}
           </div>
@@ -353,23 +381,18 @@ const Marketplace = () => {
                 ))}
               </div>
 
-              <div className="marketplace__filterGroup">
-                <h4>Delivery Time</h4>
-                <select className="marketplace__select" defaultValue="Anytime">
-                  <option>Anytime</option>
-                  <option>24 Hours</option>
-                  <option>3 Days</option>
-                  <option>1 Week</option>
-                </select>
-              </div>
             </aside>
 
             <div className="marketplace__results">
               <div className="marketplace__resultsHeader">
                 <span>Showing {filteredAssets.length} out of {pagination.total} assets</span>
-                <button className="marketplace__sort" type="button">
-                  Sort by: <strong>Newest First</strong>
-                  <span className="marketplace__sortIcon">▾</span>
+                <button 
+                  className="marketplace__sort" 
+                  type="button"
+                  onClick={handleSortChange}
+                >
+                  Sort by: <strong>{sortBy === 'newest' ? 'Most Recent' : 'Oldest'}</strong>
+                  
                 </button>
               </div>
 
