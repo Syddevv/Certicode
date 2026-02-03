@@ -1,0 +1,167 @@
+import React, { useEffect } from "react";
+import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
+import "../../styles/CustomerSupport.css";
+import SupportHero from "../../assets/SupportHero.png";
+import DeliveryIcon from "../../assets/Delivery.png";
+import TechnicalIcon from "../../assets/TechnicalIssues.png";
+import BillingIcon from "../../assets/Billing.png";
+import SoftwareIcon from "../../assets/SoftwareSec.png";
+import AccountIcon from "../../assets/AccountManagement.png";
+import ServicesIcon from "../../assets/Services.png";
+import InstallationIcon from "../../assets/Installation.png";
+import DataBackupIcon from "../../assets/Data&Backup.png";
+import HelpCircleIcon from "../../assets/HelpCircle.png";
+import IncidentIcon from "../../assets/Incident.png";
+import SearchIcon from "../../assets/Search.png";
+
+const categories = [
+  { title: "Delivery, Order,\nReturn", icon: DeliveryIcon },
+  { title: "Technical Issues", icon: TechnicalIcon },
+  { title: "Billing & Payments", icon: BillingIcon },
+  { title: "Software & Security", icon: SoftwareIcon },
+  { title: "Account Management", icon: AccountIcon },
+  { title: "Services & Maintenance", icon: ServicesIcon },
+  { title: "Installation & Setup", icon: InstallationIcon },
+  { title: "Data & Backup", icon: DataBackupIcon },
+  { title: "Something else", icon: HelpCircleIcon },
+  { title: "Incident Reporting", icon: IncidentIcon },
+];
+
+const helpTopics = [
+  "Account Setup & Registration",
+  "Software Order Status",
+  "Software Installation & Setup",
+  "Login & Password Issues",
+  "Account Recovery",
+  "Returns, Refunds & Product Support",
+  "Shipping and Delivery",
+  "Payment, Pricing and Promotions",
+  "Software, & Digital Solutions",
+  "Certicode Business Accounts",
+  "Other Topics",
+];
+
+const helpCards = [
+  {
+    title: "Track your package",
+    text: "Track your packages in Your Orders.",
+  },
+  {
+    title: "Return Items You Ordered",
+    text: "Return your orders using our Online Return Center.",
+  },
+  {
+    title: "Check status of a refund",
+    text: "Track your return and refunds in Your Orders.",
+  },
+  {
+    title: "Track Your Return",
+    text: "Learn how to track your return location and status.",
+  },
+  {
+    title: "How to Update Your Payment Method",
+    text: "Keeping your payment methods up to date prevents purchase and digital service interruptions.",
+  },
+  {
+    title: "Get Product Support",
+    text: "We provide free product support when you need help using a product or if it doesn’t work correctly.",
+  },
+  {
+    title: "Custom Software Development",
+    text: "Learn about our custom software services, project workflows, timelines, and support after delivery.",
+  },
+  {
+    title: "Certicode Software Platform",
+    text: "Get help using Certicode software products, including setup, features, updates, and common troubleshooting issues.",
+  },
+];
+
+const CustomerSupport = () => {
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, []);
+
+  return (
+    <div className="support-page">
+      <Navbar />
+      <section className="support-hero">
+        <div className="support-hero__inner">
+          <div className="support-hero__media">
+            <img src={SupportHero} alt="Customer support" />
+          </div>
+          <div className="support-hero__content">
+            <h1>Welcome to Certicode Customer Support</h1>
+            <p>
+              Get support for Certicode software, services, and technical
+              concerns. Our team is here to help.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="support-categories">
+        <div className="support-categories__inner">
+          {categories.map((item) => (
+            <button key={item.title} className="support-category" type="button">
+              <span className="support-category__icon">
+                <img src={item.icon} alt="" aria-hidden="true" />
+              </span>
+              <span className="support-category__text">
+                {item.title.split("\n").map((line) => (
+                  <span key={line}>{line}</span>
+                ))}
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="support-library">
+        <div className="support-library__inner">
+          <div className="support-library__header">
+            <h2>Search our help library</h2>
+            <div className="support-search">
+              <img src={SearchIcon} alt="" aria-hidden="true" />
+              <input
+                type="search"
+                placeholder="Search for solutions, guides, or FAQs..."
+              />
+            </div>
+          </div>
+
+          <div className="support-library__grid">
+            <aside className="support-topics">
+              <h3>All help topics</h3>
+              <ul>
+                {helpTopics.map((topic) => (
+                  <li
+                    key={topic}
+                    className={
+                      topic === "Software Order Status" ? "is-active" : ""
+                    }
+                  >
+                    <button type="button">{topic}</button>
+                  </li>
+                ))}
+              </ul>
+            </aside>
+
+            <div className="support-cards">
+              {helpCards.map((card) => (
+                <article key={card.title} className="support-card">
+                  <h4>{card.title}</h4>
+                  <p>{card.text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Footer />
+    </div>
+  );
+};
+
+export default CustomerSupport;
