@@ -22,22 +22,21 @@ const ProductDetails = () => {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [relatedProducts, setRelatedProducts] = useState([]);
-  const [passedFromState, setPassedFromState] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     
-    if (location.state && location.state.product) {
-      console.log("Product data passed from state:", location.state.product);
+    const fromRelated = location.state?.fromRelated;
+    const shouldUseState = location.state?.product && !fromRelated;
+    
+    if (shouldUseState) {
       handleProductFromState(location.state.product);
-      setPassedFromState(true);
     } else {
       fetchProductDetails();
     }
   }, [id, location.state]);
 
   const handleProductFromState = async (productFromState) => {
-    // Fetch reviews count first
     const count = await fetchReviewsCount(productFromState.id);
     
     const mappedProduct = {
@@ -48,7 +47,7 @@ const ProductDetails = () => {
       currency: "USD",
       asset_type: productFromState.asset_type,
       released_date: "Oct 12, 2023",
-      last_update: "2 days ago",
+      last_update: "1 day ago",
       file_size: "42.5 MB",
       rating: productFromState.rating || "4.8",
       technologies: productFromState.technologies,
@@ -60,14 +59,12 @@ const ProductDetails = () => {
       includes_support: true,
       includes_updates: true,
       commercial_license: true,
-      reviews_count: count, // Use the fetched count
+      reviews_count: count,
     };
     
-    console.log("Mapped product from state:", mappedProduct);
     setProduct(mappedProduct);
     setLoading(false);
     
-    // Still fetch fresh data from API
     fetchProductDetails();
   };
 
@@ -76,7 +73,7 @@ const ProductDetails = () => {
       const response = await fetch(`http://127.0.0.1:8000/api/products/${productId}/reviews`);
       if (response.ok) {
         const reviews = await response.json();
-        return reviews.length; // Return the count instead of setting state
+        return reviews.length;
       }
       return 0;
     } catch (error) {
@@ -87,29 +84,34 @@ const ProductDetails = () => {
 
   const fetchProductDetails = async () => {
     try {
-      if (!passedFromState) {
-        setLoading(true);
-      }
+      setLoading(true);
       
-      console.log(`Fetching product ${id} from API`);
       const result = await api.getProductById(id);
-      console.log('API Result:', result);
-      
       const productData = result.data || result;
       
       if (!productData) {
-        console.log('No product data received from API');
-        if (!passedFromState) {
-          setProduct(null);
-        }
+        setProduct(null);
         setLoading(false);
         return;
       }
       
-      console.log('API Product Data:', productData);
-      
-      // Fetch reviews count before creating product
       const reviewsCount = await fetchReviewsCount(productData.id);
+
+      function formatDate(timestamp) {
+        const date = new Date(timestamp);
+        const options = { year: "numeric", month: "short", day: "numeric" };
+        return date.toLocaleDateString("en-US", options);
+      }
+
+      function timeSince(timestamp) {
+        const now = new Date();
+        const past = new Date(timestamp);
+        const diffMs = now - past;
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        if (diffDays === 0) return "Today";
+        if (diffDays === 1) return "1 day ago";
+        return `${diffDays} days ago`;
+      }
       
       const apiProduct = {
         id: productData.id,
@@ -118,8 +120,8 @@ const ProductDetails = () => {
         price: parseFloat(productData.price),
         currency: "USD",
         asset_type: productData.asset_type,
-        released_date: "Oct 12, 2023",
-        last_update: "2 days ago",
+        released_date: formatDate(productData.created_at),
+        last_update: timeSince(productData.updated_at),
         file_size: "42.5 MB",
         rating: "4.8",
         technologies: productData.technologies,
@@ -131,10 +133,9 @@ const ProductDetails = () => {
         includes_support: true,
         includes_updates: true,
         commercial_license: true,
-        reviews_count: reviewsCount, // Use the fetched count
+        reviews_count: reviewsCount,
       };
       
-      console.log('Setting product from API:', apiProduct);
       setProduct(apiProduct);
       
       if (apiProduct.asset_type) {
@@ -145,10 +146,16 @@ const ProductDetails = () => {
             .slice(0, 4)
             .map(item => ({
               id: item.id,
+              name: item.name,
               title: item.name,
-              price: `$${item.price}`,
+              description: item.description,
+              price: item.price,
               rating: "4.2",
-              vendor: "CertiCode"
+              vendor: "CertiCode",
+              asset_type: item.asset_type,
+              technologies: item.technologies || [],
+              features: item.features || [],
+              images: item.images || []
             }));
           setRelatedProducts(related);
         } catch (error) {
@@ -158,9 +165,7 @@ const ProductDetails = () => {
       
     } catch (error) {
       console.error("Error fetching from API:", error);
-      if (!passedFromState) {
-        setProduct(null);
-      }
+      setProduct(null);
     } finally {
       setLoading(false);
     }
@@ -174,7 +179,6 @@ const ProductDetails = () => {
           <div className="product__inner">
             <div className="product__loading">
               Loading product details...
-              {passedFromState && <div style={{ fontSize: '12px', marginTop: '5px' }}>(Using passed data from Marketplace)</div>}
             </div>
           </div>
         </section>
@@ -354,7 +358,7 @@ const ProductDetails = () => {
                 type="button"
                 onClick={() => setActiveTab("reviews")}
               >
-                Reviews ({product ? product.reviews_count : reviewsCount})
+                Reviews ({product.reviews_count})
               </button>
             </div>
 
@@ -394,19 +398,19 @@ const ProductDetails = () => {
                   <Link 
                     key={item.id} 
                     to={`/marketplace/${item.id}`}
-                    state={{ product: item }}
+                    state={{ fromRelated: true }}
                   >
                     <article className="product__relatedCard">
                       <div className="product__relatedMedia" />
                       <div className="product__relatedBody">
-                        <h4>{item.title}</h4>
+                        <h4>{item.name || item.title}</h4>
                         <div className="product__relatedMeta">
                           <span className="product__relatedVendor">
                             <img src={CerticodeBoxIcon} alt="" />
                             {item.vendor}
                           </span>
                           <span className="product__relatedPrice">
-                            {item.price}
+                            ${parseFloat(item.price).toFixed(2)}
                           </span>
                         </div>
                         <div

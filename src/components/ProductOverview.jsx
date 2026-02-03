@@ -2,6 +2,9 @@ import React from "react";
 import ReactIcon from "../assets/React.png";
 import TailwindIcon from "../assets/Tailwind.png";
 import TypeScriptIcon from "../assets/TypeScript.png";
+import NodejsIcon from "../assets/Nodejs.png";
+import PrimaryDatabaseIcon from "../assets/PrimaryDatabase.png";
+import InfrastructureIcon from "../assets/Infrastructure.png";
 
 const ProductOverview = ({ product }) => {
     if (!product) {
@@ -12,41 +15,102 @@ const ProductOverview = ({ product }) => {
       );
     }
 
-  const getTechIcons = () => {
-    const icons = [];
-    const techs = product.technologies || [];
+  // Function to get icon for a technology
+  const getIconForTech = (techName) => {
+    const iconMap = {
+      "react": ReactIcon,
+      "node.js": NodejsIcon,
+      "nodejs": NodejsIcon,
+      "node": NodejsIcon,
+      "tailwind": TailwindIcon,
+      "tailwind css": TailwindIcon,
+      "tailwindcss": TailwindIcon,
+      "typescript": TypeScriptIcon,
+      "postgresql": PrimaryDatabaseIcon,
+      "postgres": PrimaryDatabaseIcon,
+      "mysql": PrimaryDatabaseIcon,
+      "mongodb": PrimaryDatabaseIcon,
+      "aws": InfrastructureIcon,
+      "amazon web services": InfrastructureIcon,
+      "azure": InfrastructureIcon,
+      "docker": InfrastructureIcon,
+    };
     
-    if (techs.some(tech => tech.includes('React') || tech.includes('react'))) {
-      icons.push({
-        label: 'Framework',
-        icon: ReactIcon,
-        name: 'React'
-      });
+    const lowercaseName = techName.toLowerCase();
+    return iconMap[lowercaseName] || ReactIcon; // Default icon
+  };
+
+  // Function to get label/category for a technology
+  const getLabelForTech = (techName) => {
+    const techNameLower = techName.toLowerCase();
+    
+    if (techNameLower.includes('react') || 
+        techNameLower.includes('vue') || 
+        techNameLower.includes('angular') ||
+        techNameLower.includes('next') ||
+        techNameLower.includes('svelte')) {
+      return 'Frontend';
     }
-    if (techs.some(tech => tech.includes('Tailwind') || tech.includes('tailwind'))) {
-      icons.push({
-        label: 'Styling',
-        icon: TailwindIcon,
-        name: 'Tailwind'
-      });
+    if (techNameLower.includes('node') || 
+        techNameLower.includes('express') || 
+        techNameLower.includes('django') ||
+        techNameLower.includes('flask') ||
+        techNameLower.includes('spring')) {
+      return 'Backend';
     }
-    if (techs.some(tech => tech.includes('TypeScript') || tech.includes('typescript') || tech.includes('Type Script'))) {
-      icons.push({
-        label: 'Language',
-        icon: TypeScriptIcon,
-        name: 'TypeScript'
-      });
+    if (techNameLower.includes('tailwind') || 
+        techNameLower.includes('bootstrap') || 
+        techNameLower.includes('css') ||
+        techNameLower.includes('sass') ||
+        techNameLower.includes('less')) {
+      return 'Styling';
+    }
+    if (techNameLower.includes('typescript') || 
+        techNameLower.includes('javascript') || 
+        techNameLower.includes('python') ||
+        techNameLower.includes('java') ||
+        techNameLower.includes('php')) {
+      return 'Language';
+    }
+    if (techNameLower.includes('postgres') || 
+        techNameLower.includes('mysql') || 
+        techNameLower.includes('mongo') ||
+        techNameLower.includes('database') ||
+        techNameLower.includes('sql')) {
+      return 'Database';
+    }
+    if (techNameLower.includes('aws') || 
+        techNameLower.includes('azure') || 
+        techNameLower.includes('cloud') ||
+        techNameLower.includes('docker') ||
+        techNameLower.includes('kubernetes')) {
+      return 'Infrastructure';
     }
     
-    if (icons.length === 0) {
-      icons.push(
-        { label: 'Framework', icon: ReactIcon, name: 'React' },
+    return 'Framework';
+  };
+
+  // Process technologies from product data
+  const getTechStack = () => {
+    if (!product.technologies || product.technologies.length === 0) {
+      // Return default tech stack if no technologies are provided
+      return [
+        { label: 'Frontend', icon: ReactIcon, name: 'React' },
+        { label: 'Backend', icon: NodejsIcon, name: 'Node.js' },
         { label: 'Styling', icon: TailwindIcon, name: 'Tailwind' },
-        { label: 'Language', icon: TypeScriptIcon, name: 'TypeScript' }
-      );
+        { label: 'Language', icon: TypeScriptIcon, name: 'TypeScript' },
+      ];
     }
-    
-    return icons;
+
+    // Map product technologies to display format
+    return product.technologies.map(tech => {
+      const techName = typeof tech === 'string' ? tech : tech.name || "Technology";
+      return {
+        label: getLabelForTech(techName),
+        icon: getIconForTech(techName),
+        name: techName
+      };
+    });
   };
 
   return (
@@ -59,8 +123,8 @@ const ProductOverview = ({ product }) => {
       <div className="product__section">
         <h3>Tech Stack</h3>
         <div className="product__stackGrid">
-          {/* Map through tech icons based on product technologies */}
-          {getTechIcons().map((tech, index) => (
+          {/* Map through product technologies or use defaults */}
+          {getTechStack().map((tech, index) => (
             <div key={index} className="product__stackCard">
               <span>{tech.label}</span>
               <img src={tech.icon} alt={`${tech.name} icon`} />
