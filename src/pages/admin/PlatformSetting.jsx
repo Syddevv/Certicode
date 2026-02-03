@@ -1,10 +1,17 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "../../components/Sidebar";
+import "../../styles/platformSetting.css";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom"; 
 import Sidebar from "../../components/Sidebar";
 import AdminTopbar from "../../components/AdminTopbar";
 import "../../styles/platformSetting.css";
 import searchIcon from "../../assets/Search.png";
 import notifBell from "../../assets/NotifBell.png";
+import platformIcon from "../../assets/platform-identity.png";
+import securityIcon from "../../assets/security-and-access.png";
+import activityLogIcon from "../../assets/activity-log.png";
 
 const PlatformSetting = () => {
   const navigate = useNavigate();
@@ -14,7 +21,8 @@ const PlatformSetting = () => {
       <Sidebar activePage="settings" />
       
       <main className="main-content">
-        <AdminTopbar searchIcon={<span className="search-icon">🔍</span>}>
+
+        <AdminTopbar searchIcon={<img src={searchIcon} alt="Search" className="search-icon" />}>
           <Link to="/admin-notification" className="notification-link" aria-label="Notifications">
             <img src={notifBell} alt="Notifications" className="topbar-icon" />
             <span className="notification-dot" />
@@ -24,8 +32,8 @@ const PlatformSetting = () => {
 
         <div className="page-header">
           <h2>Settings</h2>
-          <p className="subtitle">Manage your platform's public identity and core regional preferences.</p>
         </div>
+                  <p className="subtitle">Manage your platform's public identity and core regional preferences.</p>
 
 
         <div className="tabs">
@@ -131,3 +139,4 @@ const PlatformSetting = () => {
 };
 
 export default PlatformSetting;
+
