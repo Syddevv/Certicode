@@ -291,7 +291,7 @@ const BillingInvoices = () => {
                     Our finance team typically responds within 4 hours during
                     business days.
                   </p>
-                  <Link className="billing-primary" to="/customer-support">
+                  <Link className="billing-primary" to="/contact">
                     Contact Support
                   </Link>
                 </div>

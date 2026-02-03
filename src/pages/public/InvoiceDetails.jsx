@@ -136,7 +136,7 @@ const InvoiceDetails = () => {
                 assist you.
               </p>
             </div>
-            <Link className="invoice-details__ghost" to="/customer-support">
+            <Link className="invoice-details__ghost" to="/contact">
               Contact Billing Support
             </Link>
           </div>

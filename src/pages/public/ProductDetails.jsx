@@ -90,7 +90,7 @@ const ProductDetails = () => {
                   </button>
                 </Link>
 
-                <Link className="product__ghost" to="/customer-support">
+                <Link className="product__ghost" to="/contact">
                   Contact CertiCode
                 </Link>
               </div>

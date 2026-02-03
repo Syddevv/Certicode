@@ -23,6 +23,7 @@ import BuyerAccountSettings from "./pages/public/BuyerAccountSettings";
 import About from "./pages/public/About";
 import PurchasedAssetDetail from "./pages/public/PurchasedAssetDetail";
 import CustomerSupport from "./pages/public/CustomerSupport";
+import ContactUs from "./pages/public/ContactUs";
 
 // Admin
 import AdminInventory from "./pages/admin/AdminInventory";
@@ -70,6 +71,7 @@ function App() {
         <Route path="/billing-invoices/inv-8273" element={<InvoiceDetails />} />
         <Route path="/account-settings" element={<BuyerAccountSettings />} />
         <Route path="/customer-support" element={<CustomerSupport />} />
+        <Route path="/contact" element={<ContactUs />} />
         <Route path="/about" element={<About />} />
         <Route
           path="/marketplace/e-commerce-saas-template"

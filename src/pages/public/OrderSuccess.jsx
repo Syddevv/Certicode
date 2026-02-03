@@ -129,7 +129,7 @@ const OrderSuccess = () => {
 
           <div className="success__help">
             Need help with your purchase?{" "}
-            <Link to="/customer-support">Contact Support</Link>
+            <Link to="/contact">Contact Support</Link>
           </div>
         </div>
       </section>

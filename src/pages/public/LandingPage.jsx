@@ -345,7 +345,7 @@ const LandingPage = () => {
             <div className="faq__hint">
               Still have questions? We&apos;re here to help.
             </div>
-            <Link className="faq__button" to="/customer-support">
+            <Link className="faq__button" to="/contact">
               Contact Support
             </Link>
           </div>

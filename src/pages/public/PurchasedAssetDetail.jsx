@@ -187,10 +187,7 @@ const PurchasedAssetDetail = () => {
                   <strong>Active Support (6 Months Left)</strong>
                   <p>Expires on May 5, 2026</p>
                 </div>
-                <Link
-                  className="purchased-detail__supportBtn"
-                  to="/customer-support"
-                >
+                <Link className="purchased-detail__supportBtn" to="/contact">
                   Contact Technical Support
                 </Link>
                 <span className="purchased-detail__footnote">

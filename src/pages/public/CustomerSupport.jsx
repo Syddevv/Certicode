@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/CustomerSupport.css";
@@ -160,9 +161,9 @@ const CustomerSupport = () => {
               Our experts are ready to assist you with secure and scalable
               solutions.
             </p>
-            <button className="support-cta__btn" type="button">
+            <Link className="support-cta__btn" to="/contact">
               Contact Certicode
-            </button>
+            </Link>
           </div>
         </div>
       </section>
