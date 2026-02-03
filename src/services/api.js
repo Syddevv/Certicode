@@ -1,5 +1,14 @@
 const API_URL = 'http://127.0.0.1:8000/api';
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('auth_token');
+  return {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+};
+
 export const api = {
 
   async register(userData) {
@@ -164,5 +173,4 @@ export const api = {
     console.log('Returning raw data:', data);
     return data;
   },
-
 };

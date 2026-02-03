@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams, useLocation } from "react-router-dom"; // ← Add useLocation
+import { Link, useParams, useLocation } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/ProductDetails.css";
@@ -17,7 +17,7 @@ import { api } from "../../services/api";
 
 const ProductDetails = () => {
   const { id } = useParams();
-  const location = useLocation(); // ← Add this
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -27,53 +27,66 @@ const ProductDetails = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     
-    // Check if product data was passed from Marketplace
     if (location.state && location.state.product) {
       console.log("Product data passed from state:", location.state.product);
       handleProductFromState(location.state.product);
       setPassedFromState(true);
     } else {
-      // No state passed, fetch from API
       fetchProductDetails();
     }
   }, [id, location.state]);
 
-  const handleProductFromState = (productFromState) => {
-    // Map Marketplace format to ProductDetails format
+  const handleProductFromState = async (productFromState) => {
+    // Fetch reviews count first
+    const count = await fetchReviewsCount(productFromState.id);
+    
     const mappedProduct = {
       id: productFromState.id,
-      name: productFromState.title, // Marketplace uses "title", ProductDetails uses "name"
+      name: productFromState.title,
       description: productFromState.description,
       price: productFromState.price,
       currency: "USD",
       asset_type: productFromState.asset_type,
-      released_date: "Oct 12, 2023", // Static - no backend alternative
-      last_update: "2 days ago", // Static - no backend alternative
-      file_size: "42.5 MB", // Static - no backend alternative
+      released_date: "Oct 12, 2023",
+      last_update: "2 days ago",
+      file_size: "42.5 MB",
       rating: productFromState.rating || "4.8",
       technologies: productFromState.technologies,
       features: productFromState.features,
-      specifications: [], // Static - no backend alternative
+      specifications: [],
       image_urls: productFromState.image_urls,
-      vendor: "CertiCode", // Static - no backend alternative
-      verified: true, // Static - no backend alternative
-      includes_support: true, // Static - no backend alternative
-      includes_updates: true, // Static - no backend alternative
-      commercial_license: true, // Static - no backend alternative
-      reviews_count: 12 // Static - no backend alternative
+      vendor: "CertiCode",
+      verified: true,
+      includes_support: true,
+      includes_updates: true,
+      commercial_license: true,
+      reviews_count: count, // Use the fetched count
     };
     
     console.log("Mapped product from state:", mappedProduct);
     setProduct(mappedProduct);
     setLoading(false);
     
-    // Still fetch from API in background for fresh data
+    // Still fetch fresh data from API
     fetchProductDetails();
+  };
+
+  const fetchReviewsCount = async (productId) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/products/${productId}/reviews`);
+      if (response.ok) {
+        const reviews = await response.json();
+        return reviews.length; // Return the count instead of setting state
+      }
+      return 0;
+    } catch (error) {
+      console.error("Error fetching reviews count:", error);
+      return 0;
+    }
   };
 
   const fetchProductDetails = async () => {
     try {
-      // Only set loading if we don't already have state data
       if (!passedFromState) {
         setLoading(true);
       }
@@ -82,12 +95,10 @@ const ProductDetails = () => {
       const result = await api.getProductById(id);
       console.log('API Result:', result);
       
-      // Get the product data from response
       const productData = result.data || result;
       
       if (!productData) {
         console.log('No product data received from API');
-        // Don't set product to null if we have state data
         if (!passedFromState) {
           setProduct(null);
         }
@@ -97,35 +108,35 @@ const ProductDetails = () => {
       
       console.log('API Product Data:', productData);
       
-      // Only update if we don't have state data OR if API has more complete data
+      // Fetch reviews count before creating product
+      const reviewsCount = await fetchReviewsCount(productData.id);
+      
       const apiProduct = {
         id: productData.id,
-        name: productData.name, // Backend has "name"
+        name: productData.name,
         description: productData.description,
         price: parseFloat(productData.price),
         currency: "USD",
         asset_type: productData.asset_type,
-        released_date: "Oct 12, 2023", // Static - no backend alternative
-        last_update: "2 days ago", // Static - no backend alternative
-        file_size: "42.5 MB", // Static - no backend alternative
-        rating: "4.8", // Static - no backend alternative
+        released_date: "Oct 12, 2023",
+        last_update: "2 days ago",
+        file_size: "42.5 MB",
+        rating: "4.8",
         technologies: productData.technologies,
         features: productData.features,
-        specifications: [], // Static - no backend alternative
-        image_urls: productData.images, // Backend has "images" not "image_urls"
-        vendor: "CertiCode", // Static - no backend alternative
-        verified: true, // Static - no backend alternative
-        includes_support: true, // Static - no backend alternative
-        includes_updates: true, // Static - no backend alternative
-        commercial_license: true, // Static - no backend alternative
-        reviews_count: 12 // Static - no backend alternative
+        specifications: [],
+        image_urls: productData.images,
+        vendor: "CertiCode",
+        verified: true,
+        includes_support: true,
+        includes_updates: true,
+        commercial_license: true,
+        reviews_count: reviewsCount, // Use the fetched count
       };
       
-      // Update product with API data (will overwrite state data with fresh API data)
       console.log('Setting product from API:', apiProduct);
       setProduct(apiProduct);
       
-      // Fetch related products
       if (apiProduct.asset_type) {
         try {
           const relatedResult = await api.getProducts("", apiProduct.asset_type, 1);
@@ -134,7 +145,7 @@ const ProductDetails = () => {
             .slice(0, 4)
             .map(item => ({
               id: item.id,
-              title: item.name, // Backend has "name", frontend expects "title"
+              title: item.name,
               price: `$${item.price}`,
               rating: "4.2",
               vendor: "CertiCode"
@@ -147,7 +158,6 @@ const ProductDetails = () => {
       
     } catch (error) {
       console.error("Error fetching from API:", error);
-      // Only set to null if we don't have state data
       if (!passedFromState) {
         setProduct(null);
       }
@@ -344,23 +354,21 @@ const ProductDetails = () => {
                 type="button"
                 onClick={() => setActiveTab("reviews")}
               >
-                Reviews ({product.reviews_count})
+                Reviews ({product ? product.reviews_count : reviewsCount})
               </button>
             </div>
 
             <div className="product__tabContent">
               {activeTab === "overview" && (
-                <ProductOverview 
-                  product={product}
-                />
+                <ProductOverview product={product} />
               )}
               {activeTab === "tech" && (
-                <ProductTechStack technologies={product.technologies} />
+                <ProductTechStack technologies={product.technologies} productId={product.id} />
               )}
               {activeTab === "features" && (
-                <ProductFeatures features={product.features} />
+                <ProductFeatures features={product.features} productId={product.id} />
               )}
-              {activeTab === "reviews" && <ProductReviews />}
+              {activeTab === "reviews" && <ProductReviews productId={product.id} />}
             </div>
           </section>
 

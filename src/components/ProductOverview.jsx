@@ -4,7 +4,6 @@ import TailwindIcon from "../assets/Tailwind.png";
 import TypeScriptIcon from "../assets/TypeScript.png";
 
 const ProductOverview = ({ product }) => {
-  // If no product, show loading or default
     if (!product) {
       return (
         <div className="product__overview">
@@ -13,7 +12,6 @@ const ProductOverview = ({ product }) => {
       );
     }
 
-  // Helper function to detect which tech stack icons to show
   const getTechIcons = () => {
     const icons = [];
     const techs = product.technologies || [];
@@ -40,7 +38,6 @@ const ProductOverview = ({ product }) => {
       });
     }
     
-    // Fallback to default icons if none detected
     if (icons.length === 0) {
       icons.push(
         { label: 'Framework', icon: ReactIcon, name: 'React' },
