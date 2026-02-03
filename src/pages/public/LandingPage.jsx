@@ -19,7 +19,7 @@ import Wallet from "../../assets/wallet.png";
 import Lightning from "../../assets/lightning.png";
 import SearchCheck from "../../assets/search-check.png";
 import Avatar from "../../assets/Avatar.png";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const LandingPage = () => {
   const location = useLocation();
@@ -345,9 +345,9 @@ const LandingPage = () => {
             <div className="faq__hint">
               Still have questions? We&apos;re here to help.
             </div>
-            <button className="faq__button" type="button">
+            <Link className="faq__button" to="/customer-support">
               Contact Support
-            </button>
+            </Link>
           </div>
         </div>
       </section>

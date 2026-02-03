@@ -94,9 +94,9 @@ const BillingInvoices = () => {
                 Account Settings
               </Link>
             </button>
-            <button className="billing-tab" type="button">
+            <Link className="billing-tab" to="/customer-support">
               Support
-            </button>
+            </Link>
           </div>
 
           <div className="billing__content">
@@ -291,9 +291,9 @@ const BillingInvoices = () => {
                     Our finance team typically responds within 4 hours during
                     business days.
                   </p>
-                  <button className="billing-primary" type="button">
+                  <Link className="billing-primary" to="/customer-support">
                     Contact Support
-                  </button>
+                  </Link>
                 </div>
                 <img
                   className="billing-support__spark"

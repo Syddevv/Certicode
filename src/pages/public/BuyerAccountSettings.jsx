@@ -71,9 +71,9 @@ const BuyerAccountSettings = () => {
             <button className="account-tab account-tab--active" type="button">
               Account Settings
             </button>
-            <button className="account-tab" type="button">
+            <Link className="account-tab" to="/customer-support">
               Support
-            </button>
+            </Link>
           </div>
 
           <div className="account-settings__title">

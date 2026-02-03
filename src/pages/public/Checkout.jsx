@@ -233,7 +233,7 @@ const Checkout = () => {
                 </p>
               </div>
 
-              <div className="checkout__sideCard">
+              <Link className="checkout__sideCard" to="/customer-support">
                 <div className="checkout__sideIcon">
                   <img src={CustomerSupport} alt="" aria-hidden="true" />
                 </div>
@@ -245,7 +245,7 @@ const Checkout = () => {
                   </div>
                 </div>
                 <span className="checkout__sideArrow">›</span>
-              </div>
+              </Link>
 
               <div className="checkout__sideCard checkout__sideCard--help">
                 <div>
@@ -254,9 +254,9 @@ const Checkout = () => {
                     Payment processing usually takes a few moments. If you have
                     questions about payment or billing, visit our Help Center.
                   </div>
-                  <button className="checkout__sideLink" type="button">
+                  <Link className="checkout__sideLink" to="/customer-support">
                     Contact Support <span aria-hidden="true">›</span>
-                  </button>
+                  </Link>
                 </div>
               </div>
             </aside>

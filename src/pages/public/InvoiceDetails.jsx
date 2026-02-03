@@ -136,9 +136,9 @@ const InvoiceDetails = () => {
                 assist you.
               </p>
             </div>
-            <button className="invoice-details__ghost" type="button">
+            <Link className="invoice-details__ghost" to="/customer-support">
               Contact Billing Support
-            </button>
+            </Link>
           </div>
 
           <div className="invoice-details__footerNote">

@@ -111,7 +111,10 @@ const OrderSuccess = () => {
           </button>
 
           <div className="success__actions">
-            <Link className="success__action success__action--ghost" to="/marketplace">
+            <Link
+              className="success__action success__action--ghost"
+              to="/marketplace"
+            >
               Back to Marketplace
             </Link>
             <Link className="success__action" to="/marketplace">
@@ -126,7 +129,7 @@ const OrderSuccess = () => {
 
           <div className="success__help">
             Need help with your purchase?{" "}
-            <button type="button">Contact Support</button>
+            <Link to="/customer-support">Contact Support</Link>
           </div>
         </div>
       </section>

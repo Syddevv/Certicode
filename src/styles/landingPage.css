@@ -740,6 +740,10 @@
   padding: 13px 26px;
   border-radius: 999px;
   cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ================= CTA ================= */

@@ -133,9 +133,9 @@ const BuyerDashboard = () => {
             <Link className="buyer-tab" to="/account-settings">
               Account Settings
             </Link>
-            <button className="buyer-tab" type="button">
+            <Link className="buyer-tab" to="/customer-support">
               Support
-            </button>
+            </Link>
           </div>
 
           <div className="buyer-dashboard__content">
@@ -244,10 +244,10 @@ const BuyerDashboard = () => {
                 <h4>Support</h4>
                 <div className="buyer-support__list">
                   {supportItems.map((item) => (
-                    <button
+                    <Link
                       key={item.title}
                       className="buyer-support__item"
-                      type="button"
+                      to="/customer-support"
                     >
                       <span className="buyer-support__icon">
                         <img src={item.icon} alt="" aria-hidden="true" />
@@ -259,7 +259,7 @@ const BuyerDashboard = () => {
                       <span className="buyer-support__arrow" aria-hidden="true">
                         {"\u203a"}
                       </span>
-                    </button>
+                    </Link>
                   ))}
                 </div>
               </div>
