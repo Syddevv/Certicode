@@ -54,9 +54,9 @@ const Footer = () => {
             <Link className="footer__link" to="/success-stories">
               Success Stories
             </Link>
-            <a className="footer__link" href="#">
+            <Link className="footer__link" to="/blogs-news">
               Blog & News
-            </a>
+            </Link>
           </div>
 
           <div className="footer__col footer__newsletter">
