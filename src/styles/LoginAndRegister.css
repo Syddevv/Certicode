@@ -1093,3 +1093,313 @@ tr:hover {
 .auth-page .right-panel {
   display: none;
 }
+
+.auth-page.login-page,
+.auth-page.login-page * {
+  --login-orange: #ff7a1a;
+  --login-orange-dark: #f06712;
+  --login-peach: #fff3ea;
+  --login-ink: #101828;
+  --login-muted: #667085;
+  --login-border: #e4e7ec;
+  font-family: "Manrope", "Poppins", "Segoe UI", sans-serif;
+}
+
+.auth-page.login-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px 48px;
+  gap: 18px;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(255, 224, 196, 0.6),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at bottom left,
+      rgba(255, 240, 226, 0.7),
+      transparent 55%
+    ),
+    #f7f7f8;
+}
+
+.auth-page.login-page .login-container {
+  max-width: 1100px;
+  width: min(1100px, 100%);
+  min-height: 640px;
+  border-radius: 26px;
+  box-shadow: 0 24px 60px rgba(16, 24, 40, 0.12);
+  animation: login-rise 0.6s ease both;
+}
+
+@keyframes login-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-page.login-page .login-container,
+  .auth-page.login-page .login-header,
+  .auth-page.login-page .login-form,
+  .auth-page.login-page .signup-link,
+  .auth-page.login-page .right-panel,
+  .auth-page.login-page .marketing-illustration {
+    animation: none;
+  }
+}
+
+.auth-page.login-page .left-panel {
+  align-items: stretch;
+  padding: 64px 60px;
+  gap: 26px;
+}
+
+.auth-page.login-page .login-header {
+  text-align: left;
+  animation: login-rise 0.55s ease both;
+}
+
+.auth-page.login-page .login-title {
+  font-size: 32px;
+  color: var(--login-ink);
+  text-align: left;
+}
+
+.auth-page.login-page .login-subtitle {
+  font-size: 15px;
+  color: var(--login-muted);
+  text-align: left;
+  margin-bottom: 10px;
+}
+
+.auth-page.login-page .login-form {
+  width: 100%;
+  max-width: 420px;
+  animation: login-rise 0.6s ease both;
+  animation-delay: 0.05s;
+}
+
+.auth-page.login-page .form-group {
+  margin-bottom: 20px;
+}
+
+.auth-page.login-page .form-input {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--login-border);
+}
+
+.auth-page.login-page .form-input:focus {
+  border-color: var(--login-orange);
+  box-shadow: 0 0 0 3px rgba(255, 122, 26, 0.15);
+}
+
+.auth-page.login-page .forgot-password {
+  margin-top: -6px;
+  margin-bottom: 24px;
+}
+
+.auth-page.login-page .forgot-password-link {
+  color: var(--login-orange);
+}
+
+.auth-page.login-page .login-button {
+  width: 100%;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--login-orange), #ff8a33);
+  box-shadow: 0 12px 20px rgba(255, 122, 26, 0.25);
+  margin-bottom: 22px;
+}
+
+.auth-page.login-page .login-button:hover {
+  background: linear-gradient(
+    135deg,
+    var(--login-orange-dark),
+    var(--login-orange)
+  );
+}
+
+.auth-page.login-page .divider-text {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.auth-page.login-page .social-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.auth-page.login-page .social-button {
+  border-radius: 12px;
+  border-color: var(--login-border);
+  font-weight: 600;
+  color: #1f2937;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.auth-page.login-page .social-button:hover {
+  border-color: rgba(255, 122, 26, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(16, 24, 40, 0.12);
+}
+
+.auth-page.login-page .social-button:focus-visible {
+  outline: 2px solid rgba(255, 122, 26, 0.5);
+  outline-offset: 2px;
+}
+
+.auth-page.login-page .signup-link {
+  text-align: center;
+  font-size: 14px;
+  animation: login-rise 0.6s ease both;
+  animation-delay: 0.1s;
+}
+
+.auth-page.login-page .signup-link a {
+  color: var(--login-orange);
+}
+
+.auth-page.login-page .back-home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+  align-self: center;
+  color: #667085;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.auth-page.login-page .back-home:hover {
+  color: var(--login-orange);
+  transform: translateY(-1px);
+}
+
+.auth-page.login-page .back-home-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.auth-page.login-page .right-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  background: radial-gradient(
+    120% 120% at 20% 0%,
+    #fff7f1 0%,
+    #fff1e6 45%,
+    #fff7f1 100%
+  );
+  padding: 64px 56px;
+  gap: 18px;
+  animation: login-rise 0.65s ease both;
+  animation-delay: 0.12s;
+}
+
+.auth-page.login-page .brand-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth-page.login-page .brand-logo {
+  width: 200px;
+  object-fit: contain;
+}
+
+.auth-page.login-page .brand-name {
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+  color: #111827;
+}
+
+.auth-page.login-page .marketing-title {
+  font-size: 28px;
+  line-height: 1.25;
+  color: #111827;
+  margin-top: 8px;
+}
+
+.auth-page.login-page .marketing-title span {
+  display: block;
+}
+
+.auth-page.login-page .marketing-text {
+  font-size: 14px;
+  color: #6b7280;
+  max-width: 420px;
+}
+
+.auth-page.login-page .marketing-illustration {
+  max-height: 440px;
+  height: auto;
+  align-self: center;
+  margin-top: auto;
+  object-fit: contain;
+  animation: login-rise 0.7s ease both;
+  animation-delay: 0.18s;
+}
+
+@media (max-width: 1024px) {
+  .auth-page.login-page .login-container {
+    min-height: 0;
+  }
+
+  .auth-page.login-page .left-panel,
+  .auth-page.login-page .right-panel {
+    padding: 48px 40px;
+  }
+
+  .auth-page.login-page .marketing-title {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 860px) {
+  .auth-page.login-page .login-container {
+    flex-direction: column;
+  }
+
+  .auth-page.login-page .right-panel {
+    align-items: center;
+    text-align: center;
+  }
+
+  .auth-page.login-page .marketing-text {
+    max-width: 520px;
+  }
+}
+
+@media (max-width: 640px) {
+  .auth-page.login-page {
+    padding: 24px 16px;
+  }
+
+  .auth-page.login-page .left-panel,
+  .auth-page.login-page .right-panel {
+    padding: 36px 24px;
+  }
+
+  .auth-page.login-page .social-buttons {
+    grid-template-columns: 1fr;
+  }
+}

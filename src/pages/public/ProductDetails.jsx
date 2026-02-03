@@ -90,9 +90,9 @@ const ProductDetails = () => {
                   </button>
                 </Link>
 
-                <button className="product__ghost" type="button">
+                <Link className="product__ghost" to="/contact">
                   Contact CertiCode
-                </button>
+                </Link>
               </div>
 
               <div className="product__metaCard">

@@ -16,6 +16,8 @@ body {
 .main-content {
   flex: 1;
   padding: 30px 40px;
+  --admin-topbar-edge-x: 40px;
+  overflow-y: auto;
 }
 
 .topbar {

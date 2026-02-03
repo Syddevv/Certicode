@@ -1,111 +1,144 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import '../../styles/LoginAndRegister.css';
-import eye1 from '../../assets/eye1.png';
-import eye2 from '../../assets/eye2.png';
-import googleIcon from '../../assets/googleicon.png';
-import facebookLogo from '../../assets/facebooklogo.png';
-import certicodeIcon from '../../assets/certicodeicon.png';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import "../../styles/LoginAndRegister.css";
+import eye1 from "../../assets/eye1.png";
+import eye2 from "../../assets/eye2.png";
+import googleIcon from "../../assets/googleicon.png";
+import facebookLogo from "../../assets/facebooklogo.png";
+import certicodeIcon from "../../assets/certicodeicon.png";
+import loginIllustration from "../../assets/Login Image.png";
+import arrowLeft from "../../assets/arrowleft.png";
 
 const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const togglePassword = () => setPasswordVisible(!passwordVisible);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Login attempt:', { email, password });
+    console.log("Login attempt:", { email, password });
   };
 
   return (
-    <div className="auth-page">
+    <div className="auth-page login-page">
       <div className="login-container">
-        {/* LEFT PANEL */}
         <div className="left-panel">
-          <h1 className="login-title">Log In</h1>
-          <p className="login-subtitle">
-            Welcome back! please enter your details
-          </p>
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label" htmlFor="email">Email</label>
-            <input
-              type="email"
-              id="email"
-              className="form-input"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
+          <div className="login-header">
+            <h1 className="login-title">Log In</h1>
+            <p className="login-subtitle">
+              Welcome back! Please enter your details.
+            </p>
           </div>
 
-          <div className="form-group">
-            <label className="form-label" htmlFor="password">Password</label>
-            <div className="password-wrapper">
+          <form className="login-form" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label" htmlFor="email">
+                Email
+              </label>
               <input
-                type={passwordVisible ? 'text' : 'password'}
-                id="password"
+                type="email"
+                id="email"
                 className="form-input"
-                placeholder="Enter your password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={togglePassword}
-              >
-                <img
-                  src={passwordVisible ? eye2 : eye1}
-                  alt="Toggle password visibility"
-                  className="eye-icon-img"
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" htmlFor="password">
+                Password
+              </label>
+              <div className="password-wrapper">
+                <input
+                  type={passwordVisible ? "text" : "password"}
+                  id="password"
+                  className="form-input"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={togglePassword}
+                >
+                  <img
+                    src={passwordVisible ? eye2 : eye1}
+                    alt="Toggle password visibility"
+                    className="eye-icon-img"
+                  />
+                </button>
+              </div>
+            </div>
+
+            <div className="forgot-password">
+              <a href="#" className="forgot-password-link">
+                Forgot Password?
+              </a>
+            </div>
+
+            <button type="submit" className="login-button">
+              Log in
+            </button>
+
+            <div className="divider">
+              <span className="divider-text">Or Continue With</span>
+            </div>
+
+            <div className="social-buttons">
+              <button type="button" className="social-button">
+                <img src={googleIcon} alt="Google" className="google-icon" />
+                <span>Google</span>
+              </button>
+              <button type="button" className="social-button">
+                <img
+                  src={facebookLogo}
+                  alt="Facebook"
+                  className="facebook-icon"
+                />
+                <span>Facebook</span>
               </button>
             </div>
-          </div>
-
-          <button type="submit" className="login-button">Login</button>
-
-          <div className="forgot-password">
-            <a href="#" className="forgot-password-link">Forgot Password?</a>
-          </div>
-        </form>
-
-          <div className="divider">
-            <span className="divider-text">Or Continue With</span>
-          </div>
-
-          <div className="social-buttons">
-            <button type="button" className="social-button">
-              <img src={googleIcon} alt="Google" className="google-icon" />
-              <span>Google</span>
-            </button>
-            <button type="button" className="social-button">
-              <img src={facebookLogo} alt="Facebook" className="facebook-icon" />
-              <span>Facebook</span>
-            </button>
-          </div>
+          </form>
 
           <div className="signup-link">
-            Don't have account? <Link to="/register">Sign up</Link>
+            Don&apos;t have account? <Link to="/register">Sign up</Link>
           </div>
+
         </div>
 
         <div className="right-panel">
-          <div className="logo-container">
+          <div className="brand-row">
             <img
               src={certicodeIcon}
               alt="Certicode logo"
-              className="logo-image"
+              className="brand-logo"
             />
           </div>
+          <h2 className="marketing-title">
+            Supercharge Your Business
+            <span>with Our Digital Systems</span>
+          </h2>
+          <p className="marketing-text">
+            Get access to premium templates and applications designed to power
+            up your online business.
+          </p>
+          <img
+            src={loginIllustration}
+            alt="E-commerce dashboard illustration"
+            className="marketing-illustration"
+          />
         </div>
       </div>
+      <Link to="/" className="back-home">
+        <img src={arrowLeft} alt="" className="back-home-icon" />
+        Back to Home
+      </Link>
     </div>
   );
 };

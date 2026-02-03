@@ -1,7 +1,10 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; 
 import Sidebar from "../../components/Sidebar";
+import AdminTopbar from "../../components/AdminTopbar";
 import "../../styles/platformSetting.css";
+import searchIcon from "../../assets/Search.png";
+import notifBell from "../../assets/NotifBell.png";
 
 const PlatformSetting = () => {
   const navigate = useNavigate();
@@ -11,21 +14,18 @@ const PlatformSetting = () => {
       <Sidebar activePage="settings" />
       
       <main className="main-content">
-        <div className="topbar">
-          <div className="search-wrapper">
-            <span className="search-icon">🔍</span>
-            <input className="search-input" placeholder="Search anything..." />
-          </div>
-          <div className="topbar-actions">
-            <button className="icon-btn">🔔</button>
-            <button className="btn primary">Save Changes</button>
-          </div>
-        </div>
+        <AdminTopbar searchIcon={<span className="search-icon">🔍</span>}>
+          <Link to="/admin-notification" className="notification-link" aria-label="Notifications">
+            <img src={notifBell} alt="Notifications" className="topbar-icon" />
+            <span className="notification-dot" />
+          </Link>
+          <button className="btn primary">Save Changes</button>
+        </AdminTopbar>
 
         <div className="page-header">
           <h2>Settings</h2>
+          <p className="subtitle">Manage your platform's public identity and core regional preferences.</p>
         </div>
-                  <p className="subtitle">Manage your platform's public identity and core regional preferences.</p>
 
 
         <div className="tabs">

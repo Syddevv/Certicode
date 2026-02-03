@@ -1,0 +1,70 @@
+.admin-topbar.topbar {
+  background: #ffffff;
+  margin: 0 calc(-1 * var(--admin-topbar-edge-x, 0px)) 24px;
+  padding: 14px var(--admin-topbar-edge-x, 0px);
+  border: none;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.admin-topbar .search-wrapper {
+  border: none;
+  background: #f3f4f6;
+  border-radius: 10px;
+  padding: 0 16px;
+}
+
+.admin-topbar .search-wrapper:focus-within {
+  border: none;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.15);
+}
+
+.admin-topbar .search-input {
+  padding: 10px 0;
+}
+
+.admin-topbar .topbar-actions {
+  align-items: center;
+}
+
+.notification-link {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.notification-link:hover {
+  background: #f3f4f6;
+}
+
+.notification-link .notification-icon,
+.notification-link .topbar-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.notification-dot {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #f97316;
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
+@media (max-width: 768px) {
+  .admin-topbar.topbar {
+    margin: 0 calc(-1 * var(--admin-topbar-edge-x, 0px)) 20px;
+    padding: 12px var(--admin-topbar-edge-x, 0px);
+  }
+}

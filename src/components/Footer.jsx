@@ -4,6 +4,7 @@ import FacebookIcon from "../assets/fb-gray.png";
 import MailIcon from "../assets/mail-gray.png";
 import LinkedInIcon from "../assets/linkedin-gray.png";
 import SendIcon from "../assets/send-icon.png";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -47,15 +48,15 @@ const Footer = () => {
 
           <div className="footer__col">
             <div className="footer__heading">Company</div>
-            <a className="footer__link" href="#">
+            <Link to="/about" className="footer__link">
               About Certicode
-            </a>
-            <a className="footer__link" href="#">
+            </Link>
+            <Link className="footer__link" to="/success-stories">
               Success Stories
-            </a>
-            <a className="footer__link" href="#">
+            </Link>
+            <Link className="footer__link" to="/blogs-news">
               Blog & News
-            </a>
+            </Link>
           </div>
 
           <div className="footer__col footer__newsletter">
