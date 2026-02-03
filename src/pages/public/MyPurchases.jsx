@@ -120,9 +120,9 @@ const MyPurchases = () => {
                 Account Settings
               </Link>
             </button>
-            <button className="purchases-tab" type="button">
+            <Link className="purchases-tab" to="/customer-support">
               Support
-            </button>
+            </Link>
           </div>
 
           <div className="purchases__content">
@@ -331,9 +331,9 @@ const MyPurchases = () => {
                 <button className="purchases-secondary" type="button">
                   View Full License
                 </button>
-                <button className="purchases-alert" type="button">
+                <Link className="purchases-alert" to="/customer-support">
                   Report Issue
-                </button>
+                </Link>
               </div>
 
               <div className="purchases-card purchases-cta">

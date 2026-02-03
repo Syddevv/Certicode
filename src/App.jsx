@@ -22,6 +22,11 @@ import InvoiceDetails from "./pages/public/InvoiceDetails";
 import BuyerAccountSettings from "./pages/public/BuyerAccountSettings";
 import About from "./pages/public/About";
 import PurchasedAssetDetail from "./pages/public/PurchasedAssetDetail";
+import CustomerSupport from "./pages/public/CustomerSupport";
+import ContactUs from "./pages/public/ContactUs";
+import SuccessStories from "./pages/public/SuccessStories";
+import BlogsNews from "./pages/public/BlogsNews";
+import BlogsNewsIndividual from "./pages/public/BlogsNewsIndividual";
 
 // Admin
 import AdminInventory from "./pages/admin/AdminInventory";
@@ -68,6 +73,14 @@ function App() {
         <Route path="/billing-invoices" element={<BillingInvoices />} />
         <Route path="/billing-invoices/inv-8273" element={<InvoiceDetails />} />
         <Route path="/account-settings" element={<BuyerAccountSettings />} />
+        <Route path="/customer-support" element={<CustomerSupport />} />
+        <Route path="/contact" element={<ContactUs />} />
+        <Route path="/success-stories" element={<SuccessStories />} />
+        <Route path="/blogs-news" element={<BlogsNews />} />
+        <Route
+          path="/blogs-news/how-secure-software"
+          element={<BlogsNewsIndividual />}
+        />
         <Route path="/about" element={<About />} />
         <Route
           path="/marketplace/e-commerce-saas-template"

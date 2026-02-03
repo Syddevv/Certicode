@@ -187,9 +187,9 @@ const PurchasedAssetDetail = () => {
                   <strong>Active Support (6 Months Left)</strong>
                   <p>Expires on May 5, 2026</p>
                 </div>
-                <button className="purchased-detail__supportBtn" type="button">
+                <Link className="purchased-detail__supportBtn" to="/contact">
                   Contact Technical Support
-                </button>
+                </Link>
                 <span className="purchased-detail__footnote">
                   Typical response time &lt; 24 hrs
                 </span>

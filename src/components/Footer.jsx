@@ -51,12 +51,12 @@ const Footer = () => {
             <Link to="/about" className="footer__link">
               About Certicode
             </Link>
-            <a className="footer__link" href="#">
+            <Link className="footer__link" to="/success-stories">
               Success Stories
-            </a>
-            <a className="footer__link" href="#">
+            </Link>
+            <Link className="footer__link" to="/blogs-news">
               Blog & News
-            </a>
+            </Link>
           </div>
 
           <div className="footer__col footer__newsletter">
