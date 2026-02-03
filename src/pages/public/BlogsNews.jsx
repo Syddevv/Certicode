@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/BlogsNews.css";
@@ -30,6 +31,7 @@ const BlogsNews = () => {
       type: "Blog",
       title: "How Secure Software Protects Your Business in 2025",
       date: "Jan 24, 2026",
+      link: "/blogs-news/how-secure-software",
     },
     {
       type: "News",
@@ -129,16 +131,31 @@ const BlogsNews = () => {
           <div className="blogs-side">
             <div className="blogs-side__heading">Featured</div>
             <div className="blogs-side__list">
-              {sideFeatured.map((item) => (
-                <article key={item.title} className="blogs-side__card">
-                  <div className="blogs-side__media" />
-                  <div className="blogs-side__body">
-                    <span className="blogs-tag">{item.type}</span>
-                    <h4>{item.title}</h4>
-                    <span className="blogs-date">{item.date}</span>
-                  </div>
-                </article>
-              ))}
+              {sideFeatured.map((item) =>
+                item.link ? (
+                  <Link
+                    key={item.title}
+                    to={item.link}
+                    className="blogs-side__card blogs-side__card--link"
+                  >
+                    <div className="blogs-side__media" />
+                    <div className="blogs-side__body">
+                      <span className="blogs-tag">{item.type}</span>
+                      <h4>{item.title}</h4>
+                      <span className="blogs-date">{item.date}</span>
+                    </div>
+                  </Link>
+                ) : (
+                  <article key={item.title} className="blogs-side__card">
+                    <div className="blogs-side__media" />
+                    <div className="blogs-side__body">
+                      <span className="blogs-tag">{item.type}</span>
+                      <h4>{item.title}</h4>
+                      <span className="blogs-date">{item.date}</span>
+                    </div>
+                  </article>
+                )
+              )}
             </div>
           </div>
         </div>

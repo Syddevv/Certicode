@@ -26,6 +26,7 @@ import CustomerSupport from "./pages/public/CustomerSupport";
 import ContactUs from "./pages/public/ContactUs";
 import SuccessStories from "./pages/public/SuccessStories";
 import BlogsNews from "./pages/public/BlogsNews";
+import BlogsNewsIndividual from "./pages/public/BlogsNewsIndividual";
 
 // Admin
 import AdminInventory from "./pages/admin/AdminInventory";
@@ -76,6 +77,10 @@ function App() {
         <Route path="/contact" element={<ContactUs />} />
         <Route path="/success-stories" element={<SuccessStories />} />
         <Route path="/blogs-news" element={<BlogsNews />} />
+        <Route
+          path="/blogs-news/how-secure-software"
+          element={<BlogsNewsIndividual />}
+        />
         <Route path="/about" element={<About />} />
         <Route
           path="/marketplace/e-commerce-saas-template"

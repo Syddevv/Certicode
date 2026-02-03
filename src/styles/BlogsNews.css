@@ -179,6 +179,9 @@
   overflow: hidden;
   background: #ffffff;
   box-shadow: 0 12px 22px rgba(15, 23, 42, 0.04);
+  display: block;
+  text-decoration: none;
+  color: inherit;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
