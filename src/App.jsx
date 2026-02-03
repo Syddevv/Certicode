@@ -6,7 +6,7 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 
 // Public
-import LandingPage from "./pages/public/LandingPage";
+import LandingPage from "./pages/public/LandingPage"; // Note: unused in routes below, but kept from your original code
 import TermsAndConditions from "./pages/public/TermsAndConditions";
 import PrivacyPolicy from "./pages/public/PrivacyPolicy";
 import Marketplace from "./pages/public/Marketplace";
@@ -32,13 +32,14 @@ import BlogsNewsIndividual from "./pages/public/BlogsNewsIndividual";
 import AdminInventory from "./pages/admin/AdminInventory";
 import AdminSales from "./pages/admin/AdminSales";
 import AdminCustomers from "./pages/admin/AdminCustomers";
+import AdminCustomerDetails from "./pages/admin/AdminCustomerDetails"; // <--- IMPORT ADDED HERE
 import AdminSetting from "./pages/admin/AdminSetting";
 import PlatformSetting from "./pages/admin/PlatformSetting";
 import SupportDesk from "./pages/admin/SupportDesk";
 import TicketDetail from "./pages/admin/TicketDetail";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminNotification from "./pages/admin/AdminNotification";
-
+import AdminOrderDetails from "./pages/admin/AdminOrderDetails";
 function App() {
   return (
     <BrowserRouter>
@@ -52,11 +53,15 @@ function App() {
         <Route path="/dashboard" element={<AdminDashboard />} />
         <Route path="/inventory" element={<AdminInventory />} />
         <Route path="/sales" element={<AdminSales />} />
+        
+        {/* Customer Routes */}
         <Route path="/customers" element={<AdminCustomers />} />
+        <Route path="/customers/details" element={<AdminCustomerDetails />} /> {/* <--- ROUTE ADDED HERE */}
+        <Route path="/sales/order-details" element={<AdminOrderDetails />} />
         <Route path="/admin-notification" element={<AdminNotification />} />
 
         {/* PUBLIC PAGES / USER */}
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={<AdminDashboard />} />
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/marketplace" element={<Marketplace />} />

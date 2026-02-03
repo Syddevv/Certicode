@@ -146,7 +146,10 @@ const AdminSales = () => {
                   <td className="order-id">#ORD-94210</td>
                   <td>
                     <div className="asset-info">
-                      <strong>E-commerce SaaS Template</strong>
+                      {/* LINK ADDED HERE */}
+                      <Link to="/sales/order-details" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <strong>E-commerce SaaS Template</strong>
+                      </Link>
                       <span className="mini-badge blue">WEB APP</span>
                     </div>
                   </td>
@@ -167,7 +170,10 @@ const AdminSales = () => {
                     </span>
                   </td>
                   <td className="actions-cell">
-                    <button>{Icons.Edit}</button>
+                    {/* LINK ADDED HERE */}
+                    <Link to="/sales/order-details">
+                      <button>{Icons.Edit}</button>
+                    </Link>
                     <button>{Icons.Settings}</button>
                   </td>
                 </tr>
@@ -239,7 +245,10 @@ const AdminSales = () => {
                   <td className="order-id">#ORD-94207</td>
                   <td>
                     <div className="asset-info">
-                      <strong>FitLife Tracker Mobile App</strong>
+                       {/* LINK ADDED HERE */}
+                       <Link to="/sales/order-details" style={{ textDecoration: 'none', color: 'inherit' }}>
+                        <strong>FitLife Tracker Mobile App</strong>
+                      </Link>
                       <span className="mini-badge green">MOBILE APP</span>
                     </div>
                   </td>
@@ -260,7 +269,10 @@ const AdminSales = () => {
                     </span>
                   </td>
                   <td className="actions-cell">
-                    <button>{Icons.Edit}</button>
+                    {/* LINK ADDED HERE */}
+                    <Link to="/sales/order-details">
+                      <button>{Icons.Edit}</button>
+                    </Link>
                     <button>{Icons.Settings}</button>
                   </td>
                 </tr>
@@ -290,4 +302,3 @@ const AdminSales = () => {
 };
 
 export default AdminSales;
-
