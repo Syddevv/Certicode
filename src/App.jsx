@@ -24,6 +24,7 @@ import About from "./pages/public/About";
 import PurchasedAssetDetail from "./pages/public/PurchasedAssetDetail";
 import CustomerSupport from "./pages/public/CustomerSupport";
 import ContactUs from "./pages/public/ContactUs";
+import SuccessStories from "./pages/public/SuccessStories";
 
 // Admin
 import AdminInventory from "./pages/admin/AdminInventory";
@@ -72,6 +73,7 @@ function App() {
         <Route path="/account-settings" element={<BuyerAccountSettings />} />
         <Route path="/customer-support" element={<CustomerSupport />} />
         <Route path="/contact" element={<ContactUs />} />
+        <Route path="/success-stories" element={<SuccessStories />} />
         <Route path="/about" element={<About />} />
         <Route
           path="/marketplace/e-commerce-saas-template"

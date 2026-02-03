@@ -51,9 +51,9 @@ const Footer = () => {
             <Link to="/about" className="footer__link">
               About Certicode
             </Link>
-            <a className="footer__link" href="#">
+            <Link className="footer__link" to="/success-stories">
               Success Stories
-            </a>
+            </Link>
             <a className="footer__link" href="#">
               Blog & News
             </a>
