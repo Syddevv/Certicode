@@ -240,9 +240,9 @@ const PromoCodes = () => {
                   Having trouble with a voucher code? Our support team is here
                   to help you 24/7.
                 </p>
-                <button className="promo__helpLink" type="button">
+                <Link className="promo__helpLink" to="/contact">
                   Contact Support <span aria-hidden="true">›</span>
-                </button>
+                </Link>
               </div>
             </aside>
           </div>

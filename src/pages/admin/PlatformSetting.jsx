@@ -1,9 +1,10 @@
 import React from "react";
-import { useNavigate } from "react-router-dom"; 
+import { Link, useNavigate } from "react-router-dom"; 
 import Sidebar from "../../components/Sidebar";
+import AdminTopbar from "../../components/AdminTopbar";
 import "../../styles/platformSetting.css";
 import searchIcon from "../../assets/Search.png";
-import notifIcon from "../../assets/notif.png";
+import notifBell from "../../assets/NotifBell.png";
 import platformIcon from "../../assets/platform-identity.png";
 import securityIcon from "../../assets/security-and-access.png";
 import activityLogIcon from "../../assets/activity-log.png";
@@ -15,18 +16,13 @@ const PlatformSetting = () => {
     <div className="layout">
       <Sidebar activePage="settings" />
       <main className="main-content">
-        <div className="topbar">
-          <div className="search-wrapper">
-            <img src={searchIcon} alt="Search" className="search-icon" />
-            <input className="search-input" placeholder="Search anything..." />
-          </div>
-          <div className="topbar-actions">
-            <button className="icon-btn">
-              <img src={notifIcon} alt="Notifications" className="topbar-icon" />
-            </button>
-            <button className="btn primary">Save Changes</button>
-          </div>
-        </div>
+        <AdminTopbar searchIcon={<img src={searchIcon} alt="Search" className="search-icon" />}>
+          <Link to="/admin-notification" className="notification-link" aria-label="Notifications">
+            <img src={notifBell} alt="Notifications" className="topbar-icon" />
+            <span className="notification-dot" />
+          </Link>
+          <button className="btn primary">Save Changes</button>
+        </AdminTopbar>
 
         <div className="page-header">
           <h2>Settings</h2>
@@ -171,3 +167,4 @@ const PlatformSetting = () => {
 };
 
 export default PlatformSetting;
+

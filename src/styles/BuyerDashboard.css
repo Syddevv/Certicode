@@ -505,6 +505,8 @@
   gap: 12px;
   cursor: pointer;
   text-align: left;
+  text-decoration: none;
+  color: inherit;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 

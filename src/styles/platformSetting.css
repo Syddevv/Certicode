@@ -6,6 +6,7 @@
 .main-content {
   flex: 1;
   padding: 2rem;
+  --admin-topbar-edge-x: 32px;
   background-color: #f9fafb;
   overflow-y: auto;
 }

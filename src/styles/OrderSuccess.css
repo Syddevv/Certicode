@@ -275,12 +275,14 @@
   color: var(--color-neutral-500);
 }
 
-.success__help button {
+.success__help button,
+.success__help a {
   border: none;
   background: transparent;
   color: var(--color-primary-500);
   font-weight: 700;
   cursor: pointer;
+  text-decoration: none;
 }
 
 @media (max-width: 640px) {

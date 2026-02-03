@@ -486,6 +486,8 @@
   gap: 10px;
   grid-template-columns: auto 1fr auto;
   align-items: start;
+  text-decoration: none;
+  color: inherit;
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
@@ -547,6 +549,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  text-decoration: none;
   transition: color 0.2s ease;
 }
 

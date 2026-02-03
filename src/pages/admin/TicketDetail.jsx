@@ -1,9 +1,10 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
+import AdminTopbar from "../../components/AdminTopbar";
 import "../../styles/ticketDetail.css";
 import searchIcon from "../../assets/Search.png";
-import notifIcon from "../../assets/notif.png";
+import notifBell from "../../assets/NotifBell.png";
 import stripeIcon from "../../assets/stripe.png";
 import vectorMailIcon from "../../assets/tabler_mail-filled.png";
 import vectorAssetIcon from "../../assets/Vectorasset.png";
@@ -26,21 +27,15 @@ const TicketDetail = () => {
       <Sidebar activePage="support" />
 
       <main className="main-content detail-bg">
-        <header className="topbar">
-          <div className="search-wrapper">
-            <img src={searchIcon} alt="Search" className="search-icon" />
-            <input className="search-input" placeholder="Search anything..." />
+        <AdminTopbar searchIcon={<img src={searchIcon} alt="Search" className="search-icon" />}>
+          <Link to="/admin-notification" className="notification-link" aria-label="Notifications">
+            <img src={notifBell} alt="Notifications" className="topbar-icon" />
+            <span className="notification-dot"></span>
+          </Link>
+          <div className="user-profile">
+            <img src="https://i.pravatar.cc/150?u=alex" alt="User" />
           </div>
-          <div className="topbar-actions">
-            <button className="icon-btn-notif">
-              <img src={notifIcon} alt="Notifications" className="topbar-icon" />
-              <span className="notif-dot"></span>
-            </button>
-            <div className="user-profile">
-              <img src="https://i.pravatar.cc/150?u=alex" alt="User" />
-            </div>
-          </div>
-        </header>
+        </AdminTopbar>
 
         <div className="detail-container">
           <section className="ticket-main">
@@ -222,3 +217,4 @@ const TicketDetail = () => {
 };
 
 export default TicketDetail;
+
