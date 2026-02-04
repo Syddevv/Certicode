@@ -115,7 +115,7 @@ const OrderSuccess = () => {
               <div className="success__error">
                 {error || "No order found"}
               </div>
-              <Link className="success__action" to="/purchases">
+              <Link className="success__action" to="/my-purchases">
                 View All Purchases
               </Link>
             </div>
@@ -282,7 +282,7 @@ const OrderSuccess = () => {
             >
               Back to Marketplace
             </Link>
-            <Link className="success__action" to="/purchases">
+            <Link className="success__action" to="/my-purchases">
               Go to My Purchases
             </Link>
           </div>

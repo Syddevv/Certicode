@@ -265,12 +265,14 @@ const Marketplace = () => {
     return paginationItems;
   };
 
-  useEffect(() => {
-    const category = new URLSearchParams(location.search).get("category");
-    if (categoryTabs.includes(category)) {
-      setActiveTab(category);
-    }
-  }, [location.search]);
+
+  //~~~
+  // useEffect(() => {
+  //   const category = new URLSearchParams(location.search).get("category");
+  //   if (categoryTabs.includes(category)) {
+  //     setActiveTab(category);
+  //   }
+  // }, [location.search]);
 
   return (
     <div>
