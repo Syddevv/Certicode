@@ -38,6 +38,7 @@ import SupportDesk from "./pages/admin/SupportDesk";
 import TicketDetail from "./pages/admin/TicketDetail";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminNotification from "./pages/admin/AdminNotification";
+import AdminAddNewAsset from "./pages/admin/AdminAddNewAsset";
 
 function App() {
   return (
@@ -86,6 +87,7 @@ function App() {
           path="/marketplace/e-commerce-saas-template"
           element={<ProductDetails />}
         />
+
         {/* Settings - Both point to /settings in Sidebar, but have unique paths */}
         <Route path="/settings" element={<AdminSetting />} />
         <Route path="/platform-settings" element={<PlatformSetting />} />
@@ -93,6 +95,9 @@ function App() {
         {/* Support Routes */}
         <Route path="/support" element={<SupportDesk />} />
         <Route path="/ticket" element={<TicketDetail />} />
+
+        {/* Add New Asset */}
+        <Route path="/add-asset" element={<AdminAddNewAsset />} />
 
         {/* Redirect if no path matches */}
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -26,6 +26,13 @@
   align-items: center;
 }
 
+.admin-topbar .topbar-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
 .notification-link {
   position: relative;
   width: 40px;

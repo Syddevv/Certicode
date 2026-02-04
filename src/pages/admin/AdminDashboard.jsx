@@ -46,7 +46,9 @@ const AdminDashboard = () => {
               <img src={notifBell} alt="Notifications" className="notification-icon" />
               <span className="notification-dot" />
             </Link>
-            <button className="btn primary">+ Add New Asset</button>
+            <Link to="/add-asset" className="btn primary">
+              + Add New Asset
+            </Link>
           </AdminTopbar>
 
           <div className="page-header">

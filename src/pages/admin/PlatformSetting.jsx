@@ -1,17 +1,10 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import Sidebar from "../../components/Sidebar";
-import "../../styles/platformSetting.css";
-import React from "react";
-import { Link, useNavigate } from "react-router-dom"; 
+import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import AdminTopbar from "../../components/AdminTopbar";
 import "../../styles/platformSetting.css";
 import searchIcon from "../../assets/Search.png";
 import notifBell from "../../assets/NotifBell.png";
-import platformIcon from "../../assets/platform-identity.png";
-import securityIcon from "../../assets/security-and-access.png";
-import activityLogIcon from "../../assets/activity-log.png";
 
 const PlatformSetting = () => {
   const navigate = useNavigate();
