@@ -13,6 +13,7 @@ import { api } from "../../services/api";
 const Register = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -35,6 +36,7 @@ const Register = () => {
 
     try {
       const userData = {
+        name: name,
         email: email,
         password: password,
         password_confirmation: confirmPassword
@@ -79,6 +81,21 @@ const Register = () => {
           </div>
 
           <form className="login-form" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label" htmlFor="name">
+                Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                className="form-input"
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+
             <div className="form-group">
               <label className="form-label" htmlFor="email">
                 Email

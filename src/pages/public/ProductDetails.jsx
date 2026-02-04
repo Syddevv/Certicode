@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useParams, useLocation } from "react-router-dom";
+import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/ProductDetails.css";
@@ -14,14 +14,18 @@ import ProductTechStack from "../../components/ProductTechStack";
 import ProductFeatures from "../../components/ProductFeatures";
 import ProductReviews from "../../components/ProductReviews";
 import { api } from "../../services/api";
+import { CartAPI } from "../../services/CartAPI";
 
 const ProductDetails = () => {
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [relatedProducts, setRelatedProducts] = useState([]);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [cartMessage, setCartMessage] = useState("");
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -171,6 +175,65 @@ const ProductDetails = () => {
     }
   };
 
+  const handleBuyNow = async (e) => {
+  e.preventDefault();
+  
+  if (!product || !product.id) {
+    setCartMessage("Product information is missing");
+    return;
+  }
+
+  const token = localStorage.getItem('auth_token');
+    if (!token) {
+      setCartMessage("Please login to add items to cart");
+      
+      setTimeout(() => {
+        navigate("/login", { 
+          state: { 
+            from: `/marketplace/${product.id}`,
+            message: "Please login to add items to your cart" 
+          } 
+        });
+      }, 1500);
+      return;
+    }
+
+    try {
+      setAddingToCart(true);
+      setCartMessage("");
+      
+      const response = await CartAPI.addToCart(product.id);
+      
+      if (response && (response.message === "Product added to cart" || response.message === "Product already in cart")) {
+        navigate("/cart");
+      } else {
+        setCartMessage("Failed to add to cart. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      
+      if (error.response && error.response.status === 401) {
+        setCartMessage("Session expired. Please login again.");
+        localStorage.removeItem('auth_token');
+        setTimeout(() => {
+          navigate("/login");
+        }, 1500);
+      } 
+      else if (error.response && error.response.status === 400) {
+        navigate("/cart");
+      }
+      else {
+        setCartMessage(error.message || "Failed to add to cart. Please try again.");
+      }
+    } finally {
+      setAddingToCart(false);
+      
+      setTimeout(() => {
+        setCartMessage("");
+      }, 3000);
+    }
+  };
+
   if (loading) {
     return (
       <div>
@@ -287,11 +350,21 @@ const ProductDetails = () => {
                   </ul>
                 </div>
 
-                <Link to="/cart">
-                  <button className="product__cta" type="button">
-                    Buy Now
-                  </button>
-                </Link>
+                {/* Buy Now button with cart functionality */}
+                <button 
+                  className="product__cta" 
+                  type="button"
+                  onClick={handleBuyNow}
+                  disabled={addingToCart}
+                >
+                  {addingToCart ? "Adding to Cart..." : "Buy Now"}
+                </button>
+
+                {cartMessage && (
+                  <div className={`product__cartMessage ${cartMessage.includes("Failed") || cartMessage.includes("Please login") ? "error" : ""}`}>
+                    {cartMessage}
+                  </div>
+                )}
 
                 <Link className="product__ghost" to="/contact">
                   Contact CertiCode
