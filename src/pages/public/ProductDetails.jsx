@@ -26,6 +26,7 @@ const ProductDetails = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [addingToCart, setAddingToCart] = useState(false);
   const [cartMessage, setCartMessage] = useState("");
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -131,7 +132,8 @@ const ProductDetails = () => {
         technologies: productData.technologies,
         features: productData.features,
         specifications: [],
-        image_urls: productData.images,
+        featured_image: productData.featured_image,
+        images: productData.images || [],
         vendor: "CertiCode",
         verified: true,
         includes_support: true,
@@ -159,6 +161,7 @@ const ProductDetails = () => {
               asset_type: item.asset_type,
               technologies: item.technologies || [],
               features: item.features || [],
+              featured_image: item.featured_image,
               images: item.images || []
             }));
           setRelatedProducts(related);
@@ -234,6 +237,19 @@ const ProductDetails = () => {
     }
   };
 
+  const getAllImages = () => {
+    if (!product) return [];
+    const images = [];
+    if (product.featured_image) {
+      images.push(product.featured_image);
+    }
+    if (product.images && Array.isArray(product.images)) {
+      const otherImages = product.images.filter(img => img !== product.featured_image);
+      images.push(...otherImages);
+    }
+    return images;
+  };
+
   if (loading) {
     return (
       <div>
@@ -271,6 +287,8 @@ const ProductDetails = () => {
     );
   }
 
+  const allImages = getAllImages();
+
   return (
     <div>
       <Navbar />
@@ -288,11 +306,28 @@ const ProductDetails = () => {
 
           <div className="product__top">
             <div className="product__gallery">
-              <div className="product__hero" />
+              <div 
+                className="product__hero" 
+                style={{
+                  backgroundImage: `url(${allImages[selectedImageIndex] || ''})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
+              />
               <div className="product__thumbs">
-                {product.image_urls && product.image_urls.length > 0 ? (
-                  product.image_urls.slice(0, 4).map((image, index) => (
-                    <div key={index} className="product__thumb" />
+                {allImages.length > 0 ? (
+                  allImages.map((image, index) => (
+                    <div 
+                      key={index} 
+                      className={`product__thumb ${selectedImageIndex === index ? 'product__thumb--active' : ''}`}
+                      onClick={() => setSelectedImageIndex(index)}
+                      style={{
+                        backgroundImage: `url(${image})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        cursor: 'pointer'
+                      }}
+                    />
                   ))
                 ) : (
                   <>
@@ -350,7 +385,6 @@ const ProductDetails = () => {
                   </ul>
                 </div>
 
-                {/* Buy Now button with cart functionality */}
                 <button 
                   className="product__cta" 
                   type="button"
@@ -474,7 +508,14 @@ const ProductDetails = () => {
                     state={{ fromRelated: true }}
                   >
                     <article className="product__relatedCard">
-                      <div className="product__relatedMedia" />
+                      <div 
+                        className="product__relatedMedia"
+                        style={{
+                          backgroundImage: `url(${item.featured_image || ''})`,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center'
+                        }}
+                      />
                       <div className="product__relatedBody">
                         <h4>{item.name || item.title}</h4>
                         <div className="product__relatedMeta">

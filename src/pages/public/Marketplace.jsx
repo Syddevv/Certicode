@@ -96,6 +96,7 @@ const Marketplace = () => {
           price: parseFloat(product.price),
           originalPrice: `$${product.price}`,
           path: `/marketplace/${product.id}`,
+          featured_image: product.featured_image,
           asset_type: mappedAssetType,
           tags: product.technologies ? 
             product.technologies.map(tech => ({
@@ -403,6 +404,11 @@ const Marketplace = () => {
                   {filteredAssets.map((asset) => (
                     <article key={asset.title} className="marketplace__card">
                       <div className="marketplace__cardMedia" />
+                      <img
+                      src={asset.featured_image || ViewProduct}
+                      about={asset.title}
+                      className="marketplace__cardImage"
+                      />
                       <div className="marketplace__cardBody">
                         <div className="marketplace__tags">
                           {asset.tags.map((tag) => (

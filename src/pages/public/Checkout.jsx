@@ -511,7 +511,19 @@ const Checkout = () => {
                 {cartItems.map((item) => (
                   <div key={item.id} className="checkout__summaryItem">
                     <div className="checkout__thumb">
-                      {item.product?.images?.[0] ? (
+                      {item.product?.featured_image ? (
+                        <img 
+                          src={item.product.featured_image} 
+                          alt={item.product.name}
+                          className="checkout__thumbImage"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = '';
+                            e.target.parentElement.innerHTML = '<div class="checkout__thumbPlaceholder">' + 
+                              (item.product?.name?.charAt(0) || 'P') + '</div>';
+                          }}
+                        />
+                      ) : item.product?.images?.[0] ? (
                         <img 
                           src={item.product.images[0]} 
                           alt={item.product.name}

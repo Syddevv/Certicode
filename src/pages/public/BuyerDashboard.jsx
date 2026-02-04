@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -15,79 +15,143 @@ import OrangeStar from "../../assets/orangestar.png";
 import BillingSupportIcon from "../../assets/billingSupport.png";
 import CustomerSupportIcon from "../../assets/CustomerSupport.png";
 import WhiteDownload from "../../assets/whiteDownload.png";
-
-const stats = [
-  { label: "Total Assets", value: "3", icon: OrangeBox },
-  { label: "Active Licenses", value: "2", icon: OrangeBadge },
-  { label: "Last Purchase", value: "Jan 20, 2026", icon: OrangeBag },
-];
-
-const assets = [
-  {
-    title: "E-commerce SaaS Template",
-    subtitle: "Saas Template",
-    version: "v2.4.1",
-    tags: [
-      { label: "Node.js", tone: "green" },
-      { label: "React", tone: "blue" },
-    ],
-  },
-  {
-    title: "FoodieExpress Delivery App",
-    subtitle: "Website App",
-    version: "v3.2.1",
-    tags: [
-      { label: "Firebase", tone: "pink" },
-      { label: "Flutter", tone: "purple" },
-      { label: "Node.js", tone: "green" },
-    ],
-  },
-  {
-    title: "FinTech Banking Dashboard",
-    subtitle: "UI Kit",
-    version: "v3.2.1",
-    tags: [
-      { label: "Adobe XD", tone: "violet" },
-      { label: "Figma", tone: "rose" },
-    ],
-  },
-];
-
-const activities = [
-  {
-    title: "Asset downloaded: FoodieExpress Delivery App",
-    time: "2 hours ago",
-    icon: OrangeDownload,
-  },
-  {
-    title: "License renewed for E-commerce SaaS Template",
-    time: "1 day ago",
-    icon: LicensedRenewed,
-  },
-  {
-    title: "Invoice #INV-9281 generated",
-    time: "5 days ago",
-    icon: InvoiceIcon,
-  },
-];
-
-const supportItems = [
-  {
-    title: "Priority Help Desk",
-    desc: "Average response time < 2h",
-    icon: CustomerSupportIcon,
-  },
-  {
-    title: "Billing Support",
-    desc: "Invoices, refunds, & billing cycles",
-    icon: BillingSupportIcon,
-  },
-];
+import { ProfileAPI } from "../../services/ProfileAPI";
 
 const BuyerDashboard = () => {
+  const [purchases, setPurchases] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [stats, setStats] = useState([
+    { label: "Total Assets", value: "0", icon: OrangeBox },
+    { label: "Active Licenses", value: "0", icon: OrangeBadge },
+    { label: "Last Purchase", value: "Never", icon: OrangeBag },
+  ]);
+
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    fetchUserData();
+    fetchPurchases();
   }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const userData = await ProfileAPI.getCurrentUser();
+      setUser(userData);
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
+    }
+  };
+
+  const fetchPurchases = async () => {
+    try {
+      const data = await ProfileAPI.getUserPurchases();
+      const userPurchases = data.purchases || [];
+      setPurchases(userPurchases);
+      
+      const totalAssets = userPurchases.length;
+      const activeLicenses = userPurchases.filter(p => p.license_key && p.license_key !== '').length;
+      
+      let lastPurchase = 'Never';
+      if (userPurchases.length > 0) {
+        const latestPurchase = userPurchases[0];
+        const purchaseDate = new Date(latestPurchase.purchased_at);
+        lastPurchase = purchaseDate.toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric', 
+          year: 'numeric' 
+        });
+      }
+      
+      setStats([
+        { label: "Total Assets", value: totalAssets.toString(), icon: OrangeBox },
+        { label: "Active Licenses", value: activeLicenses.toString(), icon: OrangeBadge },
+        { label: "Last Purchase", value: lastPurchase, icon: OrangeBag },
+      ]);
+      
+    } catch (error) {
+      console.error("Failed to fetch purchases:", error);
+      setPurchases([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getAssetTags = (product) => {
+    if (!product) return [{ label: "Digital", tone: "gray" }];
+    
+    const name = product.name?.toLowerCase() || '';
+    const category = product.category?.toLowerCase() || '';
+    
+    const techKeywords = [
+      { keyword: "react", label: "React", tone: "blue" },
+      { keyword: "node", label: "Node.js", tone: "green" },
+      { keyword: "vue", label: "Vue", tone: "green" },
+      { keyword: "angular", label: "Angular", tone: "red" },
+      { keyword: "laravel", label: "Laravel", tone: "red" },
+      { keyword: "php", label: "PHP", tone: "orange" },
+      { keyword: "flutter", label: "Flutter", tone: "purple" },
+      { keyword: "firebase", label: "Firebase", tone: "pink" },
+      { keyword: "figma", label: "Figma", tone: "rose" },
+      { keyword: "adobe", label: "Adobe XD", tone: "violet" },
+      { keyword: "sketch", label: "Sketch", tone: "orange" },
+      { keyword: "saas", label: "SaaS", tone: "blue" },
+      { keyword: "template", label: "Template", tone: "green" },
+      { keyword: "app", label: "App", tone: "purple" },
+      { keyword: "dashboard", label: "Dashboard", tone: "violet" },
+      { keyword: "ui kit", label: "UI Kit", tone: "rose" }
+    ];
+    
+    const tags = [];
+    techKeywords.forEach(tech => {
+      if (name.includes(tech.keyword) || category.includes(tech.keyword)) {
+        tags.push({ label: tech.label, tone: tech.tone });
+      }
+    });
+    
+    if (tags.length === 0) {
+      tags.push({ label: "Digital", tone: "blue" });
+    }
+    
+    return tags.slice(0, 2);
+  };
+
+  const activities = purchases.slice(0, 3).map(purchase => ({
+    title: `Purchased: ${purchase.product?.name || 'Unknown Product'}`,
+    time: purchase.purchased_at 
+      ? new Date(purchase.purchased_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      : 'Recently',
+    icon: OrangeDownload,
+  }));
+
+  const fallbackActivities = [
+    {
+      title: "License renewed for E-commerce SaaS Template",
+      time: "1 day ago",
+      icon: LicensedRenewed,
+    },
+    {
+      title: "Invoice #INV-9281 generated",
+      time: "5 days ago",
+      icon: InvoiceIcon,
+    }
+  ];
+
+  const displayActivities = activities.length > 0 
+    ? activities 
+    : fallbackActivities.slice(0, 3);
+
+  const supportItems = [
+    {
+      title: "Priority Help Desk",
+      desc: "Average response time < 2h",
+      icon: CustomerSupportIcon,
+    },
+    {
+      title: "Billing Support",
+      desc: "Invoices, refunds, & billing cycles",
+      icon: BillingSupportIcon,
+    },
+  ];
 
   return (
     <div>
@@ -96,16 +160,31 @@ const BuyerDashboard = () => {
         <div className="buyer-dashboard__inner">
           <div className="buyer-card buyer-profile">
             <div className="buyer-profile__info">
-              <div className="buyer-profile__avatarWrap">
+              <div className="buyer-profile__avatarWrap" style={{ 
+                width: '80px', 
+                height: '80px', 
+                borderRadius: '50%', 
+                overflow: 'hidden',
+                border: '2px solid #e8e8e8'
+              }}>
                 <img
-                  className="buyer-profile__avatar"
-                  src={Avatar}
-                  alt="Jane Doe"
+                  src={user?.avatar_url || Avatar}
+                  alt={user?.name || "User"}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                  onError={(e) => {
+                    console.error('Image failed to load:', user?.avatar_url);
+                    e.target.src = Avatar;
+                    e.target.onerror = null;
+                  }}
                 />
                 <span className="buyer-profile__status" aria-hidden="true" />
               </div>
               <div>
-                <h2>Jane Doe</h2>
+                <h2>{user?.name || "Jane Doe"}</h2>
                 <span className="buyer-profile__badge">
                   <img src={VerifiedBadge} alt="" aria-hidden="true" />
                   Verified User
@@ -174,39 +253,69 @@ const BuyerDashboard = () => {
                   </div>
                 </div>
 
-                <div className="buyer-assets">
-                  {assets.map((asset) => (
-                    <article key={asset.title} className="buyer-asset">
-                      <div className="buyer-asset__media" />
-                      <div className="buyer-asset__body">
-                        <div className="buyer-asset__tags">
-                          {asset.tags.map((tag) => (
-                            <span
-                              key={tag.label}
-                              className={`buyer-tag buyer-tag--${tag.tone}`}
-                            >
-                              {tag.label}
-                            </span>
-                          ))}
-                        </div>
-                        <h5>{asset.title}</h5>
-                        <p>
-                          {asset.subtitle}{" "}
-                          <span className="buyer-dot">{"\u2022"}</span>{" "}
-                          {asset.version}
-                        </p>
-                        <button className="buyer-asset__download" type="button">
-                          <img src={WhiteDownload} alt="" aria-hidden="true" />
-                          Download
-                        </button>
-                      </div>
-                    </article>
-                  ))}
-                </div>
+                {loading ? (
+                  <div className="buyer-loading">Loading purchases...</div>
+                ) : purchases.length === 0 ? (
+                  <div className="buyer-empty">
+                    <p>No purchases yet. Visit the marketplace to get started.</p>
+                    <Link to="/marketplace" className="buyer-btn">
+                      Browse Marketplace
+                    </Link>
+                  </div>
+                ) : (
+                  <>
+                    <div className="buyer-assets">
+                      {purchases.slice(0, 3).map((purchase) => {
+                        const tags = getAssetTags(purchase.product);
+                        return (
+                          <article key={purchase.id} className="buyer-asset">
+                            <div 
+                              className="buyer-asset__media"
+                              style={{
+                                backgroundImage: purchase.product?.featured_image 
+                                  ? `url(${purchase.product.featured_image})`
+                                  : purchase.product?.images?.[0]
+                                  ? `url(${purchase.product.images[0]})`
+                                  : 'none',
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                backgroundColor: '#f5f5f5'
+                              }}
+                            />
+                            <div className="buyer-asset__body">
+                              <div className="buyer-asset__tags">
+                                {tags.map((tag) => (
+                                  <span
+                                    key={tag.label}
+                                    className={`buyer-tag buyer-tag--${tag.tone}`}
+                                  >
+                                    {tag.label}
+                                  </span>
+                                ))}
+                              </div>
+                              <h5>{purchase.product?.name || 'Unknown Product'}</h5>
+                              <p>
+                                {purchase.product?.category || 'Digital Product'}{" "}
+                                <span className="buyer-dot">{"\u2022"}</span>{" "}
+                                {purchase.product?.version || 'v1.0.0'}
+                              </p>
+                              <button className="buyer-asset__download" type="button">
+                                <img src={WhiteDownload} alt="" aria-hidden="true" />
+                                Download
+                              </button>
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </div>
 
-                <Link className="buyer-assets__link" to="/marketplace">
-                  View all assets <span aria-hidden="true">{"\u203a"}</span>
-                </Link>
+                    {purchases.length > 3 && (
+                      <Link className="buyer-assets__link" to="/my-purchases">
+                        View all assets <span aria-hidden="true">{"\u203a"}</span>
+                      </Link>
+                    )}
+                  </>
+                )}
               </div>
             </div>
 
@@ -223,8 +332,8 @@ const BuyerDashboard = () => {
                   </button>
                 </div>
                 <ul className="buyer-activity__list">
-                  {activities.map((activity) => (
-                    <li key={activity.title} className="buyer-activity__item">
+                  {displayActivities.map((activity, index) => (
+                    <li key={index} className="buyer-activity__item">
                       <div className="buyer-activity__icon">
                         <img src={activity.icon} alt="" aria-hidden="true" />
                       </div>

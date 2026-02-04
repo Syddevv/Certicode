@@ -71,6 +71,7 @@ const Cart = () => {
               vendor: "CertiCode",
               asset_type: item.asset_type,
               technologies: item.technologies || [],
+              featured_image: item.featured_image,
               images: item.images || []
             }));
           setRecommendations(related);
@@ -89,6 +90,7 @@ const Cart = () => {
               vendor: "CertiCode",
               asset_type: item.asset_type,
               technologies: item.technologies || [],
+              featured_image: item.featured_image,
               images: item.images || []
             }));
           setRecommendations(featured);
@@ -370,7 +372,18 @@ const Cart = () => {
                 cartItems.map((item) => (
                   <article key={item.id} className="cart__item">
                     <div className="cart__media">
-                      {item.product?.images?.[0] ? (
+                      {item.product?.featured_image ? (
+                        <img 
+                          src={item.product.featured_image} 
+                          alt={item.product.name}
+                          className="cart__itemImage"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = '';
+                            e.target.parentElement.innerHTML = '<div class="cart__imagePlaceholder">Product</div>';
+                          }}
+                        />
+                      ) : item.product?.images?.[0] ? (
                         <img 
                           src={item.product.images[0]} 
                           alt={item.product.name}
@@ -549,7 +562,18 @@ const Cart = () => {
                   {recommendations.map((item, index) => (
                     <article key={item.id || index} className="cart__recCard">
                       <div className="cart__recMedia">
-                        {item.images?.[0] ? (
+                        {item.featured_image ? (
+                          <img 
+                            src={item.featured_image} 
+                            alt={item.title || item.name}
+                            className="cart__recImage"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = '';
+                              e.target.parentElement.innerHTML = '<div class="cart__imagePlaceholder">' + (item.title?.charAt(0) || item.name?.charAt(0) || 'P') + '</div>';
+                            }}
+                          />
+                        ) : item.images?.[0] ? (
                           <img 
                             src={item.images[0]} 
                             alt={item.title || item.name}

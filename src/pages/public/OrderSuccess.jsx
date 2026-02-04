@@ -71,11 +71,13 @@ const OrderSuccess = () => {
     return `$${parseFloat(amount || 0).toFixed(2)}`;
   };
 
-  const handleDownload = (purchase) => {
-    // Implement download logic
-    console.log('Download purchase:', purchase);
-    alert(`Downloading ${purchase.product?.name || 'product'}...`);
-  };
+
+  // ~~~
+  // const handleDownload = (purchase) => {
+  //   // Implement download logic
+  //   console.log('Download purchase:', purchase);
+  //   alert(`Downloading ${purchase.product?.name || 'product'}...`);
+  // };
 
   if (loading) {
     return (
@@ -171,7 +173,13 @@ const OrderSuccess = () => {
             {purchases.map((purchase, index) => (
               <div key={index} className="success__item">
                 <div className="success__thumb">
-                  {purchase.product?.images?.[0] ? (
+                  {purchase.product?.featured_image ? (
+                    <img 
+                      src={purchase.product.featured_image} 
+                      alt={purchase.product.name}
+                      className="success__thumbImage"
+                    />
+                  ) : purchase.product?.images?.[0] ? (
                     <img 
                       src={purchase.product.images[0]} 
                       alt={purchase.product.name}
@@ -257,14 +265,15 @@ const OrderSuccess = () => {
             </div>
           </div>
 
-          <button 
+            {/* ~~~ */}
+          {/* <button 
             className="success__download" 
             type="button"
             onClick={() => purchases.length > 0 && handleDownload(purchases[0])}
           >
             <img src={DownloadIcon} alt="" aria-hidden="true" />
             Download
-          </button>
+          </button> */}
 
           <div className="success__actions">
             <Link

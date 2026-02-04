@@ -452,3 +452,18 @@
     gap: 10px;
   }
 }
+
+/* IDK IF TAMA ITO */
+.marketplace__card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 10px;
+}
+
+.marketplace__cardMedia {
+  height: 0px; /* Fixed height for all images */
+  flex-shrink: 0; /* Prevent shrinking */
+  overflow: hidden;
+  border-radius: 8px 8px 0 0;
+}
