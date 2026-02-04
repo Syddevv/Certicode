@@ -1,7 +1,8 @@
 const API_URL = 'http://127.0.0.1:8000/api';
 
 export const CartAPI = {
-    addToCart: async (productId) => {
+    // Get cart items
+    getCart: async () => {
         try {
             const token = localStorage.getItem('auth_token');
             
@@ -12,8 +13,130 @@ export const CartAPI = {
                 };
             }
             
-            console.log('CartAPI - Token found:', token.substring(0, 20) + '...');
-            console.log('CartAPI - Adding product:', productId);
+            const response = await fetch(`${API_URL}/carts`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const responseText = await response.text();
+            
+            if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+                throw {
+                    response: { status: response.status },
+                    message: 'Server error. Please try again.'
+                };
+            }
+
+            const data = JSON.parse(responseText);
+            
+            if (!response.ok) {
+                throw {
+                    response: {
+                        status: response.status,
+                        data: data
+                    },
+                    message: data.message || `Error ${response.status}`
+                };
+            }
+
+            return data;
+        } catch (error) {
+            console.error('CartAPI - Error fetching cart:', error);
+            throw error;
+        }
+    },
+
+    // Remove from cart
+    removeFromCart: async (cartItemId) => {
+        try {
+            const token = localStorage.getItem('auth_token');
+            
+            if (!token) {
+                throw {
+                    response: { status: 401 },
+                    message: 'No authentication token found. Please log in.'
+                };
+            }
+            
+            const response = await fetch(`${API_URL}/carts/${cartItemId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const responseText = await response.text();
+            
+            if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+                throw {
+                    response: { status: response.status },
+                    message: 'Server error. Please try again.'
+                };
+            }
+
+            const data = JSON.parse(responseText);
+            
+            if (!response.ok) {
+                throw {
+                    response: {
+                        status: response.status,
+                        data: data
+                    },
+                    message: data.message || `Error ${response.status}`
+                };
+            }
+
+            return data;
+        } catch (error) {
+            console.error('CartAPI - Error removing from cart:', error);
+            throw error;
+        }
+    },
+
+    // Clear entire cart
+    clearCart: async () => {
+        try {
+            const token = localStorage.getItem('auth_token');
+            
+            if (!token) {
+                throw {
+                    response: { status: 401 },
+                    message: 'No authentication token found. Please log in.'
+                };
+            }
+            
+            // First get all cart items
+            const cartItems = await CartAPI.getCart();
+            
+            // Remove each item
+            const deletePromises = cartItems.map(item => 
+                CartAPI.removeFromCart(item.id)
+            );
+            
+            await Promise.all(deletePromises);
+            
+            return { message: 'Cart cleared successfully' };
+        } catch (error) {
+            console.error('CartAPI - Error clearing cart:', error);
+            throw error;
+        }
+    },
+
+    // Add to cart (existing method - keep this)
+    addToCart: async (productId) => {
+        try {
+            const token = localStorage.getItem('auth_token');
+            
+            if (!token) {
+                throw {
+                    response: { status: 401 },
+                    message: 'No authentication token found. Please log in.'
+                };
+            }
             
             const response = await fetch(`${API_URL}/carts`, {
                 method: 'POST',
@@ -28,51 +151,29 @@ export const CartAPI = {
             });
 
             const responseText = await response.text();
-            console.log('CartAPI - Response status:', response.status);
-            console.log('CartAPI - Response (first 300 chars):', responseText.substring(0, 300));
             
             if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
-                console.error('CartAPI - HTML error page. Check Laravel logs.');
-                
-                if (response.status === 401 || response.status === 419) {
-                    throw {
-                        response: { status: response.status },
-                        message: 'Authentication failed. Please log in again.'
-                    };
-                }
-                
                 throw {
                     response: { status: response.status },
-                    message: `Server error ${response.status}. Check Laravel logs.`
+                    message: 'Server error. Please try again.'
                 };
             }
 
-            let data;
-            try {
-                data = JSON.parse(responseText);
-            } catch (e) {
-                console.error('CartAPI - JSON parse error:', e);
-                throw {
-                    message: 'Invalid server response',
-                    response: { status: response.status, text: responseText }
-                };
-            }
-
+            const data = JSON.parse(responseText);
+            
             if (!response.ok) {
                 throw {
                     response: {
                         status: response.status,
                         data: data
                     },
-                    message: data.message || data.error || `Error ${response.status}`
+                    message: data.message || `Error ${response.status}`
                 };
             }
 
-            console.log('CartAPI - Success:', data);
             return data;
-            
         } catch (error) {
-            console.error('CartAPI - Error:', error);
+            console.error('CartAPI - Error adding to cart:', error);
             throw error;
         }
     },

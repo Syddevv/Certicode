@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/Cart.css";
@@ -7,32 +7,243 @@ import AddToCart from "../../assets/AddToCart.png";
 import CheckoutCart from "../../assets/CheckoutCart.png";
 import NavCart from "../../assets/NavCart.png";
 import CerticodeBoxIcon from "../../assets/CerticodeBoxIcon.png";
-
-const cartItems = [
-  {
-    title: "E-commerce SaaS Template",
-    subtitle: "SaaS Template",
-    version: "v2.4.1",
-    price: "$999.00",
-    currency: "USD",
-    tags: [
-      { label: "Node.js", tone: "green" },
-      { label: "React", tone: "blue" },
-    ],
-  },
-];
-
-const recommendations = [
-  { title: "FoodieExpress Delivery App", price: "$1,499", rating: "4.2" },
-  { title: "Fintech Banking Dashboard", price: "$450", rating: "4.5" },
-  { title: "Job Board Fullstack App", price: "$799", rating: "4.9" },
-  { title: "AI Marketing Platform UI", price: "$850", rating: "4.8" },
-];
+import { CartAPI } from "../../services/CartAPI";
+import { api } from "../../services/api";
 
 const Cart = () => {
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [recommendations, setRecommendations] = useState([]); // Added state
+  const [recommendationsLoading, setRecommendationsLoading] = useState(false); // Added state
+  const [error, setError] = useState("");
+  const [subtotal, setSubtotal] = useState(0);
+  const [discount, setDiscount] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [promoCode, setPromoCode] = useState("");
+  const navigate = useNavigate();
+
+  const getToneColor = (tech) => {
+    const colorMap = {
+      'React': 'blue',
+      'Node.js': 'green',
+      'Python': 'gold',
+      'Django': 'green',
+      'Flutter': 'purple',
+      'Firebase': 'pink',
+      'Swift': 'indigo',
+      'Figma': 'rose',
+      'Adobe XD': 'violet',
+      'Tailwind': 'orange',
+      'Laravel': 'red',
+      'Vue.js': 'green',
+      'HTML': 'orange',
+      'CSS': 'blue',
+      'JavaScript': 'yellow',
+      'Stripe': 'violet',
+    };
+    
+    return colorMap[tech] || 'green';
+  };
+
+  const fetchRecommendations = async () => {
+    try {
+      setRecommendationsLoading(true);
+      
+      if (cartItems.length > 0) {
+        const randomCartItem = cartItems[Math.floor(Math.random() * cartItems.length)];
+        
+        if (randomCartItem.product?.asset_type) {
+          const relatedResult = await api.getProducts("", randomCartItem.product.asset_type, 1);
+          const related = relatedResult.data
+            .filter(item => item.id !== randomCartItem.product_id)
+            .slice(0, 4)
+            .map(item => ({
+              id: item.id,
+              name: item.name,
+              title: item.name,
+              price: parseFloat(item.price),
+              rating: item.rating || "4.2",
+              vendor: "CertiCode",
+              asset_type: item.asset_type,
+              technologies: item.technologies || [],
+              images: item.images || []
+            }));
+          setRecommendations(related);
+        }
+      } else {
+        try {
+          const featuredResult = await api.getProducts("", "", 1);
+          const featured = featuredResult.data
+            .slice(0, 4)
+            .map(item => ({
+              id: item.id,
+              name: item.name,
+              title: item.name,
+              price: parseFloat(item.price),
+              rating: item.rating || "4.2",
+              vendor: "CertiCode",
+              asset_type: item.asset_type,
+              technologies: item.technologies || [],
+              images: item.images || []
+            }));
+          setRecommendations(featured);
+        } catch (featuredError) {
+          console.error("Error fetching featured products:", featuredError);
+          setRecommendations([
+            { id: 1, title: "FoodieExpress Delivery App", price: 1499, rating: "4.2" },
+            { id: 2, title: "Fintech Banking Dashboard", price: 450, rating: "4.5" },
+            { id: 3, title: "Job Board Fullstack App", price: 799, rating: "4.9" },
+            { id: 4, title: "AI Marketing Platform UI", price: 850, rating: "4.8" },
+          ]);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+      setRecommendations([
+        { id: 1, title: "FoodieExpress Delivery App", price: 1499, rating: "4.2" },
+        { id: 2, title: "Fintech Banking Dashboard", price: 450, rating: "4.5" },
+        { id: 3, title: "Job Board Fullstack App", price: 799, rating: "4.9" },
+        { id: 4, title: "AI Marketing Platform UI", price: 850, rating: "4.8" },
+      ]);
+    } finally {
+      setRecommendationsLoading(false);
+    }
+  };
+
+  // Fetch cart items from API
+  const fetchCartItems = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      
+      const items = await CartAPI.getCart();
+      setCartItems(items);
+      calculateTotals(items);
+      
+      // Fetch recommendations after cart items are loaded
+      fetchRecommendations();
+    } catch (error) {
+      console.error("Error fetching cart:", error);
+      if (error.response?.status === 401) {
+        setError("Please login to view your cart");
+        setTimeout(() => navigate("/login"), 1500);
+      } else {
+        setError(error.message || "Failed to load cart");
+      }
+      setCartItems([]);
+      
+      fetchRecommendations();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const calculateTotals = (items) => {
+    const subtotalAmount = items.reduce((sum, item) => {
+      return sum + (parseFloat(item.product?.price) || 0);
+    }, 0);
+    
+    setSubtotal(subtotalAmount);
+    setTotal(subtotalAmount - discount);
+  };
+
+  const handleRemoveItem = async (cartItemId) => {
+    try {
+      await CartAPI.removeFromCart(cartItemId);
+      const updatedItems = cartItems.filter(item => item.id !== cartItemId);
+      setCartItems(updatedItems);
+      calculateTotals(updatedItems);
+    } catch (error) {
+      console.error("Error removing item:", error);
+      setError("Failed to remove item");
+    }
+  };
+
+  const handleClearCart = async () => {
+    if (cartItems.length === 0) return;
+    
+    if (!window.confirm("Are you sure you want to clear your cart?")) return;
+    
+    try {
+      await CartAPI.clearCart();
+      setCartItems([]);
+      setSubtotal(0);
+      setDiscount(0);
+      setTotal(0);
+    } catch (error) {
+      console.error("Error clearing cart:", error);
+      setError("Failed to clear cart");
+    }
+  };
+
+  const handleApplyPromo = () => {
+    if (!promoCode.trim()) {
+      setError("Please enter a promo code");
+      return;
+    }
+    
+    // Mock promo code logic
+    if (promoCode.toUpperCase() === "SAVE10") {
+      const discountAmount = subtotal * 0.1;
+      setDiscount(discountAmount);
+      setTotal(subtotal - discountAmount);
+      setError("Promo code applied! 10% discount.");
+    } else {
+      setError("Invalid promo code");
+    }
+  };
+
+  const handleAddRecommended = async (productId) => {
+    try {
+      await CartAPI.addToCart(productId);
+      fetchCartItems();
+      setError("Item added to cart!");
+    } catch (error) {
+      console.error("Error adding recommended item:", error);
+      setError(error.message || "Failed to add item");
+    }
+  };
+
+  const handleCheckout = () => {
+    if (cartItems.length === 0) {
+      setError("Your cart is empty");
+      return;
+    }
+    navigate("/checkout");
+  };
+
+  const handleViewAll = () => {
+    navigate("/marketplace");
+  };
+
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    fetchCartItems();
   }, []);
+
+  if (loading) {
+    return (
+      <div>
+        <Navbar />
+        <section className="cart">
+          <div className="cart__inner">
+            <div className="cart__breadcrumb">
+              <Link className="cart__crumb" to="/marketplace">
+                Marketplace
+              </Link>
+              <span className="cart__sep">&rsaquo;</span>
+              <span className="cart__crumb cart__crumb--active">Your Cart</span>
+            </div>
+            
+            <div className="cart__loading">
+              <h2>Loading your cart...</h2>
+            </div>
+          </div>
+        </section>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -53,48 +264,96 @@ const Cart = () => {
                 <img src={NavCart} alt="" aria-hidden="true" />
                 <h1>Your Cart</h1>
               </div>
-              <p>You have 1 item in your cart.</p>
+              <p>You have {cartItems.length} item{cartItems.length !== 1 ? 's' : ''} in your cart.</p>
             </div>
-            <button className="cart__clear" type="button">
-              Clear All
-            </button>
+            {cartItems.length > 0 && (
+              <button 
+                className="cart__clear" 
+                type="button"
+                onClick={handleClearCart}
+              >
+                Clear All
+              </button>
+            )}
           </div>
+
+          {error && (
+            <div className="cart__error">
+              {error}
+            </div>
+          )}
 
           <div className="cart__layout">
             <div className="cart__items">
-              {cartItems.map((item) => (
-                <article key={item.title} className="cart__item">
-                  <div className="cart__media" />
-                  <div className="cart__itemBody">
-                    <div className="cart__itemHeader">
-                      <div className="cart__tags">
-                        {item.tags.map((tag) => (
-                          <span
-                            key={tag.label}
-                            className={`cart__tag cart__tag--${tag.tone}`}
-                          >
-                            {tag.label}
-                          </span>
-                        ))}
-                      </div>
-                      <div className="cart__price">
-                        <span>{item.price}</span>
-                        <span className="cart__currency">{item.currency}</span>
-                      </div>
+              {cartItems.length === 0 ? (
+                <div className="cart__empty">
+                  <h3>Your cart is empty</h3>
+                  <p>Browse our marketplace to add items to your cart.</p>
+                  <Link to="/marketplace" className="cart__continueShopping">
+                    Continue Shopping
+                  </Link>
+                </div>
+              ) : (
+                cartItems.map((item) => (
+                  <article key={item.id} className="cart__item">
+                    <div className="cart__media">
+                      {item.product?.images?.[0] ? (
+                        <img 
+                          src={item.product.images[0]} 
+                          alt={item.product.name}
+                          className="cart__itemImage"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = '';
+                            e.target.parentElement.innerHTML = '<div class="cart__imagePlaceholder">Product</div>';
+                          }}
+                        />
+                      ) : (
+                        <div className="cart__imagePlaceholder">
+                          {item.product?.name?.charAt(0) || 'P'}
+                        </div>
+                      )}
                     </div>
+                    <div className="cart__itemBody">
+                      <div className="cart__itemHeader">
+                        <div className="cart__tags">
+                          {item.product?.technologies?.slice(0, 2).map((tech, index) => (
+                            <span
+                              key={index}
+                              className={`cart__tag cart__tag--${getToneColor(tech)}`} // Updated to use getToneColor
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="cart__price">
+                          <span>${parseFloat(item.product?.price || 0).toFixed(2)}</span>
+                          <span className="cart__currency">USD</span>
+                        </div>
+                      </div>
 
-                    <h3 className="cart__itemTitle">{item.title}</h3>
-                    <p className="cart__itemMeta">
-                      {item.subtitle} <span className="cart__dot">&bull;</span>{" "}
-                      {item.version}
-                    </p>
+                      <h3 className="cart__itemTitle">
+                        <Link to={`/marketplace/${item.product_id}`}>
+                          {item.product?.name || "Product"}
+                        </Link>
+                      </h3>
+                      <p className="cart__itemMeta">
+                        {item.product?.asset_type || "Digital Asset"}
+                        <span className="cart__dot">&bull;</span>
+                        Version 1.0
+                      </p>
 
-                    <button className="cart__remove" type="button">
-                      Remove
-                    </button>
-                  </div>
-                </article>
-              ))}
+                      <button 
+                        className="cart__remove" 
+                        type="button"
+                        onClick={() => handleRemoveItem(item.id)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </article>
+                ))
+              )}
             </div>
 
             <aside className="cart__summary">
@@ -105,8 +364,14 @@ const Cart = () => {
                     className="cart__promoInput"
                     type="text"
                     placeholder="Enter promo code"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)}
                   />
-                  <button className="cart__apply" type="button">
+                  <button 
+                    className="cart__apply" 
+                    type="button"
+                    onClick={handleApplyPromo}
+                  >
                     Apply
                   </button>
                 </div>
@@ -119,25 +384,29 @@ const Cart = () => {
                 <h3>Order Summary</h3>
                 <div className="cart__summaryRow">
                   <span>Subtotal</span>
-                  <span>$999.00</span>
+                  <span>${subtotal.toFixed(2)}</span>
                 </div>
                 <div className="cart__summaryRow">
                   <span>Discount</span>
-                  <span>-$0.00</span>
+                  <span>-${discount.toFixed(2)}</span>
                 </div>
                 <div className="cart__summaryDivider" aria-hidden="true" />
                 <div className="cart__summaryRow cart__summaryRow--total">
                   <span>Total Amount</span>
                   <span>
-                    $999.00 <span className="cart__currency">USD</span>
+                    ${total.toFixed(2)} <span className="cart__currency">USD</span>
                   </span>
                 </div>
               </div>
 
-              <Link className="cart__checkout" to="/checkout">
+              <button 
+                className="cart__checkout" 
+                onClick={handleCheckout}
+                disabled={cartItems.length === 0}
+              >
                 <img src={CheckoutCart} alt="" aria-hidden="true" />
                 Proceed to Checkout
-              </Link>
+              </button>
               <p className="cart__note">
                 By proceeding, you agree to our{" "}
                 <Link to="/terms">Terms &amp; Conditions</Link> and{" "}
@@ -146,48 +415,85 @@ const Cart = () => {
             </aside>
           </div>
 
-          <section className="cart__recommendations">
-            <div className="cart__recommendationsHeader">
-              <div>
-                <h3>You may also like</h3>
-                <p>
-                  Explore similar high-quality digital assets for your next
-                  project.
-                </p>
+          {cartItems.length > 0 && (
+            <section className="cart__recommendations">
+              <div className="cart__recommendationsHeader">
+                <div>
+                  <h3>You may also like</h3>
+                  <p>
+                    Explore similar high-quality digital assets for your next
+                    project.
+                  </p>
+                </div>
+                <button 
+                  className="cart__viewAll" 
+                  type="button"
+                  onClick={handleViewAll}
+                >
+                  View All
+                </button>
               </div>
-              <button className="cart__viewAll" type="button">
-                View All
-              </button>
-            </div>
 
-            <div className="cart__recommendationsGrid">
-              {recommendations.map((item) => (
-                <article key={item.title} className="cart__recCard">
-                  <div className="cart__recMedia" />
-                  <div className="cart__recBody">
-                    <h4>{item.title}</h4>
-                    <div className="cart__recMeta">
-                      <span className="cart__recVendor">
-                        <img src={CerticodeBoxIcon} alt="" />
-                        CertiCode
-                      </span>
-                      <span className="cart__recPrice">{item.price}</span>
-                    </div>
-                    <div className="cart__recDivider" aria-hidden="true" />
-                    <div className="cart__recFooter">
-                      <div className="cart__recRating">
-                        <span className="cart__recStar">&#9733;</span>
-                        <span>{item.rating}</span>
+              {recommendationsLoading ? (
+                <div className="cart__loadingRec">
+                  <p>Loading recommendations...</p>
+                </div>
+              ) : (
+                <div className="cart__recommendationsGrid">
+                  {recommendations.map((item, index) => (
+                    <article key={item.id || index} className="cart__recCard">
+                      <div className="cart__recMedia">
+                        {item.images?.[0] ? (
+                          <img 
+                            src={item.images[0]} 
+                            alt={item.title || item.name}
+                            className="cart__recImage"
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = '';
+                              e.target.parentElement.innerHTML = '<div class="cart__imagePlaceholder">' + (item.title?.charAt(0) || item.name?.charAt(0) || 'P') + '</div>';
+                            }}
+                          />
+                        ) : (
+                          <div className="cart__imagePlaceholder">
+                            {item.title?.charAt(0) || item.name?.charAt(0) || 'P'}
+                          </div>
+                        )}
                       </div>
-                      <button className="cart__recCart" type="button">
-                        <img src={AddToCart} alt="Add to cart" />
-                      </button>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
+                      <div className="cart__recBody">
+                        <h4>
+                          <Link to={`/marketplace/${item.id}`}>
+                            {item.title || item.name}
+                          </Link>
+                        </h4>
+                        <div className="cart__recMeta">
+                          <span className="cart__recVendor">
+                            <img src={CerticodeBoxIcon} alt="" />
+                            {item.vendor || "CertiCode"}
+                          </span>
+                          <span className="cart__recPrice">${item.price?.toFixed(2) || "0.00"}</span>
+                        </div>
+                        <div className="cart__recDivider" aria-hidden="true" />
+                        <div className="cart__recFooter">
+                          <div className="cart__recRating">
+                            <span className="cart__recStar">★</span>
+                            <span>{item.rating || "4.0"}</span>
+                          </div>
+                          <button 
+                            className="cart__recCart" 
+                            type="button"
+                            onClick={() => handleAddRecommended(item.id)}
+                          >
+                            <img src={AddToCart} alt="Add to cart" />
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </section>
+          )}
         </div>
       </section>
       <Footer />
