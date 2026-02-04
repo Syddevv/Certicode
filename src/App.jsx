@@ -72,7 +72,7 @@ function App() {
         <Route path="/admin-notification" element={<AdminNotification />} />
 
         {/* PUBLIC PAGES / USER */}
-        <Route path="/" element={<AdminDashboard />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/marketplace" element={<Marketplace />} />

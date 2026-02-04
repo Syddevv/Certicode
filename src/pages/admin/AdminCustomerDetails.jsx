@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import "../../styles/adminCustomerDetails.css";
 import Sidebar from "../../components/Sidebar";
 import AdminTopbar from "../../components/AdminTopbar";
-import notifBell from "../../assets/NotifBell.png";
+import notifBell from "../../assets/notif.png";
+import downloadIcon from "../../assets/whiteDownload.png";
 
 const Icons = {
   Download: "↓",
@@ -24,33 +25,48 @@ const AdminCustomerDetails = () => {
 
         <main className="main">
           <AdminTopbar showHamburger>
-            <Link to="/admin-notification" className="notification-link">
-              <img src={notifBell} alt="Notifications" className="notification-icon" />
+            <Link to="/notifications" className="notification-link">
+              <img
+                src={notifBell}
+                alt="Notifications"
+                className="notification-icon"
+              />
               <span className="notification-dot" />
             </Link>
-            <button className="btn primary">
-              📥 Export Profile
+            <button className="btn primary export-profile-btn">
+              <img
+                src={downloadIcon}
+                alt="Export profile"
+                className="export-profile-icon"
+              />
+              Export Profile
             </button>
           </AdminTopbar>
 
           <div className="breadcrumb">
-            <Link to="/customers" className="breadcrumb-link">Customers</Link> 
-            <span className="separator">›</span> 
+            <Link to="/customers" className="breadcrumb-link">
+              Customers
+            </Link>
+            <span className="separator">›</span>
             <span className="current">James Smith</span>
           </div>
 
           <div className="details-layout">
-            
             {/* LEFT COLUMN: PROFILE CARD */}
             <aside className="profile-card">
               <div className="profile-header">
-                <img 
-                  src="https://ui-avatars.com/api/?name=James+Smith&background=random&size=128" 
-                  alt="James Smith" 
+                <img
+                  src="https://ui-avatars.com/api/?name=James+Smith&background=random&size=128"
+                  alt="James Smith"
                   className="profile-large-avatar"
                 />
                 <h2>James Smith</h2>
-                <a href="mailto:james.smith@email.com" className="profile-email">james.smith@email.com</a>
+                <a
+                  href="mailto:james.smith@email.com"
+                  className="profile-email"
+                >
+                  james.smith@email.com
+                </a>
                 <p className="join-date">Joined: Jan 24, 2024</p>
                 <div className="profile-status">
                   <span className="status-pill active">● ACTIVE</span>
@@ -82,8 +98,10 @@ const AdminCustomerDetails = () => {
               <div className="info-section">
                 <h4>Delivery Address</h4>
                 <p className="address-text">
-                  Visayas Ave, Quezon City,<br />
-                  Metro Manila 1300,<br />
+                  Visayas Ave, Quezon City,
+                  <br />
+                  Metro Manila 1300,
+                  <br />
                   Philippines
                 </p>
               </div>
@@ -91,7 +109,6 @@ const AdminCustomerDetails = () => {
 
             {/* RIGHT COLUMN: STATS & TRANSACTIONS */}
             <div className="content-area">
-              
               {/* Top Stats Row */}
               <div className="details-stats-grid">
                 <div className="detail-stat-card">
@@ -131,7 +148,13 @@ const AdminCustomerDetails = () => {
                         <td className="order-id">#ORD-8273</td>
                         <td>
                           <div className="asset-info">
-                            <Link to="/sales/order-details" style={{ textDecoration: 'none', color: 'inherit' }}>
+                            <Link
+                              to="/sales/order-details"
+                              style={{
+                                textDecoration: "none",
+                                color: "inherit",
+                              }}
+                            >
                               <strong>E-commerce SaaS Template</strong>
                             </Link>
                             <span className="mini-badge blue">WEB APP</span>
@@ -176,7 +199,9 @@ const AdminCustomerDetails = () => {
                         <td>
                           <div className="asset-info">
                             <strong>FinTech Banking Dashboard</strong>
-                            <span className="mini-badge purple">UI/UX KITS</span>
+                            <span className="mini-badge purple">
+                              UI/UX KITS
+                            </span>
                           </div>
                         </td>
                         <td className="date-cell">
@@ -190,8 +215,8 @@ const AdminCustomerDetails = () => {
                           </span>
                         </td>
                       </tr>
-                      
-                       {/* Row 4 */}
+
+                      {/* Row 4 */}
                       <tr>
                         <td className="order-id">#ORD-8150</td>
                         <td>
@@ -211,24 +236,27 @@ const AdminCustomerDetails = () => {
                           </span>
                         </td>
                       </tr>
-
                     </tbody>
                   </table>
                 </div>
 
                 <div className="details-pagination">
-                  <span>Showing <strong>1-4</strong> of 5 transactions</span>
+                  <span>
+                    Showing <strong>1-4</strong> of 5 transactions
+                  </span>
                   <div className="nav-controls">
-                    <button className="nav-btn" disabled>‹</button>
+                    <button className="nav-btn" disabled>
+                      ‹
+                    </button>
                     <button className="nav-btn active">1</button>
-                    <button className="nav-btn" disabled>›</button>
+                    <button className="nav-btn" disabled>
+                      ›
+                    </button>
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
-
         </main>
       </div>
     </>

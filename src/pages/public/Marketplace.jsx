@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../../styles/Marketplace.css";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import ViewProduct from "../../assets/ViewProduct.png";
 
 const categoryTabs = [
@@ -91,10 +91,18 @@ const assets = [
 const Marketplace = () => {
   const [activeTab, setActiveTab] = useState("All Assets");
   const [selectedSort, setSelectedSort] = useState("Newest First");
+  const location = useLocation();
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, []);
+
+  useEffect(() => {
+    const category = new URLSearchParams(location.search).get("category");
+    if (categoryTabs.includes(category)) {
+      setActiveTab(category);
+    }
+  }, [location.search]);
 
   return (
     <div>

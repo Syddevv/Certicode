@@ -1,13 +1,33 @@
-.header-wrapper {
+.admin-order-main {
+  flex: 1;
+  padding: 0 32px;
+  --admin-topbar-edge-x: 32px;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
+  flex-direction: column;
+  overflow-y: auto;
+  background: #f9fafb;
+}
+
+.admin-order-topbar.topbar {
+  margin-bottom: 0;
+}
+
+.admin-order-topbar .topbar-actions {
+  margin-left: auto;
+  gap: 12px;
+}
+
+.admin-order-content {
+  padding: 14px 0 24px;
 }
 
 .breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 14px;
   color: #6b7280;
+  margin-bottom: 24px;
 }
 
 .breadcrumb-link {
@@ -15,30 +35,46 @@
   text-decoration: none;
 }
 
+.separator {
+  color: #cbd5e1;
+}
+
 .breadcrumb .current {
   color: #f97316;
   font-weight: 600;
 }
 
-.header-right {
-  display: flex;
+.download-btn {
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+}
+
+.download-icon-img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
 }
 
 .verified-badge {
   background: #f3f4f6;
   color: #374151;
   font-size: 12px;
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 20px;
+  font-weight: 700;
+  padding: 7px 12px;
+  border-radius: 999px;
   display: flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
-.dot-green { color: #16a34a; }
+.dot-green {
+  color: #16a34a;
+}
 
 .order-details-layout {
   display: grid;
@@ -47,7 +83,8 @@
   align-items: start;
 }
 
-.order-main-content, .order-sidebar {
+.order-main-content,
+.order-sidebar {
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -97,7 +134,10 @@
   color: #111827;
 }
 
-.meta-text { color: #6b7280; font-size: 13px; }
+.meta-text {
+  color: #6b7280;
+  font-size: 13px;
+}
 
 .status-pill.completed {
   background: #dcfce7;
@@ -110,7 +150,9 @@
   margin-top: 4px;
 }
 
-.text-right { text-align: right; }
+.text-right {
+  text-align: right;
+}
 
 .section-label {
   font-size: 11px;
@@ -141,7 +183,15 @@
   font-size: 20px;
 }
 
-.asset-info { flex: 1; }
+.asset-main-icon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.asset-info {
+  flex: 1;
+}
 
 .asset-info h3 {
   font-size: 15px;
@@ -156,7 +206,10 @@
   margin-bottom: 8px;
 }
 
-.tags-row { display: flex; gap: 6px; }
+.tags-row {
+  display: flex;
+  gap: 6px;
+}
 
 .tag {
   font-size: 10px;
@@ -205,8 +258,20 @@
   position: relative;
 }
 
-.t-icon.orange { background: #ffedd5; color: #f97316; }
-.t-icon.green { background: #dcfce7; color: #16a34a; }
+.timeline-icon-img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.t-icon.orange {
+  background: #f97316;
+  color: #ffffff;
+}
+.t-icon.green {
+  background: #22c55e;
+  color: #ffffff;
+}
 
 .t-content h4 {
   font-size: 12px;
@@ -230,8 +295,12 @@
   z-index: 1;
 }
 
-.t-line.active { background: #f97316; }
-.t-step:last-child .t-line { display: none; }
+.t-line.active {
+  background: #f97316;
+}
+.t-step:last-child .t-line {
+  display: none;
+}
 
 .payment-row {
   display: flex;
@@ -281,9 +350,14 @@
   color: #111827;
 }
 
-.role-text { font-size: 11px; color: #6b7280; }
+.role-text {
+  font-size: 11px;
+  color: #6b7280;
+}
 
-.info-group { margin-bottom: 16px; }
+.info-group {
+  margin-bottom: 16px;
+}
 
 .info-group label {
   font-size: 10px;
@@ -294,7 +368,8 @@
   margin-bottom: 4px;
 }
 
-.info-group p, .info-group a {
+.info-group p,
+.info-group a {
   font-size: 13px;
   color: #374151;
   font-weight: 500;
@@ -302,7 +377,10 @@
   line-height: 1.4;
 }
 
-.tax-text { font-weight: 700; color: #111827; }
+.tax-text {
+  font-weight: 700;
+  color: #111827;
+}
 
 .btn-outline {
   width: 100%;
@@ -327,7 +405,9 @@
   cursor: pointer;
 }
 
-.btn-refund:hover { background: #fef2f2; }
+.btn-refund:hover {
+  background: #fef2f2;
+}
 
 .security-card {
   padding: 24px;
@@ -340,7 +420,9 @@
   margin-bottom: 14px;
 }
 
-.log-row:last-child { margin-bottom: 0; }
+.log-row:last-child {
+  margin-bottom: 0;
+}
 
 .log-label {
   font-size: 12px;
@@ -350,12 +432,35 @@
 .log-value {
   font-size: 12px;
   color: #374151;
-  font-family: 'Inter', sans-serif; 
+  font-family: "Inter", sans-serif;
   text-align: right;
 }
 
 @media (max-width: 1024px) {
+  .admin-order-main {
+    padding: 0 20px;
+    --admin-topbar-edge-x: 20px;
+  }
+
   .order-details-layout {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-order-main {
+    padding: 0 16px;
+    --admin-topbar-edge-x: 16px;
+  }
+
+  .admin-order-topbar .topbar-actions {
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .verified-badge {
+    font-size: 11px;
+    padding: 6px 10px;
   }
 }
