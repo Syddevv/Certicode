@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom"; 
+import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import AdminTopbar from "../../components/AdminTopbar";
 import "../../styles/adminSetting.css";
@@ -11,7 +11,7 @@ const AdminSetting = () => {
   return (
     <div className="layout">
       <Sidebar activePage="settings" />
-      <main className="main-content">
+      <main className="main-content">      
         <AdminTopbar searchIcon={<span className="search-icon">🔍</span>}>
           <Link to="/admin-notification" className="notification-link" aria-label="Notifications">
             <img src={notifBell} alt="Notifications" className="topbar-icon" />
@@ -23,7 +23,7 @@ const AdminSetting = () => {
         <div className="page-header">
           <h2>Settings</h2>
         </div>
-        <p className="subtitle">Manage your platform's public identity and core regional preferences.</p>
+        
 
         <div className="tabs">
           <button className="tab active">My Account</button>
@@ -33,11 +33,13 @@ const AdminSetting = () => {
         </div>
 
         <div className="settings-grid">
+          
           <div className="settings-left">
+            
             <div className="settings-card">
-              <div className="card-header">
+              <div className="card-header-left" style={{ justifyContent: 'flex-start' }}>
                 <div className="icon-circle orange">👤</div>
-                <div>
+                <div className="header-text-group">
                   <h4>Account Information</h4>
                   <p className="card-sub">View and update your personal details and account information.</p>
                 </div>
@@ -71,15 +73,15 @@ const AdminSetting = () => {
             </div>
 
             <div className="settings-card">
-              <div className="card-header-flex">
-                <div className="header-left">
-                  <div className="icon-circle orange">🛡️</div>
-                  <div>
-                    <h4>Security Settings</h4>
-                    <p className="card-sub">Configure authentication protocols and session policies.</p>
-                  </div>
+              <div className="card-header-left" style={{ justifyContent: 'flex-start' }}>
+                <div className="icon-circle orange">🛡️</div>
+                <div className="header-text-group">
+                  <h4>Security Settings</h4>
+                  <p className="card-sub">Configure authentication protocols and session policies.</p>
                 </div>
-                <span className="badge success">ENFORCED</span>
+                <div className="push-right">
+                  <span className="badge success">ENFORCED</span>
+                </div>
               </div>
 
               <div className="security-item">
@@ -105,10 +107,13 @@ const AdminSetting = () => {
 
           <div className="settings-right">
             <div className="settings-card h-full">
-              <div className="card-header-simple">
+              <div className="card-header-left" style={{ justifyContent: 'flex-start' }}>
                 <h4>Admin Activity Log</h4>
-                <span className="icon-grey">🕒</span>
+                <div className="push-right">
+                   <span className="icon-grey">🕒</span>
+                </div>
               </div>
+              
               <ul className="activity-list">
                 <li className="activity-item">
                   <div className="act-icon blue">✏️</div>
@@ -153,4 +158,3 @@ const AdminSetting = () => {
 };
 
 export default AdminSetting;
-

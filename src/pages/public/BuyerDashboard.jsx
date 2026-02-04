@@ -191,12 +191,14 @@ const BuyerDashboard = () => {
                 </span>
               </div>
             </div>
-            <button className="buyer-profile__edit" type="button">
-              <span className="buyer-profile__editIcon" aria-hidden="true">
-                {"\u270e"}
-              </span>
-              Edit Profile
-            </button>
+            <Link to="/account-settings">
+              <button className="buyer-profile__edit" type="button">
+                <span className="buyer-profile__editIcon" aria-hidden="true">
+                  {"\u270e"}
+                </span>
+                Edit Profile
+              </button>
+            </Link>
           </div>
 
           <div className="buyer-tabs">

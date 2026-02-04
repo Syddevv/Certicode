@@ -1,13 +1,10 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom"; 
+import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import AdminTopbar from "../../components/AdminTopbar";
 import "../../styles/platformSetting.css";
 import searchIcon from "../../assets/Search.png";
 import notifBell from "../../assets/NotifBell.png";
-import platformIcon from "../../assets/platform-identity.png";
-import securityIcon from "../../assets/security-and-access.png";
-import activityLogIcon from "../../assets/activity-log.png";
 
 const PlatformSetting = () => {
   const navigate = useNavigate();
@@ -15,9 +12,18 @@ const PlatformSetting = () => {
   return (
     <div className="layout">
       <Sidebar activePage="settings" />
+
       <main className="main-content">
-        <AdminTopbar searchIcon={<img src={searchIcon} alt="Search" className="search-icon" />}>
-          <Link to="/admin-notification" className="notification-link" aria-label="Notifications">
+        <AdminTopbar
+          searchIcon={
+            <img src={searchIcon} alt="Search" className="search-icon" />
+          }
+        >
+          <Link
+            to="/admin-notification"
+            className="notification-link"
+            aria-label="Notifications"
+          >
             <img src={notifBell} alt="Notifications" className="topbar-icon" />
             <span className="notification-dot" />
           </Link>
@@ -26,8 +32,10 @@ const PlatformSetting = () => {
 
         <div className="page-header">
           <h2>Settings</h2>
-          <p className="subtitle">Manage your platform's public identity and core regional preferences.</p>
         </div>
+        <p className="subtitle">
+          Manage your platform's public identity and core regional preferences.
+        </p>
 
         <div className="tabs">
           <button className="tab" onClick={() => navigate("/settings")}>
@@ -39,13 +47,14 @@ const PlatformSetting = () => {
         <div className="settings-grid">
           <div className="settings-left">
             <div className="settings-card">
-              <div className="card-header">
-                <div className="icon-circle orange">
-                  <img src={platformIcon} alt="Platform Settings" className="icon-image" />
-                </div>
+              <div className="card-header-start">
+                <div className="icon-circle blue">🖥️</div>
                 <div>
                   <h4>Platform Identity</h4>
-                  <p className="card-sub">Basic identification details for the admin console and user portal.</p>
+                  <p className="card-sub">
+                    Basic identification details for the admin console and user
+                    portal.
+                  </p>
                 </div>
               </div>
 
@@ -53,39 +62,47 @@ const PlatformSetting = () => {
                 <div className="input-group">
                   <label>Platform Name</label>
                   <input type="text" defaultValue="CertiCode" />
-                  <span className="input-hint">Appears in email footers and browser tabs.</span>
+                  <span className="input-hint">
+                    Appears in email footers and browser tabs.
+                  </span>
                 </div>
                 <div className="input-group">
                   <label>Support Email Address</label>
                   <input type="email" defaultValue="support@certicode.com" />
-                  <span className="input-hint">Used for automated system communications.</span>
+                  <span className="input-hint">
+                    Used for automated system communications.
+                  </span>
                 </div>
                 <div className="input-group">
                   <label>Default Currency</label>
                   <select className="full-select">
-                    <option>USD-US-Dollar</option>
+                    <option>USD - US Dollar</option>
                   </select>
-                  <span className="input-hint">Base currency for all billing calculations.</span>
+                  <span className="input-hint">
+                    Base currency for all billing calculations.
+                  </span>
                 </div>
                 <div className="input-group">
                   <label>Timezone</label>
                   <select className="full-select">
                     <option>(UTC-05:00) Eastern Time (US & Canada)</option>
                   </select>
-                  <span className="input-hint">System wide date and time reporting.</span>
+                  <span className="input-hint">
+                    System wide date and time reporting.
+                  </span>
                 </div>
               </div>
             </div>
 
             <div className="settings-card">
-              <div className="card-header-flex">
-                <div className="header-left">
-                  <div className="icon-circle orange">
-                    <img src={securityIcon} alt="Security Settings" className="icon-image" />
-                  </div>
+              <div className="card-header-between">
+                <div className="header-group">
+                  <div className="icon-circle orange">🛡️</div>
                   <div>
                     <h4>Security & Access</h4>
-                    <p className="card-sub">Configure authentication protocols and session policies.</p>
+                    <p className="card-sub">
+                      Configure authentication protocols and session policies.
+                    </p>
                   </div>
                 </div>
                 <span className="badge success">ENFORCED</span>
@@ -107,7 +124,10 @@ const PlatformSetting = () => {
                   <strong>Automatic Session Timeout</strong>
                   <p>Require MFA for all administrative accounts</p>
                 </div>
-                <select className="mini-select">
+                <select
+                  className="full-select"
+                  style={{ width: "auto", padding: "6px 12px" }}
+                >
                   <option>30 Minutes</option>
                 </select>
               </div>
@@ -124,42 +144,6 @@ const PlatformSetting = () => {
               </div>
             </div>
           </div>
-
-          <div className="settings-right">
-            <div className="settings-card h-full">
-              <div className="card-header-simple">
-                <h4>Admin Activity Log</h4>
-                <img src={activityLogIcon} alt="Activity Log" className="icon-grey" />
-              </div>
-              <ul className="activity-list">
-                <li className="activity-item">
-                  <div className="act-icon blue">✏️</div>
-                  <div className="act-content">
-                    <strong>Updated E-commerce SaaS Price</strong>
-                    <p>Modified subscription tiers for enterprise tier assets.</p>
-                    <small>TODAY, 10:45 AM</small>
-                  </div>
-                </li>
-                <li className="activity-item">
-                  <div className="act-icon orange">⚙️</div>
-                  <div className="act-content">
-                    <strong>Change System Settings</strong>
-                    <p>Updated global notification and preferences.</p>
-                    <small>YESTERDAY, 4:20 PM</small>
-                  </div>
-                </li>
-                <li className="activity-item">
-                  <div className="act-icon green">✅</div>
-                  <div className="act-content">
-                    <strong>Authorized Payout</strong>
-                    <p>Approved monthly revenue distribution.</p>
-                    <small>DEC 31, 2025, 9:00 AM</small>
-                  </div>
-                </li>
-              </ul>
-              <button className="btn full-outline">View Complete Audit Log</button>
-            </div>
-          </div>
         </div>
       </main>
     </div>
@@ -167,4 +151,3 @@ const PlatformSetting = () => {
 };
 
 export default PlatformSetting;
-

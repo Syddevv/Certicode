@@ -2,7 +2,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 24px 32px;
+  padding: 0 32px;
   --admin-topbar-edge-x: 32px;
   background: #f8fafc;
   min-height: 100vh;
@@ -247,7 +247,7 @@
 /* Responsive tweaks */
 @media (max-width: 1024px) {
   .notifications-main {
-    padding: 20px;
+    padding: 0 20px;
   }
 
   .notifications-header {
@@ -258,7 +258,7 @@
 
 @media (max-width: 768px) {
   .notifications-main {
-    padding: 16px;
+    padding: 0 16px;
   }
 
   .notif-card {
@@ -286,7 +286,7 @@
 
 @media (max-width: 600px) {
   .notifications-main {
-    padding: 12px;
+    padding: 0 12px;
   }
 
   .notifications-header h1 {

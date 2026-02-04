@@ -17,7 +17,7 @@ body {
 
 .main {
   flex: 1;
-  padding: 24px 32px;
+  padding: 0 32px;
   --admin-topbar-edge-x: 32px;
 }
 
@@ -188,6 +188,11 @@ td {
   padding: 16px 20px;
   font-size: 13px;
   border-bottom: 1px solid #f3f4f6;
+}
+
+th:first-child,
+td:first-child {
+  padding-left: 28px;
 }
 
 .asset-cell {

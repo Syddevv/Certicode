@@ -1,13 +1,15 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // Auth
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import AuthCallback from "./components/AuthCallback";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import CreateNewPassword from "./pages/auth/CreateNewPassword";
 
 // Public
-import LandingPage from "./pages/public/LandingPage";
+import LandingPage from "./pages/public/LandingPage"; // Note: unused in routes below, but kept from your original code
 import TermsAndConditions from "./pages/public/TermsAndConditions";
 import PrivacyPolicy from "./pages/public/PrivacyPolicy";
 import Marketplace from "./pages/public/Marketplace";
@@ -28,11 +30,13 @@ import ContactUs from "./pages/public/ContactUs";
 import SuccessStories from "./pages/public/SuccessStories";
 import BlogsNews from "./pages/public/BlogsNews";
 import BlogsNewsIndividual from "./pages/public/BlogsNewsIndividual";
+import NotFound from "./pages/public/NotFound";
 
 // Admin
 import AdminInventory from "./pages/admin/AdminInventory";
 import AdminSales from "./pages/admin/AdminSales";
 import AdminCustomers from "./pages/admin/AdminCustomers";
+import AdminCustomerDetails from "./pages/admin/AdminCustomerDetails"; // <--- IMPORT ADDED HERE
 import AdminSetting from "./pages/admin/AdminSetting";
 import PlatformSetting from "./pages/admin/PlatformSetting";
 import SupportDesk from "./pages/admin/SupportDesk";
@@ -43,12 +47,11 @@ import AdminNotification from "./pages/admin/AdminNotification";
 // Components
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// Remove this import - we'll handle auth differently
-// import { useAuth } from './hooks/useAuth';
+import AdminAddNewAsset from "./pages/admin/AdminAddNewAsset";
+
+import AdminOrderDetails from "./pages/admin/AdminOrderDetails";
 
 function App() {
-  // REMOVE THIS - Can't call useAuth here because Router isn't set up yet
-  // useAuth();
   
   return (
     <BrowserRouter>
@@ -58,9 +61,7 @@ function App() {
   );
 }
 
-// Create a separate component that uses the Router context
 function AppContent() {
-  // Now we can use hooks that need Router context
   
   return (
     <Routes>
@@ -68,6 +69,8 @@ function AppContent() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/create-new-password" element={<CreateNewPassword />} />
 
       {/* ADMIN ROUTES - Protected and Admin only */}
       <Route path="/dashboard" element={
@@ -171,8 +174,9 @@ function AppContent() {
         </ProtectedRoute>
       } />
 
-      {/* Redirect if no path matches */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/add-asset" element={<AdminAddNewAsset />} />
+      {/* 404 */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

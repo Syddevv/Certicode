@@ -110,10 +110,7 @@ const SupportDesk = () => {
 
           <div className="support-sidebar">
             <div className="sidebar-box">
-              <h5 className="side-title">
-                <img src={volumeIcon} alt="Volume" className="side-icon" />
-                VOLUME BY CATEGORY
-              </h5>
+              <h5 className="side-title">📊 VOLUME BY CATEGORY</h5>
               <div className="progress-list">
                 <div className="prog-item">
                   <div className="prog-info"><span>API</span> <span>42%</span></div>
@@ -128,10 +125,7 @@ const SupportDesk = () => {
 
             <div className="sidebar-box transparent">
               <div className="side-header">
-                <h5 className="side-title">
-                  <img src={urgentIcon} alt="Urgent" className="side-icon" />
-                  URGENT ITEMS
-                </h5>
+                <h5 className="side-title">📌 URGENT ITEMS</h5>
                 <span className="badge live">3 LIVE</span>
               </div>
 
@@ -161,4 +155,3 @@ const SupportDesk = () => {
 };
 
 export default SupportDesk;
-
