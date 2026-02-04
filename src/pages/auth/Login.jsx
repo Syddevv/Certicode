@@ -30,20 +30,15 @@ const Login = () => {
       const data = await api.login(credentials);
       
       if (data.token && data.user) {
+        localStorage.setItem('auth_token', data.token);
         localStorage.setItem('user_id', data.user.id);
         localStorage.setItem('user_role', data.user.role);
         localStorage.setItem('user_name', data.user.name || '');
         
         if (data.user.role === "Admin") {
-          navigate("/admin"); //placeholder
+          navigate("/dashboard");
         } else {
-          navigate("/home", { 
-            state: { 
-              userId: data.user.id,
-              userName: data.user.name,
-              userRole: data.user.role 
-            }
-          });
+          navigate("/");
         }
       }
       

@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 // Auth
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import AuthCallback from "./components/AuthCallback";
 
 // Public
 import LandingPage from "./pages/public/LandingPage";
@@ -39,63 +40,140 @@ import TicketDetail from "./pages/admin/TicketDetail";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminNotification from "./pages/admin/AdminNotification";
 
+// Components
+import ProtectedRoute from "./components/ProtectedRoute";
+
+// Remove this import - we'll handle auth differently
+// import { useAuth } from './hooks/useAuth';
+
 function App() {
+  // REMOVE THIS - Can't call useAuth here because Router isn't set up yet
+  // useAuth();
+  
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Auth */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-
-        {/* ADMIN */}
-        {/* Admin Core */}
-        <Route path="/dashboard" element={<AdminDashboard />} />
-        <Route path="/inventory" element={<AdminInventory />} />
-        <Route path="/sales" element={<AdminSales />} />
-        <Route path="/customers" element={<AdminCustomers />} />
-        <Route path="/admin-notification" element={<AdminNotification />} />
-
-        {/* PUBLIC PAGES / USER */}
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/terms" element={<TermsAndConditions />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="/marketplace" element={<Marketplace />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/promo-codes" element={<PromoCodes />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/order-success" element={<OrderSuccess />} />
-        <Route path="/buyer-dashboard" element={<BuyerDashboard />} />
-        <Route path="/my-purchases" element={<MyPurchases />} />
-        <Route
-          path="/my-purchases/e-commerce-saas-template"
-          element={<PurchasedAssetDetail />}
-        />
-        <Route path="/billing-invoices" element={<BillingInvoices />} />
-        <Route path="/billing-invoices/inv-8273" element={<InvoiceDetails />} />
-        <Route path="/account-settings" element={<BuyerAccountSettings />} />
-        <Route path="/customer-support" element={<CustomerSupport />} />
-        <Route path="/contact" element={<ContactUs />} />
-        <Route path="/success-stories" element={<SuccessStories />} />
-        <Route path="/blogs-news" element={<BlogsNews />} />
-        <Route
-          path="/blogs-news/how-secure-software"
-          element={<BlogsNewsIndividual />}
-        />
-        <Route path="/about" element={<About />} />
-        <Route path="/marketplace/:id" element={<ProductDetails />} />
-        
-        {/* Settings - Both point to /settings in Sidebar, but have unique paths */}
-        <Route path="/settings" element={<AdminSetting />} />
-        <Route path="/platform-settings" element={<PlatformSetting />} />
-
-        {/* Support Routes */}
-        <Route path="/support" element={<SupportDesk />} />
-        <Route path="/ticket" element={<TicketDetail />} />
-
-        {/* Redirect if no path matches */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      {/* Create a wrapper component that uses useAuth */}
+      <AppContent />
     </BrowserRouter>
+  );
+}
+
+// Create a separate component that uses the Router context
+function AppContent() {
+  // Now we can use hooks that need Router context
+  
+  return (
+    <Routes>
+      {/* Auth */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/auth/callback" element={<AuthCallback />} />
+
+      {/* ADMIN ROUTES - Protected and Admin only */}
+      <Route path="/dashboard" element={
+        <ProtectedRoute allowedRoles={['Admin']}>
+          <AdminDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/inventory" element={
+        <ProtectedRoute allowedRoles={['Admin']}>
+          <AdminInventory />
+        </ProtectedRoute>
+      } />
+      <Route path="/sales" element={
+        <ProtectedRoute allowedRoles={['Admin']}>
+          <AdminSales />
+        </ProtectedRoute>
+      } />
+      <Route path="/customers" element={
+        <ProtectedRoute allowedRoles={['Admin']}>
+          <AdminCustomers />
+        </ProtectedRoute>
+      } />
+      <Route path="/admin-notification" element={
+        <ProtectedRoute allowedRoles={['Admin']}>
+          <AdminNotification />
+        </ProtectedRoute>
+      } />
+      <Route path="/settings" element={
+        <ProtectedRoute allowedRoles={['Admin']}>
+          <AdminSetting />
+        </ProtectedRoute>
+      } />
+      <Route path="/platform-settings" element={
+        <ProtectedRoute allowedRoles={['Admin']}>
+          <PlatformSetting />
+        </ProtectedRoute>
+      } />
+      <Route path="/support" element={
+        <ProtectedRoute allowedRoles={['Admin']}>
+          <SupportDesk />
+        </ProtectedRoute>
+      } />
+      <Route path="/ticket" element={
+        <ProtectedRoute allowedRoles={['Admin']}>
+          <TicketDetail />
+        </ProtectedRoute>
+      } />
+
+      {/* PUBLIC PAGES / USER */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/terms" element={<TermsAndConditions />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/marketplace" element={<Marketplace />} />
+      <Route path="/cart" element={<Cart />} />
+      <Route path="/promo-codes" element={<PromoCodes />} />
+      <Route path="/checkout" element={<Checkout />} />
+      <Route path="/order-success" element={<OrderSuccess />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/marketplace/:id" element={<ProductDetails />} />
+      <Route path="/customer-support" element={<CustomerSupport />} />
+      <Route path="/contact" element={<ContactUs />} />
+      <Route path="/success-stories" element={<SuccessStories />} />
+      <Route path="/blogs-news" element={<BlogsNews />} />
+      <Route
+        path="/blogs-news/how-secure-software"
+        element={<BlogsNewsIndividual />}
+      />
+      
+      {/* PROTECTED USER ROUTES - Require authentication */}
+      <Route path="/buyer-dashboard" element={
+        <ProtectedRoute allowedRoles={['Customer']}>
+          <BuyerDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/my-purchases" element={
+        <ProtectedRoute allowedRoles={['Customer']}>
+          <MyPurchases />
+        </ProtectedRoute>
+      } />
+      <Route
+        path="/my-purchases/e-commerce-saas-template"
+        element={
+          <ProtectedRoute allowedRoles={['Customer']}>
+            <PurchasedAssetDetail />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/billing-invoices" element={
+        <ProtectedRoute allowedRoles={['Customer']}>
+          <BillingInvoices />
+        </ProtectedRoute>
+      } />
+      <Route path="/billing-invoices/inv-8273" element={
+        <ProtectedRoute allowedRoles={['Customer']}>
+          <InvoiceDetails />
+        </ProtectedRoute>
+      } />
+      <Route path="/account-settings" element={
+        <ProtectedRoute allowedRoles={['Customer']}>
+          <BuyerAccountSettings />
+        </ProtectedRoute>
+      } />
+
+      {/* Redirect if no path matches */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 

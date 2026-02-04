@@ -48,11 +48,11 @@ export const api = {
     
     if (data.token) {
       localStorage.setItem('auth_token', data.token);
-      if (data.user && data.user.id) {
-        window.location.href = `/marketplace?id=${data.user.id}`;
-      } else {
-        window.location.href = '/marketplace';
-      }
+      localStorage.setItem('user_id', data.user.id);
+      localStorage.setItem('user_role', data.user.role);
+      localStorage.setItem('user_name', data.user.name || '');
+      
+      return data;
     }
     
     return data;
@@ -62,64 +62,129 @@ export const api = {
     window.location.href = `${API_URL}/auth/google`;
   },
 
-  async handleGoogleCallback(code) {
-    const response = await fetch(`${API_URL}/auth/google/callback`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({ code })
-    });
-    
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.message || 'Google login failed');
-    }
-    
-    if (data.token) {
-      localStorage.setItem('auth_token', data.token);
-      if (data.user && data.user.id) {
-        window.location.href = `/marketplace?id=${data.user.id}`;
-      } else {
-        window.location.href = '/marketplace';
-      }
-    }
-    
-    return data;
-  },
-
   async facebookRedirect() {
     window.location.href = `${API_URL}/auth/facebook`;
   },
 
-  async handleFacebookCallback(code) {
-    const response = await fetch(`${API_URL}/auth/facebook/callback`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({ code })
-    });
+  async logout() {
+    const token = localStorage.getItem('auth_token');
     
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.message || 'Facebook login failed');
-    }
-    
-    if (data.token) {
-      localStorage.setItem('auth_token', data.token);
-      if (data.user && data.user.id) {
-        window.location.href = `/marketplace?id=${data.user.id}`;
-      } else {
-        window.location.href = '/marketplace';
+    if (token) {
+      try {
+        await fetch(`${API_URL}/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      } catch (error) {
+        console.error('Logout error:', error);
       }
     }
     
-    return data;
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('user_role');
+    localStorage.removeItem('user_name');
+    
+    window.location.href = '/login';
+  },
+
+  async request(url, options = {}) {
+    const headers = getAuthHeaders();
+    
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...headers,
+        ...options.headers,
+      },
+    });
+    
+    if (response.status === 401) {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_id');
+      localStorage.removeItem('user_role');
+      localStorage.removeItem('user_name');
+      window.location.href = '/login';
+      throw new Error('Session expired. Please login again.');
+    }
+    
+    return response;
+  },
+
+  async validateToken() {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return false;
+    
+    try {
+      const response = await fetch(`${API_URL}/validate-token`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
+      
+      if (response.status === 401) {
+        this.clearAuthData();
+        return false;
+      }
+      
+      return response.ok;
+    } catch (error) {
+      console.error('Token validation error:', error);
+      return false;
+    }
+  },
+
+  // Clear all auth data
+  clearAuthData() {
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('user_role');
+    localStorage.removeItem('user_name');
+  },
+
+  // Enhanced request method with token expiration handling
+  async request(url, options = {}) {
+    const headers = getAuthHeaders();
+    
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        ...headers,
+        ...options.headers,
+      },
+    });
+    
+    // Handle token expiration (401 Unauthorized)
+    if (response.status === 401) {
+      this.clearAuthData();
+      window.location.href = '/login?error=Session expired. Please login again.';
+      throw new Error('Session expired');
+    }
+    
+    return response;
+  },
+
+  // Logout function
+  async logout() {
+    const token = localStorage.getItem('auth_token');
+    
+    if (token) {
+      try {
+        await fetch(`${API_URL}/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    }
+    
+    this.clearAuthData();
   },
 
   async getProducts(search = "", assetType = "", page = 1) {
