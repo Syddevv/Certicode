@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // Auth
 import Login from "./pages/auth/Login";
@@ -29,6 +29,7 @@ import ContactUs from "./pages/public/ContactUs";
 import SuccessStories from "./pages/public/SuccessStories";
 import BlogsNews from "./pages/public/BlogsNews";
 import BlogsNewsIndividual from "./pages/public/BlogsNewsIndividual";
+import NotFound from "./pages/public/NotFound";
 
 // Admin
 import AdminInventory from "./pages/admin/AdminInventory";
@@ -103,8 +104,8 @@ function App() {
         {/* Add New Asset */}
         <Route path="/add-asset" element={<AdminAddNewAsset />} />
 
-        {/* Redirect if no path matches */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* 404 */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );
