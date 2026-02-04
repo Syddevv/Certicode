@@ -8,18 +8,23 @@ import CheckoutCart from "../../assets/CheckoutCart.png";
 import NavCart from "../../assets/NavCart.png";
 import CerticodeBoxIcon from "../../assets/CerticodeBoxIcon.png";
 import { CartAPI } from "../../services/CartAPI";
+import { PromoAPI } from "../../services/PromoAPI";
 import { api } from "../../services/api";
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [recommendations, setRecommendations] = useState([]); // Added state
-  const [recommendationsLoading, setRecommendationsLoading] = useState(false); // Added state
+  const [recommendations, setRecommendations] = useState([]);
+  const [recommendationsLoading, setRecommendationsLoading] = useState(false);
   const [error, setError] = useState("");
   const [subtotal, setSubtotal] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [total, setTotal] = useState(0);
   const [promoCode, setPromoCode] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState(null);
+  const [promoError, setPromoError] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
+  
   const navigate = useNavigate();
 
   const getToneColor = (tech) => {
@@ -110,7 +115,6 @@ const Cart = () => {
     }
   };
 
-  // Fetch cart items from API
   const fetchCartItems = async () => {
     try {
       setLoading(true);
@@ -120,7 +124,6 @@ const Cart = () => {
       setCartItems(items);
       calculateTotals(items);
       
-      // Fetch recommendations after cart items are loaded
       fetchRecommendations();
     } catch (error) {
       console.error("Error fetching cart:", error);
@@ -176,21 +179,91 @@ const Cart = () => {
     }
   };
 
-  const handleApplyPromo = () => {
+  const handleApplyPromo = async () => {
     if (!promoCode.trim()) {
-      setError("Please enter a promo code");
+      setPromoError("Please enter a promo code");
       return;
     }
-    
-    // Mock promo code logic
-    if (promoCode.toUpperCase() === "SAVE10") {
-      const discountAmount = subtotal * 0.1;
-      setDiscount(discountAmount);
-      setTotal(subtotal - discountAmount);
-      setError("Promo code applied! 10% discount.");
-    } else {
-      setError("Invalid promo code");
+
+    if (appliedPromo) {
+      setPromoError("A promo code is already applied");
+      return;
     }
+
+    try {
+      setPromoLoading(true);
+      setPromoError("");
+      
+      const result = await PromoAPI.validatePromo(promoCode, subtotal);
+      
+      if (result.valid) {
+        setAppliedPromo(result.promo);
+        setDiscount(result.discount_amount);
+        setTotal(subtotal - result.discount_amount);
+        setPromoError(`Promo code applied! ${result.message}`);
+      } else {
+        setPromoError(result.message || "Invalid promo code");
+      }
+    } catch (error) {
+      console.error("Error applying promo:", error);
+      setPromoError(error.message || "Failed to apply promo code");
+      
+      // Fallback to mock logic
+      applyMockPromo();
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const applyMockPromo = () => {
+    const mockPromos = {
+      'SAVE10': { type: 'percentage', value: 10, min_amount: 0 },
+      'SAVE20': { type: 'percentage', value: 20, min_amount: 100 },
+      'FIXED50': { type: 'fixed', value: 50, min_amount: 200 },
+      'FREESHIP': { type: 'shipping', value: 0, min_amount: 50 }
+    };
+
+    const promo = mockPromos[promoCode.toUpperCase()];
+    
+    if (!promo) {
+      setPromoError("Invalid promo code");
+      return;
+    }
+
+    if (subtotal < promo.min_amount) {
+      setPromoError(`Minimum order of $${promo.min_amount} required`);
+      return;
+    }
+
+    let discountAmount = 0;
+    let message = "";
+
+    if (promo.type === 'percentage') {
+      discountAmount = subtotal * (promo.value / 100);
+      message = `${promo.value}% discount applied!`;
+    } else if (promo.type === 'fixed') {
+      discountAmount = Math.min(promo.value, subtotal);
+      message = `$${promo.value} discount applied!`;
+    }
+
+    setAppliedPromo({
+      code: promoCode.toUpperCase(),
+      type: promo.type,
+      value: promo.value,
+      discount_amount: discountAmount
+    });
+    
+    setDiscount(discountAmount);
+    setTotal(subtotal - discountAmount);
+    setPromoError(message);
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setDiscount(0);
+    setTotal(subtotal);
+    setPromoCode("");
+    setPromoError("");
   };
 
   const handleAddRecommended = async (productId) => {
@@ -359,24 +432,57 @@ const Cart = () => {
             <aside className="cart__summary">
               <div className="cart__promo">
                 <h3>Promo Code</h3>
-                <div className="cart__promoRow">
-                  <input
-                    className="cart__promoInput"
-                    type="text"
-                    placeholder="Enter promo code"
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value)}
-                  />
-                  <button 
-                    className="cart__apply" 
-                    type="button"
-                    onClick={handleApplyPromo}
-                  >
-                    Apply
-                  </button>
-                </div>
+                {appliedPromo ? (
+                  <div className="cart__promoApplied">
+                    <div className="cart__promoSuccess">
+                      <span>✓ {appliedPromo.code} applied</span>
+                      <button 
+                        className="cart__removePromo"
+                        onClick={handleRemovePromo}
+                        type="button"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    <div className="cart__promoDetails">
+                      {appliedPromo.type === 'percentage' && (
+                        <span>{appliedPromo.value}% off</span>
+                      )}
+                      {appliedPromo.type === 'fixed' && (
+                        <span>${appliedPromo.value} off</span>
+                      )}
+                      <span>-${discount.toFixed(2)}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="cart__promoRow">
+                      <input
+                        className="cart__promoInput"
+                        type="text"
+                        placeholder="Enter promo code"
+                        value={promoCode}
+                        onChange={(e) => setPromoCode(e.target.value)}
+                        disabled={promoLoading}
+                      />
+                      <button 
+                        className="cart__apply" 
+                        type="button"
+                        onClick={handleApplyPromo}
+                        disabled={promoLoading || !promoCode.trim()}
+                      >
+                        {promoLoading ? "Applying..." : "Apply"}
+                      </button>
+                    </div>
+                    {promoError && (
+                      <div className={`cart__promoMessage ${promoError.includes("applied") ? "cart__promoMessage--success" : "cart__promoMessage--error"}`}>
+                        {promoError}
+                      </div>
+                    )}
+                  </>
+                )}
                 <Link className="cart__promoLink" to="/promo-codes">
-                  View promo codes
+                  View all promo codes
                 </Link>
               </div>
 

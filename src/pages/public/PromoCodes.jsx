@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -8,76 +8,7 @@ import SearchIcon from "../../assets/lucide_search.png";
 import CopyIcon from "../../assets/Copy.png";
 import GrayCheck from "../../assets/GrayCheck.png";
 import DeleteIcon from "../../assets/Delete.png";
-
-const vouchers = [
-  {
-    id: 1,
-    value: "$50 OFF",
-    title: "Valid on all UI Kits",
-    status: "active",
-    badge: "Active",
-    metaLabel: "Expires:",
-    metaValue: "Jan 31, 2026",
-    code: "CERT50UIKIT",
-  },
-  {
-    id: 2,
-    value: "$20% OFF",
-    title: "Mobile App Templates",
-    status: "expiring",
-    badge: "Expiring Soon",
-    metaLabel: "",
-    metaValue: "Expires in 2 days",
-    code: "MOBAPP20OFF",
-  },
-  {
-    id: 3,
-    value: "$100 OFF",
-    title: "SaaS Launch Promo",
-    status: "active",
-    badge: "Active",
-    metaLabel: "Expires:",
-    metaValue: "Jan 31, 2026",
-    code: "LAUNCHSAAS",
-  },
-  {
-    id: 4,
-    value: "15% OFF",
-    title: "Loyalty Discount",
-    status: "used",
-    badge: "Used",
-    metaLabel: "Applied on",
-    metaValue: "Jan 21, 2026",
-    code: "LOYALTY15",
-  },
-];
-
-const historyItems = [
-  {
-    id: 1,
-    icon: GrayCheck,
-    tone: "neutral",
-    title: "LOYALTY15 Used",
-    desc: 'Applied on "Fintech Banking Dashboard" purchase.',
-    date: "Jan 21, 2026",
-  },
-  {
-    id: 2,
-    icon: DeleteIcon,
-    tone: "danger",
-    title: "SUMMER25 Expired",
-    desc: "25% discount voucher expired without use.",
-    date: "May 01, 2025",
-  },
-  {
-    id: 3,
-    icon: GrayCheck,
-    tone: "neutral",
-    title: "FREELANCE5 Used",
-    desc: 'Applied on "Portfolio Template" purchase.',
-    date: "Mar 05, 2025",
-  },
-];
+import { PromoAPI } from "../../services/PromoAPI";
 
 const steps = [
   "Browse and copy the voucher code you want to use.",
@@ -86,11 +17,177 @@ const steps = [
 ];
 
 const PromoCodes = () => {
+  const [vouchers, setVouchers] = useState([]);
+  const [historyItems, setHistoryItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [copyingCode, setCopyingCode] = useState(null);
+
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    fetchVouchers();
+    fetchHistory();
   }, []);
 
-  const hasVouchers = vouchers.length > 0;
+  const fetchVouchers = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      
+      const activePromos = await PromoAPI.getActivePromos();
+      
+      const transformedVouchers = activePromos.map((promo, index) => {
+        let status = "active";
+        let badge = "Active";
+        
+        if (promo.valid_until) {
+          const expiryDate = new Date(promo.valid_until);
+          const now = new Date();
+          const daysUntilExpiry = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+          
+          if (daysUntilExpiry <= 7) {
+            status = "expiring";
+            badge = "Expiring Soon";
+          }
+        }
+        
+        let valueDisplay = "";
+        if (promo.type === 'percentage') {
+          valueDisplay = `${promo.value}% OFF`;
+        } else if (promo.type === 'fixed') {
+          valueDisplay = `$${promo.value} OFF`;
+        } else if (promo.type === 'shipping') {
+          valueDisplay = "FREE SHIPPING";
+        }
+        
+        const title = promo.description || 
+          (promo.type === 'percentage' ? `Get ${promo.value}% off your order` :
+           promo.type === 'fixed' ? `Save $${promo.value} on your purchase` :
+           "Free shipping on eligible orders");
+        
+        let metaLabel = "Expires:";
+        let metaValue = "";
+        if (promo.valid_until) {
+          const expiryDate = new Date(promo.valid_until);
+          metaValue = expiryDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          });
+        } else {
+          metaValue = "No expiry date";
+        }
+        
+        if (promo.min_order_amount > 0) {
+          metaLabel = "Min order:";
+          metaValue = `$${promo.min_order_amount}`;
+        }
+        
+        return {
+          id: promo.id || index + 1,
+          value: valueDisplay,
+          title: title,
+          status: status,
+          badge: badge,
+          metaLabel: metaLabel,
+          metaValue: metaValue,
+          code: promo.code,
+          type: promo.type,
+          rawValue: promo.value,
+          min_order_amount: promo.min_order_amount,
+          valid_until: promo.valid_until
+        };
+      });
+      
+      setVouchers(transformedVouchers);
+      
+    } catch (error) {
+      console.error("Error fetching vouchers:", error);
+      setError("Failed to load vouchers. Please try again.");
+      setVouchers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchHistory = async () => {
+    try {
+      // MOCK API
+      const mockHistory = [
+        {
+          id: 1,
+          icon: GrayCheck,
+          tone: "neutral",
+          title: "LOYALTY15 Used",
+          desc: 'Applied on "Fintech Banking Dashboard" purchase.',
+          date: "Jan 21, 2026",
+        },
+        {
+          id: 2,
+          icon: DeleteIcon,
+          tone: "danger",
+          title: "SUMMER25 Expired",
+          desc: "25% discount voucher expired without use.",
+          date: "May 01, 2025",
+        },
+        {
+          id: 3,
+          icon: GrayCheck,
+          tone: "neutral",
+          title: "FREELANCE5 Used",
+          desc: 'Applied on "Portfolio Template" purchase.',
+          date: "Mar 05, 2025",
+        },
+      ];
+      
+      setHistoryItems(mockHistory);
+    } catch (error) {
+      console.error("Error fetching history:", error);
+      setHistoryItems([]);
+    }
+  };
+
+  const handleCopyCode = async (code) => {
+    try {
+      setCopyingCode(code);
+      await navigator.clipboard.writeText(code);
+      
+      setTimeout(() => {
+        setCopyingCode(null);
+      }, 2000);
+    } catch (error) {
+      console.error("Failed to copy:", error);
+      setCopyingCode(null);
+    }
+  };
+
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const filteredVouchers = vouchers.filter(voucher =>
+    voucher.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    voucher.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const hasVouchers = filteredVouchers.length > 0;
+
+  if (loading) {
+    return (
+      <div>
+        <Navbar />
+        <section className="promo">
+          <div className="promo__inner">
+            <div className="promo__loading">
+              <h2>Loading your vouchers...</h2>
+            </div>
+          </div>
+        </section>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -113,11 +210,21 @@ const PromoCodes = () => {
               <p>
                 Manage your promo codes and exclusive marketplace discounts.
               </p>
+              {error && (
+                <div className="promo__error">
+                  {error}
+                </div>
+              )}
             </div>
 
             <div className="promo__search">
               <img src={SearchIcon} alt="" aria-hidden="true" />
-              <input type="text" placeholder="Search vouchers..." />
+              <input 
+                type="text" 
+                placeholder="Search vouchers..."
+                value={searchTerm}
+                onChange={handleSearch}
+              />
             </div>
           </div>
 
@@ -126,7 +233,7 @@ const PromoCodes = () => {
               {hasVouchers ? (
                 <>
                   <div className="promo__grid">
-                    {vouchers.map((voucher) => (
+                    {filteredVouchers.map((voucher) => (
                       <article
                         key={voucher.id}
                         className={`promoCard promoCard--${voucher.status}`}
@@ -174,10 +281,14 @@ const PromoCodes = () => {
                           <span className="promoCard__code">
                             {voucher.code}
                           </span>
-                          {voucher.status === "used" ? (
-                            <span className="promoCard__applied">Applied</span>
+                          {copyingCode === voucher.code ? (
+                            <span className="promoCard__copied">Copied!</span>
                           ) : (
-                            <button className="promoCard__copy" type="button">
+                            <button 
+                              className="promoCard__copy" 
+                              type="button"
+                              onClick={() => handleCopyCode(voucher.code)}
+                            >
                               <img src={CopyIcon} alt="" aria-hidden="true" />
                               Copy
                             </button>

@@ -11,10 +11,8 @@ const getAuthHeaders = () => {
 
 export const ReviewAPI = {
   async getProductReviews(productId) {
-    // Make it EXACTLY like your working version
     const response = await fetch(`http://127.0.0.1:8000/api/products/${productId}/reviews`);
     
-    // Add debug logging
     console.log('ReviewAPI Response status:', response.status);
     console.log('ReviewAPI Response headers:', response.headers);
     
