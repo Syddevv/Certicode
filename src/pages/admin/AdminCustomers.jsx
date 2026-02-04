@@ -140,13 +140,19 @@ const AdminCustomers = () => {
                 </tr>
               </thead>
               <tbody>
-                {/* ROW 1 */}
+                {/* ROW 1 - JAMES SMITH (LINKED) */}
                 <tr>
                   <td>
                     <div className="user-cell">
                       <Avatar name="James Smith" />
                       <div>
-                        <strong>James Smith</strong>
+                        {/* ⬇️ THIS IS THE CHANGE: Wrapped the name in a Link */}
+                        <Link 
+                          to="/customers/details" 
+                          style={{ textDecoration: 'none', color: 'inherit' }}
+                        >
+                          <strong>James Smith</strong>
+                        </Link>
                         <span className="email">james.smith@email.com</span>
                       </div>
                     </div>
@@ -157,7 +163,10 @@ const AdminCustomers = () => {
                     <span className="status-badge active">● ACTIVE</span>
                   </td>
                   <td className="actions">
-                    <button className="more-btn">{Icons.MoreVertical}</button>
+                    {/* Optional: You can also link the 'more' button if you prefer */}
+                    <Link to="/customers/details">
+                      <button className="more-btn">{Icons.MoreVertical}</button>
+                    </Link>
                   </td>
                 </tr>
 
@@ -202,9 +211,9 @@ const AdminCustomers = () => {
                     <button className="more-btn">{Icons.MoreVertical}</button>
                   </td>
                 </tr>
-
+                
                 {/* ROW 4 */}
-                <tr>
+                 <tr>
                   <td>
                     <div className="user-cell">
                       <Avatar name="Joshua Olsen" />
@@ -223,6 +232,7 @@ const AdminCustomers = () => {
                     <button className="more-btn">{Icons.MoreVertical}</button>
                   </td>
                 </tr>
+
               </tbody>
             </table>
 
@@ -248,4 +258,3 @@ const AdminCustomers = () => {
 };
 
 export default AdminCustomers;
-

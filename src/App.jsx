@@ -8,7 +8,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import CreateNewPassword from "./pages/auth/CreateNewPassword";
 
 // Public
-import LandingPage from "./pages/public/LandingPage";
+import LandingPage from "./pages/public/LandingPage"; // Note: unused in routes below, but kept from your original code
 import TermsAndConditions from "./pages/public/TermsAndConditions";
 import PrivacyPolicy from "./pages/public/PrivacyPolicy";
 import Marketplace from "./pages/public/Marketplace";
@@ -35,13 +35,17 @@ import NotFound from "./pages/public/NotFound";
 import AdminInventory from "./pages/admin/AdminInventory";
 import AdminSales from "./pages/admin/AdminSales";
 import AdminCustomers from "./pages/admin/AdminCustomers";
+import AdminCustomerDetails from "./pages/admin/AdminCustomerDetails"; // <--- IMPORT ADDED HERE
 import AdminSetting from "./pages/admin/AdminSetting";
 import PlatformSetting from "./pages/admin/PlatformSetting";
 import SupportDesk from "./pages/admin/SupportDesk";
 import TicketDetail from "./pages/admin/TicketDetail";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminNotification from "./pages/admin/AdminNotification";
+
 import AdminAddNewAsset from "./pages/admin/AdminAddNewAsset";
+
+import AdminOrderDetails from "./pages/admin/AdminOrderDetails";
 
 function App() {
   return (
@@ -52,17 +56,23 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/create-new-password" element={<CreateNewPassword />} />
-
         {/* ADMIN */}
+
         {/* Admin Core */}
         <Route path="/dashboard" element={<AdminDashboard />} />
         <Route path="/inventory" element={<AdminInventory />} />
         <Route path="/sales" element={<AdminSales />} />
+
+        {/* Customer Routes */}
         <Route path="/customers" element={<AdminCustomers />} />
+        <Route path="/customers/details" element={<AdminCustomerDetails />} />
+
+        {/* <--- ROUTE ADDED HERE */}
+        <Route path="/sales/order-details" element={<AdminOrderDetails />} />
         <Route path="/admin-notification" element={<AdminNotification />} />
 
         {/* PUBLIC PAGES / USER */}
-        <Route path="/" element={<LandingPage />} />
+        <Route path="/" element={<AdminDashboard />} />
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/marketplace" element={<Marketplace />} />
@@ -95,15 +105,16 @@ function App() {
 
         {/* Settings - Both point to /settings in Sidebar, but have unique paths */}
         <Route path="/settings" element={<AdminSetting />} />
+
         <Route path="/platform-settings" element={<PlatformSetting />} />
-
         {/* Support Routes */}
+
         <Route path="/support" element={<SupportDesk />} />
+
         <Route path="/ticket" element={<TicketDetail />} />
-
         {/* Add New Asset */}
-        <Route path="/add-asset" element={<AdminAddNewAsset />} />
 
+        <Route path="/add-asset" element={<AdminAddNewAsset />} />
         {/* 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
