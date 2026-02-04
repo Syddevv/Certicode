@@ -13,6 +13,15 @@ const categoryTabs = [
   "Custom Projects",
 ];
 
+const sortOptions = [
+  "Newest First",
+  "Oldest First",
+  "Most Popular",
+  "Highest Rated",
+  "Price: Low to High",
+  "Price: High to Low",
+];
+
 const assets = [
   {
     title: "E-commerce SaaS Template",
@@ -81,6 +90,7 @@ const assets = [
 
 const Marketplace = () => {
   const [activeTab, setActiveTab] = useState("All Assets");
+  const [selectedSort, setSelectedSort] = useState("Newest First");
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -218,10 +228,22 @@ const Marketplace = () => {
             <div className="marketplace__results">
               <div className="marketplace__resultsHeader">
                 <span>Showing 24 assets found</span>
-                <button className="marketplace__sort" type="button">
-                  Sort by: <strong>Newest First</strong>
+                <label className="marketplace__sort" htmlFor="sort-assets">
+                  <span>Sort by:</span>
+                  <select
+                    id="sort-assets"
+                    className="marketplace__sortSelect"
+                    value={selectedSort}
+                    onChange={(event) => setSelectedSort(event.target.value)}
+                  >
+                    {sortOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
                   <span className="marketplace__sortIcon">▾</span>
-                </button>
+                </label>
               </div>
 
               <div className="marketplace__cards">

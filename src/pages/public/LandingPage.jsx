@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "../../styles/landingPage.css";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -19,10 +19,21 @@ import Wallet from "../../assets/wallet.png";
 import Lightning from "../../assets/lightning.png";
 import SearchCheck from "../../assets/search-check.png";
 import Avatar from "../../assets/Avatar.png";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+
+const heroCategories = [
+  "All Categories",
+  "Website Apps",
+  "Mobile Apps",
+  "UI/UX Design",
+  "Custom Projects",
+];
 
 const LandingPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [selectedCategory, setSelectedCategory] = useState("All Categories");
+  const [openFaqIndex, setOpenFaqIndex] = useState(0);
 
   useEffect(() => {
     if (!location.hash) return;
@@ -113,11 +124,36 @@ const LandingPage = () => {
   ];
 
   const faqs = [
-    "How does the transfer process work?",
-    "Are the assets verified?",
-    "What payment methods do you accept?",
-    "Is there a refund policy?",
+    {
+      question: "How does the transfer process work?",
+      answer:
+        "After checkout, Certicode securely delivers source files, docs, and license details in your buyer dashboard. You can download instantly and track all purchases from one place.",
+    },
+    {
+      question: "Are the assets verified?",
+      answer:
+        "Yes. Every asset listed on Certicode goes through a review for code quality, documentation completeness, and production-readiness before it becomes available in the marketplace.",
+    },
+    {
+      question: "What payment methods do you accept?",
+      answer:
+        "Certicode supports major debit/credit cards and other secure payment gateways available at checkout, with invoices and transaction history stored in your account.",
+    },
+    {
+      question: "Is there a refund policy?",
+      answer:
+        "If an asset is materially different from its listing or has a blocking delivery issue, you can contact Certicode Support to open a resolution request under our refund guidelines.",
+    },
   ];
+
+  const handleExplore = () => {
+    const params = new URLSearchParams();
+    if (selectedCategory !== "All Categories") {
+      params.set("category", selectedCategory);
+    }
+    const query = params.toString();
+    navigate(query ? `/marketplace?${query}` : "/marketplace");
+  };
 
   return (
     <div>
@@ -147,10 +183,26 @@ const LandingPage = () => {
                   className="search__input"
                   placeholder={`Search by "Node.js E-commerce", "Fitness App"...`}
                 />
-                <button className="search__select" type="button">
-                  All Categories <img src={ArrowDown} alt="moon-icon" />
-                </button>
-                <button className="btn btn--primary search__cta" type="button">
+                <label className="search__selectWrap" htmlFor="hero-category">
+                  <select
+                    id="hero-category"
+                    className="search__select"
+                    value={selectedCategory}
+                    onChange={(event) => setSelectedCategory(event.target.value)}
+                  >
+                    {heroCategories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
+                  </select>
+                  <img src={ArrowDown} alt="" aria-hidden="true" />
+                </label>
+                <button
+                  className="btn btn--primary search__cta"
+                  type="button"
+                  onClick={handleExplore}
+                >
                   Explore
                 </button>
               </div>
@@ -227,9 +279,11 @@ const LandingPage = () => {
                 need.
               </p>
             </div>
-            <button className="categories__link" type="button">
-              View all marketplace <span aria-hidden="true">›</span>
-            </button>
+            <Link to="/marketplace">
+              <button className="categories__link" type="button">
+                View all marketplace <span aria-hidden="true">›</span>
+              </button>
+            </Link>
           </div>
 
           <div className="categories__grid">
@@ -328,16 +382,33 @@ const LandingPage = () => {
           </p>
 
           <div className="faq__list">
-            {faqs.map((question) => (
-              <button className="faqItem" key={question} type="button">
-                <span className="faqItem__text">{question}</span>
-                <img
-                  className="faqItem__chevron"
-                  src={ArrowDown}
-                  alt=""
-                  aria-hidden="true"
-                />
-              </button>
+            {faqs.map((faq, index) => (
+              <article
+                className={`faqItem${openFaqIndex === index ? " faqItem--open" : ""}`}
+                key={faq.question}
+              >
+                <button
+                  className="faqItem__trigger"
+                  type="button"
+                  onClick={() =>
+                    setOpenFaqIndex((currentIndex) =>
+                      currentIndex === index ? -1 : index,
+                    )
+                  }
+                  aria-expanded={openFaqIndex === index}
+                >
+                  <span className="faqItem__text">{faq.question}</span>
+                  <img
+                    className="faqItem__chevron"
+                    src={ArrowDown}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                </button>
+                {openFaqIndex === index ? (
+                  <p className="faqItem__answer">{faq.answer}</p>
+                ) : null}
+              </article>
             ))}
           </div>
 
@@ -363,9 +434,11 @@ const LandingPage = () => {
                 Join thousands of businesses already using CertiCode to
                 accelerate their digital transformation.
               </p>
-              <button className="ctaCard__button" type="button">
-                Get Started Now
-              </button>
+              <Link to="/register">
+                <button className="ctaCard__button" type="button">
+                  Get Started Now
+                </button>
+              </Link>
             </div>
           </div>
         </div>
