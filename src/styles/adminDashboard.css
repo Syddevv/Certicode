@@ -16,7 +16,7 @@
 
 .main {
   flex: 1;
-  padding: 24px 32px;
+  padding: 0 32px;
   --admin-topbar-edge-x: 32px;
   display: flex;
   flex-direction: column;

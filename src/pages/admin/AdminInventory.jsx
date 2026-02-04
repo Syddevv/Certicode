@@ -45,7 +45,9 @@ const AdminInventory = () => {
               <img src={notifBell} alt="Notifications" className="notification-icon" />
               <span className="notification-dot" />
             </Link>
-            <button className="btn primary">{Icons.Add} Add New Asset</button>
+            <Link to="/add-asset" className="btn primary">
+              {Icons.Add} Add New Asset
+            </Link>
           </AdminTopbar>
 
           <div className="page-header">

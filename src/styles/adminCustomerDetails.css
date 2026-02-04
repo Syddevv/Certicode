@@ -1,4 +1,3 @@
-
 .breadcrumb {
   margin-bottom: 24px;
   font-size: 13px;
@@ -217,9 +216,18 @@
   width: fit-content;
 }
 
-.mini-badge.blue { background: #e0e7ff; color: #4338ca; }
-.mini-badge.green { background: #dcfce7; color: #15803d; }
-.mini-badge.purple { background: #f3e8ff; color: #7e22ce; }
+.mini-badge.blue {
+  background: #e0e7ff;
+  color: #4338ca;
+}
+.mini-badge.green {
+  background: #dcfce7;
+  color: #15803d;
+}
+.mini-badge.purple {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
 
 /* Date Cell */
 .date-cell div {
@@ -248,9 +256,18 @@
   white-space: nowrap;
 }
 
-.status-pill.completed { background: #dcfce7; color: #16a34a; }
-.status-pill.pending { background: #ffedd5; color: #ea580c; }
-.status-pill.refunded { background: #fee2e2; color: #dc2626; }
+.status-pill.completed {
+  background: #dcfce7;
+  color: #16a34a;
+}
+.status-pill.pending {
+  background: #ffedd5;
+  color: #ea580c;
+}
+.status-pill.refunded {
+  background: #fee2e2;
+  color: #dc2626;
+}
 
 .details-pagination {
   display: flex;
@@ -285,6 +302,18 @@
   background: #f97316;
   color: #fff;
   border-color: #f97316;
+}
+
+.export-profile-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.export-profile-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
 }
 
 @media (max-width: 1024px) {

@@ -1,9 +1,11 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 // Auth
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import CreateNewPassword from "./pages/auth/CreateNewPassword";
 
 // Public
 import LandingPage from "./pages/public/LandingPage"; // Note: unused in routes below, but kept from your original code
@@ -27,6 +29,7 @@ import ContactUs from "./pages/public/ContactUs";
 import SuccessStories from "./pages/public/SuccessStories";
 import BlogsNews from "./pages/public/BlogsNews";
 import BlogsNewsIndividual from "./pages/public/BlogsNewsIndividual";
+import NotFound from "./pages/public/NotFound";
 
 // Admin
 import AdminInventory from "./pages/admin/AdminInventory";
@@ -39,7 +42,11 @@ import SupportDesk from "./pages/admin/SupportDesk";
 import TicketDetail from "./pages/admin/TicketDetail";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminNotification from "./pages/admin/AdminNotification";
+
+import AdminAddNewAsset from "./pages/admin/AdminAddNewAsset";
+
 import AdminOrderDetails from "./pages/admin/AdminOrderDetails";
+
 function App() {
   return (
     <BrowserRouter>
@@ -47,21 +54,25 @@ function App() {
         {/* Auth */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/create-new-password" element={<CreateNewPassword />} />
         {/* ADMIN */}
+
         {/* Admin Core */}
         <Route path="/dashboard" element={<AdminDashboard />} />
         <Route path="/inventory" element={<AdminInventory />} />
         <Route path="/sales" element={<AdminSales />} />
-        
+
         {/* Customer Routes */}
         <Route path="/customers" element={<AdminCustomers />} />
-        <Route path="/customers/details" element={<AdminCustomerDetails />} /> {/* <--- ROUTE ADDED HERE */}
+        <Route path="/customers/details" element={<AdminCustomerDetails />} />
+
+        {/* <--- ROUTE ADDED HERE */}
         <Route path="/sales/order-details" element={<AdminOrderDetails />} />
         <Route path="/admin-notification" element={<AdminNotification />} />
 
         {/* PUBLIC PAGES / USER */}
-        <Route path="/" element={<AdminDashboard />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/terms" element={<TermsAndConditions />} />
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/marketplace" element={<Marketplace />} />
@@ -91,16 +102,21 @@ function App() {
           path="/marketplace/e-commerce-saas-template"
           element={<ProductDetails />}
         />
+
         {/* Settings - Both point to /settings in Sidebar, but have unique paths */}
         <Route path="/settings" element={<AdminSetting />} />
+
         <Route path="/platform-settings" element={<PlatformSetting />} />
-
         {/* Support Routes */}
-        <Route path="/support" element={<SupportDesk />} />
-        <Route path="/ticket" element={<TicketDetail />} />
 
-        {/* Redirect if no path matches */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/support" element={<SupportDesk />} />
+
+        <Route path="/ticket" element={<TicketDetail />} />
+        {/* Add New Asset */}
+
+        <Route path="/add-asset" element={<AdminAddNewAsset />} />
+        {/* 404 */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

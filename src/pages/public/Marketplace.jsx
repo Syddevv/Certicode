@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../../styles/Marketplace.css";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import ViewProduct from "../../assets/ViewProduct.png";
 
 const categoryTabs = [
@@ -11,6 +11,15 @@ const categoryTabs = [
   "Mobile Apps",
   "UI/UX Design",
   "Custom Projects",
+];
+
+const sortOptions = [
+  "Newest First",
+  "Oldest First",
+  "Most Popular",
+  "Highest Rated",
+  "Price: Low to High",
+  "Price: High to Low",
 ];
 
 const assets = [
@@ -81,10 +90,19 @@ const assets = [
 
 const Marketplace = () => {
   const [activeTab, setActiveTab] = useState("All Assets");
+  const [selectedSort, setSelectedSort] = useState("Newest First");
+  const location = useLocation();
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, []);
+
+  useEffect(() => {
+    const category = new URLSearchParams(location.search).get("category");
+    if (categoryTabs.includes(category)) {
+      setActiveTab(category);
+    }
+  }, [location.search]);
 
   return (
     <div>
@@ -218,10 +236,22 @@ const Marketplace = () => {
             <div className="marketplace__results">
               <div className="marketplace__resultsHeader">
                 <span>Showing 24 assets found</span>
-                <button className="marketplace__sort" type="button">
-                  Sort by: <strong>Newest First</strong>
+                <label className="marketplace__sort" htmlFor="sort-assets">
+                  <span>Sort by:</span>
+                  <select
+                    id="sort-assets"
+                    className="marketplace__sortSelect"
+                    value={selectedSort}
+                    onChange={(event) => setSelectedSort(event.target.value)}
+                  >
+                    {sortOptions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
                   <span className="marketplace__sortIcon">▾</span>
-                </button>
+                </label>
               </div>
 
               <div className="marketplace__cards">
