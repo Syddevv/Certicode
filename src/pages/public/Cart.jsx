@@ -148,8 +148,12 @@ const Cart = () => {
       return sum + (parseFloat(item.product?.price) || 0);
     }, 0);
     
+    const savedDiscount = localStorage.getItem('appliedDiscount');
+    const currentDiscount = savedDiscount ? parseFloat(savedDiscount) : 0;
+    
     setSubtotal(subtotalAmount);
-    setTotal(subtotalAmount - discount);
+    setDiscount(currentDiscount);
+    setTotal(subtotalAmount - currentDiscount);
   };
 
   const handleRemoveItem = async (cartItemId) => {
@@ -171,10 +175,13 @@ const Cart = () => {
     
     try {
       await CartAPI.clearCart();
+      localStorage.removeItem('appliedPromo');
+      localStorage.removeItem('appliedDiscount');
       setCartItems([]);
       setSubtotal(0);
       setDiscount(0);
       setTotal(0);
+      setAppliedPromo(null);
     } catch (error) {
       console.error("Error clearing cart:", error);
       setError("Failed to clear cart");
@@ -199,6 +206,10 @@ const Cart = () => {
       const result = await PromoAPI.validatePromo(promoCode, subtotal);
       
       if (result.valid) {
+        localStorage.setItem('appliedPromo', JSON.stringify(result.promo));
+        localStorage.setItem('appliedDiscount', result.discount_amount.toString());
+        localStorage.setItem('promoAppliedAt', Date.now().toString());
+        
         setAppliedPromo(result.promo);
         setDiscount(result.discount_amount);
         setTotal(subtotal - result.discount_amount);
@@ -210,7 +221,6 @@ const Cart = () => {
       console.error("Error applying promo:", error);
       setPromoError(error.message || "Failed to apply promo code");
       
-      // Fallback to mock logic
       applyMockPromo();
     } finally {
       setPromoLoading(false);
@@ -248,19 +258,28 @@ const Cart = () => {
       message = `$${promo.value} discount applied!`;
     }
 
-    setAppliedPromo({
+    const promoData = {
       code: promoCode.toUpperCase(),
       type: promo.type,
       value: promo.value,
       discount_amount: discountAmount
-    });
+    };
     
+    localStorage.setItem('appliedPromo', JSON.stringify(promoData));
+    localStorage.setItem('appliedDiscount', discountAmount.toString());
+    localStorage.setItem('promoAppliedAt', Date.now().toString());
+    
+    setAppliedPromo(promoData);
     setDiscount(discountAmount);
     setTotal(subtotal - discountAmount);
     setPromoError(message);
   };
 
   const handleRemovePromo = () => {
+    localStorage.removeItem('appliedPromo');
+    localStorage.removeItem('appliedDiscount');
+    localStorage.removeItem('promoAppliedAt');
+    
     setAppliedPromo(null);
     setDiscount(0);
     setTotal(subtotal);
@@ -284,7 +303,15 @@ const Cart = () => {
       setError("Your cart is empty");
       return;
     }
-    navigate("/checkout");
+    
+    navigate("/checkout", { 
+      state: { 
+        appliedPromo,
+        discount,
+        subtotal,
+        total 
+      } 
+    });
   };
 
   const handleViewAll = () => {
@@ -293,8 +320,34 @@ const Cart = () => {
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    
+    const savedPromo = localStorage.getItem('appliedPromo');
+    const savedDiscount = localStorage.getItem('appliedDiscount');
+    const savedAt = localStorage.getItem('promoAppliedAt');
+    
+    if (savedPromo && savedAt) {
+      const appliedTime = parseInt(savedAt);
+      const currentTime = Date.now();
+      const thirtyMinutes = 30 * 60 * 1000;
+      
+      if (currentTime - appliedTime > thirtyMinutes) {
+        localStorage.removeItem('appliedPromo');
+        localStorage.removeItem('appliedDiscount');
+        localStorage.removeItem('promoAppliedAt');
+      } else {
+        setAppliedPromo(JSON.parse(savedPromo));
+        setDiscount(savedDiscount ? parseFloat(savedDiscount) : 0);
+      }
+    }
+    
     fetchCartItems();
   }, []);
+
+  useEffect(() => {
+    if (cartItems.length > 0) {
+      calculateTotals(cartItems);
+    }
+  }, [cartItems]);
 
   if (loading) {
     return (
@@ -406,7 +459,7 @@ const Cart = () => {
                           {item.product?.technologies?.slice(0, 2).map((tech, index) => (
                             <span
                               key={index}
-                              className={`cart__tag cart__tag--${getToneColor(tech)}`} // Updated to use getToneColor
+                              className={`cart__tag cart__tag--${getToneColor(tech)}`}
                             >
                               {tech}
                             </span>
@@ -488,7 +541,7 @@ const Cart = () => {
                       </button>
                     </div>
                     {promoError && (
-                      <div className={`cart__promoMessage ${promoError.includes("applied") ? "cart__promoMessage--success" : "cart__promoMessage--error"}`}>
+                      <div className={`cart__promoMessage ${promoError.includes("applied") || promoError.includes("!") ? "cart__promoMessage--success" : "cart__promoMessage--error"}`}>
                         {promoError}
                       </div>
                     )}

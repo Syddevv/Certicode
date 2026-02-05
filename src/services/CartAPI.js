@@ -303,51 +303,51 @@ export const CartAPI = {
     },
 
     getLatestOrder: async () => {
-    try {
-        const token = localStorage.getItem('auth_token');
-        
-        if (!token) {
-            throw {
-                response: { status: 401 },
-                message: 'No authentication token found. Please log in.'
-            };
-        }
-        
-        const response = await fetch(`${API_URL}/orders/latest`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Authorization': `Bearer ${token}`
+        try {
+            const token = localStorage.getItem('auth_token');
+            
+            if (!token) {
+                throw {
+                    response: { status: 401 },
+                    message: 'No authentication token found. Please log in.'
+                };
             }
-        });
+            
+            const response = await fetch(`${API_URL}/orders/latest`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
 
-        const responseText = await response.text();
-        
-        if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
-            throw {
-                response: { status: response.status },
-                message: 'Server error. Please try again.'
-            };
+            const responseText = await response.text();
+            
+            if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+                throw {
+                    response: { status: response.status },
+                    message: 'Server error. Please try again.'
+                };
+            }
+
+            const data = JSON.parse(responseText);
+            
+            if (!response.ok) {
+                throw {
+                    response: {
+                        status: response.status,
+                        data: data
+                    },
+                    message: data.message || `Error ${response.status}`
+                };
+            }
+
+            return data;
+        } catch (error) {
+            console.error('CartAPI - Error fetching latest order:', error);
+            throw error;
         }
-
-        const data = JSON.parse(responseText);
-        
-        if (!response.ok) {
-            throw {
-                response: {
-                    status: response.status,
-                    data: data
-                },
-                message: data.message || `Error ${response.status}`
-            };
-        }
-
-        return data;
-    } catch (error) {
-        console.error('CartAPI - Error fetching latest order:', error);
-        throw error;
-    }
-},
+    },
 
     getOrder: async (orderId) => {
         try {
@@ -385,7 +385,7 @@ export const CartAPI = {
                         status: response.status,
                         data: data
                     },
-                        message: data.message || `Error ${response.status}`
+                    message: data.message || `Error ${response.status}`
                 };
             }
 

@@ -201,6 +201,9 @@ const Checkout = () => {
       const result = await CartAPI.checkout(checkoutData);
 
       if (result.success) {
+        localStorage.removeItem('appliedPromo');
+        localStorage.removeItem('appliedDiscount');
+        
         if (paymentMethod === 'card' && result.client_secret) {
           await handleStripePayment(result.client_secret, result.order_id, result.payment_intent_id);
         } else {
