@@ -187,11 +187,12 @@ export const api = {
     this.clearAuthData();
   },
 
-  async getProducts(search = "", assetType = "", page = 1) {
+  async getProducts(search = "", assetType = "", page = 1, sortOrder = "newest") {
     const params = new URLSearchParams();
     if (search) params.append('search', search);
     if (assetType) params.append('asset_type', assetType);
     params.append('page', page);
+    params.append('sort', sortOrder);
     
     const url = `${API_URL}/products?${params.toString()}`;
       

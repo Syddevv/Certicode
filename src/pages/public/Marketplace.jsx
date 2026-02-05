@@ -39,6 +39,7 @@ const Marketplace = () => {
   const [availableTechs, setAvailableTechs] = useState([]);
   const [selectedPriceRange, setSelectedPriceRange] = useState("");
   const [sortBy, setSortBy] = useState("newest");
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [pagination, setPagination] = useState({
     current_page: 1,
     last_page: 1,
@@ -47,6 +48,19 @@ const Marketplace = () => {
   });
 
   const tabs = ["All Assets", "Mobile App", "Website", "UI Kit", "Custom Projects"];
+
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (showSortDropdown && !event.target.closest('.marketplace__sortContainer')) {
+      setShowSortDropdown(false);
+    }
+  };
+
+  document.addEventListener('click', handleClickOutside);
+  return () => {
+    document.removeEventListener('click', handleClickOutside);
+  };
+}, [showSortDropdown]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -209,16 +223,16 @@ const Marketplace = () => {
     fetchProducts(searchTerm, assetType, page, sortBy);
   };
 
-  const handleSortChange = () => {
-    const newSort = sortBy === 'newest' ? 'oldest' : 'newest';
-    setSortBy(newSort);
+  const handleSortSelect = (value) => {
+    setSortBy(value);
+    setShowSortDropdown(false);
     
     let assetType = activeTab === "All Assets" ? "" : activeTab;
     if (assetType === "Custom Projects") {
       assetType = "";
     }
     
-    fetchProducts(searchTerm, assetType, 1, newSort);
+    fetchProducts(searchTerm, assetType, 1, value);
   };
 
   const renderPagination = () => {
@@ -265,14 +279,15 @@ const Marketplace = () => {
     return paginationItems;
   };
 
-
-  //~~~
-  // useEffect(() => {
-  //   const category = new URLSearchParams(location.search).get("category");
-  //   if (categoryTabs.includes(category)) {
-  //     setActiveTab(category);
-  //   }
-  // }, [location.search]);
+  const getSortLabel = () => {
+    switch(sortBy) {
+      case 'newest': return 'Most Recent';
+      case 'oldest': return 'Oldest';
+      case 'highest': return 'Highest Price';
+      case 'lowest': return 'Lowest Price';
+      default: return 'Most Recent';
+    }
+  };
 
   return (
     <div>
@@ -396,14 +411,58 @@ const Marketplace = () => {
             <div className="marketplace__results">
               <div className="marketplace__resultsHeader">
                 <span>Showing {filteredAssets.length} out of {pagination.total} assets</span>
-                <button 
-                  className="marketplace__sort" 
-                  type="button"
-                  onClick={handleSortChange}
-                >
-                  Sort by: <strong>{sortBy === 'newest' ? 'Most Recent' : 'Oldest'}</strong>
-                  
-                </button>
+                <div className="marketplace__sortContainer">
+                  <button 
+                    className="marketplace__sort" 
+                    type="button"
+                    onClick={() => setShowSortDropdown(!showSortDropdown)}
+                  >
+                    Sort by: <strong>{getSortLabel()}</strong>
+                    <svg 
+                      width="12" 
+                      height="12" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2"
+                      style={{ marginLeft: '8px', transform: showSortDropdown ? 'rotate(180deg)' : 'none' }}
+                    >
+                      <path d="M6 9l6 6 6-6"/>
+                    </svg>
+                  </button>
+                  {showSortDropdown && (
+                    <div className="marketplace__sortDropdown">
+                      <button 
+                        type="button" 
+                        className={`marketplace__sortOption ${sortBy === 'newest' ? 'marketplace__sortOption--active' : ''}`}
+                        onClick={() => handleSortSelect('newest')}
+                      >
+                        Most Recent
+                      </button>
+                      <button 
+                        type="button" 
+                        className={`marketplace__sortOption ${sortBy === 'oldest' ? 'marketplace__sortOption--active' : ''}`}
+                        onClick={() => handleSortSelect('oldest')}
+                      >
+                        Oldest
+                      </button>
+                      <button 
+                        type="button" 
+                        className={`marketplace__sortOption ${sortBy === 'highest' ? 'marketplace__sortOption--active' : ''}`}
+                        onClick={() => handleSortSelect('highest')}
+                      >
+                        Highest Price
+                      </button>
+                      <button 
+                        type="button" 
+                        className={`marketplace__sortOption ${sortBy === 'lowest' ? 'marketplace__sortOption--active' : ''}`}
+                        onClick={() => handleSortSelect('lowest')}
+                      >
+                        Lowest Price
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {loading ? (
