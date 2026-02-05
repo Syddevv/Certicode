@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/adminSales.css";
 import Sidebar from "../../components/Sidebar";
 import AdminTopbar from "../../components/AdminTopbar";
 import notifBell from "../../assets/NotifBell.png";
+import { AdminSalesAPI } from "../../services/AdminSalesAPI";
 
-// Icons
 const Icons = {
   Bell: "🔔",
   Export: "📥",
@@ -15,7 +15,6 @@ const Icons = {
   Dot: "●"
 };
 
-// Avatar Helper
 const Avatar = ({ name }) => (
   <img
     src={`https://ui-avatars.com/api/?name=${name}&background=random&color=fff`}
@@ -25,27 +24,241 @@ const Avatar = ({ name }) => (
 );
 
 const AdminSales = () => {
+  const [orders, setOrders] = useState([]);
+  const [stats, setStats] = useState({
+    gross_volume: 0,
+    net_revenue: 0,
+    refund_rate: 0,
+    avg_transaction: 0,
+    gross_volume_change: 0,
+    net_revenue_change: 0,
+    refund_rate_change: 0,
+    avg_transaction_change: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [exporting, setExporting] = useState(false);
+  const [filters, setFilters] = useState({
+    date_range: "30",
+    category: "all",
+    status: "all",
+    search: ""
+  });
+
+  const fetchStats = useCallback(async () => {
+    try {
+      const data = await AdminSalesAPI.getSalesStats();
+      setStats(data);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  }, []);
+
+  const fetchOrders = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await AdminSalesAPI.getOrders(currentPage, filters);
+      setOrders(data.orders.data || data.orders);
+      setTotalPages(data.pagination?.total_pages || data.orders.last_page || 1);
+      setTotalItems(data.pagination?.total_items || data.orders.total || 0);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, filters]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  const handleSearch = (term) => {
+    setFilters(prev => ({ ...prev, search: term }));
+    setCurrentPage(1);
+  };
+
+  const handleFilterChange = (filterName, value) => {
+    setFilters(prev => ({ ...prev, [filterName]: value }));
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await AdminSalesAPI.exportOrders(filters);
+    } catch (error) {
+      console.error("Error exporting orders:", error);
+      alert('Failed to export sales data: ' + (error.message || 'Unknown error'));
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    if (!amount) return "$0.00";
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(amount);
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    return date.toLocaleDateString("en-US", options);
+  };
+
+  const formatTime = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: true });
+  };
+
+  const getStatusBadge = (status) => {
+    const statusMap = {
+      'completed': 'completed',
+      'paid': 'completed',
+      'pending': 'pending',
+      'processing': 'pending',
+      'refunded': 'refunded',
+      'cancelled': 'refunded',
+      'failed': 'refunded'
+    };
+    
+    const badgeClass = statusMap[status.toLowerCase()] || 'pending';
+    
+    return (
+      <span className={`status-pill ${badgeClass}`}>
+        {Icons.Dot} {status.toUpperCase()}
+      </span>
+    );
+  };
+
+  const getCategoryBadge = (category) => {
+    const categoryMap = {
+      'mobile app': 'green',
+      'website': 'blue',
+      'ui kit': 'purple',
+      'custom projects': 'orange',
+      'desktop app': 'blue',
+      'web app': 'blue'
+    };
+    
+    const badgeClass = categoryMap[category.toLowerCase()] || 'blue';
+    
+    return (
+      <span className={`mini-badge ${badgeClass}`}>
+        {category.toUpperCase()}
+      </span>
+    );
+  };
+
+  const renderPagination = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          className={`page-btn ${currentPage === i ? "active" : ""}`}
+          onClick={() => handlePageChange(i)}
+        >
+          {i}
+        </button>
+      );
+    }
+    
+    return (
+      <div className="pagination-controls">
+        <button 
+          className="page-btn" 
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          ‹
+        </button>
+        {startPage > 1 && (
+          <>
+            <button 
+              className="page-btn" 
+              onClick={() => handlePageChange(1)}
+            >
+              1
+            </button>
+            {startPage > 2 && <span className="dots">...</span>}
+          </>
+        )}
+        {pages}
+        {endPage < totalPages && (
+          <>
+            {endPage < totalPages - 1 && <span className="dots">...</span>}
+            <button 
+              className="page-btn" 
+              onClick={() => handlePageChange(totalPages)}
+            >
+              {totalPages}
+            </button>
+          </>
+        )}
+        <button 
+          className="page-btn" 
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          ›
+        </button>
+      </div>
+    );
+  };
+
+  const formatPercent = (value) => {
+    if (value === 0) return "0.0%";
+    const sign = value > 0 ? "+" : "";
+    return `${sign}${value.toFixed(1)}%`;
+  };
+
   return (
     <>
       <input type="checkbox" id="sidebar-toggle" />
 
       <div className="layout">
-        {/* Active page Highlight */}
         <Sidebar activePage="sales" />
 
         <main className="main">
-          {/* TOP BAR */}
-          <AdminTopbar showHamburger>
+          <AdminTopbar showHamburger onSearch={handleSearch}>
             <Link to="/admin-notification" className="notification-link" aria-label="Notifications">
               <img src={notifBell} alt="Notifications" className="notification-icon" />
               <span className="notification-dot" />
             </Link>
-            <button className="btn primary">
-              {Icons.Export} Export
+            <button 
+              className="btn primary" 
+              onClick={handleExport}
+              disabled={exporting}
+            >
+              {exporting ? "Exporting..." : `${Icons.Export} Export`}
             </button>
           </AdminTopbar>
 
-          {/* PAGE HEADER */}
           <div className="page-header">
             <div>
               <h2>Sales Management</h2>
@@ -55,69 +268,93 @@ const AdminSales = () => {
             </div>
           </div>
 
-          {/* STATS CARDS */}
           <div className="stats-grid">
             <div className="stat-card">
               <div className="stat-header">
                 <small>GROSS VOLUME</small>
               </div>
-              <h3>$342,500.00</h3>
-              <span className="trend-badge positive">+15.2%</span>
+              <h3>{formatCurrency(stats.gross_volume)}</h3>
+              <span className={`trend-badge ${stats.gross_volume_change >= 0 ? 'positive' : 'negative'}`}>
+                {formatPercent(stats.gross_volume_change)}
+              </span>
             </div>
 
             <div className="stat-card">
               <div className="stat-header">
                 <small>NET REVENUE</small>
               </div>
-              <h3>$283,240.60</h3>
-              <span className="trend-badge positive">+5.2%</span>
+              <h3>{formatCurrency(stats.net_revenue)}</h3>
+              <span className={`trend-badge ${stats.net_revenue_change >= 0 ? 'positive' : 'negative'}`}>
+                {formatPercent(stats.net_revenue_change)}
+              </span>
             </div>
 
             <div className="stat-card">
               <div className="stat-header">
                 <small>REFUND RATE</small>
               </div>
-              <h3>1.2%</h3>
-              <span className="trend-badge negative">-0.4%</span>
+              <h3>{stats.refund_rate.toFixed(1)}%</h3>
+              <span className={`trend-badge ${stats.refund_rate_change <= 0 ? 'positive' : 'negative'}`}>
+                {formatPercent(stats.refund_rate_change)}
+              </span>
             </div>
 
             <div className="stat-card">
               <div className="stat-header">
                 <small>AVG. TRANSACTION</small>
               </div>
-              <h3>$485.20</h3>
-              <span className="trend-badge positive">+3.2%</span>
+              <h3>{formatCurrency(stats.avg_transaction)}</h3>
+              <span className={`trend-badge ${stats.avg_transaction_change >= 0 ? 'positive' : 'negative'}`}>
+                {formatPercent(stats.avg_transaction_change)}
+              </span>
             </div>
           </div>
 
-          {/* FILTERS & TABLE CONTAINER */}
           <div className="table-wrapper">
-
-            {/* FILTER BAR */}
             <div className="filter-bar">
               <div className="filter-inputs">
                 <div className="select-group">
                   <label>DATE RANGE:</label>
-                  <select defaultValue="30">
-                    <option value="30">Last 30 Days</option>
+                  <select 
+                    value={filters.date_range} 
+                    onChange={(e) => handleFilterChange('date_range', e.target.value)}
+                  >
                     <option value="7">Last 7 Days</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                    <option value="365">Last Year</option>
+                    <option value="all">All Time</option>
                   </select>
                 </div>
 
                 <div className="select-group">
                   <label>CATEGORY:</label>
-                  <select defaultValue="all">
+                  <select 
+                    value={filters.category} 
+                    onChange={(e) => handleFilterChange('category', e.target.value)}
+                  >
                     <option value="all">All Assets</option>
-                    <option value="web">Web Apps</option>
+                    <option value="Website">Website</option>
+                    <option value="Mobile App">Mobile App</option>
+                    <option value="UI Kit">UI Kit</option>
+                    <option value="Custom Projects">Custom Projects</option>
                   </select>
                 </div>
 
                 <div className="select-group">
                   <label>STATUS:</label>
-                  <select defaultValue="all">
+                  <select 
+                    value={filters.status} 
+                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                  >
                     <option value="all">All Status</option>
                     <option value="completed">Completed</option>
+                    <option value="paid">Paid</option>
                     <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="refunded">Refunded</option>
+                    <option value="cancelled">Cancelled</option>
+                    <option value="failed">Failed</option>
                   </select>
                 </div>
               </div>
@@ -127,7 +364,6 @@ const AdminSales = () => {
               </button>
             </div>
 
-            {/* SALES TABLE */}
             <table>
               <thead>
                 <tr>
@@ -141,159 +377,65 @@ const AdminSales = () => {
                 </tr>
               </thead>
               <tbody>
-                {/* ROW 1 - Completed */}
-                <tr>
-                  <td className="order-id">#ORD-94210</td>
-                  <td>
-                    <div className="asset-info">
-                      {/* LINK ADDED HERE */}
-                      <Link to="/sales/order-details" style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <strong>E-commerce SaaS Template</strong>
-                      </Link>
-                      <span className="mini-badge blue">WEB APP</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="customer-info">
-                      <Avatar name="James Wilson" />
-                      <span>James Wilson</span>
-                    </div>
-                  </td>
-                  <td className="date-cell">
-                    <div>Dec 5, 2025</div>
-                    <small>14:24 PM</small>
-                  </td>
-                  <td className="amount">$999.00</td>
-                  <td>
-                    <span className="status-pill completed">
-                      {Icons.Dot} COMPLETED
-                    </span>
-                  </td>
-                  <td className="actions-cell">
-                    {/* LINK ADDED HERE */}
-                    <Link to="/sales/order-details">
-                      <button>{Icons.Edit}</button>
-                    </Link>
-                    <button>{Icons.Settings}</button>
-                  </td>
-                </tr>
-
-                {/* ROW 2 - Pending */}
-                <tr>
-                  <td className="order-id">#ORD-94209</td>
-                  <td>
-                    <div className="asset-info">
-                      <strong>Foodie Express Delivery App</strong>
-                      <span className="mini-badge green">MOBILE APP</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="customer-info">
-                      <Avatar name="James Naismith" />
-                      <span>James Naismith</span>
-                    </div>
-                  </td>
-                  <td className="date-cell">
-                    <div>Dec 1, 2025</div>
-                    <small>14:04 PM</small>
-                  </td>
-                  <td className="amount">$1,499.00</td>
-                  <td>
-                    <span className="status-pill pending">
-                      {Icons.Dot} PENDING
-                    </span>
-                  </td>
-                  <td className="actions-cell">
-                    <button>{Icons.Edit}</button>
-                    <button>{Icons.Settings}</button>
-                  </td>
-                </tr>
-
-                {/* ROW 3 - Refunded */}
-                <tr>
-                  <td className="order-id">#ORD-94208</td>
-                  <td>
-                    <div className="asset-info">
-                      <strong>Fintech Banking Dashboard</strong>
-                      <span className="mini-badge purple">UI/UX KITS</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="customer-info">
-                      <Avatar name="James Lebron" />
-                      <span>James Lebron</span>
-                    </div>
-                  </td>
-                  <td className="date-cell">
-                    <div>Nov 25, 2025</div>
-                    <small>04:14 PM</small>
-                  </td>
-                  <td className="amount">$450.00</td>
-                  <td>
-                    <span className="status-pill refunded">
-                      {Icons.Dot} REFUNDED
-                    </span>
-                  </td>
-                  <td className="actions-cell">
-                    <button>{Icons.Edit}</button>
-                    <button>{Icons.Settings}</button>
-                  </td>
-                </tr>
-
-                {/* ROW 4 - Completed */}
-                <tr>
-                  <td className="order-id">#ORD-94207</td>
-                  <td>
-                    <div className="asset-info">
-                       {/* LINK ADDED HERE */}
-                       <Link to="/sales/order-details" style={{ textDecoration: 'none', color: 'inherit' }}>
-                        <strong>FitLife Tracker Mobile App</strong>
-                      </Link>
-                      <span className="mini-badge green">MOBILE APP</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="customer-info">
-                      <Avatar name="James Harden" />
-                      <span>James Harden</span>
-                    </div>
-                  </td>
-                  <td className="date-cell">
-                    <div>Nov 24, 2025</div>
-                    <small>01:34 PM</small>
-                  </td>
-                  <td className="amount">$1,250.00</td>
-                  <td>
-                    <span className="status-pill completed">
-                      {Icons.Dot} COMPLETED
-                    </span>
-                  </td>
-                  <td className="actions-cell">
-                    {/* LINK ADDED HERE */}
-                    <Link to="/sales/order-details">
-                      <button>{Icons.Edit}</button>
-                    </Link>
-                    <button>{Icons.Settings}</button>
-                  </td>
-                </tr>
-
+                {loading ? (
+                  <tr>
+                    <td colSpan="7" className="loading-cell">
+                      Loading orders...
+                    </td>
+                  </tr>
+                ) : orders.length === 0 ? (
+                  <tr>
+                    <td colSpan="7" className="no-data-cell">
+                      No orders found
+                    </td>
+                  </tr>
+                ) : (
+                  orders.map((order) => (
+                    <tr key={order.id}>
+                      <td className="order-id">{order.order_number}</td>
+                      <td>
+                        <div className="asset-info">
+                          <Link 
+                            to={`/sales/order-details/${order.id}`}
+                            style={{ textDecoration: 'none', color: 'inherit' }}
+                          >
+                            <strong>{order.asset_name}</strong>
+                          </Link>
+                          {getCategoryBadge(order.category)}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="customer-info">
+                          <Avatar name={order.customer_name} />
+                          <span>{order.customer_name}</span>
+                        </div>
+                      </td>
+                      <td className="date-cell">
+                        <div>{formatDate(order.purchased_at)}</div>
+                        <small>{formatTime(order.purchased_at)}</small>
+                      </td>
+                      <td className="amount">{formatCurrency(order.total_amount)}</td>
+                      <td>
+                        {getStatusBadge(order.status)}
+                      </td>
+                      <td className="actions-cell">
+                        <Link to={`/sales/order-details/${order.id}`}>
+                          <button>{Icons.Edit}</button>
+                        </Link>
+                        <button>{Icons.Settings}</button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
 
-            {/* PAGINATION */}
             <div className="pagination-bar">
-              <span>Showing <strong>1-4</strong> of 1,248 transactions</span>
-              <div className="pagination-controls">
-                <button className="page-btn">‹</button>
-                <button className="page-btn active">1</button>
-                <button className="page-btn">2</button>
-                <button className="page-btn">3</button>
-                <span className="dots">...</span>
-                <button className="page-btn">12</button>
-                <button className="page-btn">›</button>
-              </div>
+              <span>
+                Showing <strong>{((currentPage - 1) * 10) + 1}-{Math.min(currentPage * 10, totalItems)}</strong> of {totalItems} transactions
+              </span>
+              {renderPagination()}
             </div>
-
           </div>
         </main>
       </div>
