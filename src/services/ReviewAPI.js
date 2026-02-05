@@ -127,4 +127,19 @@ export const ReviewAPI = {
       };
     }
   },
+
+  async getTopReviews() {
+    const response = await fetch('http://127.0.0.1:8000/api/top-reviews');
+    
+    console.log('Top Reviews Response status:', response.status);
+    
+    const data = await response.json();
+    console.log('Top Reviews Response data:', data);
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to fetch top reviews');
+    }
+    
+    return data;
+  },
 };

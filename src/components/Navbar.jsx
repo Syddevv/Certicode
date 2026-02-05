@@ -105,7 +105,7 @@ const Navbar = () => {
 
         <div className="nav__actions">
           <button className="iconBtn" aria-label="Search" type="button">
-            <img className="iconImg" src={SearchIcon} alt="" />
+            {/* <img className="iconImg" src={SearchIcon} alt=""  placeholder/> */}
           </button>
 
           {isLoggedIn && (
