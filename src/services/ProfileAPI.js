@@ -292,8 +292,4 @@ export const ProfileAPI = {
         throw error;
     }
     },
-
-    
-
-    
 };
