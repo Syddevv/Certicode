@@ -9,7 +9,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import CreateNewPassword from "./pages/auth/CreateNewPassword";
 
 // Public
-import LandingPage from "./pages/public/LandingPage"; // Note: unused in routes below, but kept from your original code
+import LandingPage from "./pages/public/LandingPage";
 import TermsAndConditions from "./pages/public/TermsAndConditions";
 import PrivacyPolicy from "./pages/public/PrivacyPolicy";
 import Marketplace from "./pages/public/Marketplace";
