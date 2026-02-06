@@ -203,73 +203,7 @@ export const AdminInventoryAPI = {
   }
 },
 
-createProduct: async (productData) => {
-  try {
-    const token = localStorage.getItem('auth_token');
-    
-    if (!token) {
-      throw new Error('No authentication token found.');
-    }
-    
-    const formData = new FormData();
-    
-    formData.append('name', productData.name || '');
-    formData.append('asset_type', productData.asset_type || '');
-    formData.append('description', productData.description || '');
-    formData.append('version', productData.version || '1.0');
-    formData.append('price', productData.price || 0);
-    
-    if (productData.technologies && Array.isArray(productData.technologies)) {
-      formData.append('technologies', JSON.stringify(productData.technologies));
-    }
-    
-    if (productData.featured_image) {
-      formData.append('featured_image', productData.featured_image);
-    }
-    
-    if (productData.images && Array.isArray(productData.images)) {
-      productData.images.forEach((image, index) => {
-        formData.append(`images[${index}]`, image);
-      });
-    }
-    
-    if (productData.project_files && Array.isArray(productData.project_files)) {
-      productData.project_files.forEach((file, index) => {
-        formData.append(`project_files[${index}]`, file);
-      });
-    }
-    
-    const response = await fetch(`${API_URL}/products`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: formData
-    });
-
-    const responseText = await response.text();
-    
-    if (!response.ok) {
-      let errorData;
-      try {
-        errorData = JSON.parse(responseText);
-      } catch {
-        errorData = { message: 'Server error' };
-      }
-      throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
-    }
-
-    const data = JSON.parse(responseText);
-    return data;
-    
-  } catch (error) {
-    console.error('AdminInventoryAPI - Error creating product:', error);
-    throw error;
-  }
-},
-
-   createProduct: async (productData) => {
+  createProduct: async (productData) => {
     try {
       const token = localStorage.getItem('auth_token');
       
@@ -279,27 +213,65 @@ createProduct: async (productData) => {
       
       const formData = new FormData();
       
-      Object.keys(productData).forEach(key => {
-        if (key !== 'featured_image' && key !== 'images' && key !== 'project_files') {
-          formData.append(key, productData[key]);
-        }
-      });
+      formData.append('name', productData.name || '');
+      formData.append('asset_type', productData.asset_type || '');
+      formData.append('description', productData.description || '');
+      formData.append('version', productData.version || '1.0');
       
-      if (productData.featured_image) {
-        formData.append('featured_image', productData.featured_image);
+      const priceValue = parseFloat(productData.price);
+      console.log('Price value:', priceValue, 'Type:', typeof priceValue);
+      formData.append('price', priceValue);
+      
+      console.log('Technologies:', productData.technologies);
+      if (productData.technologies && Array.isArray(productData.technologies)) {
+        const techString = JSON.stringify(productData.technologies);
+        console.log('Stringified technologies:', techString);
+        formData.append('technologies', techString);
+      } else {
+        console.log('No technologies, sending empty array');
+        formData.append('technologies', JSON.stringify([]));
       }
       
-      if (productData.images && productData.images.length > 0) {
+      if (productData.featured_image) {
+        console.log('Featured image exists:', productData.featured_image.name);
+        console.log('File type:', productData.featured_image.type);
+        console.log('File size:', productData.featured_image.size);
+        formData.append('featured_image', productData.featured_image);
+      } else {
+        console.error('NO FEATURED IMAGE - This will cause validation error!');
+        throw new Error('Featured image is required');
+      }
+      
+      if (productData.images && Array.isArray(productData.images) && productData.images.length > 0) {
+        console.log('Gallery images count:', productData.images.length);
         productData.images.forEach((image, index) => {
           formData.append(`images[${index}]`, image);
         });
+      } else {
+        console.log('No gallery images');
       }
       
-      if (productData.project_files && productData.project_files.length > 0) {
+      if (productData.project_files && Array.isArray(productData.project_files) && productData.project_files.length > 0) {
+        console.log('Project files count:', productData.project_files.length);
         productData.project_files.forEach((file, index) => {
           formData.append(`project_files[${index}]`, file);
         });
+      } else {
+        console.log('No project files');
       }
+      
+      console.log('=== FORM DATA BEING SENT ===');
+      for (let pair of formData.entries()) {
+        if (pair[0] !== 'featured_image' && 
+            !pair[0].startsWith('images[') && 
+            !pair[0].startsWith('project_files[')) {
+          console.log(pair[0] + ':', pair[1]);
+        } else {
+          console.log(pair[0] + ':', '[FILE - ' + (pair[1].name || 'file') + ']');
+        }
+      }
+      
+      console.log('Sending request to:', `${API_URL}/products`);
       
       const response = await fetch(`${API_URL}/products`, {
         method: 'POST',
@@ -311,18 +283,42 @@ createProduct: async (productData) => {
       });
 
       const responseText = await response.text();
+      console.log('=== RAW SERVER RESPONSE ===');
+      console.log('Status:', response.status, response.statusText);
+      console.log('Response text:', responseText);
       
       if (!response.ok) {
         let errorData;
         try {
           errorData = JSON.parse(responseText);
-        } catch {
-          errorData = { message: 'Server error' };
+          console.error('=== FULL ERROR RESPONSE ===');
+          console.error('Error data:', errorData);
+          
+          if (errorData.errors) {
+            console.error('VALIDATION ERRORS:');
+            Object.keys(errorData.errors).forEach(key => {
+              console.error(`  ${key}:`, errorData.errors[key]);
+            });
+            
+            let errorMessages = [];
+            Object.keys(errorData.errors).forEach(key => {
+              errorMessages.push(`${key}: ${errorData.errors[key].join(', ')}`);
+            });
+            throw new Error(`Validation failed: ${errorMessages.join('; ')}`);
+          } else if (errorData.message) {
+            throw new Error(errorData.message);
+          } else {
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
+          }
+        } catch (parseError) {
+          console.error('Failed to parse error response:', parseError);
+          console.error('Raw response was:', responseText);
+          throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
-        throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
       }
 
       const data = JSON.parse(responseText);
+      console.log('Success! Response:', data);
       return data;
       
     } catch (error) {

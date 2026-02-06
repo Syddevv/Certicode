@@ -15,19 +15,22 @@ import { ProfileAPI } from "../../services/ProfileAPI";
 const MyPurchases = () => {
   const navigate = useNavigate();
   const [purchases, setPurchases] = useState([]);
+  const [filteredPurchases, setFilteredPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedAssetType, setSelectedAssetType] = useState("All");
 
-  const handleItemClick = (title) => {
-    if (title === "E-commerce SaaS Template") {
-      navigate("/my-purchases/e-commerce-saas-template");
-    }
+  const API_URL = "http://localhost:5000/api";
+
+  const handleItemClick = (purchaseId) => {
+    navigate(`/my-purchases/${purchaseId}`);
   };
 
-  const handleItemKeyDown = (event, title) => {
+  const handleItemKeyDown = (event, purchaseId) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      handleItemClick(title);
+      handleItemClick(purchaseId);
     }
   };
 
@@ -36,6 +39,10 @@ const MyPurchases = () => {
     fetchUserData();
     fetchPurchases();
   }, []);
+
+  useEffect(() => {
+    filterPurchases();
+  }, [searchQuery, purchases, selectedAssetType]);
 
   const fetchUserData = async () => {
     try {
@@ -56,6 +63,129 @@ const MyPurchases = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const downloadProductFile = async (productId) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        alert('Please login to download files');
+        throw new Error('Please login to download files');
+      }
+      
+      const downloadUrl = `${API_URL}/products/${productId}/download`;
+      
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = downloadUrl;
+      
+      iframe.onload = () => {
+        console.log('Download iframe loaded');
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+        }, 1000);
+      };
+      
+      document.body.appendChild(iframe);
+      
+      window.open(downloadUrl, '_blank');
+      
+      return {
+        success: true,
+        message: 'Download started'
+      };
+      
+    } catch (error) {
+      console.error('Download error:', error);
+      
+      try {
+        const token = localStorage.getItem('auth_token');
+        const response = await fetch(`${API_URL}/products/${productId}/download`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const blob = await response.blob();
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `product-${productId}.zip`;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+          
+          return {
+            success: true,
+            message: 'Download started via blob'
+          };
+        }
+      } catch (fallbackError) {
+        console.error('Fallback download error:', fallbackError);
+        alert('Download failed. Please check if the backend server is running and try again.');
+      }
+      
+      throw error;
+    }
+  };
+
+  const handleDownload = async (event, productId) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (productId) {
+      try {
+        await downloadProductFile(productId);
+      } catch (error) {
+        console.error('Download failed:', error.message);
+      }
+    } else {
+      alert('No product ID available for download');
+    }
+  };
+
+  const filterPurchases = () => {
+    let filtered = purchases.filter(purchase => {
+      const productName = purchase.product?.name?.toLowerCase() || "";
+      const productCategory = purchase.product?.category?.toLowerCase() || "";
+      
+      const searchMatch = searchQuery.trim() === "" ||
+        productName.includes(searchQuery.toLowerCase()) ||
+        productCategory.includes(searchQuery.toLowerCase());
+      
+      if (!searchMatch) return false;
+      
+      if (selectedAssetType !== "All") {
+        const purchaseType = getAssetType(purchase);
+        if (selectedAssetType !== purchaseType) return false;
+      }
+      
+      return true;
+    });
+    
+    setFilteredPurchases(filtered);
+  };
+
+  const getAssetType = (purchase) => {
+    const name = purchase.product?.name?.toLowerCase() || '';
+    const category = purchase.product?.category?.toLowerCase() || '';
+    
+    if (name.includes('template') || category.includes('template')) return 'Templates';
+    if (name.includes('ui kit') || name.includes('dashboard') || category.includes('ui')) return 'UI Kits';
+    if (name.includes('app') || name.includes('mobile') || category.includes('app')) return 'Apps';
+    return 'Other';
+  };
+
+  const toggleAssetType = (type) => {
+    setSelectedAssetType(prev => prev === type ? "All" : type);
+  };
+
+  const clearAllFilters = () => {
+    setSearchQuery("");
+    setSelectedAssetType("All");
   };
 
   const getAssetTags = (product) => {
@@ -80,7 +210,11 @@ const MyPurchases = () => {
       { keyword: "template", label: "Template", tone: "green" },
       { keyword: "app", label: "App", tone: "purple" },
       { keyword: "dashboard", label: "Dashboard", tone: "violet" },
-      { keyword: "ui kit", label: "UI Kit", tone: "rose" }
+      { keyword: "ui kit", label: "UI Kit", tone: "rose" },
+      { keyword: "javascript", label: "JavaScript", tone: "yellow" },
+      { keyword: "typescript", label: "TypeScript", tone: "blue" },
+      { keyword: "python", label: "Python", tone: "blue" },
+      { keyword: "java", label: "Java", tone: "orange" }
     ];
     
     const tags = [];
@@ -109,6 +243,9 @@ const MyPurchases = () => {
     const date = new Date(purchased_at);
     return `Updated ${date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`;
   };
+
+  const activeFilterCount = (searchQuery ? 1 : 0) + 
+    (selectedAssetType !== "All" ? 1 : 0);
 
   return (
     <div>
@@ -186,6 +323,15 @@ const MyPurchases = () => {
             <div className="purchases-main">
               <div className="purchases-main__header">
                 <h3>Your Asset Library</h3>
+                {activeFilterCount > 0 && (
+                  <button 
+                    className="purchases-clear" 
+                    type="button"
+                    onClick={clearAllFilters}
+                  >
+                    Clear Filters
+                  </button>
+                )}
               </div>
 
               {loading ? (
@@ -207,133 +353,134 @@ const MyPurchases = () => {
                         </span>
                         <input
                           type="text"
-                          placeholder="Search your assets by name or tech stack..."
+                          placeholder="Search your assets..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
                         />
                       </div>
-                      <button className="purchases-action" type="button">
-                        <span className="purchases-action__icon" aria-hidden="true">
-                          <svg viewBox="0 0 24 24">
-                            <path
-                              d="M4 6h16M7 12h10M10 18h4"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                        </span>
-                        Filter
-                      </button>
-                      <button className="purchases-action" type="button">
-                        <span className="purchases-action__icon" aria-hidden="true">
-                          <svg viewBox="0 0 24 24">
-                            <path
-                              d="M7 6h10M5 12h14M9 18h6"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                            />
-                          </svg>
-                        </span>
-                        Sort by
-                      </button>
                     </div>
 
                     <div className="purchases-filters__chips">
                       <button
-                        className="purchases-chip purchases-chip--active"
+                        className={`purchases-chip ${selectedAssetType === "All" ? "purchases-chip--active" : ""}`}
                         type="button"
+                        onClick={() => toggleAssetType("All")}
                       >
-                        Asset Type: All <span aria-hidden="true">{"\u00d7"}</span>
+                        All Assets
                       </button>
-                      <button className="purchases-chip" type="button">
-                        Tech Stack <img src={ArrowDown} alt="" aria-hidden="true" />
+                      <button
+                        className={`purchases-chip ${selectedAssetType === "Templates" ? "purchases-chip--active" : ""}`}
+                        type="button"
+                        onClick={() => toggleAssetType("Templates")}
+                      >
+                        Templates
                       </button>
-                      <button className="purchases-chip" type="button">
-                        License Status{" "}
-                        <img src={ArrowDown} alt="" aria-hidden="true" />
+                      <button
+                        className={`purchases-chip ${selectedAssetType === "UI Kits" ? "purchases-chip--active" : ""}`}
+                        type="button"
+                        onClick={() => toggleAssetType("UI Kits")}
+                      >
+                        UI Kits
                       </button>
-                      <button className="purchases-clear" type="button">
-                        Clear All
+                      <button
+                        className={`purchases-chip ${selectedAssetType === "Apps" ? "purchases-chip--active" : ""}`}
+                        type="button"
+                        onClick={() => toggleAssetType("Apps")}
+                      >
+                        Apps
                       </button>
                     </div>
                   </div>
 
                   <div className="purchases-list">
-                    {purchases.map((purchase) => {
-                      const tags = getAssetTags(purchase.product);
-                      const status = getStatus(purchase);
-                      const updatedDate = getUpdatedDate(purchase.purchased_at);
-                      
-                      return (
-                        <article
-                          key={purchase.id}
-                          className={`purchases-item purchases-item--link`}
-                          role="button"
-                          tabIndex={0}
-                          onClick={() => handleItemClick(purchase.product?.name)}
-                          onKeyDown={(event) => handleItemKeyDown(event, purchase.product?.name)}
-                        >
-                          <div 
-                            className="purchases-item__media"
-                            style={{
-                              backgroundImage: purchase.product?.featured_image 
-                                ? `url(${purchase.product.featured_image})`
-                                : purchase.product?.images?.[0]
-                                ? `url(${purchase.product.images[0]})`
-                                : 'none',
-                              backgroundSize: 'cover',
-                              backgroundPosition: 'center',
-                              backgroundColor: '#f5f5f5'
-                            }}
-                          />
-                          <div className="purchases-item__body">
-                            <div className="purchases-item__tags">
-                              {tags.map((tag) => (
-                                <span
-                                  key={tag.label}
-                                  className={`purchases-tag purchases-tag--${tag.tone}`}
-                                >
-                                  {tag.label}
-                                </span>
-                              ))}
+                    {filteredPurchases.length === 0 && purchases.length > 0 ? (
+                      <div className="purchases-no-results">
+                        <p>No assets found matching your search criteria.</p>
+                        {activeFilterCount > 0 && (
+                          <button 
+                            className="purchases-btn"
+                            type="button"
+                            onClick={clearAllFilters}
+                          >
+                            Clear All Filters
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      filteredPurchases.map((purchase) => {
+                        const tags = getAssetTags(purchase.product);
+                        const status = getStatus(purchase);
+                        const updatedDate = getUpdatedDate(purchase.purchased_at);
+                        
+                        return (
+                          <article
+                            key={purchase.id}
+                            className="purchases-item purchases-item--link"
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => handleItemClick(purchase.id)}
+                            onKeyDown={(event) => handleItemKeyDown(event, purchase.id)}
+                          >
+                            <div 
+                              className="purchases-item__media"
+                              style={{
+                                backgroundImage: purchase.product?.featured_image 
+                                  ? `url(${purchase.product.featured_image})`
+                                  : purchase.product?.images?.[0]
+                                  ? `url(${purchase.product.images[0]})`
+                                  : 'none',
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                backgroundColor: '#f5f5f5'
+                              }}
+                            />
+                            <div className="purchases-item__body">
+                              <div className="purchases-item__tags">
+                                {tags.map((tag) => (
+                                  <span
+                                    key={tag.label}
+                                    className={`purchases-tag purchases-tag--${tag.tone}`}
+                                  >
+                                    {tag.label}
+                                  </span>
+                                ))}
+                              </div>
+                              <h4>{purchase.product?.name || 'Unknown Product'}</h4>
+                              <p>
+                                {purchase.product?.category || 'Digital Product'} <span>{"\u2022"}</span> {purchase.product?.version || 'v1.0.0'}
+                              </p>
                             </div>
-                            <h4>{purchase.product?.name || 'Unknown Product'}</h4>
-                            <p>
-                              {purchase.product?.category || 'Digital Product'} <span>{"\u2022"}</span> {purchase.product?.version || 'v1.0.0'}
-                            </p>
-                          </div>
-                          <div className="purchases-item__meta">
-                            <span
-                              className={`purchases-status${
-                                status === "Update Ready" ? " is-warning" : ""
-                              }`}
+                            <div className="purchases-item__meta">
+                              <span
+                                className={`purchases-status${
+                                  status === "Update Ready" ? " is-warning" : ""
+                                }`}
+                              >
+                                <span className="purchases-status__dot" />
+                                {status}
+                              </span>
+                              <span className="purchases-updated">{updatedDate}</span>
+                            </div>
+                            <button
+                              className="purchases-download"
+                              type="button"
+                              onClick={(event) => handleDownload(event, purchase.product?.id)}
                             >
-                              <span className="purchases-status__dot" />
-                              {status}
-                            </span>
-                            <span className="purchases-updated">{updatedDate}</span>
-                          </div>
-                          <button
-                            className="purchases-download"
-                            type="button"
-                            onClick={(event) => event.stopPropagation()}
-                          >
-                            <img src={WhiteDownload} alt="" aria-hidden="true" />
-                            Download
-                          </button>
-                          <button
-                            className="purchases-more"
-                            type="button"
-                            aria-label="More options"
-                            onClick={(event) => event.stopPropagation()}
-                          >
-                            ...
-                          </button>
-                        </article>
-                      );
-                    })}
+                              <img src={WhiteDownload} alt="" aria-hidden="true" />
+                              Download
+                            </button>
+                            <button
+                              className="purchases-more"
+                              type="button"
+                              aria-label="More options"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              ...
+                            </button>
+                          </article>
+                        );
+                      })
+                    )}
                   </div>
                 </>
               )}
@@ -352,14 +499,14 @@ const MyPurchases = () => {
                   </button>
                 </div>
 
-                {purchases.length > 0 && (
+                {filteredPurchases.length > 0 && (
                   <>
                     <div className="purchases-update">
                       <div className="purchases-update__icon">
                         <img src={OrangeBadge} alt="" aria-hidden="true" />
                       </div>
                       <div>
-                        <strong>{purchases[0].product?.version || 'v1.0.0'} Available</strong>
+                        <strong>{filteredPurchases[0].product?.version || 'v1.0.0'} Available</strong>
                         <p>
                           Critical security patches and new Dark Mode components
                           added.
@@ -380,10 +527,10 @@ const MyPurchases = () => {
                         <span>Usage</span>
                         <strong>Perpetual</strong>
                       </div>
-                      {purchases[0].license_key && (
+                      {filteredPurchases[0].license_key && (
                         <div className="purchases-info__row">
                           <span>Key</span>
-                          <strong className="purchases-key">{purchases[0].license_key}</strong>
+                          <strong className="purchases-key">{filteredPurchases[0].license_key}</strong>
                         </div>
                       )}
                     </div>
@@ -406,9 +553,13 @@ const MyPurchases = () => {
                       </div>
                     </div>
 
-                    <button className="purchases-primary" type="button">
+                    <button 
+                      className="purchases-primary" 
+                      type="button"
+                      onClick={(event) => handleDownload(event, filteredPurchases[0].product?.id)}
+                    >
                       <img src={WhiteDownload} alt="" aria-hidden="true" />
-                      Download Latest ({purchases[0].product?.version || 'v1.0.0'})
+                      Download Latest ({filteredPurchases[0].product?.version || 'v1.0.0'})
                     </button>
                     <button className="purchases-secondary" type="button">
                       View Full License

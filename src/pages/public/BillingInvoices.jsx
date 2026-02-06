@@ -307,7 +307,7 @@ const BillingInvoices = () => {
                     <span>Date</span>
                     <span>Amount</span>
                     <span>Status</span>
-                    <span>Actions</span>
+     
                   </div>
                   {invoices.map((row) => (
                     <div key={row.id} className="billing-row">
@@ -332,7 +332,7 @@ const BillingInvoices = () => {
                           {row.status}
                         </span>
                       </span>
-                      <div className="billing-row__actions">
+                      {/* <div className="billing-row__actions">
                         <button
                           className="billing-iconBtn"
                           type="button"
@@ -355,7 +355,7 @@ const BillingInvoices = () => {
                             <circle cx="12" cy="12" r="3" fill="currentColor" />
                           </svg>
                         </Link>
-                      </div>
+                      </div> */}
                     </div>
                   ))}
                   <div className="billing-table__footer">
