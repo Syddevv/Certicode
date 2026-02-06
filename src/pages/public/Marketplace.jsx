@@ -4,6 +4,10 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { Link, useLocation } from "react-router-dom";
 import ViewProduct from "../../assets/ViewProduct.png";
+import WebsiteAppsIcon from "../../assets/website-apps.png";
+import MobileAppsIcon from "../../assets/mobile-apps.png";
+import UiUxDesignIcon from "../../assets/ui-ux-design.png";
+import CustomProjIcon from "../../assets/custom-proj.png";
 
 const categoryTabs = [
   "All Assets",
@@ -128,19 +132,39 @@ const Marketplace = () => {
           </div>
 
           <div className="marketplace__tabs">
-            {categoryTabs.map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                className={`marketplace__tab${
-                  activeTab === tab ? " marketplace__tab--active" : ""
-                }`}
-                onClick={() => setActiveTab(tab)}
-                aria-pressed={activeTab === tab}
-              >
-                <span className="marketplace__tabLabel">{tab}</span>
-              </button>
-            ))}
+            {categoryTabs.map((tab) => {
+              let icon = null;
+              if (tab === "Website Apps") {
+                icon = WebsiteAppsIcon;
+              } else if (tab === "Mobile Apps") {
+                icon = MobileAppsIcon;
+              } else if (tab === "UI/UX Design") {
+                icon = UiUxDesignIcon;
+              } else if (tab === "Custom Projects") {
+                icon = CustomProjIcon;
+              }
+              
+              return (
+                <button
+                  key={tab}
+                  type="button"
+                  className={`marketplace__tab${
+                    activeTab === tab ? " marketplace__tab--active" : ""
+                  }`}
+                  onClick={() => setActiveTab(tab)}
+                  aria-pressed={activeTab === tab}
+                >
+                  {icon && (
+                    <img 
+                      src={icon} 
+                      alt={`${tab} icon`} 
+                      className="marketplace__tabIcon"
+                    />
+                  )}
+                  <span className="marketplace__tabLabel">{tab}</span>
+                </button>
+              );
+            })}
           </div>
 
           <div className="marketplace__content">
