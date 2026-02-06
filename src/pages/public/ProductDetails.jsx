@@ -428,13 +428,6 @@ const ProductDetails = () => {
                     {cartMessage}
                   </div>
                 )}
-                <Link to="/cart">
-                  <button className="product__cta" type="button">
-                    <img src={CartIcon} alt="Cart" className="product__icon" style={{ marginRight: '8px', verticalAlign: 'middle' }} />
-                    Buy Now
-                  </button>
-                </Link>
-
                 <Link className="product__ghost" to="/contact">
                   <img src={MailIcon} alt="Mail" className="product__icon" style={{ marginRight: '8px', verticalAlign: 'middle' }} />
                   Contact CertiCode
