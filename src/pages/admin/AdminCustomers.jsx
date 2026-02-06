@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/adminCustomers.css";
 import Sidebar from "../../components/Sidebar";
@@ -8,7 +8,7 @@ import totalCustomersIcon from "../../assets/total-customers.png";
 import activeCustomersIcon from "../../assets/active-customers.png";
 import totalRevenueIcon from "../../assets/total-revenue.png";
 import avgCustomerSpentIcon from "../../assets/avg-customer-spent.png";
-import filterIcon from "../../assets/filter.png";
+import { AdminCustomersAPI } from "../../services/AdminCustomersAPI";
 
 const Icons = {
   Bell: "🔔",
@@ -24,15 +24,220 @@ const Icons = {
   Sort: "⇅"
 };
 
-const Avatar = ({ name }) => (
-  <img
-    src={`https://ui-avatars.com/api/?name=${name}&background=random&color=fff&size=128`}
-    alt={name}
-    className="avatar-img"
-  />
-);
-
 const AdminCustomers = () => {
+  const [customers, setCustomers] = useState([]);
+  const [stats, setStats] = useState({
+    total_customers: 0,
+    active_customers: 0,
+    total_revenue: 0,
+    avg_order_value: 0,
+    total_customers_change: 0,
+    active_customers_change: 0,
+    total_revenue_change: 0,
+    avg_order_value_change: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [perPage] = useState(10);
+  const [exporting, setExporting] = useState(false);
+
+  const fetchStats = useCallback(async () => {
+    try {
+      const data = await AdminCustomersAPI.getCustomerStats();
+      setStats(data);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  }, []);
+
+  const fetchCustomers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await AdminCustomersAPI.getCustomers(currentPage, searchTerm, statusFilter, perPage);
+      setCustomers(data.customers.data || data.customers);
+      setTotalPages(data.pagination?.total_pages || data.customers.last_page || 1);
+      setTotalItems(data.pagination?.total_items || data.customers.total || 0);
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, searchTerm, statusFilter, perPage]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
+  useEffect(() => {
+    fetchCustomers();
+  }, [fetchCustomers]);
+
+  const handleSearch = (term) => {
+    setSearchTerm(term);
+    setCurrentPage(1);
+  };
+
+  const handleFilterClick = (filter) => {
+    setStatusFilter(filter);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await AdminCustomersAPI.exportCustomers();
+    } catch (error) {
+      console.error("Error exporting customers:", error);
+      alert('Failed to export customer data: ' + (error.message || 'Unknown error'));
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    if (!amount) return "$0.00";
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(amount);
+  };
+
+  const formatPercentage = (percentage) => {
+    if (percentage === undefined || percentage === null) return "0%";
+    return `${percentage >= 0 ? '+' : ''}${percentage.toFixed(1)}%`;
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const getStatusBadge = (customer) => {
+    const hasOrders = customer.total_orders > 0;
+    
+    return hasOrders ? (
+      <span className="status-badge active">● ACTIVE</span>
+    ) : (
+      <span className="status-badge suspended">● INACTIVE</span>
+    );
+  };
+
+  const Avatar = ({ name, avatarUrl }) => (
+    <img
+      src={avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&size=128`}
+      alt={name}
+      className="avatar-img"
+    />
+  );
+
+  const getPurchaseBadge = (orderCount) => {
+    if (orderCount === 0) {
+      return (
+        <div className="purchase-count">
+          <span className="purchase-badge zero">{orderCount} orders</span>
+        </div>
+      );
+    } else if (orderCount <= 3) {
+      return (
+        <div className="purchase-count">
+          <span className="purchase-badge low">{orderCount} orders</span>
+        </div>
+      );
+    } else if (orderCount <= 10) {
+      return (
+        <div className="purchase-count">
+          <span className="purchase-badge medium">{orderCount} orders</span>
+        </div>
+      );
+    } else {
+      return (
+        <div className="purchase-count">
+          <span className="purchase-badge high">{orderCount} orders</span>
+        </div>
+      );
+    }
+  };
+
+  const renderPagination = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          className={`page-btn ${currentPage === i ? "active" : ""}`}
+          onClick={() => handlePageChange(i)}
+        >
+          {i}
+        </button>
+      );
+    }
+    
+    return (
+      <div className="pagination-controls">
+        <button 
+          className="page-btn" 
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          ‹
+        </button>
+        {startPage > 1 && (
+          <>
+            <button 
+              className="page-btn" 
+              onClick={() => handlePageChange(1)}
+            >
+              1
+            </button>
+            {startPage > 2 && <span className="dots">...</span>}
+          </>
+        )}
+        {pages}
+        {endPage < totalPages && (
+          <>
+            {endPage < totalPages - 1 && <span className="dots">...</span>}
+            <button 
+              className="page-btn" 
+              onClick={() => handlePageChange(totalPages)}
+            >
+              {totalPages}
+            </button>
+          </>
+        )}
+        <button 
+          className="page-btn" 
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          ›
+        </button>
+      </div>
+    );
+  };
+
   return (
     <>
       <input type="checkbox" id="sidebar-toggle" />
@@ -41,13 +246,20 @@ const AdminCustomers = () => {
         <Sidebar activePage="customers" />
 
         <main className="main">
-          <AdminTopbar showHamburger>
+          <AdminTopbar 
+            showHamburger
+            onSearch={handleSearch}
+          >
             <Link to="/admin-notification" className="notification-link" aria-label="Notifications">
               <img src={notifBell} alt="Notifications" className="notification-icon" />
               <span className="notification-dot" />
             </Link>
-            <button className="btn primary">
-              {Icons.Export} Export
+            <button 
+              className="btn primary" 
+              onClick={handleExport}
+              disabled={exporting}
+            >
+              {exporting ? "Exporting..." : `${Icons.Export} Export`}
             </button>
           </AdminTopbar>
 
@@ -66,10 +278,12 @@ const AdminCustomers = () => {
                 <div className="icon-box green">
                   <img src={totalCustomersIcon} alt="Total Customers" className="stat-icon-img" />
                 </div>
-                <span className="badge positive">+12%</span>
+                <span className={`badge ${stats.total_customers_change >= 0 ? 'positive' : 'negative'}`}>
+                  {formatPercentage(stats.total_customers_change)}
+                </span>
               </div>
               <small>TOTAL CUSTOMERS</small>
-              <h3>1,284</h3>
+              <h3>{stats.total_customers}</h3>
             </div>
 
             <div className="stat-card">
@@ -77,10 +291,12 @@ const AdminCustomers = () => {
                 <div className="icon-box orange">
                   <img src={activeCustomersIcon} alt="Active Customers" className="stat-icon-img" />
                 </div>
-                <span className="badge positive">+5%</span>
+                <span className={`badge ${stats.active_customers_change >= 0 ? 'positive' : 'negative'}`}>
+                  {formatPercentage(stats.active_customers_change)}
+                </span>
               </div>
               <small>ACTIVE CUSTOMERS</small>
-              <h3>1,150</h3>
+              <h3>{stats.active_customers}</h3>
             </div>
 
             <div className="stat-card">
@@ -88,10 +304,12 @@ const AdminCustomers = () => {
                 <div className="icon-box blue">
                   <img src={totalRevenueIcon} alt="Total Revenue" className="stat-icon-img" />
                 </div>
-                <span className="badge positive">+18%</span>
+                <span className={`badge ${stats.total_revenue_change >= 0 ? 'positive' : 'negative'}`}>
+                  {formatPercentage(stats.total_revenue_change)}
+                </span>
               </div>
               <small>TOTAL REVENUE</small>
-              <h3>$10,356.00</h3>
+              <h3>{formatCurrency(stats.total_revenue)}</h3>
             </div>
 
             <div className="stat-card">
@@ -99,25 +317,38 @@ const AdminCustomers = () => {
                 <div className="icon-box purple">
                   <img src={avgCustomerSpentIcon} alt="Avg Customer Spent" className="stat-icon-img" />
                 </div>
-                <span className="badge negative">-2%</span>
+                <span className={`badge ${stats.avg_order_value_change >= 0 ? 'positive' : 'negative'}`}>
+                  {formatPercentage(stats.avg_order_value_change)}
+                </span>
               </div>
               <small>AVG. CUSTOMER SPENT</small>
-              <h3>$485.20</h3>
+              <h3>{formatCurrency(stats.avg_order_value)}</h3>
             </div>
           </div>
 
           <div className="content-box">
-
             <div className="toolbar">
               <div className="left-controls">
                 <div className="tab-switcher">
-                  <button className="tab-btn active">All</button>
-                  <button className="tab-btn">Active</button>
-                  <button className="tab-btn">Suspended</button>
+                  <button 
+                    className={`tab-btn ${statusFilter === "all" ? "active" : ""}`}
+                    onClick={() => handleFilterClick("all")}
+                  >
+                    All
+                  </button>
+                  <button 
+                    className={`tab-btn ${statusFilter === "active" ? "active" : ""}`}
+                    onClick={() => handleFilterClick("active")}
+                  >
+                    Active
+                  </button>
+                  <button 
+                    className={`tab-btn ${statusFilter === "inactive" ? "active" : ""}`}
+                    onClick={() => handleFilterClick("inactive")}
+                  >
+                    Inactive
+                  </button>
                 </div>
-                <button className="icon-btn">
-                  <img src={filterIcon} alt="Filter" className="filter-icon" />
-                </button>
               </div>
 
               <div className="right-controls">
@@ -128,7 +359,6 @@ const AdminCustomers = () => {
               </div>
             </div>
 
-            {/* CUSTOMERS TABLE */}
             <table>
               <thead>
                 <tr>
@@ -136,121 +366,64 @@ const AdminCustomers = () => {
                   <th style={{ width: "20%" }}>PURCHASES {Icons.Sort}</th>
                   <th style={{ width: "20%" }}>TOTAL SPENT {Icons.Sort}</th>
                   <th style={{ width: "15%" }}>STATUS {Icons.Sort}</th>
-                  <th style={{ width: "10%" }}></th>
                 </tr>
               </thead>
               <tbody>
-                {/* ROW 1 - JAMES SMITH (LINKED) */}
-                <tr>
-                  <td>
-                    <div className="user-cell">
-                      <Avatar name="James Smith" />
-                      <div>
-                        {/* ⬇️ THIS IS THE CHANGE: Wrapped the name in a Link */}
-                        <Link 
-                          to="/customers/details" 
-                          style={{ textDecoration: 'none', color: 'inherit' }}
-                        >
-                          <strong>James Smith</strong>
+                {loading ? (
+                  <tr>
+                    <td colSpan="5" className="loading-cell">
+                      Loading customers...
+                    </td>
+                  </tr>
+                ) : customers.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="no-data-cell">
+                      No customers found
+                    </td>
+                  </tr>
+                ) : (
+                  customers.map((customer) => (
+                    <tr key={customer.id}>
+                      <td>
+                        <div className="user-cell">
+                          <Avatar name={customer.name} avatarUrl={customer.avatar_url} />
+                          <div>
+                            <Link 
+                              to={`/customers/${customer.id}`}
+                              style={{ textDecoration: 'none', color: 'inherit' }}
+                            >
+                              <strong>{customer.name}</strong>
+                            </Link>
+                            <span className="email">{customer.email}</span>
+                            <span className="join-date">Joined: {formatDate(customer.created_at)}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        {getPurchaseBadge(customer.total_orders || 0)}
+                      </td>
+                      <td className="amount">{formatCurrency(customer.total_spent)}</td>
+                      <td>
+                        {getStatusBadge(customer)}
+                      </td>
+                      {/* <td className="actions">
+                        <Link to={`/customers/${customer.id}`}>
+                          <button className="more-btn">{Icons.MoreVertical}</button>
                         </Link>
-                        <span className="email">james.smith@email.com</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td>5 orders</td>
-                  <td className="amount">$5,460.00</td>
-                  <td>
-                    <span className="status-badge active">● ACTIVE</span>
-                  </td>
-                  <td className="actions">
-                    {/* Optional: You can also link the 'more' button if you prefer */}
-                    <Link to="/customers/details">
-                      <button className="more-btn">{Icons.MoreVertical}</button>
-                    </Link>
-                  </td>
-                </tr>
-
-                {/* ROW 2 */}
-                <tr>
-                  <td>
-                    <div className="user-cell">
-                      <Avatar name="Olivia Carter" />
-                      <div>
-                        <strong>Olivia Carter</strong>
-                        <span className="email">olivia.carter@email.com</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td>2 orders</td>
-                  <td className="amount">$2,350.00</td>
-                  <td>
-                    <span className="status-badge suspended">● SUSPENDED</span>
-                  </td>
-                  <td className="actions">
-                    <button className="more-btn">{Icons.MoreVertical}</button>
-                  </td>
-                </tr>
-
-                {/* ROW 3 */}
-                <tr>
-                  <td>
-                    <div className="user-cell">
-                      <Avatar name="Joshua Olsen" />
-                      <div>
-                        <strong>Joshua Olsen</strong>
-                        <span className="email">joshua.olsen@email.com</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td>12 orders</td>
-                  <td className="amount">$12,400.00</td>
-                  <td>
-                    <span className="status-badge active">● ACTIVE</span>
-                  </td>
-                  <td className="actions">
-                    <button className="more-btn">{Icons.MoreVertical}</button>
-                  </td>
-                </tr>
-                
-                {/* ROW 4 */}
-                 <tr>
-                  <td>
-                    <div className="user-cell">
-                      <Avatar name="Joshua Olsen" />
-                      <div>
-                        <strong>Joshua Olsen</strong>
-                        <span className="email">joshua.olsen@email.com</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td>12 orders</td>
-                  <td className="amount">$12,400.00</td>
-                  <td>
-                    <span className="status-badge active">● ACTIVE</span>
-                  </td>
-                  <td className="actions">
-                    <button className="more-btn">{Icons.MoreVertical}</button>
-                  </td>
-                </tr>
-
+                      </td> */}
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
 
-            {/* PAGINATION */}
             <div className="pagination-bar">
-              <span>Showing <strong>1-10</strong> of 1,284 customers</span>
-              <div className="pagination-controls">
-                <button className="page-btn">‹</button>
-                <button className="page-btn active">1</button>
-                <button className="page-btn">2</button>
-                <button className="page-btn">3</button>
-                <span className="dots">...</span>
-                <button className="page-btn">128</button>
-                <button className="page-btn">›</button>
-              </div>
+              <span>
+                Showing <strong>{((currentPage - 1) * perPage) + 1}-{Math.min(currentPage * perPage, totalItems)}</strong> of {totalItems} customers
+              </span>
+              {renderPagination()}
             </div>
           </div>
-
         </main>
       </div>
     </>

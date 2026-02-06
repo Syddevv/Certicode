@@ -1,42 +1,76 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import VerifiedIcon from "../assets/Verified.png";
 import WriteReviewIcon from "../assets/write-a-rev.png";
 
-const ratingBreakdown = [
-  { label: "5 stars", value: 92 },
-  { label: "4 stars", value: 8 },
-  { label: "3 stars", value: 0 },
-  { label: "2 stars", value: 0 },
-  { label: "1 stars", value: 0 },
-];
+const ProductReviews = ({ productId }) => {
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [averageRating, setAverageRating] = useState(0);
+  const [ratingBreakdown, setRatingBreakdown] = useState([
+    { label: "5 stars", value: 0 },
+    { label: "4 stars", value: 0 },
+    { label: "3 stars", value: 0 },
+    { label: "2 stars", value: 0 },
+    { label: "1 stars", value: 0 },
+  ]);
 
-const reviews = [
-  {
-    name: "Jason Dracos",
-    initials: "JD",
-    rating: 5,
-    date: "Published Dec 7, 2025",
-    body:
-      "Exceptional quality. The component library is robust and the documentation made integration a breeze for our enterprise team. The dark mode implementation is the best I've seen in a marketplace asset.",
-  },
-  {
-    name: "Sarah Higgins",
-    initials: "SH",
-    rating: 4,
-    date: "Published Dec 1, 2025",
-    body:
-      "Very clean codebase. It saved us at least 40 hours of frontend work. My only suggestion would be to include more chart variations, but the existing ones are excellent.",
-  },
-];
+  useEffect(() => {
+    if (productId) {
+      fetchReviews();
+    }
+  }, [productId]);
 
-const ProductReviews = () => {
+  const fetchReviews = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch(`http://127.0.0.1:8000/api/products/${productId}/reviews`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch reviews: ${response.status}`);
+      }
+      
+      const reviewsData = await response.json();
+      console.log("Reviews data received:", reviewsData);
+      
+      setReviews(reviewsData);
+      
+      if (reviewsData.length > 0) {
+        const totalRating = reviewsData.reduce((sum, review) => sum + review.rating, 0);
+        const avg = totalRating / reviewsData.length;
+        setAverageRating(avg.toFixed(1));
+        
+        const breakdown = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+        reviewsData.forEach(review => {
+          breakdown[review.rating]++;
+        });
+        
+        const newBreakdown = ratingBreakdown.map(row => {
+          const starNumber = parseInt(row.label.charAt(0));
+          const count = breakdown[starNumber] || 0;
+          const percentage = reviewsData.length > 0 ? Math.round((count / reviewsData.length) * 100) : 0;
+          return { ...row, value: percentage };
+        });
+        
+        setRatingBreakdown(newBreakdown);
+      }
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="product__reviews">
       <div className="product__reviewsSummary">
         <div className="product__ratingCard">
-          <div className="product__ratingScore">4.9</div>
+          <div className="product__ratingScore">{loading ? "..." : averageRating || "0.0"}</div>
           <div className="product__ratingStars">★★★★★</div>
-          <div className="product__ratingMeta">12 Verified Reviews</div>
+          <div className="product__ratingMeta">{loading ? "Loading..." : `${reviews.length} Reviews`}</div>
         </div>
 
         <div className="product__ratingBars">
@@ -55,33 +89,53 @@ const ProductReviews = () => {
         </div>
       </div>
 
+      {error && (
+        <div className="product__error">
+          Error: {error}
+        </div>
+      )}
+
       <div className="product__reviewList">
-        {reviews.map((review) => (
-          <article key={review.name} className="product__reviewCard">
-            <div className="product__reviewHeader">
-              <div className="product__avatar">{review.initials}</div>
-              <div className="product__reviewMeta">
-                <div className="product__reviewTitle">
-                  <strong>{review.name}</strong>
-                  <span className="product__verifiedBadge">
-                    <img src={VerifiedIcon} alt="" />
-                    Verified Purchase
-                  </span>
+        {loading ? (
+          <div className="product__loading">Loading reviews...</div>
+        ) : reviews.length === 0 ? (
+          <div className="product__noReviews">No reviews yet. Be the first to review!</div>
+        ) : (
+          reviews.map((review) => (
+            <article key={review.id} className="product__reviewCard">
+              <div className="product__reviewHeader">
+                <div className="product__avatar">
+                  {review.user?.name?.charAt(0) || "U"}
                 </div>
-                <div className="product__reviewStars">
-                  <span className="product__starsFilled">
-                    {"★★★★★".slice(0, review.rating)}
-                  </span>
-                  <span className="product__starsEmpty">
-                    {"★★★★★".slice(0, 5 - review.rating)}
-                  </span>
+                <div className="product__reviewMeta">
+                  <div className="product__reviewTitle">
+                    <strong>{review.user?.name || "User"}</strong>
+                    <span className="product__verifiedBadge">
+                      <img src={VerifiedIcon} alt="" />
+                      Verified Purchase
+                    </span>
+                  </div>
+                  <div className="product__reviewStars">
+                    <span className="product__starsFilled">
+                      {"★".repeat(review.rating)}
+                    </span>
+                    <span className="product__starsEmpty">
+                      {"☆".repeat(5 - review.rating)}
+                    </span>
+                  </div>
                 </div>
+                <span className="product__reviewDate">
+                  {new Date(review.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                  })}
+                </span>
               </div>
-              <span className="product__reviewDate">{review.date}</span>
-            </div>
-            <p>{review.body}</p>
-          </article>
-        ))}
+              <p>{review.description}</p>
+            </article>
+          ))
+        )}
       </div>
 
       <div className="product__reviewCta">

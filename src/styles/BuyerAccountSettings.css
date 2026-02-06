@@ -635,4 +635,61 @@
     flex-direction: column;
     align-items: flex-start;
   }
+
+  /* Add to your existing CSS file */
+
+/* Profile photo in the account card */
+.account-profile__photo img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e8e8e8;
+}
+
+/* User profile photo in the header */
+.user-profile-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+
+/* Avatar wrapper in the profile info */
+.account-profile__avatarWrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+  border: 2px solid #e8e8e8;
+}
+
+/* Image in the avatar wrapper */
+.account-profile__avatarWrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Profile photo section */
+.account-profile__photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* For responsive design */
+@media (max-width: 768px) {
+  .account-profile__photo img {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .account-profile__avatarWrap {
+    width: 60px;
+    height: 60px;
+  }
+}
 }

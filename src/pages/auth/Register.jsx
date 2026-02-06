@@ -8,10 +8,12 @@ import facebookLogo from "../../assets/facebooklogo.png";
 import certicodeIcon from "../../assets/certicodeicon.png";
 import registerIllustration from "../../assets/Login Image.png";
 import arrowLeft from "../../assets/arrowleft.png";
+import { api } from "../../services/api";
 
 const Register = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -21,7 +23,7 @@ const Register = () => {
   const toggleConfirmPassword = () =>
     setConfirmPasswordVisible(!confirmPasswordVisible);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       alert("Passwords do not match");
@@ -31,7 +33,40 @@ const Register = () => {
       alert("Please accept the terms and conditions");
       return;
     }
-    console.log("Signup attempt:", { email, password });
+
+    try {
+      const userData = {
+        name: name,
+        email: email,
+        password: password,
+        password_confirmation: confirmPassword
+      };
+
+      const data = await api.register(userData);
+      
+      console.log("Registration successful:", data);
+      alert('Registration successful!');
+      window.location.href = '/login';
+    } catch (error) {
+      console.error("Registration error:", error);
+      alert(error.message || 'Registration failed. Please try again.');
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+        await api.googleRedirect();
+        } catch (error) {
+          alert('Google login failed. Please try again.');
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    try {
+      await api.facebookRedirect();
+      } catch (error) {
+        alert('Facebook login failed. Please try again.');
+    }
   };
 
   return (
@@ -46,6 +81,21 @@ const Register = () => {
           </div>
 
           <form className="login-form" onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label className="form-label" htmlFor="name">
+                Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                className="form-input"
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+
             <div className="form-group">
               <label className="form-label" htmlFor="email">
                 Email
@@ -143,11 +193,15 @@ const Register = () => {
             </div>
 
             <div className="social-buttons">
-              <button type="button" className="social-button">
-                <img src={googleIcon} alt="Google" className="google-icon" />
+              <button type="button" className="social-button" onClick={handleGoogleLogin}>
+                <img 
+              src={googleIcon} 
+              alt="Google" 
+              className="google-icon"
+              />
                 <span>Google</span>
               </button>
-              <button type="button" className="social-button">
+              <button type="button" className="social-button" onClick={handleFacebookLogin}>
                 <img
                   src={facebookLogo}
                   alt="Facebook"

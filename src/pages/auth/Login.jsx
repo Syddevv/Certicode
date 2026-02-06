@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../../styles/LoginAndRegister.css";
 import eye1 from "../../assets/eye1.png";
 import eye2 from "../../assets/eye2.png";
@@ -8,17 +8,59 @@ import facebookLogo from "../../assets/facebooklogo.png";
 import certicodeIcon from "../../assets/certicodeicon.png";
 import loginIllustration from "../../assets/Login Image.png";
 import arrowLeft from "../../assets/arrowleft.png";
+import { api } from "../../services/api";
 
 const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const togglePassword = () => setPasswordVisible(!passwordVisible);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login attempt:", { email, password });
+    
+    try {
+      const credentials = {
+        email: email,
+        password: password
+      };
+
+      const data = await api.login(credentials);
+      
+      if (data.token && data.user) {
+        localStorage.setItem('auth_token', data.token);
+        localStorage.setItem('user_id', data.user.id);
+        localStorage.setItem('user_role', data.user.role);
+        localStorage.setItem('user_name', data.user.name || '');
+        
+        if (data.user.role === "Admin") {
+          navigate("/dashboard");
+        } else {
+          navigate("/");
+        }
+      }
+      
+    } catch (error) {
+      alert(error.message || 'Login failed. Please try again.');
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await api.googleRedirect();
+    } catch (error) {
+      alert('Google login failed. Please try again.');
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    try {
+      await api.facebookRedirect();
+    } catch (error) {
+      alert('Facebook login failed. Please try again.');
+    }
   };
 
   return (
@@ -91,11 +133,19 @@ const Login = () => {
             </div>
 
             <div className="social-buttons">
-              <button type="button" className="social-button">
+              <button 
+                type="button" 
+                className="social-button" 
+                onClick={handleGoogleLogin}
+              >
                 <img src={googleIcon} alt="Google" className="google-icon" />
                 <span>Google</span>
               </button>
-              <button type="button" className="social-button">
+              <button 
+                type="button" 
+                className="social-button"
+                onClick={handleFacebookLogin}
+              >
                 <img
                   src={facebookLogo}
                   alt="Facebook"

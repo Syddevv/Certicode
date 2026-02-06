@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import "../../styles/landingPage.css";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
@@ -20,6 +20,8 @@ import Lightning from "../../assets/lightning.png";
 import SearchCheck from "../../assets/search-check.png";
 import Avatar from "../../assets/Avatar.png";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { api } from "../../services/api";
+import { ReviewAPI } from "../../services/ReviewAPI";
 
 const heroCategories = [
   "All Categories",
@@ -29,11 +31,72 @@ const heroCategories = [
   "Custom Projects",
 ];
 
+const getToneColor = (tech) => {
+  const colorMap = {
+    'React': 'blue',
+    'Node.js': 'green',
+    'Python': 'gold',
+    'Django': 'green',
+    'Flutter': 'purple',
+    'Firebase': 'pink',
+    'Swift': 'indigo',
+    'Figma': 'rose',
+    'Adobe XD': 'violet',
+    'Tailwind': 'orange',
+    'Laravel': 'red',
+    'Vue.js': 'green',
+    'HTML': 'orange',
+    'CSS': 'blue',
+    'JavaScript': 'yellow',
+    'Stripe': 'violet',
+  };
+  
+  return colorMap[tech] || 'green';
+};
+
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
 const LandingPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedResult, setSelectedResult] = useState(null);
+  const [allReviews, setAllReviews] = useState([]);
+  const [currentReviewPage, setCurrentReviewPage] = useState(0);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const searchRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (!location.hash) return;
@@ -43,6 +106,247 @@ const LandingPage = () => {
       section.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [location.hash]);
+
+  useEffect(() => {
+    fetchTopReviews();
+  }, []);
+
+  const fetchTopReviews = async () => {
+    try {
+      setReviewsLoading(true);
+      const reviewsData = await ReviewAPI.getTopReviews();
+      
+      const formattedReviews = reviewsData.map((review, index) => ({
+        id: review.id,
+        quote: review.description,
+        name: review.user?.name || "User",
+        role: "Verified Buyer",
+        rating: review.rating,
+        avatar: Avatar,
+        featured: index === 1 || index === 4 || index === 7
+      }));
+      
+      if (formattedReviews.length === 0) {
+        setAllReviews(getFallbackReviews());
+      } else {
+        setAllReviews(formattedReviews);
+      }
+    } catch (error) {
+      console.error("Error fetching top reviews:", error);
+      setAllReviews(getFallbackReviews());
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  const getFallbackReviews = () => {
+    return [
+      {
+        id: 1,
+        quote: "Their SaaS templates saved us months of build time. The code quality was exceptional.",
+        name: "Alex Johnson",
+        role: "CTO, TechFlow",
+        rating: 5,
+        avatar: Avatar,
+        featured: false,
+      },
+      {
+        id: 2,
+        quote: "As a buyer, the verification process is rigorous but worth it. Best B2B marketplace out there.",
+        name: "Sarah Chen",
+        role: "Senior UI Designer",
+        rating: 5,
+        avatar: Avatar,
+        featured: true,
+      },
+      {
+        id: 3,
+        quote: "Support was outstanding and helped us through a complex integration. We shipped on time.",
+        name: "Marcus Rodriguez",
+        role: "Product Manager",
+        rating: 5,
+        avatar: Avatar,
+        featured: false,
+      },
+      {
+        id: 4,
+        quote: "The UI kits are production-ready and saved our design team weeks of work.",
+        name: "Emily Wilson",
+        role: "Lead Designer",
+        rating: 5,
+        avatar: Avatar,
+        featured: false,
+      },
+      {
+        id: 5,
+        quote: "Purchased a mobile app template and customized it for our needs. Excellent documentation!",
+        name: "David Kim",
+        role: "Mobile Developer",
+        rating: 5,
+        avatar: Avatar,
+        featured: true,
+      },
+      {
+        id: 6,
+        quote: "Fast delivery and excellent support. Will definitely buy again.",
+        name: "Lisa Thompson",
+        role: "Startup Founder",
+        rating: 5,
+        avatar: Avatar,
+        featured: false,
+      },
+      {
+        id: 7,
+        quote: "Code was clean and well-structured. Easy to integrate with our existing systems.",
+        name: "Michael Brown",
+        role: "Backend Engineer",
+        rating: 5,
+        avatar: Avatar,
+        featured: false,
+      },
+      {
+        id: 8,
+        quote: "The marketplace has high-quality assets that are actually production-ready.",
+        name: "Jessica Lee",
+        role: "Product Manager",
+        rating: 5,
+        avatar: Avatar,
+        featured: true,
+      },
+      {
+        id: 9,
+        quote: "Saved 3 months of development time with their e-commerce template.",
+        name: "Robert Garcia",
+        role: "CTO",
+        rating: 5,
+        avatar: Avatar,
+        featured: false,
+      },
+    ];
+  };
+
+  const handleReviewPageChange = (pageIndex) => {
+    setCurrentReviewPage(pageIndex);
+  };
+
+  const getCurrentReviews = () => {
+    const reviewsPerPage = 3;
+    const startIndex = currentReviewPage * reviewsPerPage;
+    return allReviews.slice(startIndex, startIndex + reviewsPerPage);
+  };
+
+  const getTotalReviewPages = () => {
+    return Math.ceil(allReviews.length / 3);
+  };
+
+  const performSearch = async (query, category) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    try {
+      setIsSearching(true);
+      let assetType = "";
+      if (category !== "All Categories") {
+        switch (category) {
+          case "Website Apps":
+            assetType = "Website";
+            break;
+          case "Mobile Apps":
+            assetType = "Mobile App";
+            break;
+          case "UI/UX Design":
+            assetType = "UI Kit";
+            break;
+          case "Custom Projects":
+            assetType = "";
+            break;
+          default:
+            assetType = "";
+        }
+      }
+
+      const result = await api.getProducts(query, assetType, 1, "newest", 5);
+      
+      // Add null/undefined check here
+      const products = result?.data || [];
+      
+      const formattedResults = products.map(product => ({
+        id: product.id,
+        title: product.name,
+        description: product.description || "",
+        price: `$${parseFloat(product.price || 0).toFixed(2)}`,
+        asset_type: product.asset_type || "Uncategorized",
+        technologies: product.technologies || [], // Add fallback
+        image: product.featured_image,
+        techTags: (product.technologies || []).map(tech => ({
+          label: tech,
+          tone: getToneColor(tech)
+        }))
+      }));
+      
+      setSearchResults(formattedResults);
+    } catch (error) {
+      console.error("Search error:", error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const debouncedSearch = useCallback(
+    debounce((query, category) => {
+      performSearch(query, category);
+    }, 300),
+    []
+  );
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    setSelectedResult(null);
+    setShowDropdown(true);
+    debouncedSearch(value, selectedCategory);
+  };
+
+  const handleCategoryChange = (e) => {
+    const value = e.target.value;
+    setSelectedCategory(value);
+    if (searchQuery.trim()) {
+      debouncedSearch(searchQuery, value);
+    }
+  };
+
+  const handleResultSelect = (result) => {
+    setSearchQuery(result.title);
+    setSelectedResult(result);
+    setShowDropdown(false);
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
+  const handleSearchSubmit = () => {
+    if (selectedResult) {
+      navigate(`/marketplace/${selectedResult.id}`);
+    } else if (searchQuery.trim()) {
+      const params = new URLSearchParams();
+      params.set("search", searchQuery);
+      if (selectedCategory !== "All Categories") {
+        params.set("category", selectedCategory);
+      }
+      navigate(`/marketplace?${params.toString()}`);
+    }
+    setShowDropdown(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearchSubmit();
+    }
+  };
 
   const items = [
     { src: TechFlow, name: "TechFlow" },
@@ -93,36 +397,6 @@ const LandingPage = () => {
     },
   ];
 
-  const testimonials = [
-    {
-      quote:
-        "Their SaaS templates saved us months of build time. The code quality was exceptional.",
-      name: "Alex Johnson",
-      role: "CTO, TechFlow",
-      rating: 5,
-      avatar: Avatar,
-      featured: false,
-    },
-    {
-      quote:
-        "As a buyer, the verification process is rigorous but worth it. Best B2B marketplace out there.",
-      name: "Sarah Chen",
-      role: "Senior UI Designer",
-      rating: 5,
-      avatar: Avatar,
-      featured: true,
-    },
-    {
-      quote:
-        "Support was outstanding and helped us through a complex integration. We shipped on time.",
-      name: "Marcus Rodriguez",
-      role: "Product Manager",
-      rating: 5,
-      avatar: Avatar,
-      featured: false,
-    },
-  ];
-
   const faqs = [
     {
       question: "How does the transfer process work?",
@@ -146,15 +420,6 @@ const LandingPage = () => {
     },
   ];
 
-  const handleExplore = () => {
-    const params = new URLSearchParams();
-    if (selectedCategory !== "All Categories") {
-      params.set("category", selectedCategory);
-    }
-    const query = params.toString();
-    navigate(query ? `/marketplace?${query}` : "/marketplace");
-  };
-
   return (
     <div>
       <Navbar />
@@ -174,21 +439,26 @@ const LandingPage = () => {
               trusted, production-ready assets.
             </p>
 
-            <div className="hero__search">
+            <div className="hero__search" ref={searchRef}>
               <div className="search">
                 <span className="search__icon" aria-hidden="true">
                   <img src={SearchIcon} alt="search-icon" />
                 </span>
                 <input
+                  ref={inputRef}
                   className="search__input"
                   placeholder={`Search by "Node.js E-commerce", "Fitness App"...`}
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  onKeyDown={handleKeyDown}
+                  onFocus={() => setShowDropdown(true)}
                 />
                 <label className="search__selectWrap" htmlFor="hero-category">
                   <select
                     id="hero-category"
                     className="search__select"
                     value={selectedCategory}
-                    onChange={(event) => setSelectedCategory(event.target.value)}
+                    onChange={handleCategoryChange}
                   >
                     {heroCategories.map((category) => (
                       <option key={category} value={category}>
@@ -201,12 +471,75 @@ const LandingPage = () => {
                 <button
                   className="btn btn--primary search__cta"
                   type="button"
-                  onClick={handleExplore}
+                  onClick={handleSearchSubmit}
                 >
-                  Explore
+                  Search
                 </button>
               </div>
+              
+              {showDropdown && (
+                <div className="search__dropdown" ref={dropdownRef}>
+                  {isSearching ? (
+                    <div className="search__dropdownItem search__dropdownItem--loading">
+                      Searching...
+                    </div>
+                  ) : searchQuery.trim() && (searchResults?.length === 0 || !searchResults) ? ( // Add ?.
+                    <div className="search__dropdownItem search__dropdownItem--empty">
+                      No results found for "{searchQuery}"
+                    </div>
+                  ) : searchResults?.length > 0 ? ( // Add ?.
+                    <>
+                      <div className="search__dropdownHeader">
+                        <span>Search Results ({searchResults.length})</span>
+                        <Link 
+                          to={`/marketplace?search=${encodeURIComponent(searchQuery)}${selectedCategory !== "All Categories" ? `&category=${selectedCategory}` : ''}`}
+                          className="search__dropdownViewAll"
+                          onClick={() => setShowDropdown(false)}
+                        >
+                          View all →
+                        </Link>
+                      </div>
+                      {searchResults.map((result) => (
+                        <div
+                          key={result.id}
+                          className="search__dropdownItem"
+                          onClick={() => handleResultSelect(result)}
+                        >
+                          <div className="search__dropdownItemContent">
+                            <div className="search__dropdownItemTitle">
+                              {result.title}
+                            </div>
+                            <div className="search__dropdownItemDesc">
+                              {(result.description || "").length > 80  // Add fallback
+                                ? `${result.description.substring(0, 80)}...` 
+                                : result.description}
+                            </div>
+                            <div className="search__dropdownItemMeta">
+                              <span className="search__dropdownItemPrice">
+                                {result.price}
+                              </span>
+                              <div className="search__dropdownItemTechs">
+                                {(result.techTags || []).slice(0, 3).map((tag, index) => ( // Add fallback
+                                  <span key={index} className={`search__dropdownItemTech search__dropdownItemTech--${tag.tone}`}>
+                                    {tag.label}
+                                  </span>
+                                ))}
+                                {(result.techTags || []).length > 3 && (
+                                  <span className="search__dropdownItemTechMore">
+                                    +{(result.techTags || []).length - 3}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </>
+                  ) : null}
+                </div>
+              )}
             </div>
+
           </div>
 
           <div className="hero__right">
@@ -335,9 +668,9 @@ const LandingPage = () => {
           </div>
 
           <div className="testimonials__grid">
-            {testimonials.map((item) => (
+            {getCurrentReviews()?.map((item) => (
               <div
-                key={item.name}
+                key={item.id}
                 className={`testimonialCard${
                   item.featured ? " testimonialCard--featured" : ""
                 }`}
@@ -362,13 +695,15 @@ const LandingPage = () => {
           </div>
 
           <div className="testimonials__pagination" aria-label="Pagination">
-            <button className="pagerDot" type="button" aria-label="Page 1" />
-            <button
-              className="pagerDot pagerDot--active"
-              type="button"
-              aria-label="Page 2"
-            />
-            <button className="pagerDot" type="button" aria-label="Page 3" />
+            {Array.from({ length: getTotalReviewPages() }).map((_, index) => (
+              <button 
+                key={index}
+                className={`pagerDot ${currentReviewPage === index ? "pagerDot--active" : ""}`}
+                type="button"
+                onClick={() => handleReviewPageChange(index)}
+                aria-label={`Page ${index + 1}`}
+              />
+            ))}
           </div>
         </div>
       </section>

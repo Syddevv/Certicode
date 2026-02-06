@@ -11,12 +11,32 @@ import ProfileIcon from "../../assets/orangeprofile.png";
 import NotificationIcon from "../../assets/NotifBell.png";
 import MoonIcon from "../../assets/OrangeMoon.png";
 import WalletIcon from "../../assets/wallet.png";
+import { ProfileAPI } from "../../services/ProfileAPI";
 
 const BuyerAccountSettings = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [profileData, setProfileData] = useState({
+    name: "",
+    email: "",
+    company_name: "",
+    avatar_url: ""
+  });
+  const [passwordData, setPasswordData] = useState({
+    current_password: "",
+    new_password: "",
+    new_password_confirmation: ""
+  });
+  const [deletePassword, setDeletePassword] = useState("");
+  const [message, setMessage] = useState({ type: "", text: "" });
+  const [saving, setSaving] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    fetchUserData();
   }, []);
 
   useEffect(() => {
@@ -33,6 +53,249 @@ const BuyerAccountSettings = () => {
     return undefined;
   }, [isDeleteOpen]);
 
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Create image to check dimensions
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+    
+    img.onload = async () => {
+      URL.revokeObjectURL(img.src);
+      
+      // Check dimensions
+      if (img.width > 1024 || img.height > 1024) {
+        setMessage({ 
+          type: 'error', 
+          text: 'Image dimensions should be less than 1024x1024 pixels' 
+        });
+        e.target.value = '';
+        return;
+      }
+
+      if (file.size > 2 * 1024 * 1024) {
+        setMessage({ type: 'error', text: 'Image size should be less than 2MB' });
+        e.target.value = '';
+        return;
+      }
+
+      if (!file.type.match('image.*')) {
+        setMessage({ type: 'error', text: 'Please select an image file' });
+        e.target.value = '';
+        return;
+      }
+
+      try {
+        setSaving(true);
+        setMessage({ type: '', text: '' });
+        
+        console.log('Uploading file:', file.name, file.type, file.size);
+        
+        const result = await ProfileAPI.uploadAvatar(file);
+        
+        console.log('Upload result:', result);
+        
+        setMessage({ type: 'success', text: result.message || 'Avatar updated successfully' });
+        
+        setUser(prev => ({ ...prev, avatar_url: result.avatar_url }));
+        setProfileData(prev => ({ ...prev, avatar_url: result.avatar_url }));
+        
+        e.target.value = '';
+        
+        setTimeout(() => {
+          setMessage({ type: '', text: '' });
+        }, 3000);
+        
+      } catch (error) {
+        console.error('Failed to upload avatar:', error);
+        setMessage({ 
+          type: 'error', 
+          text: error.message || 'Failed to upload avatar. Please try again.' 
+        });
+        e.target.value = '';
+      } finally {
+        setSaving(false);
+      }
+    };
+
+    img.onerror = () => {
+      setMessage({ type: 'error', text: 'Failed to load image. Please select a valid image file.' });
+      e.target.value = '';
+    };
+  };
+
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      const data = await ProfileAPI.getCurrentUser();
+      setUser(data);
+      setProfileData({
+        name: data.name || "",
+        email: data.email || "",
+        company_name: data.company_name || "",
+        avatar_url: data.avatar_url || ""
+      });
+    } catch (error) {
+      console.error("Failed to fetch user data:", error);
+      setMessage({ type: "error", text: "Failed to load user data" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleProfileChange = (e) => {
+    const { id, value } = e.target;
+    setProfileData(prev => ({
+      ...prev,
+      [id === "full-name" ? "name" : id === "company" ? "company_name" : id]: value
+    }));
+  };
+
+  const handlePasswordChange = (e) => {
+    const { placeholder, value } = e.target;
+    setPasswordData(prev => ({
+      ...prev,
+      [placeholder === "Old Password" ? "current_password" : 
+       placeholder === "New Password" ? "new_password" : 
+       "new_password_confirmation"]: value
+    }));
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      setSaving(true);
+      setMessage({ type: "", text: "" });
+      
+      const dataToSend = {
+        name: profileData.name,
+        email: profileData.email,
+        company_name: profileData.company_name,
+        avatar_url: profileData.avatar_url
+      };
+      
+      const result = await ProfileAPI.updateProfile(dataToSend);
+      
+      setMessage({ type: "success", text: result.message || "Profile updated successfully" });
+      
+      if (result.user) {
+        setUser(prev => ({ ...prev, ...result.user }));
+      }
+      
+      setTimeout(() => {
+        setMessage({ type: "", text: "" });
+      }, 3000);
+      
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      setMessage({ 
+        type: "error", 
+        text: error.message || "Failed to update profile. Please try again." 
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    try {
+      setChangingPassword(true);
+      setMessage({ type: "", text: "" });
+      
+      if (!passwordData.current_password || !passwordData.new_password || !passwordData.new_password_confirmation) {
+        setMessage({ type: "error", text: "Please fill in all password fields" });
+        return;
+      }
+      
+      if (passwordData.new_password !== passwordData.new_password_confirmation) {
+        setMessage({ type: "error", text: "New passwords do not match" });
+        return;
+      }
+      
+      const result = await ProfileAPI.updatePassword({
+        current_password: passwordData.current_password,
+        new_password: passwordData.new_password,
+        new_password_confirmation: passwordData.new_password_confirmation
+      });
+      
+      setMessage({ type: "success", text: result.message || "Password updated successfully" });
+      
+      setPasswordData({
+        current_password: "",
+        new_password: "",
+        new_password_confirmation: ""
+      });
+      
+      setTimeout(() => {
+        setMessage({ type: "", text: "" });
+      }, 3000);
+      
+    } catch (error) {
+      console.error("Failed to update password:", error);
+      setMessage({ 
+        type: "error", 
+        text: error.message || "Failed to update password. Please try again." 
+      });
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      setDeletingAccount(true);
+      setMessage({ type: "", text: "" });
+      
+      if (!deletePassword) {
+        setMessage({ type: "error", text: "Please enter your password to confirm" });
+        return;
+      }
+      
+      const result = await ProfileAPI.deleteAccount(deletePassword);
+      
+      setMessage({ type: "success", text: result.message || "Account deleted successfully" });
+      
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_id');
+      localStorage.removeItem('user_role');
+      localStorage.removeItem('user_name');
+      
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000);
+      
+    } catch (error) {
+      console.error("Failed to delete account:", error);
+      setMessage({ 
+        type: "error", 
+        text: error.message || "Failed to delete account. Please check your password." 
+      });
+    } finally {
+      setDeletingAccount(false);
+    }
+  };
+
+  const handleDialogDelete = () => {
+    handleDeleteAccount();
+    setIsDeleteOpen(false);
+  };
+
+  if (loading) {
+    return (
+      <div>
+        <Navbar />
+        <section className="account-settings">
+          <div className="account-settings__inner">
+            <div className="account-loading">
+              <h2>Loading account settings...</h2>
+            </div>
+          </div>
+        </section>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div>
       <Navbar />
@@ -40,16 +303,31 @@ const BuyerAccountSettings = () => {
         <div className="account-settings__inner">
           <div className="account-profile">
             <div className="account-profile__info">
-              <div className="account-profile__avatarWrap">
+              <div className="account-profile__avatarWrap" style={{ 
+                width: '80px', 
+                height: '80px', 
+                borderRadius: '50%', 
+                overflow: 'hidden',
+                border: '2px solid #e8e8e8'
+              }}>
                 <img
-                  className="account-profile__avatar"
-                  src={Avatar}
-                  alt="Jane Doe"
+                  src={user?.avatar_url || Avatar}
+                  alt={user?.name || "User"}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                  onError={(e) => {
+                    console.error('Image failed to load:', user?.avatar_url);
+                    e.target.src = Avatar;
+                    e.target.onerror = null;
+                  }}
                 />
                 <span className="account-profile__status" aria-hidden="true" />
               </div>
               <div>
-                <h2>Jane Doe</h2>
+                <h2>{user?.name || "User"}</h2>
                 <span className="account-profile__badge">
                   <img src={OrangeBadge} alt="" aria-hidden="true" />
                   Verified User
@@ -80,6 +358,12 @@ const BuyerAccountSettings = () => {
             <h3>Account Settings</h3>
           </div>
 
+          {message.text && (
+            <div className={`account-message account-message--${message.type}`}>
+              {message.text}
+            </div>
+          )}
+
           <div className="account-card">
             <div className="account-card__header">
               <span className="account-card__icon">
@@ -94,19 +378,55 @@ const BuyerAccountSettings = () => {
             </div>
             <div className="account-card__body account-profile__body">
               <div className="account-profile__photo">
-                <img
-                  src={Avatar}
-                  alt="Jane Doe"
-                  className="user-profile-photo"
-                />
-                <button type="button" className="account-secondary">
-                  Change Picture
-                </button>
+                <div style={{ 
+                  width: '120px', 
+                  height: '120px', 
+                  borderRadius: '50%', 
+                  overflow: 'hidden',
+                  border: '2px solid #e8e8e8'
+                }}>
+                  <img
+                    src={user?.avatar_url || Avatar}
+                    alt={user?.name || "User"}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover'
+                    }}
+                    onError={(e) => {
+                      console.error('Image failed to load:', user?.avatar_url);
+                      e.target.src = Avatar;
+                      e.target.onerror = null;
+                    }}
+                  />
+                </div>
+                <div>
+                  <input
+                    type="file"
+                    id="avatar-upload"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={handleAvatarUpload}
+                  />
+                  <button 
+                    type="button" 
+                    className="account-secondary"
+                    onClick={() => document.getElementById('avatar-upload').click()}
+                  >
+                    Change Picture
+                  </button>
+                </div>
               </div>
               <div className="account-profile__form">
                 <div className="account-field">
                   <label htmlFor="full-name">Full Name</label>
-                  <input id="full-name" type="text" placeholder="Jane Doe" />
+                  <input 
+                    id="full-name" 
+                    type="text" 
+                    placeholder="Jane Doe" 
+                    value={profileData.name}
+                    onChange={handleProfileChange}
+                  />
                 </div>
                 <div className="account-field">
                   <label htmlFor="email">Email</label>
@@ -114,6 +434,8 @@ const BuyerAccountSettings = () => {
                     id="email"
                     type="email"
                     placeholder="jane.doe@email.com"
+                    value={profileData.email}
+                    onChange={handleProfileChange}
                   />
                 </div>
                 <div className="account-field account-field--full">
@@ -122,11 +444,18 @@ const BuyerAccountSettings = () => {
                     id="company"
                     type="text"
                     placeholder="Sterling Digital Solutions Ltd."
+                    value={profileData.company_name}
+                    onChange={handleProfileChange}
                   />
                 </div>
                 <div className="account-actions">
-                  <button className="account-primary" type="button">
-                    Save Changes
+                  <button 
+                    className="account-primary" 
+                    type="button"
+                    onClick={handleSaveProfile}
+                    disabled={saving}
+                  >
+                    {saving ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
               </div>
@@ -153,11 +482,32 @@ const BuyerAccountSettings = () => {
                     <strong>Update Password</strong>
                   </div>
                   <div className="account-security__inputs">
-                    <input type="password" placeholder="Old Password" />
-                    <input type="password" placeholder="New Password" />
+                    <input 
+                      type="password" 
+                      placeholder="Old Password" 
+                      value={passwordData.current_password}
+                      onChange={handlePasswordChange}
+                    />
+                    <input 
+                      type="password" 
+                      placeholder="New Password" 
+                      value={passwordData.new_password}
+                      onChange={handlePasswordChange}
+                    />
+                    <input 
+                      type="password" 
+                      placeholder="Confirm New Password" 
+                      value={passwordData.new_password_confirmation}
+                      onChange={handlePasswordChange}
+                    />
                   </div>
-                  <button className="account-primary" type="button">
-                    Change Password
+                  <button 
+                    className="account-primary" 
+                    type="button"
+                    onClick={handleChangePassword}
+                    disabled={changingPassword}
+                  >
+                    {changingPassword ? "Changing..." : "Change Password"}
                   </button>
                 </div>
                 <div className="account-divider" />
@@ -275,9 +625,9 @@ const BuyerAccountSettings = () => {
               <div>
                 <h4>Billing Summary</h4>
                 <p>
-                  Horizon Tech Solutions LLC • GB123456789
+                  {user?.company_name || "No company name set"} • 
                   <span>
-                    452 Market Street, Ste 1200, San Francisco, CA 94104
+                    Update your billing details in settings
                   </span>
                 </p>
               </div>
@@ -348,20 +698,30 @@ const BuyerAccountSettings = () => {
               type="password"
               placeholder="Enter your password"
               className="account-dialog__input"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
             />
+            {message.text && message.type === "error" && (
+              <div className="account-dialog__error">
+                {message.text}
+              </div>
+            )}
             <div className="account-dialog__actions">
               <button
                 className="account-dialog__btn account-dialog__btn--ghost"
                 type="button"
                 onClick={() => setIsDeleteOpen(false)}
+                disabled={deletingAccount}
               >
                 Cancel
               </button>
               <button
                 className="account-dialog__btn account-dialog__btn--danger"
                 type="button"
+                onClick={handleDialogDelete}
+                disabled={deletingAccount}
               >
-                Delete Account
+                {deletingAccount ? "Deleting..." : "Delete Account"}
               </button>
             </div>
           </div>

@@ -493,3 +493,48 @@ td {
     display: none;
   }
 }
+
+.purchase-count {
+  display: flex;
+  align-items: center;
+}
+
+.purchase-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  display: inline-block;
+  min-width: 80px;
+}
+
+.purchase-badge.zero {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.purchase-badge.low {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.purchase-badge.medium {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.purchase-badge.high {
+  background-color: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.amount {
+  font-weight: 700;
+  color: #111827;
+  font-size: 14px;
+}

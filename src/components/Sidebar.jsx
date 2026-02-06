@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import logo from "../assets/certicodeadminpanel.png";
 import "../styles/sidebar.css";
@@ -21,6 +21,99 @@ const Icons = {
 
 const Sidebar = ({ activePage }) => {
   const [showLogout, setShowLogout] = useState(false);
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        console.error("No authentication token found");
+        return;
+      }
+      
+      const response = await fetch('http://127.0.0.1:8000/api/profile/current-user', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const responseText = await response.text();
+      
+      if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+        console.error('Server error response');
+        return;
+      }
+
+      const data = JSON.parse(responseText);
+      
+      if (!response.ok) {
+        console.error('Failed to fetch user:', data.message || `Error ${response.status}`);
+        return;
+      }
+
+      setUser(data.user || data);
+    } catch (error) {
+      console.error("Failed to fetch user data in sidebar:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    const token = localStorage.getItem('auth_token');
+    
+    if (token) {
+      try {
+        await fetch('http://127.0.0.1:8000/api/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    }
+    
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('user_role');
+    localStorage.removeItem('user_name');
+    window.location.href = '/login';
+  };
+
+  const LogoutModal = ({ onClose }) => (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <h3>Logout</h3>
+        <p>Are you sure you want to log out?</p>
+        <div className="modal-actions">
+          <button 
+            className="modal-btn modal-btn-secondary"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button 
+            className="modal-btn modal-btn-danger"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
@@ -34,7 +127,6 @@ const Sidebar = ({ activePage }) => {
         </label>
 
         <div className="menu">
-          {/* MAIN MENU */}
           <ul className="menu-top">
             <li className={activePage === "dashboard" ? "active" : ""}>
               <Link to="/dashboard">
@@ -62,10 +154,8 @@ const Sidebar = ({ activePage }) => {
             </li>
           </ul>
 
-          {/* SYSTEM LABEL */}
           <div className="menu-section-label">SYSTEM</div>
 
-          {/* SYSTEM MENU */}
           <ul className="menu-bottom">
             <li className={activePage === "settings" ? "active" : ""}>
               <Link to="/settings">
@@ -81,17 +171,26 @@ const Sidebar = ({ activePage }) => {
             </li>
           </ul>
 
-          {/* PROFILE */}
           <div className="profile-item">
             <div className="profile">
-              <img
-                src="https://i.pravatar.cc/150?u=a042581f4e29026024d"
-                alt="Admin"
-              />
-              <div>
-                <strong>Alex Rivera</strong>
-                <small> Admin</small>
-              </div>
+              {loading ? (
+                <div className="profile-loading">...</div>
+              ) : (
+                <>
+                  <img
+                    src={user?.avatar_url || "https://i.pravatar.cc/150?u=a042581f4e29026024d"}
+                    alt="Admin"
+                    onError={(e) => {
+                      e.target.src = "https://i.pravatar.cc/150?u=a042581f4e29026024d";
+                      e.target.onerror = null;
+                    }}
+                  />
+                  <div>
+                    <strong>{user?.name || "Admin User"}</strong>
+                    <small> {user?.role || "Admin"}</small>
+                  </div>
+                </>
+              )}
             </div>
 
             <button className="logout" onClick={() => setShowLogout(true)}>
@@ -101,14 +200,9 @@ const Sidebar = ({ activePage }) => {
         </div>
       </aside>
 
-      {/* LOGOUT MODAL */}
       {showLogout && (
         <LogoutModal
           onClose={() => setShowLogout(false)}
-          onConfirm={() => {
-            setShowLogout(false);
-            console.log("User logged out");
-          }}
         />
       )}
     </>

@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import SearchIcon from "../assets/lucide_search.png";
 import MoonIcon from "../assets/lucide_moon.png";
 import CartIcon from "../assets/NavCart.png";
@@ -5,9 +6,11 @@ import AvatarImg from "../assets/Avatar.png";
 import "../styles/nav.css";
 import CerticodeLogo from "../assets/certicodeicon.png";
 import { Link, NavLink, useLocation } from "react-router-dom";
+import { ProfileAPI } from "../services/ProfileAPI";
 
 const Navbar = () => {
-  const isLoggedIn = true;
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
   const isLanding = location.pathname === "/";
 
@@ -22,6 +25,33 @@ const Navbar = () => {
       section.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  const fetchUserData = async () => {
+    try {
+      // Check if user is logged in (check for auth token)
+      const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
+      
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      
+      const userData = await ProfileAPI.getCurrentUser();
+      setUser(userData);
+    } catch (error) {
+      console.error("Failed to fetch user data for navbar:", error);
+      // User might not be logged in or token expired
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Check if user is logged in
+  const isLoggedIn = !!user;
 
   return (
     <header className="nav">
@@ -75,7 +105,7 @@ const Navbar = () => {
 
         <div className="nav__actions">
           <button className="iconBtn" aria-label="Search" type="button">
-            <img className="iconImg" src={SearchIcon} alt="" />
+            {/* <img className="iconImg" src={SearchIcon} alt=""  placeholder/> */}
           </button>
 
           {isLoggedIn && (
@@ -90,12 +120,34 @@ const Navbar = () => {
             <img className="iconImg" src={MoonIcon} alt="" />
           </button>
 
-          {isLoggedIn && (
+          {isLoggedIn && !loading && (
             <button className="iconBtn" aria-label="Profile" type="button">
               <Link to="/buyer-dashboard">
-                <img className="iconImg nav__avatar" src={AvatarImg} alt="" />
+                <img 
+                  className="iconImg nav__avatar" 
+                  src={user?.avatar_url || AvatarImg} 
+                  alt={user?.name || "User"}
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    objectFit: 'cover',
+                    border: '2px solid #e8e8e8'
+                  }}
+                  onError={(e) => {
+                    console.error('Navbar avatar failed to load:', user?.avatar_url);
+                    e.target.src = AvatarImg;
+                    e.target.onerror = null;
+                  }}
+                />
               </Link>
             </button>
+          )}
+
+          {!isLoggedIn && !loading && (
+            <Link className="nav__login" to="/login">
+              Sign In
+            </Link>
           )}
         </div>
       </div>

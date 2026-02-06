@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useMemo, useState, useEffect } from "react";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import certicodeIcon from "../../assets/certicodeicon.png";
 import "../../styles/CreateNewPassword.css";
 
@@ -31,11 +31,23 @@ const EyeIcon = ({ closed = false }) => (
 );
 
 const CreateNewPassword = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [feedback, setFeedback] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ type: "", text: "" });
+
+  const token = searchParams.get('token');
+  const email = searchParams.get('email');
+
+  useEffect(() => {
+    console.log("Token:", token);
+    console.log("Email:", email);
+    console.log("Full URL:", window.location.href);
+  }, [token, email]);
 
   const rules = useMemo(() => {
     const hasEightChars = newPassword.length >= 8;
@@ -52,13 +64,61 @@ const CreateNewPassword = () => {
     rules.hasSpecialChar &&
     passwordsMatch;
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!isValid) {
-      setFeedback("Please satisfy the requirements and confirm both passwords.");
+    
+    if (!token || !email) {
+      setMessage({ type: "error", text: "Invalid reset link. Please request a new password reset." });
       return;
     }
-    setFeedback("Password reset successful.");
+
+    if (!isValid) {
+      setMessage({ type: "error", text: "Please satisfy the requirements and confirm both passwords." });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setMessage({ type: "", text: "" });
+
+      const response = await fetch('http://127.0.0.1:8000/api/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          token: token,
+          email: email,
+          password: newPassword,
+          password_confirmation: confirmPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to reset password');
+      }
+
+      setMessage({ 
+        type: "success", 
+        text: "Password reset successful! Redirecting to login..." 
+      });
+
+      setTimeout(() => {
+        navigate('/login');
+      }, 3000);
+
+    } catch (error) {
+      console.error('Reset password error:', error);
+      setMessage({ 
+        type: "error", 
+        text: error.message || "Failed to reset password. Please try again." 
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -76,6 +136,12 @@ const CreateNewPassword = () => {
             Your new password must be different from previous passwords.
           </p>
 
+          {message.text && (
+            <div className={`create-password-message create-password-message--${message.type}`}>
+              {message.text}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="create-password-form">
             <label htmlFor="new-password" className="create-password-label">
               New Password
@@ -88,6 +154,7 @@ const CreateNewPassword = () => {
                 value={newPassword}
                 onChange={(event) => setNewPassword(event.target.value)}
                 required
+                minLength="8"
               />
               <button
                 type="button"
@@ -110,6 +177,7 @@ const CreateNewPassword = () => {
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
                 required
+                minLength="8"
               />
               <button
                 type="button"
@@ -143,10 +211,13 @@ const CreateNewPassword = () => {
             {confirmPassword.length > 0 && !passwordsMatch ? (
               <p className="create-password-error">Passwords do not match.</p>
             ) : null}
-            {feedback ? <p className="create-password-feedback">{feedback}</p> : null}
 
-            <button type="submit" className="create-password-button">
-              Reset password
+            <button 
+              type="submit" 
+              className="create-password-button"
+              disabled={loading || !isValid}
+            >
+              {loading ? "Resetting..." : "Reset password"}
             </button>
           </form>
 
