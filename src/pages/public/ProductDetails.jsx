@@ -9,6 +9,8 @@ import VerifiedIcon from "../../assets/Verified.png";
 import CustomerSupportIcon from "../../assets/CustomerSupport.png";
 import UpdatesIcon from "../../assets/Updates.png";
 import LicensedIcon from "../../assets/Licensed.png";
+import CartIcon from "../../assets/cartt.png";
+import MailIcon from "../../assets/tabler_mail-filled.png";
 import ProductOverview from "../../components/ProductOverview";
 import ProductTechStack from "../../components/ProductTechStack";
 import ProductFeatures from "../../components/ProductFeatures";
@@ -426,8 +428,15 @@ const ProductDetails = () => {
                     {cartMessage}
                   </div>
                 )}
+                <Link to="/cart">
+                  <button className="product__cta" type="button">
+                    <img src={CartIcon} alt="Cart" className="product__icon" style={{ marginRight: '8px', verticalAlign: 'middle' }} />
+                    Buy Now
+                  </button>
+                </Link>
 
                 <Link className="product__ghost" to="/contact">
+                  <img src={MailIcon} alt="Mail" className="product__icon" style={{ marginRight: '8px', verticalAlign: 'middle' }} />
                   Contact CertiCode
                 </Link>
               </div>

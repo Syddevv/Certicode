@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import VerifiedIcon from "../assets/Verified.png";
+import WriteReviewIcon from "../assets/write-a-rev.png";
 
 const ProductReviews = ({ productId }) => {
   const [reviews, setReviews] = useState([]);
@@ -143,6 +144,7 @@ const ProductReviews = ({ productId }) => {
           Your feedback helps the community and helps us improve our assets.
         </p>
         <button className="product__reviewBtn" type="button">
+          <img src={WriteReviewIcon} alt="Write Review" className="product__icon" style={{ marginRight: '8px', verticalAlign: 'middle' }} />
           Write a Review
         </button>
       </div>
