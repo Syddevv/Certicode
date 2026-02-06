@@ -17,10 +17,16 @@ import CustomerSupportIcon from "../../assets/CustomerSupport.png";
 import WhiteDownload from "../../assets/whiteDownload.png";
 import { ProfileAPI } from "../../services/ProfileAPI";
 
+const API_URL = 'http://127.0.0.1:8000/api';
+
 const BuyerDashboard = () => {
   const [purchases, setPurchases] = useState([]);
+  const [filteredPurchases, setFilteredPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [downloading, setDownloading] = useState({});
+  const [downloadMessage, setDownloadMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [stats, setStats] = useState([
     { label: "Total Assets", value: "0", icon: OrangeBox },
     { label: "Active Licenses", value: "0", icon: OrangeBadge },
@@ -32,6 +38,10 @@ const BuyerDashboard = () => {
     fetchUserData();
     fetchPurchases();
   }, []);
+
+  useEffect(() => {
+    filterPurchases();
+  }, [searchQuery, purchases]);
 
   const fetchUserData = async () => {
     try {
@@ -47,6 +57,7 @@ const BuyerDashboard = () => {
       const data = await ProfileAPI.getUserPurchases();
       const userPurchases = data.purchases || [];
       setPurchases(userPurchases);
+      setFilteredPurchases(userPurchases.slice(0, 3));
       
       const totalAssets = userPurchases.length;
       const activeLicenses = userPurchases.filter(p => p.license_key && p.license_key !== '').length;
@@ -71,9 +82,109 @@ const BuyerDashboard = () => {
     } catch (error) {
       console.error("Failed to fetch purchases:", error);
       setPurchases([]);
+      setFilteredPurchases([]);
     } finally {
       setLoading(false);
     }
+  };
+
+  const filterPurchases = () => {
+    if (!searchQuery.trim()) {
+      setFilteredPurchases(purchases.slice(0, 3));
+      return;
+    }
+    
+    const query = searchQuery.toLowerCase();
+    const filtered = purchases.filter(purchase => {
+      const productName = purchase.product?.name?.toLowerCase() || '';
+      const productCategory = purchase.product?.category?.toLowerCase() || '';
+      const productDesc = purchase.product?.description?.toLowerCase() || '';
+      
+      return productName.includes(query) || 
+             productCategory.includes(query) || 
+             productDesc.includes(query);
+    });
+    
+    setFilteredPurchases(filtered);
+  };
+
+  const handleDownload = async (productId) => {
+    try {
+      setDownloading(prev => ({...prev, [productId]: true}));
+      
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        alert('Please login to download files');
+        setDownloading(prev => ({...prev, [productId]: false}));
+        return;
+      }
+      
+      const response = await fetch(`${API_URL}/products/${productId}/download`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (response.status === 401) {
+        alert('Authentication failed. Please login again.');
+        setDownloading(prev => ({...prev, [productId]: false}));
+        return;
+      }
+      
+      if (response.status === 403) {
+        alert('You need to purchase this product to download files.');
+        setDownloading(prev => ({...prev, [productId]: false}));
+        return;
+      }
+      
+      if (response.status === 404) {
+        alert('No files found for this product.');
+        setDownloading(prev => ({...prev, [productId]: false}));
+        return;
+      }
+      
+      if (!response.ok) {
+        throw new Error(`Download failed: ${response.status}`);
+      }
+      
+      const blob = await response.blob();
+      
+      let filename = 'download.zip';
+      const disposition = response.headers.get('content-disposition');
+      if (disposition) {
+        const match = disposition.match(/filename="?([^"]+)"?/);
+        if (match) filename = match[1];
+      }
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+      
+      setDownloading(prev => ({...prev, [productId]: false}));
+      
+    } catch (error) {
+      console.error('Download failed:', error);
+      alert(error.message || 'Failed to download. Please try again.');
+      setDownloading(prev => ({...prev, [productId]: false}));
+    }
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
   };
 
   const getAssetTags = (product) => {
@@ -156,6 +267,11 @@ const BuyerDashboard = () => {
   return (
     <div>
       <Navbar />
+      {downloadMessage && (
+        <div className="buyer-dashboard__message">
+          {downloadMessage}
+        </div>
+      )}
       <section className="buyer-dashboard">
         <div className="buyer-dashboard__inner">
           <div className="buyer-card buyer-profile">
@@ -251,23 +367,52 @@ const BuyerDashboard = () => {
                         />
                       </svg>
                     </span>
-                    <input type="text" placeholder="Search assets..." />
+                    <input 
+                      type="text" 
+                      placeholder="Search assets..." 
+                      value={searchQuery}
+                      onChange={handleSearchChange}
+                    />
+                    {searchQuery && (
+                      <button 
+                        className="buyer-search__clear"
+                        onClick={clearSearch}
+                        type="button"
+                        aria-label="Clear search"
+                      >
+                        ×
+                      </button>
+                    )}
                   </div>
                 </div>
 
                 {loading ? (
                   <div className="buyer-loading">Loading purchases...</div>
-                ) : purchases.length === 0 ? (
+                ) : filteredPurchases.length === 0 ? (
                   <div className="buyer-empty">
-                    <p>No purchases yet. Visit the marketplace to get started.</p>
-                    <Link to="/marketplace" className="buyer-btn">
-                      Browse Marketplace
-                    </Link>
+                    <p>
+                      {searchQuery 
+                        ? `No purchases found for "${searchQuery}"`
+                        : 'No purchases yet. Visit the marketplace to get started.'}
+                    </p>
+                    {!searchQuery && (
+                      <Link to="/marketplace" className="buyer-btn">
+                        Browse Marketplace
+                      </Link>
+                    )}
+                    {searchQuery && (
+                      <button 
+                        className="buyer-btn" 
+                        onClick={clearSearch}
+                      >
+                        Clear Search
+                      </button>
+                    )}
                   </div>
                 ) : (
                   <>
                     <div className="buyer-assets">
-                      {purchases.slice(0, 3).map((purchase) => {
+                      {filteredPurchases.slice(0, 6).map((purchase) => {
                         const tags = getAssetTags(purchase.product);
                         return (
                           <article key={purchase.id} className="buyer-asset">
@@ -301,9 +446,19 @@ const BuyerDashboard = () => {
                                 <span className="buyer-dot">{"\u2022"}</span>{" "}
                                 {purchase.product?.version || 'v1.0.0'}
                               </p>
-                              <button className="buyer-asset__download" type="button">
+                              {purchase.license_key && (
+                                <div className="buyer-asset__license">
+                                  <small>License: {purchase.license_key}</small>
+                                </div>
+                              )}
+                              <button 
+                                className="buyer-asset__download" 
+                                type="button"
+                                onClick={() => handleDownload(purchase.product?.id)}
+                                disabled={!purchase.product?.id || downloading[purchase.product?.id]}
+                              >
                                 <img src={WhiteDownload} alt="" aria-hidden="true" />
-                                Download
+                                {downloading[purchase.product?.id] ? 'Downloading...' : 'Download'}
                               </button>
                             </div>
                           </article>
@@ -311,7 +466,7 @@ const BuyerDashboard = () => {
                       })}
                     </div>
 
-                    {purchases.length > 3 && (
+                    {!searchQuery && purchases.length > 3 && (
                       <Link className="buyer-assets__link" to="/my-purchases">
                         View all assets <span aria-hidden="true">{"\u203a"}</span>
                       </Link>
@@ -346,9 +501,9 @@ const BuyerDashboard = () => {
                     </li>
                   ))}
                 </ul>
-                <button className="buyer-activity__cta" type="button">
+                {/* <button className="buyer-activity__cta" type="button">
                   View Full History
-                </button>
+                </button> */}
               </div>
 
               <div className="buyer-card buyer-support">

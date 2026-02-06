@@ -118,6 +118,32 @@ const ProductDetails = () => {
         return `${diffDays} days ago`;
       }
       
+      const calculateFileSize = () => {
+        if (!productData.project_files || !Array.isArray(productData.project_files)) {
+          return "0 MB";
+        }
+        
+        let totalSize = 0;
+        productData.project_files.forEach(file => {
+          if (file && typeof file === 'object') {
+            totalSize += file.size || 0;
+          }
+        });
+        
+        if (totalSize === 0) return "0 MB";
+        
+        const units = ['B', 'KB', 'MB', 'GB'];
+        let size = totalSize;
+        let unitIndex = 0;
+        
+        while (size >= 1024 && unitIndex < units.length - 1) {
+          size /= 1024;
+          unitIndex++;
+        }
+        
+        return `${size.toFixed(1)} ${units[unitIndex]}`;
+      };
+      
       const apiProduct = {
         id: productData.id,
         name: productData.name,
@@ -127,13 +153,14 @@ const ProductDetails = () => {
         asset_type: productData.asset_type,
         released_date: formatDate(productData.created_at),
         last_update: timeSince(productData.updated_at),
-        file_size: "42.5 MB",
+        file_size: calculateFileSize(),
         rating: "4.8",
         technologies: productData.technologies,
         features: productData.features,
         specifications: [],
         featured_image: productData.featured_image,
         images: productData.images || [],
+        project_files: productData.project_files || [],
         vendor: "CertiCode",
         verified: true,
         includes_support: true,

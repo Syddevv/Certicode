@@ -487,7 +487,8 @@ const Checkout = () => {
                   )}
                 </div>
 
-                <div className={`checkout__payOption ${paymentMethod === 'paypal' ? 'checkout__payOption--active' : ''}`}
+                {/* PAYPAL */}
+                {/* <div className={`checkout__payOption ${paymentMethod === 'paypal' ? 'checkout__payOption--active' : ''}`}
                      onClick={() => handlePaymentMethodChange('paypal')}>
                   <div className="checkout__payTop">
                     <div className="checkout__payLeft">
@@ -499,7 +500,7 @@ const Checkout = () => {
                     </div>
                     <img src={GrayWallet} alt="" aria-hidden="true" />
                   </div>
-                </div>
+                </div> */}
               </section>
 
               <Link className="checkout__back" to="/marketplace">

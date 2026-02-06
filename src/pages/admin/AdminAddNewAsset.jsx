@@ -10,6 +10,7 @@ import technicalConfIcon from "../../assets/technicalconf.png";
 import pricingIcon from "../../assets/pricing.png";
 import mediaAssetsIcon from "../../assets/media-assets.png";
 import uploadIcon from "../../assets/upload.png";
+import { AdminInventoryAPI } from "../../services/AdminInventoryAPI";
 
 const getToneColor = (tech) => {
   const colorMap = {
@@ -63,6 +64,7 @@ const AdminAddNewAssets = () => {
   const [galleryFiles, setGalleryFiles] = useState([]);
   const [projectFiles, setProjectFiles] = useState([]);
   const [existingFiles, setExistingFiles] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
 
   const techDropdownRef = useRef(null);
   const techSearchRef = useRef(null);
@@ -71,44 +73,85 @@ const AdminAddNewAssets = () => {
 
   useEffect(() => {
     if (isEditMode && productData) {
-      const existingTechs = Array.isArray(productData.technologies) 
-        ? productData.technologies 
-        : (productData.technologies ? JSON.parse(productData.technologies) : []);
+      let techs = [];
+      if (productData.technologies) {
+        if (Array.isArray(productData.technologies)) {
+          techs = productData.technologies;
+        } else if (typeof productData.technologies === 'string') {
+          try {
+            techs = JSON.parse(productData.technologies) || [];
+          } catch {
+            techs = [];
+          }
+        }
+      }
       
-      const existingImages = Array.isArray(productData.images) 
-        ? productData.images 
-        : (productData.images ? JSON.parse(productData.images) : []);
+      let images = [];
+      if (productData.images) {
+        if (Array.isArray(productData.images)) {
+          images = productData.images;
+        } else if (typeof productData.images === 'string') {
+          try {
+            images = JSON.parse(productData.images) || [];
+          } catch {
+            images = [];
+          }
+        }
+      }
       
-      const existingProjectFiles = Array.isArray(productData.project_files) 
-        ? productData.project_files 
-        : (productData.project_files ? JSON.parse(productData.project_files) : []);
+      let files = [];
+      if (productData.project_files) {
+        if (Array.isArray(productData.project_files)) {
+          files = productData.project_files;
+        } else if (typeof productData.project_files === 'string') {
+          try {
+            files = JSON.parse(productData.project_files) || [];
+          } catch {
+            files = [];
+          }
+        }
+      }
       
-      setExistingFiles(existingProjectFiles);
+      setExistingFiles(files);
+      setExistingImages(images);
       
-      const filePreviewsData = existingProjectFiles.map(file => ({
-        name: file.name || file,
-        size: file.size,
-        type: file.mime_type || 'application/zip'
-      }));
+      const filePreviewsData = files.map(file => {
+        if (typeof file === 'string') {
+          return {
+            name: file.split('/').pop() || 'file.zip',
+            size: 0,
+            type: 'application/zip',
+            isExisting: true,
+            url: file
+          };
+        }
+        return {
+          name: file.name || file.filename || 'file.zip',
+          size: file.size || 0,
+          type: file.type || file.mime_type || 'application/zip',
+          isExisting: true,
+          url: file.url || file.path || file
+        };
+      });
       
       setFormData({
         name: productData.name || "",
         asset_type: productData.asset_type || "",
         description: productData.description || "",
-        technologies: existingTechs,
+        technologies: techs,
         version: productData.version || "1.0",
         price: productData.price || "",
       });
       
-      setSelectedTechnologies(existingTechs);
+      setSelectedTechnologies(techs);
       setFilePreviews(filePreviewsData);
       
       if (productData.featured_image) {
         setThumbnailPreview(productData.featured_image);
       }
       
-      if (existingImages && existingImages.length > 0) {
-        setGalleryPreviews(existingImages);
+      if (images && images.length > 0) {
+        setGalleryPreviews(images);
       }
     }
   }, [isEditMode, productData]);
@@ -210,7 +253,7 @@ const AdminAddNewAssets = () => {
     setGalleryPreviews(newPreviews);
     
     const newFiles = [...galleryFiles];
-    const removedFile = newFiles.splice(index, 1);
+    newFiles.splice(index, 1);
     setGalleryFiles(newFiles);
     
     if (removedPreview[0]?.startsWith('blob:')) {
@@ -223,32 +266,52 @@ const AdminAddNewAssets = () => {
     const previews = files.map(file => ({
       name: file.name,
       size: file.size,
-      type: file.type
+      type: file.type,
+      isExisting: false,
+      file: file
     }));
     setFilePreviews([...filePreviews, ...previews]);
     setProjectFiles([...projectFiles, ...files]);
   };
 
   const removeFile = (index) => {
+    const fileToRemove = filePreviews[index];
     const newPreviews = [...filePreviews];
     newPreviews.splice(index, 1);
     setFilePreviews(newPreviews);
     
-    const newFiles = [...projectFiles];
-    newFiles.splice(index, 1);
-    setProjectFiles(newFiles);
+    if (!fileToRemove.isExisting) {
+      const newFiles = [...projectFiles];
+      const fileIndex = newFiles.findIndex(f => f.name === fileToRemove.name);
+      if (fileIndex !== -1) {
+        newFiles.splice(fileIndex, 1);
+        setProjectFiles(newFiles);
+      }
+    } else {
+      setExistingFiles(prev => prev.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleThumbnailButtonClick = () => {
+    document.getElementById('thumbnail-upload').click();
+  };
+
+  const handleGalleryButtonClick = () => {
+    document.getElementById('gallery-upload').click();
+  };
+
+  const handleFileButtonClick = () => {
+    document.getElementById('file-upload').click();
+  };
+
+  const handleChangeThumbnailClick = () => {
+    document.getElementById('change-thumbnail').click();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setSaveStatus("");
-    
-    if (!isEditMode && !thumbnailFile) {
-      setSaveStatus("Error: Featured image is required");
-      setLoading(false);
-      return;
-    }
     
     if (!formData.name || !formData.asset_type || !formData.price) {
       setSaveStatus("Error: Please fill in all required fields");
@@ -257,80 +320,63 @@ const AdminAddNewAssets = () => {
     }
     
     try {
-      const submitData = new FormData();
+      const existingImageUrls = galleryPreviews.filter(preview => !preview.startsWith('blob:'));
+      const existingFileUrls = filePreviews.filter(file => file.isExisting).map(file => file.url);
       
-      submitData.append('name', formData.name);
-      submitData.append('asset_type', formData.asset_type);
-      submitData.append('description', formData.description || '');
-      submitData.append('version', formData.version || '1.0');
-      submitData.append('price', parseFloat(formData.price) || 0);
-      
-      selectedTechnologies.forEach((tech, index) => {
-        submitData.append(`technologies[${index}]`, tech);
-      });
-      
-      if (thumbnailFile) {
-        submitData.append('featured_image', thumbnailFile);
-      }
-      
-      galleryFiles.forEach((file, index) => {
-        submitData.append(`images[${index}]`, file);
-      });
-      
-      projectFiles.forEach((file, index) => {
-        submitData.append(`project_files[${index}]`, file);
-      });
+      const productDataForAPI = {
+        name: formData.name,
+        asset_type: formData.asset_type,
+        description: formData.description || '',
+        version: formData.version || '1.0',
+        price: parseFloat(formData.price),
+        technologies: JSON.stringify(selectedTechnologies), // Stringify here
+      };
       
       if (isEditMode && productData?.id) {
-        if (galleryPreviews.length > 0) {
-          const existingGalleryUrls = galleryPreviews.filter(preview => !preview.startsWith('blob:'));
-          if (existingGalleryUrls.length > 0) {
-            submitData.append('images', JSON.stringify(existingGalleryUrls));
-          }
+        productDataForAPI.existing_images = existingImageUrls;
+        productDataForAPI.existing_project_files = existingFileUrls;
+        
+        if (thumbnailFile) {
+          productDataForAPI.featured_image = thumbnailFile;
+        } else if (thumbnailPreview && !thumbnailFile) {
+          productDataForAPI.existing_featured_image = thumbnailPreview;
         }
         
-        if (existingFiles.length > 0) {
-          submitData.append('project_files', JSON.stringify(existingFiles));
+        if (galleryFiles.length > 0) {
+          productDataForAPI.images = galleryFiles;
         }
-      }
-      
-      const token = localStorage.getItem('auth_token');
-      
-      let url = 'http://127.0.0.1:8000/api/products';
-      let method = 'POST';
-      
-      if (isEditMode && productData?.id) {
-        url = `http://127.0.0.1:8000/api/products/${productData.id}`;
-        method = 'PUT';
-      }
-      
-      const response = await fetch(url, {
-        method: method,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'application/json'
-        },
-        body: submitData
-      });
-      
-      const responseText = await response.text();
-      
-      if (!response.ok) {
-        let errorData;
-        try {
-          errorData = JSON.parse(responseText);
-        } catch {
-          errorData = { message: responseText };
+        
+        if (projectFiles.length > 0) {
+          productDataForAPI.project_files = projectFiles;
         }
-        throw new Error(errorData.message || `Failed to ${isEditMode ? 'update' : 'create'} product`);
+        
+        const result = await AdminInventoryAPI.updateProduct(productData.id, productDataForAPI);
+        setSaveStatus(result.message || 'Product updated successfully!');
+      } else {
+        if (!thumbnailFile) {
+          setSaveStatus("Error: Featured image is required for new products");
+          setLoading(false);
+          return;
+        }
+        
+        productDataForAPI.featured_image = thumbnailFile;
+        
+        if (galleryFiles.length > 0) {
+          productDataForAPI.images = galleryFiles;
+        }
+        
+        if (projectFiles.length > 0) {
+          productDataForAPI.project_files = projectFiles;
+        }
+        
+        const result = await AdminInventoryAPI.createProduct(productDataForAPI);
+        setSaveStatus(result.message || 'Product created successfully!');
       }
       
-      const result = JSON.parse(responseText);
-      setSaveStatus(result.message || `Product ${isEditMode ? 'updated' : 'created'} successfully!`);
       setTimeout(() => navigate("/inventory"), 1500);
     } catch (error) {
       console.error("Error saving product:", error);
-      setSaveStatus(`Error: ${error.message}`);
+      setSaveStatus(`Error: ${error.message || 'Failed to save product'}`);
     } finally {
       setLoading(false);
     }
@@ -396,20 +442,23 @@ const AdminAddNewAssets = () => {
 
               <div className="card-body-grid two-col">
                 <div className="form-group">
-                  <label>Asset Name *</label>
+                  <label htmlFor="asset-name">Asset Name *</label>
                   <input 
                     type="text" 
+                    id="asset-name"
                     name="name"
                     placeholder="e.g. Modern SaaS Dashboard" 
                     value={formData.name}
                     onChange={handleInputChange}
                     required
+                    autoComplete="off"
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Category *</label>
+                  <label htmlFor="asset-category">Category *</label>
                   <select 
+                    id="asset-category"
                     name="asset_type"
                     value={formData.asset_type}
                     onChange={handleInputChange}
@@ -424,13 +473,15 @@ const AdminAddNewAssets = () => {
                 </div>
 
                 <div className="form-group full-width">
-                  <label>Description</label>
+                  <label htmlFor="asset-description">Description</label>
                   <textarea
+                    id="asset-description"
                     name="description"
                     rows={5}
                     placeholder="Describe the core features and purpose of the asset..."
                     value={formData.description}
                     onChange={handleInputChange}
+                    autoComplete="off"
                   />
                 </div>
               </div>
@@ -449,17 +500,19 @@ const AdminAddNewAssets = () => {
 
               <div className="card-body-grid two-col">
                 <div className="form-group">
-                  <label>Tech Stack</label>
+                  <label htmlFor="tech-search">Tech Stack</label>
                   <div className="tech-input-container" ref={techDropdownRef}>
                     <div className="tech-search-wrapper">
                       <input
                         ref={techSearchRef}
+                        id="tech-search"
                         type="text"
                         placeholder="Type to search or add technology..."
                         value={techSearch}
                         onChange={handleTechSearch}
                         onKeyDown={handleTechKeyDown}
                         onFocus={() => techSearch && setShowTechDropdown(true)}
+                        autoComplete="off"
                       />
                       {showTechDropdown && filteredTechs.length > 0 && (
                         <div className="tech-dropdown">
@@ -497,13 +550,15 @@ const AdminAddNewAssets = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Version Number</label>
+                  <label htmlFor="asset-version">Version Number</label>
                   <input 
                     type="text" 
+                    id="asset-version"
                     name="version"
                     placeholder="e.g. 1.0.4" 
                     value={formData.version}
                     onChange={handleInputChange}
+                    autoComplete="off"
                   />
                 </div>
               </div>
@@ -523,11 +578,12 @@ const AdminAddNewAssets = () => {
 
                 <div className="card-body-grid single-col">
                   <div className="form-group">
-                    <label>Base Price (USD) *</label>
+                    <label htmlFor="asset-price">Base Price (USD) *</label>
                     <div className="input-with-prefix">
                       <span className="input-prefix">$</span>
                       <input 
                         type="number" 
+                        id="asset-price"
                         name="price"
                         placeholder="0.00" 
                         value={formData.price}
@@ -535,6 +591,7 @@ const AdminAddNewAssets = () => {
                         step="0.01"
                         min="0"
                         required
+                        autoComplete="off"
                       />
                     </div>
                   </div>
@@ -555,26 +612,27 @@ const AdminAddNewAssets = () => {
                 <div className="upload-box">
                   <div 
                     className="upload-dashed"
-                    onClick={() => document.getElementById('file-upload').click()}
+                    onClick={handleFileButtonClick}
                     style={{ cursor: 'pointer' }}
                   >
                     <input
                       type="file"
                       id="file-upload"
+                      name="project_files"
                       multiple
                       onChange={handleFileUpload}
                       style={{ display: 'none' }}
                     />
-                    <label htmlFor="file-upload" className="upload-label">
+                    <div className="upload-label">
                       <p className="upload-title">Click to upload or drag .zip</p>
                       <p className="upload-sub">Maximum file size 500MB</p>
-                    </label>
+                    </div>
                   </div>
                   {filePreviews.length > 0 && (
                     <div className="uploaded-files-list">
                       {filePreviews.map((file, index) => (
                         <div key={index} className="file-preview">
-                          <span>{file.name}</span>
+                          <span>{file.name} {file.isExisting && '(Existing)'}</span>
                           <button
                             type="button"
                             className="remove-file-btn"
@@ -604,7 +662,7 @@ const AdminAddNewAssets = () => {
 
               <div className="media-grid">
                 <div className="media-column">
-                  <h3>Product Thumbnail (Featured Image) *</h3>
+                  <h3>Product Thumbnail (Featured Image) {!isEditMode && '*'}</h3>
                   <div className="thumbnail-upload">
                     {thumbnailPreview ? (
                       <div className="thumbnail-preview">
@@ -613,17 +671,19 @@ const AdminAddNewAssets = () => {
                           <input
                             type="file"
                             id="change-thumbnail"
+                            name="featured_image"
                             accept="image/*"
                             onChange={handleThumbnailUpload}
                             style={{ display: 'none' }}
                           />
-                          <label 
-                            htmlFor="change-thumbnail" 
+                          <button
+                            type="button"
                             className="change-thumbnail-btn"
+                            onClick={handleChangeThumbnailClick}
                             style={{ cursor: 'pointer' }}
                           >
                             Change
-                          </label>
+                          </button>
                           <button
                             type="button"
                             className="remove-thumbnail-btn"
@@ -643,21 +703,22 @@ const AdminAddNewAssets = () => {
                     ) : (
                       <div 
                         className="thumbnail-upload-placeholder"
-                        onClick={() => document.getElementById('thumbnail-upload').click()}
+                        onClick={handleThumbnailButtonClick}
                         style={{ cursor: 'pointer' }}
                       >
                         <input
                           type="file"
                           id="thumbnail-upload"
+                          name="featured_image"
                           accept="image/*"
                           onChange={handleThumbnailUpload}
                           style={{ display: 'none' }}
                         />
-                        <label htmlFor="thumbnail-upload" className="upload-placeholder">
+                        <div className="upload-placeholder">
                           <img src={uploadIcon} alt="Upload" />
                           <span>Click to upload thumbnail</span>
                           <small>Required • Recommended: 800×600px</small>
-                        </label>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -682,21 +743,22 @@ const AdminAddNewAssets = () => {
                       ))}
                       <div 
                         className="gallery-add-item"
-                        onClick={() => document.getElementById('gallery-upload').click()}
+                        onClick={handleGalleryButtonClick}
                         style={{ cursor: 'pointer' }}
                       >
                         <input
                           type="file"
                           id="gallery-upload"
+                          name="gallery_images"
                           accept="image/*"
                           multiple
                           onChange={handleGalleryUpload}
                           style={{ display: 'none' }}
                         />
-                        <label htmlFor="gallery-upload" className="gallery-add-placeholder">
+                        <div className="gallery-add-placeholder">
                           <span>+</span>
                           <small>Add Images</small>
-                        </label>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -292,4 +292,27 @@ export const ProfileAPI = {
         throw error;
     }
     },
+
+    downloadProductFile: async (productId) => {
+  try {
+    const token = localStorage.getItem('auth_token');
+    
+    if (!token) {
+      throw new Error('Please login to download files');
+    }
+    
+    // Open in new window - browser will handle the auth headers automatically
+    window.open(`${API_URL}/products/${productId}/download`, '_blank');
+    
+    return {
+      success: true,
+      message: 'Download opened in new tab'
+    };
+    
+  } catch (error) {
+    console.error('Download error:', error);
+    throw error;
+  }
+},
+
 };

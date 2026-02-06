@@ -471,12 +471,17 @@ const Marketplace = () => {
                 <div className="marketplace__cards">
                   {filteredAssets.map((asset) => (
                     <article key={asset.title} className="marketplace__card">
-                      <div className="marketplace__cardMedia" />
-                      <img
-                      src={asset.featured_image || ViewProduct}
-                      about={asset.title}
-                      className="marketplace__cardImage"
-                      />
+                      <div className="marketplace__cardMedia">
+                        <img
+                          src={asset.featured_image || ViewProduct}
+                          alt={asset.title}
+                          className="marketplace__cardImage"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = ViewProduct;
+                          }}
+                        />
+                      </div>
                       <div className="marketplace__cardBody">
                         <div className="marketplace__tags">
                           {asset.tags.map((tag) => (

@@ -269,13 +269,17 @@ const LandingPage = () => {
       }
 
       const result = await api.getProducts(query, assetType, 1, "newest", 5);
-      const formattedResults = result.data.map(product => ({
+      
+      // Add null/undefined check here
+      const products = result?.data || [];
+      
+      const formattedResults = products.map(product => ({
         id: product.id,
         title: product.name,
-        description: product.description,
-        price: `$${parseFloat(product.price).toFixed(2)}`,
+        description: product.description || "",
+        price: `$${parseFloat(product.price || 0).toFixed(2)}`,
         asset_type: product.asset_type || "Uncategorized",
-        technologies: product.technologies || [],
+        technologies: product.technologies || [], // Add fallback
         image: product.featured_image,
         techTags: (product.technologies || []).map(tech => ({
           label: tech,
@@ -479,11 +483,11 @@ const LandingPage = () => {
                     <div className="search__dropdownItem search__dropdownItem--loading">
                       Searching...
                     </div>
-                  ) : searchQuery.trim() && searchResults.length === 0 ? (
+                  ) : searchQuery.trim() && (searchResults?.length === 0 || !searchResults) ? ( // Add ?.
                     <div className="search__dropdownItem search__dropdownItem--empty">
                       No results found for "{searchQuery}"
                     </div>
-                  ) : searchResults.length > 0 ? (
+                  ) : searchResults?.length > 0 ? ( // Add ?.
                     <>
                       <div className="search__dropdownHeader">
                         <span>Search Results ({searchResults.length})</span>
@@ -506,7 +510,7 @@ const LandingPage = () => {
                               {result.title}
                             </div>
                             <div className="search__dropdownItemDesc">
-                              {result.description.length > 80 
+                              {(result.description || "").length > 80  // Add fallback
                                 ? `${result.description.substring(0, 80)}...` 
                                 : result.description}
                             </div>
@@ -515,14 +519,14 @@ const LandingPage = () => {
                                 {result.price}
                               </span>
                               <div className="search__dropdownItemTechs">
-                                {result.techTags.slice(0, 3).map((tag, index) => (
+                                {(result.techTags || []).slice(0, 3).map((tag, index) => ( // Add fallback
                                   <span key={index} className={`search__dropdownItemTech search__dropdownItemTech--${tag.tone}`}>
                                     {tag.label}
                                   </span>
                                 ))}
-                                {result.techTags.length > 3 && (
+                                {(result.techTags || []).length > 3 && (
                                   <span className="search__dropdownItemTechMore">
-                                    +{result.techTags.length - 3}
+                                    +{(result.techTags || []).length - 3}
                                   </span>
                                 )}
                               </div>
@@ -664,7 +668,7 @@ const LandingPage = () => {
           </div>
 
           <div className="testimonials__grid">
-            {getCurrentReviews().map((item) => (
+            {getCurrentReviews()?.map((item) => (
               <div
                 key={item.id}
                 className={`testimonialCard${
