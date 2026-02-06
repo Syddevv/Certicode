@@ -8,7 +8,6 @@ import totalCustomersIcon from "../../assets/total-customers.png";
 import activeCustomersIcon from "../../assets/active-customers.png";
 import totalRevenueIcon from "../../assets/total-revenue.png";
 import avgCustomerSpentIcon from "../../assets/avg-customer-spent.png";
-import filterIcon from "../../assets/filter.png";
 import { AdminCustomersAPI } from "../../services/AdminCustomersAPI";
 
 const Icons = {
@@ -137,6 +136,34 @@ const AdminCustomers = () => {
       className="avatar-img"
     />
   );
+
+  const getPurchaseBadge = (orderCount) => {
+    if (orderCount === 0) {
+      return (
+        <div className="purchase-count">
+          <span className="purchase-badge zero">{orderCount} orders</span>
+        </div>
+      );
+    } else if (orderCount <= 3) {
+      return (
+        <div className="purchase-count">
+          <span className="purchase-badge low">{orderCount} orders</span>
+        </div>
+      );
+    } else if (orderCount <= 10) {
+      return (
+        <div className="purchase-count">
+          <span className="purchase-badge medium">{orderCount} orders</span>
+        </div>
+      );
+    } else {
+      return (
+        <div className="purchase-count">
+          <span className="purchase-badge high">{orderCount} orders</span>
+        </div>
+      );
+    }
+  };
 
   const renderPagination = () => {
     const pages = [];
@@ -315,9 +342,6 @@ const AdminCustomers = () => {
                     Inactive
                   </button>
                 </div>
-                <button className="icon-btn">
-                  <img src={filterIcon} alt="Filter" className="filter-icon" />
-                </button>
               </div>
 
               <div className="right-controls">
@@ -369,7 +393,9 @@ const AdminCustomers = () => {
                           </div>
                         </div>
                       </td>
-                      <td>{customer.total_orders || 0} orders</td>
+                      <td>
+                        {getPurchaseBadge(customer.total_orders || 0)}
+                      </td>
                       <td className="amount">{formatCurrency(customer.total_spent)}</td>
                       <td>
                         {getStatusBadge(customer)}

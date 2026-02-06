@@ -552,3 +552,31 @@ td {
     display: none;
   }
 }
+
+.loading-cell, .no-data-cell, .activities-loading, .activities-no-data, .chart-loading, .chart-no-data {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+.chart-loading, .chart-no-data {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+}
+
+.activities-loading, .activities-no-data {
+  padding: 40px;
+  text-align: center;
+}
+
+.card h3:empty::before {
+  content: "...";
+  color: #ccc;
+}
+
+.badge.neutral:empty::before {
+  content: "...";
+}

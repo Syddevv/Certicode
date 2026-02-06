@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "../../styles/adminInventory.css";
 import Sidebar from "../../components/Sidebar";
 import AdminTopbar from "../../components/AdminTopbar";
@@ -15,6 +15,7 @@ import developerIcon from "../../assets/developer-portfolio.png";
 import fitlifeIcon from "../../assets/fitlife-tracker.png";
 import totalValueIcon from "../../assets/total-value.png";
 import lastAuditIcon from "../../assets/last-audit.png";
+import { AdminInventoryAPI } from "../../services/AdminInventoryAPI";
 
 const Icons = {
   Bell: "🔔",
@@ -22,6 +23,7 @@ const Icons = {
   More: "⋮",
   Filter: "⚙️",
   Edit: "📝",
+  Trash: "🗑️",
   Settings: "⚙️",
   Web: "🌐",
   Mobile: "📱",
@@ -32,6 +34,249 @@ const Icons = {
 };
 
 const AdminInventory = () => {
+  const [products, setProducts] = useState([]);
+  const [stats, setStats] = useState({
+    total_value: 0,
+    monthly_sales: 0,
+    last_audit: "",
+    active_count: 0,
+    draft_count: 0,
+    archived_count: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [filters, setFilters] = useState({
+    category: "all",
+    search: ""
+  });
+  const [searchTimeout, setSearchTimeout] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+
+  const navigate = useNavigate();
+
+  const fetchStats = useCallback(async () => {
+    try {
+      const data = await AdminInventoryAPI.getInventoryStats();
+      setStats(data);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  }, []);
+
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await AdminInventoryAPI.getProducts(currentPage, filters);
+      setProducts(data.products);
+      setTotalPages(data.pagination?.total_pages || 1);
+      setTotalItems(data.pagination?.total_items || 0);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, filters]);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  const handleSearch = (term) => {
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    const timeout = setTimeout(() => {
+      setFilters(prev => ({ ...prev, search: term }));
+      setCurrentPage(1);
+    }, 300);
+
+    setSearchTimeout(timeout);
+  };
+
+  const handleCategoryChange = (category) => {
+    setFilters(prev => ({ ...prev, category }));
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
+
+  const handleEdit = (product) => {
+    const productDataForEdit = {
+      ...product,
+      description: product.description || "",
+      technologies: Array.isArray(product.technologies) 
+        ? product.technologies 
+        : (product.technologies ? JSON.parse(product.technologies) : []),
+      images: Array.isArray(product.images) 
+        ? product.images 
+        : (product.images ? JSON.parse(product.images) : []),
+      project_files: Array.isArray(product.project_files) 
+        ? product.project_files 
+        : (product.project_files ? JSON.parse(product.project_files) : [])
+    };
+    
+    navigate("/add-asset", { 
+      state: { 
+        editMode: true,
+        productData: productDataForEdit
+      } 
+    });
+  };
+
+  const handleDelete = async (productId) => {
+    if (!window.confirm("Are you sure you want to delete this asset?")) return;
+    
+    setDeletingId(productId);
+    try {
+      await AdminInventoryAPI.deleteProduct(productId);
+      await fetchProducts();
+      await fetchStats();
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      alert("Failed to delete product");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const formatCurrency = (amount) => {
+    if (!amount) return "$0.00";
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(amount);
+  };
+
+  const getCategoryBadge = (assetType) => {
+    const badgeMap = {
+      'website': 'gray',
+      'web app': 'gray', 
+      'mobile app': 'gray',
+      'ui kit': 'gray',
+      'ui/ux kits': 'gray',
+      'desktop app': 'gray',
+      'custom projects': 'gray'
+    };
+    
+    const badgeClass = badgeMap[assetType?.toLowerCase()] || 'gray';
+    
+    return (
+      <span className={`badge ${badgeClass}`}>
+        {assetType?.toUpperCase() || 'UNCATEGORIZED'}
+      </span>
+    );
+  };
+
+  const getToneColor = (tech) => {
+    const colorMap = {
+      'React': 'blue',
+      'Node.js': 'green',
+      'Python': 'gold',
+      'Django': 'green',
+      'Flutter': 'purple',
+      'Firebase': 'pink',
+      'Swift': 'indigo',
+      'Figma': 'rose',
+      'Adobe XD': 'violet',
+      'Tailwind': 'orange',
+      'Laravel': 'red',
+      'Vue.js': 'green',
+      'HTML': 'orange',
+      'CSS': 'blue',
+      'JavaScript': 'yellow',
+      'Stripe': 'violet',
+    };
+    
+    return colorMap[tech] || 'green';
+  };
+
+  const renderPagination = () => {
+    const pages = [];
+    const maxVisiblePages = 5;
+    
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(
+        <button
+          key={i}
+          className={`page-btn ${currentPage === i ? "active" : ""}`}
+          onClick={() => handlePageChange(i)}
+        >
+          {i}
+        </button>
+      );
+    }
+    
+    return (
+      <div className="pagination-controls">
+        <button 
+          className="page-btn" 
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          ‹
+        </button>
+        {startPage > 1 && (
+          <>
+            <button 
+              className="page-btn" 
+              onClick={() => handlePageChange(1)}
+            >
+              1
+            </button>
+            {startPage > 2 && <span className="dots">...</span>}
+          </>
+        )}
+        {pages}
+        {endPage < totalPages && (
+          <>
+            {endPage < totalPages - 1 && <span className="dots">...</span>}
+            <button 
+              className="page-btn" 
+              onClick={() => handlePageChange(totalPages)}
+            >
+              {totalPages}
+            </button>
+          </>
+        )}
+        <button 
+          className="page-btn" 
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          ›
+        </button>
+      </div>
+    );
+  };
+
+  const getCategoryName = (category) => {
+    const categoryMap = {
+      'all': 'All Assets',
+      'Website': 'Web Apps',
+      'Mobile App': 'Mobile Apps',
+      'UI Kit': 'UI/UX Kits',
+      'Custom Projects': 'Custom Projects'
+    };
+    return categoryMap[category] || category;
+  };
+
   return (
     <>
       <input type="checkbox" id="sidebar-toggle" />
@@ -40,7 +285,7 @@ const AdminInventory = () => {
         <Sidebar activePage="inventory" />
 
         <main className="main">
-          <AdminTopbar showHamburger>
+          <AdminTopbar showHamburger onSearch={handleSearch}>
             <Link to="/admin-notification" className="notification-link" aria-label="Notifications">
               <img src={notifBell} alt="Notifications" className="notification-icon" />
               <span className="notification-dot" />
@@ -59,34 +304,57 @@ const AdminInventory = () => {
             </div>
 
             <div className="status-tabs">
-              <button className="status-tab active">Active (24)</button>
-              <button className="status-tab">Drafts (12)</button>
-              <button className="status-tab">Archived</button>
+              <button className="status-tab active">
+                Active ({stats.active_count || 0})
+              </button>
+              <button className="status-tab">
+                Drafts ({stats.draft_count || 0})
+              </button>
+              <button className="status-tab">
+                Archived ({stats.archived_count || 0})
+              </button>
             </div>
           </div>
 
           <div className="filter-bar">
             <div className="filter-group">
-              <button className="filter-pill active">All Assets</button>
-              <button className="filter-pill">
+              <button 
+                className={`filter-pill ${filters.category === 'all' ? 'active' : ''}`}
+                onClick={() => handleCategoryChange('all')}
+              >
+                All Assets
+              </button>
+              <button 
+                className={`filter-pill ${filters.category === 'Website' ? 'active' : ''}`}
+                onClick={() => handleCategoryChange('Website')}
+              >
                 <span>
                   <img src={webappsIcon} alt="Web Apps" className="filter-icon" />
-                </span> Web Apps
+                </span> {getCategoryName('Website')}
               </button>
-              <button className="filter-pill">
+              <button 
+                className={`filter-pill ${filters.category === 'Mobile App' ? 'active' : ''}`}
+                onClick={() => handleCategoryChange('Mobile App')}
+              >
                 <span>
                   <img src={mobileIcon} alt="Mobile Apps" className="filter-icon" />
-                </span> Mobile Apps
+                </span> {getCategoryName('Mobile App')}
               </button>
-              <button className="filter-pill">
+              <button 
+                className={`filter-pill ${filters.category === 'UI Kit' ? 'active' : ''}`}
+                onClick={() => handleCategoryChange('UI Kit')}
+              >
                 <span>
                   <img src={uiUxIcon} alt="UI/UX Kits" className="filter-icon" />
-                </span> UI/UX Kits
+                </span> {getCategoryName('UI Kit')}
               </button>
-              <button className="filter-pill">
+              <button 
+                className={`filter-pill ${filters.category === 'Custom Projects' ? 'active' : ''}`}
+                onClick={() => handleCategoryChange('Custom Projects')}
+              >
                 <span>
                   <img src={settingsCustomIcon} alt="Custom Projects" className="filter-icon" />
-                </span> Custom Projects
+                </span> {getCategoryName('Custom Projects')}
               </button>
             </div>
 
@@ -95,7 +363,6 @@ const AdminInventory = () => {
             </button>
           </div>
 
-          {/* INVENTORY TABLE */}
           <div className="table-container">
             <table>
               <thead>
@@ -109,164 +376,95 @@ const AdminInventory = () => {
                 </tr>
               </thead>
               <tbody>
-                {/* ROW 1 */}
-                <tr>
-                  <td>
-                    <div className="asset-cell">
-                      <div className="asset-icon blue">
-                        <img src={newSaleIcon} alt="New Sale" className="asset-icon-img" />
-                      </div>
-                      <div>
-                        <strong>E-commerce SaaS Template</strong>
-                        <small>Updated 2 days ago</small>
-                      </div>
-                    </div>
-                  </td>
-                  <td><span className="badge gray">WEB APP</span></td>
-                  <td className="tech-stack">React, Node.js, Stripe</td>
-                  <td className="price">$999.00</td>
-                  <td>
-                    <div className="status-indicator active">
-                      <span className="dot"></span> ACTIVE
-                    </div>
-                  </td>
-                  <td>
-                    <div className="action-buttons">
-                      <button>{Icons.Edit}</button>
-                      <button>{Icons.Settings}</button>
-                    </div>
-                  </td>
-                </tr>
-
-                {/* ROW 2 */}
-                <tr>
-                  <td>
-                    <div className="asset-cell">
-                      <div className="asset-icon green">
-                        <img src={assetUpdatedIcon} alt="Asset Updated" className="asset-icon-img" />
-                      </div>
-                      <div>
-                        <strong>Foodie Express Delivery App</strong>
-                        <small>Updated 2 days ago</small>
-                      </div>
-                    </div>
-                  </td>
-                  <td><span className="badge gray">MOBILE APP</span></td>
-                  <td className="tech-stack">Flutter, Firebase, Node.js</td>
-                  <td className="price">$1,499.00</td>
-                  <td>
-                    <div className="status-indicator active">
-                      <span className="dot"></span> ACTIVE
-                    </div>
-                  </td>
-                  <td>
-                    <div className="action-buttons">
-                      <button>{Icons.Edit}</button>
-                      <button>{Icons.Settings}</button>
-                    </div>
-                  </td>
-                </tr>
-
-                {/* ROW 3 */}
-                <tr>
-                  <td>
-                    <div className="asset-cell">
-                      <div className="asset-icon orange">
-                        <img src={fintechIcon} alt="Fintech Banking" className="asset-icon-img" />
-                      </div>
-                      <div>
-                        <strong>Fintech Banking Dashboard</strong>
-                        <small>Updated 2 days ago</small>
-                      </div>
-                    </div>
-                  </td>
-                  <td><span className="badge gray">UI/UX KITS</span></td>
-                  <td className="tech-stack">Figma, Adobe XD</td>
-                  <td className="price">$450.00</td>
-                  <td>
-                    <div className="status-indicator active">
-                      <span className="dot"></span> ACTIVE
-                    </div>
-                  </td>
-                  <td>
-                    <div className="action-buttons">
-                      <button>{Icons.Edit}</button>
-                      <button>{Icons.Settings}</button>
-                    </div>
-                  </td>
-                </tr>
-
-                {/* ROW 4 */}
-                <tr>
-                  <td>
-                    <div className="asset-cell">
-                      <div className="asset-icon purple">
-                        <img src={developerIcon} alt="Developer Portfolio" className="asset-icon-img" />
-                      </div>
-                      <div>
-                        <strong>Developer Portfolio Website</strong>
-                        <small>Updated 2 days ago</small>
-                      </div>
-                    </div>
-                  </td>
-                  <td><span className="badge gray">WEB APP</span></td>
-                  <td className="tech-stack">React, Tailwind</td>
-                  <td className="price">$199.00</td>
-                  <td>
-                    <div className="status-indicator draft">
-                      <span className="dot"></span> DRAFT
-                    </div>
-                  </td>
-                  <td>
-                    <div className="action-buttons">
-                      <button>{Icons.Edit}</button>
-                      <button>{Icons.Settings}</button>
-                    </div>
-                  </td>
-                </tr>
-
-                {/* ROW 5 */}
-                <tr>
-                  <td>
-                    <div className="asset-cell">
-                      <div className="asset-icon blue">
-                        <img src={fitlifeIcon} alt="FitLife Tracker" className="asset-icon-img" />
-                      </div>
-                      <div>
-                        <strong>FitLife Tracker Mobile App</strong>
-                        <small>Updated 2 days ago</small>
-                      </div>
-                    </div>
-                  </td>
-                  <td><span className="badge gray">MOBILE APP</span></td>
-                  <td className="tech-stack">Flutter, Swift</td>
-                  <td className="price">$1,250.00</td>
-                  <td>
-                    <div className="status-indicator active">
-                      <span className="dot"></span> ACTIVE
-                    </div>
-                  </td>
-                  <td>
-                    <div className="action-buttons">
-                      <button>{Icons.Edit}</button>
-                      <button>{Icons.Settings}</button>
-                    </div>
-                  </td>
-                </tr>
+                {loading ? (
+                  <tr>
+                    <td colSpan="6" className="loading-cell">
+                      Loading products...
+                    </td>
+                  </tr>
+                ) : products.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="no-data-cell">
+                      No products found
+                    </td>
+                  </tr>
+                ) : (
+                  products.map((product) => (
+                    <tr key={product.id}>
+                      <td>
+                        <div className="asset-cell">
+                          {product.featured_image ? (
+                            <div className="asset-icon">
+                              <img 
+                                src={product.featured_image} 
+                                alt={product.name} 
+                                className="asset-icon-img"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = newSaleIcon;
+                                }}
+                              />
+                            </div>
+                          ) : (
+                            <div className="asset-icon blue">
+                              <img src={newSaleIcon} alt={product.name} className="asset-icon-img" />
+                            </div>
+                          )}
+                          <div>
+                            <strong>{product.name}</strong>
+                            <small>Updated {product.updated_ago}</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>{getCategoryBadge(product.asset_type)}</td>
+                      <td className="tech-stack">
+                        <div className="tech-tags">
+                          {product.technologies?.slice(0, 3).map((tech, index) => (
+                            <span
+                              key={index}
+                              className={`tech-tag tech-tag--${getToneColor(tech)}`}
+                            >
+                              {tech}
+                            </span>
+                          ))}
+                          {product.technologies?.length > 3 && <span className="tech-more">...</span>}
+                        </div>
+                      </td>
+                      <td className="price">{formatCurrency(product.price)}</td>
+                      <td>
+                        <div className="status-indicator active">
+                          <span className="dot"></span> ACTIVE
+                        </div>
+                      </td>
+                      <td>
+                        <div className="action-buttons">
+                          <button 
+                            onClick={() => handleEdit(product)}
+                            title="Edit"
+                            disabled={deletingId === product.id}
+                          >
+                            {Icons.Settings}
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(product.id)}
+                            title="Delete"
+                            disabled={deletingId === product.id}
+                          >
+                            {deletingId === product.id ? "..." : Icons.Trash}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
 
             <div className="pagination-bar">
-              <span>Showing <strong>1-5</strong> of 48 assets</span>
-              <div className="pagination-controls">
-                <button className="page-btn">‹</button>
-                <button className="page-btn active">1</button>
-                <button className="page-btn">2</button>
-                <button className="page-btn">3</button>
-                <span className="dots">...</span>
-                <button className="page-btn">12</button>
-                <button className="page-btn">›</button>
-              </div>
+              <span>
+                Showing <strong>{((currentPage - 1) * 5) + 1}-{Math.min(currentPage * 5, totalItems)}</strong> of {totalItems} assets
+              </span>
+              {renderPagination()}
             </div>
           </div>
 
@@ -277,7 +475,7 @@ const AdminInventory = () => {
               </div>
               <div>
                 <small>TOTAL VALUE</small>
-                <h3>$24,850.00</h3>
+                <h3>{formatCurrency(stats.total_value)}</h3>
               </div>
             </div>
 
@@ -287,7 +485,7 @@ const AdminInventory = () => {
               </div>
               <div>
                 <small>MONTHLY SALES</small>
-                <h3>112 Items</h3>
+                <h3>{stats.monthly_sales} Items</h3>
               </div>
             </div>
 
@@ -297,11 +495,10 @@ const AdminInventory = () => {
               </div>
               <div>
                 <small>LAST AUDIT</small>
-                <h3>14h Ago</h3>
+                <h3>{stats.last_audit}</h3>
               </div>
             </div>
           </div>
-
         </main>
       </div>
     </>
@@ -309,4 +506,3 @@ const AdminInventory = () => {
 };
 
 export default AdminInventory;
-

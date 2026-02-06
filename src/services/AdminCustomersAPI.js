@@ -291,10 +291,8 @@ export const AdminCustomersAPI = {
 
   exportCustomers: async () => {
     try {
-      // First test without token
       console.log('Testing export route...');
       
-      // Test 1: Try without any auth first
       const testResponse = await fetch(`${API_URL}/customers/export-test`, {
         method: 'GET',
         headers: {
@@ -312,7 +310,6 @@ export const AdminCustomersAPI = {
         console.log('Test route error:', testText);
       }
       
-      // Now try the real route with auth
       const token = localStorage.getItem('auth_token');
       
       if (!token) {

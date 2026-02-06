@@ -359,9 +359,9 @@ const AdminSales = () => {
                 </div>
               </div>
 
-              <button className="filter-btn">
+              {/* <button className="filter-btn">
                 {Icons.Filter} More Filters
-              </button>
+              </button> */}
             </div>
 
             <table>
