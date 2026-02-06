@@ -70,7 +70,7 @@ function AppContent() {
       <Route path="/register" element={<Register />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/create-new-password" element={<CreateNewPassword />} />
+      <Route path="/reset-password" element={<CreateNewPassword />} />
 
       {/* ADMIN ROUTES - Protected and Admin only */}
       <Route path="/dashboard" element={
