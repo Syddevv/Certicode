@@ -284,7 +284,7 @@ const AdminDashboard = () => {
             <div className="box activity-box">
               <div className="box-header">
                 <h4>Recent Activities</h4>
-                <a href="#" className="view-all">View All</a>
+                {/* <a href="#" className="view-all">View All</a> */}
               </div>
 
               {loading.dashboard ? (
@@ -346,25 +346,23 @@ const AdminDashboard = () => {
                       <tr key={index}>
                         <td>
                           <div className="asset-cell">
-                            <div className="asset-icon">
-                              {order.product_featured_image ? (
+                            {order.product_featured_image ? (
+                              <div className="asset-icon">
                                 <img 
-                                  src={order.product_featured_image.startsWith('http') 
-                                    ? order.product_featured_image 
-                                    : `/storage/${order.product_featured_image}`}
-                                  alt={order.asset_name}
+                                  src={order.product_featured_image} 
+                                  alt={order.asset_name} 
                                   className="asset-icon-img"
                                   onError={(e) => {
                                     e.target.onerror = null;
                                     e.target.src = newSaleIcon;
                                   }}
                                 />
-                              ) : (
-                                <div className="asset-icon blue">
-                                  <img src={newSaleIcon} alt={order.asset_name} className="asset-icon-img" />
-                                </div>
-                              )}
-                            </div>
+                              </div>
+                            ) : (
+                              <div className="asset-icon blue">
+                                <img src={newSaleIcon} alt={order.asset_name} className="asset-icon-img" />
+                              </div>
+                            )}
                             <div>
                               <strong>{order.asset_name}</strong>
                               <small>

@@ -139,7 +139,20 @@ export const AdminCustomersAPI = {
         };
       }
 
-      return data;
+      const calculatePercentageChange = (current, previous) => {
+        if (!previous || previous === 0) return current > 0 ? 100 : 0;
+        return ((current - previous) / previous) * 100;
+      };
+
+      const statsWithPercentages = {
+        ...data,
+        total_customers_change: calculatePercentageChange(data.total_customers, data.previous_total_customers || 0),
+        active_customers_change: calculatePercentageChange(data.active_customers, data.previous_active_customers || 0),
+        total_revenue_change: calculatePercentageChange(data.total_revenue, data.previous_total_revenue || 0),
+        avg_order_value_change: calculatePercentageChange(data.avg_order_value, data.previous_avg_order_value || 0)
+      };
+
+      return statsWithPercentages;
     } catch (error) {
       console.error('AdminCustomersAPI - Error fetching customer stats:', error);
       throw error;

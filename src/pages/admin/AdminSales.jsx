@@ -15,11 +15,15 @@ const Icons = {
   Dot: "●"
 };
 
-const Avatar = ({ name }) => (
+const Avatar = ({ name, avatarUrl }) => (
   <img
-    src={`https://ui-avatars.com/api/?name=${name}&background=random&color=fff`}
+    src={avatarUrl || `https://ui-avatars.com/api/?name=${name}&background=random&color=fff`}
     alt={name}
     className="user-avatar"
+    onError={(e) => {
+      e.target.onerror = null;
+      e.target.src = `https://ui-avatars.com/api/?name=${name}&background=random&color=fff`;
+    }}
   />
 );
 
@@ -111,6 +115,11 @@ const AdminSales = () => {
       style: "currency",
       currency: "USD",
     }).format(amount);
+  };
+
+  const formatPercentage = (percentage) => {
+    if (percentage === undefined || percentage === null) return "0%";
+    return `${percentage >= 0 ? '+' : ''}${percentage.toFixed(1)}%`;
   };
 
   const formatDate = (dateString) => {
@@ -231,12 +240,6 @@ const AdminSales = () => {
     );
   };
 
-  const formatPercent = (value) => {
-    if (value === 0) return "0.0%";
-    const sign = value > 0 ? "+" : "";
-    return `${sign}${value.toFixed(1)}%`;
-  };
-
   return (
     <>
       <input type="checkbox" id="sidebar-toggle" />
@@ -275,7 +278,7 @@ const AdminSales = () => {
               </div>
               <h3>{formatCurrency(stats.gross_volume)}</h3>
               <span className={`trend-badge ${stats.gross_volume_change >= 0 ? 'positive' : 'negative'}`}>
-                {formatPercent(stats.gross_volume_change)}
+                {formatPercentage(stats.gross_volume_change)}
               </span>
             </div>
 
@@ -285,7 +288,7 @@ const AdminSales = () => {
               </div>
               <h3>{formatCurrency(stats.net_revenue)}</h3>
               <span className={`trend-badge ${stats.net_revenue_change >= 0 ? 'positive' : 'negative'}`}>
-                {formatPercent(stats.net_revenue_change)}
+                {formatPercentage(stats.net_revenue_change)}
               </span>
             </div>
 
@@ -295,7 +298,7 @@ const AdminSales = () => {
               </div>
               <h3>{stats.refund_rate.toFixed(1)}%</h3>
               <span className={`trend-badge ${stats.refund_rate_change <= 0 ? 'positive' : 'negative'}`}>
-                {formatPercent(stats.refund_rate_change)}
+                {formatPercentage(stats.refund_rate_change)}
               </span>
             </div>
 
@@ -305,7 +308,7 @@ const AdminSales = () => {
               </div>
               <h3>{formatCurrency(stats.avg_transaction)}</h3>
               <span className={`trend-badge ${stats.avg_transaction_change >= 0 ? 'positive' : 'negative'}`}>
-                {formatPercent(stats.avg_transaction_change)}
+                {formatPercentage(stats.avg_transaction_change)}
               </span>
             </div>
           </div>
@@ -373,7 +376,7 @@ const AdminSales = () => {
                   <th style={{ width: "15%" }}>Date / Time</th>
                   <th style={{ width: "10%" }}>Amount</th>
                   <th style={{ width: "12%" }}>Payment Status</th>
-                  <th style={{ width: "8%", textAlign: "center" }}>Actions</th>
+                  {/* <th style={{ width: "8%", textAlign: "center" }}>Actions</th> */}
                 </tr>
               </thead>
               <tbody>
@@ -406,7 +409,7 @@ const AdminSales = () => {
                       </td>
                       <td>
                         <div className="customer-info">
-                          <Avatar name={order.customer_name} />
+                          <Avatar name={order.customer_name} avatarUrl={order.customer_avatar} />
                           <span>{order.customer_name}</span>
                         </div>
                       </td>
@@ -418,12 +421,12 @@ const AdminSales = () => {
                       <td>
                         {getStatusBadge(order.status)}
                       </td>
-                      <td className="actions-cell">
+                      {/* <td className="actions-cell">
                         <Link to={`/sales/order-details/${order.id}`}>
                           <button>{Icons.Edit}</button>
                         </Link>
                         <button>{Icons.Settings}</button>
-                      </td>
+                      </td> */}
                     </tr>
                   ))
                 )}

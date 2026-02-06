@@ -31,8 +31,10 @@ const AdminCustomers = () => {
     active_customers: 0,
     total_revenue: 0,
     avg_order_value: 0,
-    revenue_change: 0,
-    orders_change: 0
+    total_customers_change: 0,
+    active_customers_change: 0,
+    total_revenue_change: 0,
+    avg_order_value_change: 0
   });
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -107,6 +109,11 @@ const AdminCustomers = () => {
       style: "currency",
       currency: "USD",
     }).format(amount);
+  };
+
+  const formatPercentage = (percentage) => {
+    if (percentage === undefined || percentage === null) return "0%";
+    return `${percentage >= 0 ? '+' : ''}${percentage.toFixed(1)}%`;
   };
 
   const formatDate = (dateString) => {
@@ -271,8 +278,8 @@ const AdminCustomers = () => {
                 <div className="icon-box green">
                   <img src={totalCustomersIcon} alt="Total Customers" className="stat-icon-img" />
                 </div>
-                <span className={`badge ${stats.revenue_change >= 0 ? 'positive' : 'negative'}`}>
-                  {stats.revenue_change >= 0 ? '+' : ''}{stats.revenue_change}%
+                <span className={`badge ${stats.total_customers_change >= 0 ? 'positive' : 'negative'}`}>
+                  {formatPercentage(stats.total_customers_change)}
                 </span>
               </div>
               <small>TOTAL CUSTOMERS</small>
@@ -284,8 +291,8 @@ const AdminCustomers = () => {
                 <div className="icon-box orange">
                   <img src={activeCustomersIcon} alt="Active Customers" className="stat-icon-img" />
                 </div>
-                <span className={`badge ${stats.orders_change >= 0 ? 'positive' : 'negative'}`}>
-                  {stats.orders_change >= 0 ? '+' : ''}{stats.orders_change}%
+                <span className={`badge ${stats.active_customers_change >= 0 ? 'positive' : 'negative'}`}>
+                  {formatPercentage(stats.active_customers_change)}
                 </span>
               </div>
               <small>ACTIVE CUSTOMERS</small>
@@ -297,8 +304,8 @@ const AdminCustomers = () => {
                 <div className="icon-box blue">
                   <img src={totalRevenueIcon} alt="Total Revenue" className="stat-icon-img" />
                 </div>
-                <span className={`badge ${stats.revenue_change >= 0 ? 'positive' : 'negative'}`}>
-                  {stats.revenue_change >= 0 ? '+' : ''}{stats.revenue_change}%
+                <span className={`badge ${stats.total_revenue_change >= 0 ? 'positive' : 'negative'}`}>
+                  {formatPercentage(stats.total_revenue_change)}
                 </span>
               </div>
               <small>TOTAL REVENUE</small>
@@ -310,8 +317,8 @@ const AdminCustomers = () => {
                 <div className="icon-box purple">
                   <img src={avgCustomerSpentIcon} alt="Avg Customer Spent" className="stat-icon-img" />
                 </div>
-                <span className={`badge ${stats.orders_change >= 0 ? 'positive' : 'negative'}`}>
-                  {stats.orders_change >= 0 ? '+' : ''}{stats.orders_change}%
+                <span className={`badge ${stats.avg_order_value_change >= 0 ? 'positive' : 'negative'}`}>
+                  {formatPercentage(stats.avg_order_value_change)}
                 </span>
               </div>
               <small>AVG. CUSTOMER SPENT</small>
@@ -359,7 +366,6 @@ const AdminCustomers = () => {
                   <th style={{ width: "20%" }}>PURCHASES {Icons.Sort}</th>
                   <th style={{ width: "20%" }}>TOTAL SPENT {Icons.Sort}</th>
                   <th style={{ width: "15%" }}>STATUS {Icons.Sort}</th>
-                  <th style={{ width: "10%" }}></th>
                 </tr>
               </thead>
               <tbody>
@@ -400,11 +406,11 @@ const AdminCustomers = () => {
                       <td>
                         {getStatusBadge(customer)}
                       </td>
-                      <td className="actions">
+                      {/* <td className="actions">
                         <Link to={`/customers/${customer.id}`}>
                           <button className="more-btn">{Icons.MoreVertical}</button>
                         </Link>
-                      </td>
+                      </td> */}
                     </tr>
                   ))
                 )}
