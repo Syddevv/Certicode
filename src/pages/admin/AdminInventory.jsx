@@ -358,9 +358,6 @@ const AdminInventory = () => {
               </button>
             </div>
 
-            <button className="filter-pill outline">
-              {Icons.Filter} More Filters
-            </button>
           </div>
 
           <div className="table-container">
