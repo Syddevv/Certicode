@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/MyPurchases.css";
-import Avatar from "../../assets/Avatar.png";
+import Avatar from "../../assets/default-profile.png";
+import { resolveAvatarUrl } from "../../utils/avatar";
 import VerifiedBadge from "../../assets/Verified.png";
 import ArrowDown from "../../assets/ArrowDown.png";
 import SearchIcon from "../../assets/lucide_search.png";
@@ -125,7 +126,7 @@ const MyPurchases = () => {
                 border: '2px solid #e8e8e8'
               }}>
                 <img
-                  src={user?.avatar_url || Avatar}
+                  src={resolveAvatarUrl(user?.avatar_url) || Avatar}
                   alt={user?.name || "User"}
                   style={{
                     width: '100%',
