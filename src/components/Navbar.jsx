@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import SearchIcon from "../assets/lucide_search.png";
-import MoonIcon from "../assets/lucide_moon.png";
 import CartIcon from "../assets/NavCart.png";
 import AvatarImg from "../assets/Avatar.png";
 import "../styles/nav.css";
@@ -105,7 +104,7 @@ const Navbar = () => {
 
         <div className="nav__actions">
           <button className="iconBtn" aria-label="Search" type="button">
-            {/* <img className="iconImg" src={SearchIcon} alt=""  placeholder/> */}
+            <img className="iconImg" src={SearchIcon} alt="" />
           </button>
 
           {isLoggedIn && (
@@ -115,10 +114,6 @@ const Navbar = () => {
               </Link>
             </button>
           )}
-
-          <button className="iconBtn" aria-label="Theme" type="button">
-            <img className="iconImg" src={MoonIcon} alt="" />
-          </button>
 
           {isLoggedIn && !loading && (
             <button className="iconBtn" aria-label="Profile" type="button">
@@ -145,9 +140,14 @@ const Navbar = () => {
           )}
 
           {!isLoggedIn && !loading && (
-            <Link className="nav__login" to="/login">
-              Sign In
-            </Link>
+            <>
+              <Link className="btn btn--ghost" to="/login">
+                Login
+              </Link>
+              <Link className="btn btn--light" to="/register">
+                Sign Up
+              </Link>
+            </>
           )}
         </div>
       </div>

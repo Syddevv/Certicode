@@ -275,6 +275,30 @@ const BuyerAccountSettings = () => {
     }
   };
 
+  const handleLogout = async () => {
+    const token = localStorage.getItem('auth_token');
+
+    if (token) {
+      try {
+        await fetch('http://127.0.0.1:8000/api/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    }
+
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('user_role');
+    localStorage.removeItem('user_name');
+    window.location.href = '/login';
+  };
+
   const handleDialogDelete = () => {
     handleDeleteAccount();
     setIsDeleteOpen(false);
@@ -651,13 +675,22 @@ const BuyerAccountSettings = () => {
                 </p>
               </div>
             </div>
-            <button
-              className="account-danger"
-              type="button"
-              onClick={() => setIsDeleteOpen(true)}
-            >
-              Delete Account
-            </button>
+            <div className="account-danger__actions">
+              <button
+                className="account-secondary"
+                type="button"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+              <button
+                className="account-danger"
+                type="button"
+                onClick={() => setIsDeleteOpen(true)}
+              >
+                Delete Account
+              </button>
+            </div>
           </div>
         </div>
       </section>
