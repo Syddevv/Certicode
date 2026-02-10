@@ -344,6 +344,7 @@ const BillingInvoices = () => {
                         <Link
                           className="billing-iconBtn"
                           to={`/billing-invoices/${row.id.toLowerCase().replace('#', '').replace('inv-', '')}`}
+                          state={{ invoice: row, user }}
                           aria-label="View"
                         >
                           <svg viewBox="0 0 24 24">

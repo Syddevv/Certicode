@@ -346,3 +346,32 @@
     align-items: flex-start;
   }
 }
+
+@media print {
+  body {
+    background: #ffffff;
+  }
+
+  nav,
+  footer,
+  .invoice-details__breadcrumb,
+  .invoice-details__actions,
+  .invoice-details__support {
+    display: none !important;
+  }
+
+  .invoice-details {
+    background: #ffffff;
+    padding: 0;
+  }
+
+  .invoice-details__inner {
+    width: 100%;
+    margin: 0;
+  }
+
+  .invoice-details__card {
+    box-shadow: none;
+    border: 1px solid #e5e7eb;
+  }
+}
