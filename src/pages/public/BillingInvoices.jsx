@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/BillingInvoices.css";
-import Avatar from "../../assets/Avatar.png";
+import Avatar from "../../assets/default-profile.png";
+import { resolveAvatarUrl } from "../../utils/avatar";
 import VerifiedBadge from "../../assets/Verified.png";
 import InvoiceIcon from "../../assets/Invoice.png";
 import ChartBar from "../../assets/ChartBar.png";
@@ -179,7 +180,7 @@ const BillingInvoices = () => {
                 border: '2px solid #e8e8e8'
               }}>
                 <img
-                  src={user?.avatar_url || Avatar}
+                  src={resolveAvatarUrl(user?.avatar_url) || Avatar}
                   alt={user?.name || "User"}
                   style={{
                     width: '100%',
@@ -343,6 +344,7 @@ const BillingInvoices = () => {
                         <Link
                           className="billing-iconBtn"
                           to={`/billing-invoices/${row.id.toLowerCase().replace('#', '').replace('inv-', '')}`}
+                          state={{ invoice: row, user }}
                           aria-label="View"
                         >
                           <svg viewBox="0 0 24 24">

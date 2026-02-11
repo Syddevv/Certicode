@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useMemo } from "react";
+import { Link, useLocation, useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/InvoiceDetails.css";
@@ -8,9 +8,134 @@ import WhiteDownload from "../../assets/whiteDownload.png";
 import BillingSupport from "../../assets/billingSupport.png";
 
 const InvoiceDetails = () => {
+  const { invoiceId } = useParams();
+  const location = useLocation();
+  const invoice = location.state?.invoice;
+  const user = location.state?.user;
+
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, []);
+
+  const details = useMemo(() => {
+    const purchase = invoice?.purchaseData || {};
+    const product = purchase.product || {};
+
+    const toNumber = (value) => {
+      if (value === null || value === undefined) return null;
+      if (typeof value === "number") return Number.isFinite(value) ? value : null;
+      const cleaned = String(value).replace(/[^0-9.-]/g, "");
+      const parsed = Number.parseFloat(cleaned);
+      return Number.isFinite(parsed) ? parsed : null;
+    };
+
+    const formatCurrency = (value) => {
+      const numberValue = toNumber(value);
+      return `$${(numberValue ?? 0).toFixed(2)}`;
+    };
+
+    const purchaseDate =
+      purchase.purchased_at ||
+      purchase.created_at ||
+      purchase.date ||
+      purchase.paid_at;
+
+    const issuedDate = purchaseDate
+      ? new Date(purchaseDate).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })
+      : invoice?.date || "Unknown Date";
+
+    const invoiceLabel = invoice?.id
+      ? invoice.id
+      : invoiceId
+      ? `INV-${invoiceId.toUpperCase()}`
+      : "INV-0000";
+
+    const invoiceNumber = invoiceLabel.replace("#", "");
+
+    const orderNumber =
+      purchase.order_number ||
+      purchase.order?.order_number ||
+      purchase.order?.id ||
+      purchase.id ||
+      "N/A";
+
+    const amountNumber =
+      toNumber(purchase.total_amount) ??
+      toNumber(purchase.amount) ??
+      toNumber(purchase.price) ??
+      toNumber(purchase.order?.total_amount) ??
+      toNumber(invoice?.amount);
+
+    const subtotalNumber =
+      toNumber(purchase.order?.subtotal) ??
+      toNumber(purchase.subtotal) ??
+      amountNumber;
+
+    const taxNumber =
+      toNumber(purchase.order?.tax_amount) ?? toNumber(purchase.tax_amount) ?? 0;
+
+    const discountNumber =
+      toNumber(purchase.order?.discount_amount) ??
+      toNumber(purchase.discount_amount) ??
+      0;
+
+    const totalNumber =
+      toNumber(purchase.order?.total_amount) ??
+      toNumber(purchase.total_amount) ??
+      amountNumber ??
+      0;
+
+    const status =
+      invoice?.status ||
+      (purchase.license_key && purchase.license_key !== "" ? "Paid" : "Pending");
+
+    const billedToName = user?.name || "Customer";
+    const billedToCompany = user?.company_name;
+    const billedToAddress = user?.company_address || user?.address;
+    const billedToLine = [billedToCompany, billedToAddress]
+      .filter(Boolean)
+      .join(" \u2022 ");
+
+    const productName = product.name || invoice?.asset || "Digital Asset";
+    const productId =
+      product.sku ||
+      product.product_id ||
+      product.id ||
+      purchase.product_id ||
+      "N/A";
+
+    const licenseLabel =
+      purchase.license_type ||
+      purchase.license?.type ||
+      purchase.license?.name ||
+      "Commercial";
+
+    return {
+      invoiceLabel,
+      invoiceNumber,
+      orderNumber,
+      issuedDate,
+      status,
+      billedToName,
+      billedToLine,
+      productName,
+      productId,
+      licenseLabel,
+      subtotal: formatCurrency(subtotalNumber),
+      tax: formatCurrency(taxNumber),
+      discount: formatCurrency(Math.abs(discountNumber)),
+      total: formatCurrency(totalNumber),
+      hasInvoice: Boolean(invoice),
+    };
+  }, [invoice, invoiceId, user]);
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   return (
     <div>
@@ -23,7 +148,7 @@ const InvoiceDetails = () => {
             </Link>
             <span className="invoice-details__sep">›</span>
             <span className="invoice-details__crumb invoice-details__crumb--active">
-              Invoice Details #INV-8273
+              Invoice Details {details.invoiceLabel}
             </span>
           </div>
 
@@ -31,14 +156,20 @@ const InvoiceDetails = () => {
             <div>
               <div className="invoice-details__titleRow">
                 <h1>Invoice Details</h1>
-                <span className="invoice-details__status">Paid</span>
+                <span className="invoice-details__status">{details.status}</span>
               </div>
               <p>
-                Manage your billing records and download asset certificates.
+                {details.hasInvoice
+                  ? "Manage your billing records and download asset certificates."
+                  : "We could not load all invoice details for this link. Return to Billing & Invoices and reopen the invoice to see the full record."}
               </p>
             </div>
             <div className="invoice-details__actions">
-              <button className="invoice-details__ghost" type="button">
+              <button
+                className="invoice-details__ghost"
+                type="button"
+                onClick={handlePrint}
+              >
                 <img src={PrintIcon} alt="" aria-hidden="true" />
                 Print
               </button>
@@ -53,26 +184,23 @@ const InvoiceDetails = () => {
             <div className="invoice-details__meta">
               <div>
                 <span>Invoice Number</span>
-                <strong>INV-8273</strong>
+                <strong>{details.invoiceNumber}</strong>
               </div>
               <div>
                 <span>Order Number</span>
-                <strong>ORD-99283-CX</strong>
+                <strong>{details.orderNumber}</strong>
               </div>
               <div>
                 <span>Date Issued</span>
-                <strong>Jan 31, 2026</strong>
+                <strong>{details.issuedDate}</strong>
               </div>
             </div>
 
             <div className="invoice-details__parties">
               <div>
                 <span>Billed To</span>
-                <strong>Jane Doe</strong>
-                <p>
-                  Horizon Tech Solutions LLC • 452 Market Street, Ste 1200, San
-                  Francisco, CA 94104
-                </p>
+                <strong>{details.billedToName}</strong>
+                <p>{details.billedToLine || "Billing address not provided."}</p>
               </div>
               <div>
                 <span>Issued By</span>
@@ -93,32 +221,34 @@ const InvoiceDetails = () => {
               </div>
               <div className="invoice-details__tableRow">
                 <div>
-                  <strong>E-commerce SaaS Template</strong>
-                  <span>Product ID: SKU-ECO-442</span>
+                  <strong>{details.productName}</strong>
+                  <span>Product ID: {details.productId}</span>
                 </div>
-                <span className="invoice-details__pill">Commercial</span>
+                <span className="invoice-details__pill">
+                  {details.licenseLabel}
+                </span>
                 <span>1</span>
-                <span>$999.00</span>
+                <span>{details.total}</span>
               </div>
             </div>
 
             <div className="invoice-details__totals">
               <div className="invoice-details__totalsRow">
                 <span>Subtotal</span>
-                <span>$999.00</span>
+                <span>{details.subtotal}</span>
               </div>
               <div className="invoice-details__totalsRow">
                 <span>VAT / Tax</span>
-                <span>$0.00</span>
+                <span>{details.tax}</span>
               </div>
               <div className="invoice-details__totalsRow">
                 <span>Discount</span>
-                <span>-$0.00</span>
+                <span>-{details.discount}</span>
               </div>
               <div className="invoice-details__totalsRow invoice-details__totalsRow--total">
                 <span>Total Paid</span>
                 <span>
-                  $999.00 <small>USD</small>
+                  {details.total} <small>USD</small>
                 </span>
               </div>
             </div>

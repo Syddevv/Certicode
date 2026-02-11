@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/BuyerAccountSettings.css";
-import Avatar from "../../assets/Avatar.png";
+import Avatar from "../../assets/default-profile.png";
 import OrangeBadge from "../../assets/orangeBadge.png";
 import DeleteIcon from "../../assets/Delete.png";
 import AlertTriangle from "../../assets/AlertTriangle.png";
@@ -12,6 +12,7 @@ import NotificationIcon from "../../assets/NotifBell.png";
 import MoonIcon from "../../assets/OrangeMoon.png";
 import WalletIcon from "../../assets/wallet.png";
 import { ProfileAPI } from "../../services/ProfileAPI";
+import { resolveAvatarUrl } from "../../utils/avatar";
 
 const BuyerAccountSettings = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -97,9 +98,15 @@ const BuyerAccountSettings = () => {
         console.log('Upload result:', result);
         
         setMessage({ type: 'success', text: result.message || 'Avatar updated successfully' });
+
+        const nextAvatarUrl =
+          result.avatar_url ||
+          result.user?.avatar_url ||
+          result.data?.avatar_url ||
+          "";
         
-        setUser(prev => ({ ...prev, avatar_url: result.avatar_url }));
-        setProfileData(prev => ({ ...prev, avatar_url: result.avatar_url }));
+        setUser(prev => ({ ...prev, avatar_url: nextAvatarUrl }));
+        setProfileData(prev => ({ ...prev, avatar_url: nextAvatarUrl }));
         
         e.target.value = '';
         
@@ -335,7 +342,7 @@ const BuyerAccountSettings = () => {
                 border: '2px solid #e8e8e8'
               }}>
                 <img
-                  src={user?.avatar_url || Avatar}
+                  src={resolveAvatarUrl(user?.avatar_url) || Avatar}
                   alt={user?.name || "User"}
                   style={{
                     width: '100%',
@@ -410,7 +417,7 @@ const BuyerAccountSettings = () => {
                   border: '2px solid #e8e8e8'
                 }}>
                   <img
-                    src={user?.avatar_url || Avatar}
+                    src={resolveAvatarUrl(user?.avatar_url) || Avatar}
                     alt={user?.name || "User"}
                     style={{
                       width: '100%',

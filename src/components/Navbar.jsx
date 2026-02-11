@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import SearchIcon from "../assets/lucide_search.png";
 import CartIcon from "../assets/NavCart.png";
-import AvatarImg from "../assets/Avatar.png";
+import AvatarImg from "../assets/default-profile.png";
 import "../styles/nav.css";
 import CerticodeLogo from "../assets/certicodeicon.png";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { ProfileAPI } from "../services/ProfileAPI";
+import { resolveAvatarUrl } from "../utils/avatar";
 
 const Navbar = () => {
   const [user, setUser] = useState(null);
@@ -120,7 +121,7 @@ const Navbar = () => {
               <Link to="/buyer-dashboard">
                 <img 
                   className="iconImg nav__avatar" 
-                  src={user?.avatar_url || AvatarImg} 
+                  src={resolveAvatarUrl(user?.avatar_url) || AvatarImg} 
                   alt={user?.name || "User"}
                   style={{
                     width: '32px',
