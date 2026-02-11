@@ -52,7 +52,6 @@ import AdminAddNewAsset from "./pages/admin/AdminAddNewAsset";
 import AdminOrderDetails from "./pages/admin/AdminOrderDetails";
 
 function App() {
-  
   return (
     <BrowserRouter>
       {/* Create a wrapper component that uses useAuth */}
@@ -62,7 +61,6 @@ function App() {
 }
 
 function AppContent() {
-  
   return (
     <Routes>
       {/* Auth */}
@@ -73,51 +71,78 @@ function AppContent() {
       <Route path="/reset-password" element={<CreateNewPassword />} />
 
       {/* ADMIN ROUTES - Protected and Admin only */}
-      <Route path="/dashboard" element={
-        <ProtectedRoute allowedRoles={['Admin']}>
-          <AdminDashboard />
-        </ProtectedRoute>
-      } />
-      <Route path="/inventory" element={
-        <ProtectedRoute allowedRoles={['Admin']}>
-          <AdminInventory />
-        </ProtectedRoute>
-      } />
-      <Route path="/sales" element={
-        <ProtectedRoute allowedRoles={['Admin']}>
-          <AdminSales />
-        </ProtectedRoute>
-      } />
-      <Route path="/customers" element={
-        <ProtectedRoute allowedRoles={['Admin']}>
-          <AdminCustomers />
-        </ProtectedRoute>
-      } />
-      <Route path="/admin-notification" element={
-        <ProtectedRoute allowedRoles={['Admin']}>
-          <AdminNotification />
-        </ProtectedRoute>
-      } />
-      <Route path="/settings" element={
-        <ProtectedRoute allowedRoles={['Admin']}>
-          <AdminSetting />
-        </ProtectedRoute>
-      } />
-      <Route path="/platform-settings" element={
-        <ProtectedRoute allowedRoles={['Admin']}>
-          <PlatformSetting />
-        </ProtectedRoute>
-      } />
-      <Route path="/support" element={
-        <ProtectedRoute allowedRoles={['Admin']}>
-          <SupportDesk />
-        </ProtectedRoute>
-      } />
-      <Route path="/ticket" element={
-        <ProtectedRoute allowedRoles={['Admin']}>
-          <TicketDetail />
-        </ProtectedRoute>
-      } />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/inventory"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminInventory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/sales"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminSales />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/customers"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminCustomers />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin-notification"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminNotification />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminSetting />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/platform-settings"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <PlatformSetting />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/support"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <SupportDesk />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ticket"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <TicketDetail />
+          </ProtectedRoute>
+        }
+      />
 
       {/* PUBLIC PAGES / USER */}
       <Route path="/" element={<LandingPage />} />
@@ -138,43 +163,58 @@ function AppContent() {
         path="/blogs-news/how-secure-software"
         element={<BlogsNewsIndividual />}
       />
-      
+
       {/* PROTECTED USER ROUTES - Require authentication */}
-      <Route path="/buyer-dashboard" element={
-        <ProtectedRoute allowedRoles={['Customer']}>
-          <BuyerDashboard />
-        </ProtectedRoute>
-      } />
-      <Route path="/my-purchases" element={
-        <ProtectedRoute allowedRoles={['Customer']}>
-          <MyPurchases />
-        </ProtectedRoute>
-      } />
+      <Route
+        path="/buyer-dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["Customer"]}>
+            <BuyerDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/my-purchases"
+        element={
+          <ProtectedRoute allowedRoles={["Customer"]}>
+            <MyPurchases />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/my-purchases/e-commerce-saas-template"
         element={
-          <ProtectedRoute allowedRoles={['Customer']}>
+          <ProtectedRoute allowedRoles={["Customer"]}>
             <PurchasedAssetDetail />
           </ProtectedRoute>
         }
       />
-      <Route path="/billing-invoices" element={
-        <ProtectedRoute allowedRoles={['Customer']}>
-          <BillingInvoices />
-        </ProtectedRoute>
-      } />
-      <Route path="/billing-invoices/inv-8273" element={
-        <ProtectedRoute allowedRoles={['Customer']}>
-          <InvoiceDetails />
-        </ProtectedRoute>
-      } />
-      <Route path="/account-settings" element={
-        <ProtectedRoute allowedRoles={['Customer']}>
-          <BuyerAccountSettings />
-        </ProtectedRoute>
-      } />
+      <Route
+        path="/billing-invoices"
+        element={
+          <ProtectedRoute allowedRoles={["Customer"]}>
+            <BillingInvoices />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/billing-invoices/:invoiceId"
+        element={
+          <ProtectedRoute allowedRoles={["Customer"]}>
+            <InvoiceDetails />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/account-settings"
+        element={
+          <ProtectedRoute allowedRoles={["Customer"]}>
+            <BuyerAccountSettings />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route path="/add-asset" element={<AdminAddNewAsset />} />
+      <Route path="/add-asset" element={<AdminAddNewAsset />} />
       {/* 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
