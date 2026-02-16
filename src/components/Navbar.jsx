@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import SearchIcon from "../assets/lucide_search.png";
 import CartIcon from "../assets/NavCart.png";
 import AvatarImg from "../assets/default-profile.png";
 import "../styles/nav.css";
@@ -104,10 +103,6 @@ const Navbar = () => {
         </nav>
 
         <div className="nav__actions">
-          <button className="iconBtn" aria-label="Search" type="button">
-            <img className="iconImg" src={SearchIcon} alt="" />
-          </button>
-
           {isLoggedIn && (
             <button className="iconBtn" aria-label="Cart" type="button">
               <Link to="/cart">

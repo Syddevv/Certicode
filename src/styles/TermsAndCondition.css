@@ -55,6 +55,19 @@
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 16px 32px rgba(255, 127, 22, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.terms__download:hover {
+  background: #ff6b00;
+  transform: translateY(-2px);
+  box-shadow: 0 22px 36px rgba(255, 127, 22, 0.36);
+}
+
+.terms__download:focus-visible {
+  outline: 3px solid rgba(255, 127, 22, 0.35);
+  outline-offset: 2px;
 }
 
 .terms__downloadIcon {
