@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/BillingInvoices.css";
@@ -16,6 +16,7 @@ import SearchIcon from "../../assets/lucide_search.png";
 import { ProfileAPI } from "../../services/ProfileAPI";
 
 const BillingInvoices = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -203,7 +204,11 @@ const BillingInvoices = () => {
                 </span>
               </div>
             </div>
-            <button className="billing-profile__edit" type="button">
+            <button
+              className="billing-profile__edit"
+              type="button"
+              onClick={() => navigate("/account-settings")}
+            >
               <span className="billing-profile__editIcon" aria-hidden="true">
                 {"\u270e"}
               </span>
