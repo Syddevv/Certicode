@@ -113,6 +113,7 @@ const SuccessStories = () => {
                 tag: "Fintech",
                 title: "Scaling with the Ironclad UI Kit",
                 text: "Launched a secure banking portal in 3 weeks. The pre-built security components and financial widgets saved hundreds of development hours.",
+                href: "/success-stories/scaling-with-the-ironclad-ui-kit",
               },
               {
                 tag: "SaaS",
