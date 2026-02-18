@@ -13,6 +13,7 @@ import MoonIcon from "../../assets/OrangeMoon.png";
 import WalletIcon from "../../assets/wallet.png";
 import { ProfileAPI } from "../../services/ProfileAPI";
 import { resolveAvatarUrl } from "../../utils/avatar";
+import EditBillingDetailsModal from "../../components/Editbillingdetailsmodal ";
 
 const BuyerAccountSettings = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -34,6 +35,7 @@ const BuyerAccountSettings = () => {
   const [saving, setSaving] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [isUpdateBillingModal, setUpdateBillingModal] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -53,6 +55,17 @@ const BuyerAccountSettings = () => {
     }
     return undefined;
   }, [isDeleteOpen]);
+
+  useEffect(() => {
+    if (isUpdateBillingModal || isDeleteOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isUpdateBillingModal, isDeleteOpen]);
 
   const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
@@ -699,7 +712,11 @@ const BuyerAccountSettings = () => {
                 </p>
               </div>
             </div>
-            <button className="account-primary" type="button">
+            <button
+              onClick={() => setUpdateBillingModal(true)}
+              className="account-primary"
+              type="button"
+            >
               Update Billing Details
             </button>
           </div>
@@ -801,6 +818,11 @@ const BuyerAccountSettings = () => {
           </div>
         </div>
       )}
+
+      <EditBillingDetailsModal
+        isOpen={isUpdateBillingModal}
+        onClose={() => setUpdateBillingModal(false)}
+      />
       <Footer />
     </div>
   );
