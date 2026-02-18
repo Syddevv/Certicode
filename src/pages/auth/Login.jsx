@@ -9,6 +9,7 @@ import certicodeIcon from "../../assets/certicodeicon.png";
 import loginIllustration from "../../assets/Login Image.png";
 import arrowLeft from "../../assets/arrowleft.png";
 import { api } from "../../services/api";
+import { showErrorToast } from "../../utils/toast";
 
 const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -43,7 +44,7 @@ const Login = () => {
       }
       
     } catch (error) {
-      alert(error.message || 'Login failed. Please try again.');
+      showErrorToast(error.message || "Login failed. Please try again.");
     }
   };
 
@@ -51,7 +52,7 @@ const Login = () => {
     try {
       await api.googleRedirect();
     } catch (error) {
-      alert('Google login failed. Please try again.');
+      showErrorToast("Google login failed. Please try again.");
     }
   };
 
@@ -59,7 +60,7 @@ const Login = () => {
     try {
       await api.facebookRedirect();
     } catch (error) {
-      alert('Facebook login failed. Please try again.');
+      showErrorToast("Facebook login failed. Please try again.");
     }
   };
 
