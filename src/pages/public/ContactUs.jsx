@@ -5,6 +5,7 @@ import Footer from "../../components/Footer";
 import "../../styles/ContactUs.css";
 import CerticodeLogo from "../../assets/certicodeicon.png";
 import { SupportTicketAPI } from "../../services/SupportTicketAPI";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
 const ContactUs = () => {
   const [formData, setFormData] = useState({
@@ -71,7 +72,7 @@ const ContactUs = () => {
     setIsSubmitting(true);
 
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.subject || !formData.message) {
-      alert("Please fill in all required fields");
+      showErrorToast("Please fill in all required fields");
       setIsSubmitting(false);
       return;
     }
@@ -99,7 +100,7 @@ const ContactUs = () => {
 
       const response = await SupportTicketAPI.createTicket(ticketData);
       
-      alert(`Ticket created successfully! Your ticket ID: ${response.ticket_id}`);
+      showSuccessToast(`Ticket created successfully! Your ticket ID: ${response.ticket_id}`);
       
       // Reset form
       setFormData({
@@ -124,7 +125,7 @@ const ContactUs = () => {
       
     } catch (error) {
       console.error('Ticket creation error:', error);
-      alert(error.message || "Failed to create ticket. Please try again.");
+      showErrorToast(error.message || "Failed to create ticket. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

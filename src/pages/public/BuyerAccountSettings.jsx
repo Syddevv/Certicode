@@ -14,6 +14,7 @@ import WalletIcon from "../../assets/wallet.png";
 import { ProfileAPI } from "../../services/ProfileAPI";
 import { resolveAvatarUrl } from "../../utils/avatar";
 import EditBillingDetailsModal from "../../components/Editbillingdetailsmodal ";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
 const BuyerAccountSettings = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -36,6 +37,19 @@ const BuyerAccountSettings = () => {
   const [changingPassword, setChangingPassword] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [isUpdateBillingModal, setUpdateBillingModal] = useState(false);
+
+  const notifyUser = (type, text) => {
+    setMessage({ type, text });
+
+    if (!text) return;
+    if (type === "success") {
+      showSuccessToast(text);
+      return;
+    }
+    if (type === "error") {
+      showErrorToast(text);
+    }
+  };
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -80,25 +94,19 @@ const BuyerAccountSettings = () => {
 
       // Check dimensions
       if (img.width > 1024 || img.height > 1024) {
-        setMessage({
-          type: "error",
-          text: "Image dimensions should be less than 1024x1024 pixels",
-        });
+        notifyUser("error", "Image dimensions should be less than 1024x1024 pixels");
         e.target.value = "";
         return;
       }
 
       if (file.size > 2 * 1024 * 1024) {
-        setMessage({
-          type: "error",
-          text: "Image size should be less than 2MB",
-        });
+        notifyUser("error", "Image size should be less than 2MB");
         e.target.value = "";
         return;
       }
 
       if (!file.type.match("image.*")) {
-        setMessage({ type: "error", text: "Please select an image file" });
+        notifyUser("error", "Please select an image file");
         e.target.value = "";
         return;
       }
@@ -113,10 +121,7 @@ const BuyerAccountSettings = () => {
 
         console.log("Upload result:", result);
 
-        setMessage({
-          type: "success",
-          text: result.message || "Avatar updated successfully",
-        });
+        notifyUser("success", result.message || "Avatar updated successfully");
 
         const nextAvatarUrl =
           result.avatar_url ||
@@ -134,10 +139,7 @@ const BuyerAccountSettings = () => {
         }, 3000);
       } catch (error) {
         console.error("Failed to upload avatar:", error);
-        setMessage({
-          type: "error",
-          text: error.message || "Failed to upload avatar. Please try again.",
-        });
+        notifyUser("error", error.message || "Failed to upload avatar. Please try again.");
         e.target.value = "";
       } finally {
         setSaving(false);
@@ -145,10 +147,7 @@ const BuyerAccountSettings = () => {
     };
 
     img.onerror = () => {
-      setMessage({
-        type: "error",
-        text: "Failed to load image. Please select a valid image file.",
-      });
+      notifyUser("error", "Failed to load image. Please select a valid image file.");
       e.target.value = "";
     };
   };
@@ -166,7 +165,7 @@ const BuyerAccountSettings = () => {
       });
     } catch (error) {
       console.error("Failed to fetch user data:", error);
-      setMessage({ type: "error", text: "Failed to load user data" });
+      notifyUser("error", "Failed to load user data");
     } finally {
       setLoading(false);
     }
@@ -207,10 +206,7 @@ const BuyerAccountSettings = () => {
 
       const result = await ProfileAPI.updateProfile(dataToSend);
 
-      setMessage({
-        type: "success",
-        text: result.message || "Profile updated successfully",
-      });
+      notifyUser("success", result.message || "Profile updated successfully");
 
       if (result.user) {
         setUser((prev) => ({ ...prev, ...result.user }));
@@ -221,10 +217,7 @@ const BuyerAccountSettings = () => {
       }, 3000);
     } catch (error) {
       console.error("Failed to update profile:", error);
-      setMessage({
-        type: "error",
-        text: error.message || "Failed to update profile. Please try again.",
-      });
+      notifyUser("error", error.message || "Failed to update profile. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -240,17 +233,14 @@ const BuyerAccountSettings = () => {
         !passwordData.new_password ||
         !passwordData.new_password_confirmation
       ) {
-        setMessage({
-          type: "error",
-          text: "Please fill in all password fields",
-        });
+        notifyUser("error", "Please fill in all password fields");
         return;
       }
 
       if (
         passwordData.new_password !== passwordData.new_password_confirmation
       ) {
-        setMessage({ type: "error", text: "New passwords do not match" });
+        notifyUser("error", "New passwords do not match");
         return;
       }
 
@@ -260,10 +250,7 @@ const BuyerAccountSettings = () => {
         new_password_confirmation: passwordData.new_password_confirmation,
       });
 
-      setMessage({
-        type: "success",
-        text: result.message || "Password updated successfully",
-      });
+      notifyUser("success", result.message || "Password updated successfully");
 
       setPasswordData({
         current_password: "",
@@ -276,10 +263,7 @@ const BuyerAccountSettings = () => {
       }, 3000);
     } catch (error) {
       console.error("Failed to update password:", error);
-      setMessage({
-        type: "error",
-        text: error.message || "Failed to update password. Please try again.",
-      });
+      notifyUser("error", error.message || "Failed to update password. Please try again.");
     } finally {
       setChangingPassword(false);
     }
@@ -291,19 +275,13 @@ const BuyerAccountSettings = () => {
       setMessage({ type: "", text: "" });
 
       if (!deletePassword) {
-        setMessage({
-          type: "error",
-          text: "Please enter your password to confirm",
-        });
+        notifyUser("error", "Please enter your password to confirm");
         return;
       }
 
       const result = await ProfileAPI.deleteAccount(deletePassword);
 
-      setMessage({
-        type: "success",
-        text: result.message || "Account deleted successfully",
-      });
+      notifyUser("success", result.message || "Account deleted successfully");
 
       localStorage.removeItem("auth_token");
       localStorage.removeItem("user_id");
@@ -315,12 +293,10 @@ const BuyerAccountSettings = () => {
       }, 2000);
     } catch (error) {
       console.error("Failed to delete account:", error);
-      setMessage({
-        type: "error",
-        text:
-          error.message ||
-          "Failed to delete account. Please check your password.",
-      });
+      notifyUser(
+        "error",
+        error.message || "Failed to delete account. Please check your password.",
+      );
     } finally {
       setDeletingAccount(false);
     }
@@ -435,12 +411,6 @@ const BuyerAccountSettings = () => {
           <div className="account-settings__title">
             <h3>Account Settings</h3>
           </div>
-
-          {message.text && (
-            <div className={`account-message account-message--${message.type}`}>
-              {message.text}
-            </div>
-          )}
 
           <div className="account-card">
             <div className="account-card__header">

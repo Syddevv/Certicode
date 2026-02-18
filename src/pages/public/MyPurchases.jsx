@@ -39,16 +39,26 @@ const MyPurchases = () => {
     "Sketch",
   ];
 
-  const handleItemClick = (title) => {
-    if (title === "E-commerce SaaS Template") {
-      navigate("/my-purchases/e-commerce-saas-template");
-    }
+  const createAssetSlug = (value = "") =>
+    String(value)
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+  const handleItemClick = (purchase) => {
+    if (!purchase) return;
+    const productName = purchase.product?.name || `asset-${purchase.id || "detail"}`;
+    const assetSlug = createAssetSlug(productName) || `asset-${purchase.id || "detail"}`;
+    navigate(`/my-purchases/${assetSlug}`, {
+      state: { purchase },
+    });
   };
 
-  const handleItemKeyDown = (event, title) => {
+  const handleItemKeyDown = (event, purchase) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      handleItemClick(title);
+      handleItemClick(purchase);
     }
   };
 
@@ -493,8 +503,8 @@ const MyPurchases = () => {
                             className={`purchases-item purchases-item--link`}
                             role="button"
                             tabIndex={0}
-                            onClick={() => handleItemClick(purchase.product?.name)}
-                            onKeyDown={(event) => handleItemKeyDown(event, purchase.product?.name)}
+                            onClick={() => handleItemClick(purchase)}
+                            onKeyDown={(event) => handleItemKeyDown(event, purchase)}
                           >
                             <div 
                               className="purchases-item__media"

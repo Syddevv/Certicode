@@ -46,6 +46,7 @@ import AdminNotification from "./pages/admin/AdminNotification";
 
 // Components
 import ProtectedRoute from "./components/ProtectedRoute";
+import ToastContainer from "./components/ToastContainer";
 
 import AdminAddNewAsset from "./pages/admin/AdminAddNewAsset";
 
@@ -54,6 +55,7 @@ import AdminOrderDetails from "./pages/admin/AdminOrderDetails";
 function App() {
   return (
     <BrowserRouter>
+      <ToastContainer />
       {/* Create a wrapper component that uses useAuth */}
       <AppContent />
     </BrowserRouter>
@@ -182,7 +184,7 @@ function AppContent() {
         }
       />
       <Route
-        path="/my-purchases/e-commerce-saas-template"
+        path="/my-purchases/:assetSlug"
         element={
           <ProtectedRoute allowedRoles={["Customer"]}>
             <PurchasedAssetDetail />

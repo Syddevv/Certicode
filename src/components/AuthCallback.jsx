@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { showErrorToast } from "../utils/toast";
 
 const AuthCallback = () => {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ const AuthCallback = () => {
     const error = params.get('error');
 
     if (error) {
-      alert(decodeURIComponent(error));
+      showErrorToast(decodeURIComponent(error));
       navigate('/login');
       return;
     }
