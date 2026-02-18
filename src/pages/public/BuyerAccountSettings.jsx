@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/BuyerAccountSettings.css";
-import Avatar from "../../assets/Avatar.png";
+import Avatar from "../../assets/default-profile.png";
 import OrangeBadge from "../../assets/orangeBadge.png";
 import DeleteIcon from "../../assets/Delete.png";
 import AlertTriangle from "../../assets/AlertTriangle.png";
@@ -12,6 +12,7 @@ import NotificationIcon from "../../assets/NotifBell.png";
 import MoonIcon from "../../assets/OrangeMoon.png";
 import WalletIcon from "../../assets/wallet.png";
 import { ProfileAPI } from "../../services/ProfileAPI";
+import { resolveAvatarUrl } from "../../utils/avatar";
 
 const BuyerAccountSettings = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -97,9 +98,15 @@ const BuyerAccountSettings = () => {
         console.log('Upload result:', result);
         
         setMessage({ type: 'success', text: result.message || 'Avatar updated successfully' });
+
+        const nextAvatarUrl =
+          result.avatar_url ||
+          result.user?.avatar_url ||
+          result.data?.avatar_url ||
+          "";
         
-        setUser(prev => ({ ...prev, avatar_url: result.avatar_url }));
-        setProfileData(prev => ({ ...prev, avatar_url: result.avatar_url }));
+        setUser(prev => ({ ...prev, avatar_url: nextAvatarUrl }));
+        setProfileData(prev => ({ ...prev, avatar_url: nextAvatarUrl }));
         
         e.target.value = '';
         
@@ -275,6 +282,30 @@ const BuyerAccountSettings = () => {
     }
   };
 
+  const handleLogout = async () => {
+    const token = localStorage.getItem('auth_token');
+
+    if (token) {
+      try {
+        await fetch('http://127.0.0.1:8000/api/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    }
+
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('user_role');
+    localStorage.removeItem('user_name');
+    window.location.href = '/login';
+  };
+
   const handleDialogDelete = () => {
     handleDeleteAccount();
     setIsDeleteOpen(false);
@@ -311,7 +342,7 @@ const BuyerAccountSettings = () => {
                 border: '2px solid #e8e8e8'
               }}>
                 <img
-                  src={user?.avatar_url || Avatar}
+                  src={resolveAvatarUrl(user?.avatar_url) || Avatar}
                   alt={user?.name || "User"}
                   style={{
                     width: '100%',
@@ -386,7 +417,7 @@ const BuyerAccountSettings = () => {
                   border: '2px solid #e8e8e8'
                 }}>
                   <img
-                    src={user?.avatar_url || Avatar}
+                    src={resolveAvatarUrl(user?.avatar_url) || Avatar}
                     alt={user?.name || "User"}
                     style={{
                       width: '100%',
@@ -651,13 +682,22 @@ const BuyerAccountSettings = () => {
                 </p>
               </div>
             </div>
-            <button
-              className="account-danger"
-              type="button"
-              onClick={() => setIsDeleteOpen(true)}
-            >
-              Delete Account
-            </button>
+            <div className="account-danger__actions">
+              <button
+                className="account-secondary"
+                type="button"
+                onClick={handleLogout}
+              >
+                Logout
+              </button>
+              <button
+                className="account-danger"
+                type="button"
+                onClick={() => setIsDeleteOpen(true)}
+              >
+                Delete Account
+              </button>
+            </div>
           </div>
         </div>
       </section>

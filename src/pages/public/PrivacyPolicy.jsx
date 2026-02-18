@@ -32,6 +32,76 @@ const PrivacyPolicy = () => {
     }
   };
 
+  const handleDownloadPdf = () => {
+    const policyContent = document.querySelector(".policy__content");
+    if (!policyContent) return;
+
+    const printWindow = window.open("", "_blank", "width=900,height=700");
+    if (!printWindow) return;
+
+    const printableHtml = `
+      <!doctype html>
+      <html lang="en">
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>Certicode Privacy Policy</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.5;
+              color: #111827;
+              margin: 40px;
+            }
+            h1, h2, h3, h4 {
+              margin-top: 24px;
+              margin-bottom: 10px;
+              color: #0f172a;
+            }
+            p, li {
+              margin: 0 0 10px;
+            }
+            ul {
+              margin: 0 0 12px 22px;
+              padding: 0;
+            }
+            a {
+              color: #0f172a;
+              text-decoration: none;
+            }
+            img {
+              max-width: 20px;
+              max-height: 20px;
+            }
+            .policy__back {
+              display: none;
+            }
+            @page {
+              size: A4;
+              margin: 16mm;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>Certicode Privacy Policy</h1>
+          <p><strong>Last Updated:</strong> November 31, 2025</p>
+          ${policyContent.innerHTML}
+        </body>
+      </html>
+    `;
+
+    printWindow.document.open();
+    printWindow.document.write(printableHtml);
+    printWindow.document.close();
+    printWindow.onload = () => {
+      printWindow.focus();
+      printWindow.print();
+    };
+    printWindow.onafterprint = () => {
+      printWindow.close();
+    };
+  };
+
   return (
     <div>
       <Navbar />
@@ -55,7 +125,11 @@ const PrivacyPolicy = () => {
                 Last Updated: November 31, 2025
               </div>
             </div>
-            <button className="policy__download" type="button">
+            <button
+              className="policy__download"
+              type="button"
+              onClick={handleDownloadPdf}
+            >
               <span className="policy__downloadIcon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" role="img" aria-hidden="true">
                   <path

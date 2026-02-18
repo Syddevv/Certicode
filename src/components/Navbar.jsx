@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import SearchIcon from "../assets/lucide_search.png";
-import MoonIcon from "../assets/lucide_moon.png";
 import CartIcon from "../assets/NavCart.png";
-import AvatarImg from "../assets/Avatar.png";
+import AvatarImg from "../assets/default-profile.png";
 import "../styles/nav.css";
 import CerticodeLogo from "../assets/certicodeicon.png";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { ProfileAPI } from "../services/ProfileAPI";
+import { resolveAvatarUrl } from "../utils/avatar";
 
 const Navbar = () => {
   const [user, setUser] = useState(null);
@@ -104,10 +103,6 @@ const Navbar = () => {
         </nav>
 
         <div className="nav__actions">
-          <button className="iconBtn" aria-label="Search" type="button">
-            {/* <img className="iconImg" src={SearchIcon} alt=""  placeholder/> */}
-          </button>
-
           {isLoggedIn && (
             <button className="iconBtn" aria-label="Cart" type="button">
               <Link to="/cart">
@@ -116,16 +111,12 @@ const Navbar = () => {
             </button>
           )}
 
-          <button className="iconBtn" aria-label="Theme" type="button">
-            <img className="iconImg" src={MoonIcon} alt="" />
-          </button>
-
           {isLoggedIn && !loading && (
             <button className="iconBtn" aria-label="Profile" type="button">
               <Link to="/buyer-dashboard">
                 <img 
                   className="iconImg nav__avatar" 
-                  src={user?.avatar_url || AvatarImg} 
+                  src={resolveAvatarUrl(user?.avatar_url) || AvatarImg} 
                   alt={user?.name || "User"}
                   style={{
                     width: '32px',
@@ -145,9 +136,14 @@ const Navbar = () => {
           )}
 
           {!isLoggedIn && !loading && (
-            <Link className="nav__login" to="/login">
-              Sign In
-            </Link>
+            <>
+              <Link className="btn btn--ghost" to="/login">
+                Login
+              </Link>
+              <Link className="btn btn--light" to="/register">
+                Sign Up
+              </Link>
+            </>
           )}
         </div>
       </div>

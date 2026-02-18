@@ -323,9 +323,7 @@ const LandingPage = () => {
     setSearchQuery(result.title);
     setSelectedResult(result);
     setShowDropdown(false);
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    navigate(`/marketplace/${result.id}`);
   };
 
   const handleSearchSubmit = () => {

@@ -3,7 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/MyPurchases.css";
-import Avatar from "../../assets/Avatar.png";
+import Avatar from "../../assets/default-profile.png";
+import { resolveAvatarUrl } from "../../utils/avatar";
 import VerifiedBadge from "../../assets/Verified.png";
 import ArrowDown from "../../assets/ArrowDown.png";
 import SearchIcon from "../../assets/lucide_search.png";
@@ -18,13 +19,31 @@ const MyPurchases = () => {
   const [filteredPurchases, setFilteredPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedAssetType, setSelectedAssetType] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [assetTypeFilter, setAssetTypeFilter] = useState("All");
+  const [techStackFilter, setTechStackFilter] = useState("All");
+  const [licenseFilter, setLicenseFilter] = useState("All");
+  const [sortBy, setSortBy] = useState("recent");
+  const [filtersOpen, setFiltersOpen] = useState(true);
 
-  const API_URL = "http://localhost:5000/api";
+  const techStackLabels = [
+    "React",
+    "Node.js",
+    "Vue",
+    "Angular",
+    "Laravel",
+    "PHP",
+    "Flutter",
+    "Firebase",
+    "Figma",
+    "Adobe XD",
+    "Sketch",
+  ];
 
-  const handleItemClick = (purchaseId) => {
-    navigate(`/my-purchases/${purchaseId}`);
+  const handleItemClick = (title) => {
+    if (title === "E-commerce SaaS Template") {
+      navigate("/my-purchases/e-commerce-saas-template");
+    }
   };
 
   const handleItemKeyDown = (event, purchaseId) => {
@@ -65,127 +84,28 @@ const MyPurchases = () => {
     }
   };
 
-  const downloadProductFile = async (productId) => {
-    try {
-      const token = localStorage.getItem('auth_token');
-      
-      if (!token) {
-        alert('Please login to download files');
-        throw new Error('Please login to download files');
-      }
-      
-      const downloadUrl = `${API_URL}/products/${productId}/download`;
-      
-      const iframe = document.createElement('iframe');
-      iframe.style.display = 'none';
-      iframe.src = downloadUrl;
-      
-      iframe.onload = () => {
-        console.log('Download iframe loaded');
-        setTimeout(() => {
-          document.body.removeChild(iframe);
-        }, 1000);
-      };
-      
-      document.body.appendChild(iframe);
-      
-      window.open(downloadUrl, '_blank');
-      
-      return {
-        success: true,
-        message: 'Download started'
-      };
-      
-    } catch (error) {
-      console.error('Download error:', error);
-      
-      try {
-        const token = localStorage.getItem('auth_token');
-        const response = await fetch(`${API_URL}/products/${productId}/download`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        
-        if (response.ok) {
-          const blob = await response.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `product-${productId}.zip`;
-          document.body.appendChild(a);
-          a.click();
-          window.URL.revokeObjectURL(url);
-          document.body.removeChild(a);
-          
-          return {
-            success: true,
-            message: 'Download started via blob'
-          };
-        }
-      } catch (fallbackError) {
-        console.error('Fallback download error:', fallbackError);
-        alert('Download failed. Please check if the backend server is running and try again.');
-      }
-      
-      throw error;
-    }
+  const normalizeText = (value) => {
+    if (!value) return "";
+    return String(value).toLowerCase().trim();
   };
 
-  const handleDownload = async (event, productId) => {
-    event.preventDefault();
-    event.stopPropagation();
-    
-    if (productId) {
-      try {
-        await downloadProductFile(productId);
-      } catch (error) {
-        console.error('Download failed:', error.message);
-      }
-    } else {
-      alert('No product ID available for download');
-    }
+  const toTitleCase = (value) => {
+    if (!value) return "";
+    return String(value)
+      .replace(/[_-]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/\w\S*/g, (word) => word[0].toUpperCase() + word.slice(1).toLowerCase());
   };
 
-  const filterPurchases = () => {
-    let filtered = purchases.filter(purchase => {
-      const productName = purchase.product?.name?.toLowerCase() || "";
-      const productCategory = purchase.product?.category?.toLowerCase() || "";
-      
-      const searchMatch = searchQuery.trim() === "" ||
-        productName.includes(searchQuery.toLowerCase()) ||
-        productCategory.includes(searchQuery.toLowerCase());
-      
-      if (!searchMatch) return false;
-      
-      if (selectedAssetType !== "All") {
-        const purchaseType = getAssetType(purchase);
-        if (selectedAssetType !== purchaseType) return false;
-      }
-      
-      return true;
-    });
-    
-    setFilteredPurchases(filtered);
-  };
-
-  const getAssetType = (purchase) => {
-    const name = purchase.product?.name?.toLowerCase() || '';
-    const category = purchase.product?.category?.toLowerCase() || '';
-    
-    if (name.includes('template') || category.includes('template')) return 'Templates';
-    if (name.includes('ui kit') || name.includes('dashboard') || category.includes('ui')) return 'UI Kits';
-    if (name.includes('app') || name.includes('mobile') || category.includes('app')) return 'Apps';
-    return 'Other';
-  };
-
-  const toggleAssetType = (type) => {
-    setSelectedAssetType(prev => prev === type ? "All" : type);
-  };
-
-  const clearAllFilters = () => {
-    setSearchQuery("");
-    setSelectedAssetType("All");
+  const getAssetTypeLabel = (product) => {
+    const raw =
+      product?.category ||
+      product?.type ||
+      product?.asset_type ||
+      product?.product_type ||
+      "Digital Product";
+    return toTitleCase(raw);
   };
 
   const getAssetTags = (product) => {
@@ -231,6 +151,23 @@ const MyPurchases = () => {
     return tags.slice(0, 2);
   };
 
+  const getTechStackLabels = (product) => {
+    const tags = getAssetTags(product).map((tag) => tag.label);
+    const fromTags = tags.filter((label) => techStackLabels.includes(label));
+
+    const rawTech = product?.tech_stack || product?.techStack;
+    const fromField = Array.isArray(rawTech)
+      ? rawTech.map((entry) => toTitleCase(entry))
+      : rawTech
+      ? rawTech
+          .split(",")
+          .map((entry) => toTitleCase(entry))
+          .filter(Boolean)
+      : [];
+
+    return Array.from(new Set([...fromTags, ...fromField]));
+  };
+
   const getStatus = (purchase) => {
     if (purchase.license_key && purchase.license_key !== '') {
       return "Active";
@@ -244,8 +181,99 @@ const MyPurchases = () => {
     return `Updated ${date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`;
   };
 
-  const activeFilterCount = (searchQuery ? 1 : 0) + 
-    (selectedAssetType !== "All" ? 1 : 0);
+  const assetTypeOptions = React.useMemo(() => {
+    const types = new Set();
+    purchases.forEach((purchase) => {
+      types.add(getAssetTypeLabel(purchase.product));
+    });
+    return Array.from(types).sort((a, b) => a.localeCompare(b));
+  }, [purchases]);
+
+  const techStackOptions = React.useMemo(() => {
+    const stacks = new Set();
+    purchases.forEach((purchase) => {
+      getTechStackLabels(purchase.product).forEach((label) => stacks.add(label));
+    });
+    return Array.from(stacks).sort((a, b) => a.localeCompare(b));
+  }, [purchases]);
+
+  const filteredPurchases = React.useMemo(() => {
+    const searchValue = normalizeText(searchTerm);
+
+    const matchesFilters = (purchase) => {
+      const product = purchase.product || {};
+      const assetTypeLabel = getAssetTypeLabel(product);
+      const techLabels = getTechStackLabels(product);
+      const status = getStatus(purchase);
+
+      const searchBlob = [
+        product.name,
+        product.category,
+        assetTypeLabel,
+        ...techLabels,
+      ]
+        .map((value) => normalizeText(value))
+        .filter(Boolean)
+        .join(" ");
+
+      const matchesSearch = searchValue.length === 0 || searchBlob.includes(searchValue);
+      const matchesAssetType =
+        assetTypeFilter === "All" || assetTypeLabel === assetTypeFilter;
+      const matchesTechStack =
+        techStackFilter === "All" || techLabels.includes(techStackFilter);
+      const matchesLicense =
+        licenseFilter === "All" || status === licenseFilter;
+
+      return matchesSearch && matchesAssetType && matchesTechStack && matchesLicense;
+    };
+
+    const getPurchaseDateValue = (purchase) => {
+      const dateValue =
+        purchase.purchased_at ||
+        purchase.created_at ||
+        purchase.date ||
+        purchase.paid_at;
+      const date = dateValue ? new Date(dateValue) : null;
+      return date && !Number.isNaN(date.getTime()) ? date.getTime() : 0;
+    };
+
+    const sorted = purchases.filter(matchesFilters).sort((a, b) => {
+      if (sortBy === "recent") {
+        return getPurchaseDateValue(b) - getPurchaseDateValue(a);
+      }
+      if (sortBy === "oldest") {
+        return getPurchaseDateValue(a) - getPurchaseDateValue(b);
+      }
+      if (sortBy === "name-asc") {
+        return normalizeText(a.product?.name).localeCompare(normalizeText(b.product?.name));
+      }
+      if (sortBy === "name-desc") {
+        return normalizeText(b.product?.name).localeCompare(normalizeText(a.product?.name));
+      }
+      if (sortBy === "status") {
+        const statusOrder = { Active: 0, "Update Ready": 1 };
+        return (statusOrder[getStatus(a)] ?? 99) - (statusOrder[getStatus(b)] ?? 99);
+      }
+      return 0;
+    });
+
+    return sorted;
+  }, [
+    purchases,
+    searchTerm,
+    assetTypeFilter,
+    techStackFilter,
+    licenseFilter,
+    sortBy,
+  ]);
+
+  const clearFilters = () => {
+    setSearchTerm("");
+    setAssetTypeFilter("All");
+    setTechStackFilter("All");
+    setLicenseFilter("All");
+    setSortBy("recent");
+  };
 
   return (
     <div>
@@ -262,7 +290,7 @@ const MyPurchases = () => {
                 border: '2px solid #e8e8e8'
               }}>
                 <img
-                  src={user?.avatar_url || Avatar}
+                  src={resolveAvatarUrl(user?.avatar_url) || Avatar}
                   alt={user?.name || "User"}
                   style={{
                     width: '100%',
@@ -353,61 +381,126 @@ const MyPurchases = () => {
                         </span>
                         <input
                           type="text"
-                          placeholder="Search your assets..."
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Search your assets by name or tech stack..."
+                          value={searchTerm}
+                          onChange={(event) => setSearchTerm(event.target.value)}
                         />
                       </div>
+                      <button
+                        className="purchases-action"
+                        type="button"
+                        onClick={() => setFiltersOpen((prev) => !prev)}
+                      >
+                        <span className="purchases-action__icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24">
+                            <path
+                              d="M4 6h16M7 12h10M10 18h4"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                        </span>
+                        Filter
+                      </button>
+                      <label className="purchases-action purchases-action--select">
+                        <span className="purchases-action__icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24">
+                            <path
+                              d="M7 6h10M5 12h14M9 18h6"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                        </span>
+                        Sort by
+                        <select
+                          className="purchases-actionSelect"
+                          value={sortBy}
+                          onChange={(event) => setSortBy(event.target.value)}
+                          aria-label="Sort purchases"
+                        >
+                          <option value="recent">Newest</option>
+                          <option value="oldest">Oldest</option>
+                          <option value="name-asc">Name (A-Z)</option>
+                          <option value="name-desc">Name (Z-A)</option>
+                          <option value="status">Status</option>
+                        </select>
+                      </label>
                     </div>
 
-                    <div className="purchases-filters__chips">
-                      <button
-                        className={`purchases-chip ${selectedAssetType === "All" ? "purchases-chip--active" : ""}`}
-                        type="button"
-                        onClick={() => toggleAssetType("All")}
-                      >
-                        All Assets
-                      </button>
-                      <button
-                        className={`purchases-chip ${selectedAssetType === "Templates" ? "purchases-chip--active" : ""}`}
-                        type="button"
-                        onClick={() => toggleAssetType("Templates")}
-                      >
-                        Templates
-                      </button>
-                      <button
-                        className={`purchases-chip ${selectedAssetType === "UI Kits" ? "purchases-chip--active" : ""}`}
-                        type="button"
-                        onClick={() => toggleAssetType("UI Kits")}
-                      >
-                        UI Kits
-                      </button>
-                      <button
-                        className={`purchases-chip ${selectedAssetType === "Apps" ? "purchases-chip--active" : ""}`}
-                        type="button"
-                        onClick={() => toggleAssetType("Apps")}
-                      >
-                        Apps
-                      </button>
-                    </div>
+                    {filtersOpen && (
+                      <div className="purchases-filters__chips">
+                        <label
+                          className={`purchases-chip${assetTypeFilter !== "All" ? " purchases-chip--active" : ""}`}
+                        >
+                          Asset Type:
+                          <select
+                            className="purchases-chipSelect"
+                            value={assetTypeFilter}
+                            onChange={(event) => setAssetTypeFilter(event.target.value)}
+                          >
+                            <option value="All">All</option>
+                            {assetTypeOptions.map((option) => (
+                              <option key={option} value={option}>
+                                {option}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                        <label
+                          className={`purchases-chip${techStackFilter !== "All" ? " purchases-chip--active" : ""}`}
+                        >
+                          Tech Stack
+                          <select
+                            className="purchases-chipSelect"
+                            value={techStackFilter}
+                            onChange={(event) => setTechStackFilter(event.target.value)}
+                          >
+                            <option value="All">All</option>
+                            {techStackOptions.map((option) => (
+                              <option key={option} value={option}>
+                                {option}
+                              </option>
+                            ))}
+                          </select>
+                          <img src={ArrowDown} alt="" aria-hidden="true" />
+                        </label>
+                        <label
+                          className={`purchases-chip${licenseFilter !== "All" ? " purchases-chip--active" : ""}`}
+                        >
+                          License Status
+                          <select
+                            className="purchases-chipSelect"
+                            value={licenseFilter}
+                            onChange={(event) => setLicenseFilter(event.target.value)}
+                          >
+                            <option value="All">All</option>
+                            <option value="Active">Active</option>
+                            <option value="Update Ready">Update Ready</option>
+                          </select>
+                          <img src={ArrowDown} alt="" aria-hidden="true" />
+                        </label>
+                        <button className="purchases-clear" type="button" onClick={clearFilters}>
+                          Clear All
+                        </button>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="purchases-list">
-                    {filteredPurchases.length === 0 && purchases.length > 0 ? (
-                      <div className="purchases-no-results">
-                        <p>No assets found matching your search criteria.</p>
-                        {activeFilterCount > 0 && (
-                          <button 
-                            className="purchases-btn"
-                            type="button"
-                            onClick={clearAllFilters}
-                          >
-                            Clear All Filters
-                          </button>
-                        )}
-                      </div>
-                    ) : (
-                      filteredPurchases.map((purchase) => {
+                  {filteredPurchases.length === 0 ? (
+                    <div className="purchases-empty">
+                      <p>No assets match your current search or filters.</p>
+                      <button className="purchases-btn" type="button" onClick={clearFilters}>
+                        Clear filters
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="purchases-list">
+                      {filteredPurchases.map((purchase) => {
                         const tags = getAssetTags(purchase.product);
                         const status = getStatus(purchase);
                         const updatedDate = getUpdatedDate(purchase.purchased_at);
@@ -415,11 +508,11 @@ const MyPurchases = () => {
                         return (
                           <article
                             key={purchase.id}
-                            className="purchases-item purchases-item--link"
+                            className={`purchases-item purchases-item--link`}
                             role="button"
                             tabIndex={0}
-                            onClick={() => handleItemClick(purchase.id)}
-                            onKeyDown={(event) => handleItemKeyDown(event, purchase.id)}
+                            onClick={() => handleItemClick(purchase.product?.name)}
+                            onKeyDown={(event) => handleItemKeyDown(event, purchase.product?.name)}
                           >
                             <div 
                               className="purchases-item__media"
@@ -447,7 +540,7 @@ const MyPurchases = () => {
                               </div>
                               <h4>{purchase.product?.name || 'Unknown Product'}</h4>
                               <p>
-                                {purchase.product?.category || 'Digital Product'} <span>{"\u2022"}</span> {purchase.product?.version || 'v1.0.0'}
+                                {getAssetTypeLabel(purchase.product)} <span>{"\u2022"}</span> {purchase.product?.version || 'v1.0.0'}
                               </p>
                             </div>
                             <div className="purchases-item__meta">
@@ -464,7 +557,7 @@ const MyPurchases = () => {
                             <button
                               className="purchases-download"
                               type="button"
-                              onClick={(event) => handleDownload(event, purchase.product?.id)}
+                              onClick={(event) => event.stopPropagation()}
                             >
                               <img src={WhiteDownload} alt="" aria-hidden="true" />
                               Download
@@ -479,9 +572,9 @@ const MyPurchases = () => {
                             </button>
                           </article>
                         );
-                      })
-                    )}
-                  </div>
+                      })}
+                    </div>
+                  )}
                 </>
               )}
             </div>

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/BillingInvoices.css";
-import Avatar from "../../assets/Avatar.png";
+import Avatar from "../../assets/default-profile.png";
+import { resolveAvatarUrl } from "../../utils/avatar";
 import VerifiedBadge from "../../assets/Verified.png";
 import InvoiceIcon from "../../assets/Invoice.png";
 import ChartBar from "../../assets/ChartBar.png";
@@ -15,6 +16,7 @@ import SearchIcon from "../../assets/lucide_search.png";
 import { ProfileAPI } from "../../services/ProfileAPI";
 
 const BillingInvoices = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -179,7 +181,7 @@ const BillingInvoices = () => {
                 border: '2px solid #e8e8e8'
               }}>
                 <img
-                  src={user?.avatar_url || Avatar}
+                  src={resolveAvatarUrl(user?.avatar_url) || Avatar}
                   alt={user?.name || "User"}
                   style={{
                     width: '100%',
@@ -202,7 +204,11 @@ const BillingInvoices = () => {
                 </span>
               </div>
             </div>
-            <button className="billing-profile__edit" type="button">
+            <button
+              className="billing-profile__edit"
+              type="button"
+              onClick={() => navigate("/account-settings")}
+            >
               <span className="billing-profile__editIcon" aria-hidden="true">
                 {"\u270e"}
               </span>
@@ -343,6 +349,7 @@ const BillingInvoices = () => {
                         <Link
                           className="billing-iconBtn"
                           to={`/billing-invoices/${row.id.toLowerCase().replace('#', '').replace('inv-', '')}`}
+                          state={{ invoice: row, user }}
                           aria-label="View"
                         >
                           <svg viewBox="0 0 24 24">

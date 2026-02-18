@@ -181,7 +181,7 @@
   accent-color: var(--color-primary-500);
   width: 16px;
   height: 16px;
-  border-radius: 50%;
+  border-radius: 4px;
 }
 
 .marketplace__check input[type="checkbox"] {
@@ -200,15 +200,15 @@
 }
 
 .marketplace__check input[type="checkbox"]:checked::after {
-  content: '';
+  content: "";
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 8px;
+  left: 5px;
+  top: 1px;
+  width: 4px;
   height: 8px;
-  border-radius: 50%;
-  background-color: #fff;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 .marketplace__check input[type="checkbox"]:hover {
