@@ -622,6 +622,13 @@
   line-height: 1.6;
 }
 
+.product__reviewMedia {
+  width: min(260px, 100%);
+  border-radius: 10px;
+  border: 1px solid var(--color-neutral-100);
+  display: block;
+}
+
 .product__reviewCta {
   border-top: 1px solid var(--color-neutral-100);
   padding-top: 20px;
@@ -911,6 +918,25 @@
 .product__reviewSubmitBtn:hover {
   filter: brightness(1.05);
   transform: translateY(-1px);
+}
+
+.product__reviewSubmitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.product__reviewSubmitMessage {
+  margin-top: 14px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.product__reviewSubmitMessage--error {
+  color: #b91c1c;
+}
+
+.product__reviewSubmitMessage--success {
+  color: #15803d;
 }
 
 .product__tech {

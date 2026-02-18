@@ -2,8 +2,11 @@ import React, { useState, useEffect } from "react";
 import VerifiedIcon from "../assets/Verified.png";
 import WriteReviewIcon from "../assets/write-a-rev.png";
 import CameraIcon from "../assets/camera-icon.png";
+import { ReviewAPI } from "../services/ReviewAPI";
 
-const ProductReviews = ({ productId, product }) => {
+const BACKEND_BASE_URL = "http://127.0.0.1:8000";
+
+const ProductReviews = ({ productId, product, onReviewCreated }) => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,7 +14,11 @@ const ProductReviews = ({ productId, product }) => {
   const [selectedRating, setSelectedRating] = useState(4);
   const [reviewText, setReviewText] = useState("");
   const [anonymousReview, setAnonymousReview] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState(null);
   const [uploadedFileName, setUploadedFileName] = useState("");
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [submitSuccess, setSubmitSuccess] = useState("");
   const [averageRating, setAverageRating] = useState(0);
   const [ratingBreakdown, setRatingBreakdown] = useState([
     { label: "5 stars", value: 0 },
@@ -20,6 +27,16 @@ const ProductReviews = ({ productId, product }) => {
     { label: "2 stars", value: 0 },
     { label: "1 stars", value: 0 },
   ]);
+
+  const resetReviewForm = () => {
+    setSelectedRating(4);
+    setReviewText("");
+    setAnonymousReview(false);
+    setUploadedFile(null);
+    setUploadedFileName("");
+    setSubmitError("");
+    setSubmitSuccess("");
+  };
 
   useEffect(() => {
     if (productId) {
@@ -36,6 +53,7 @@ const ProductReviews = ({ productId, product }) => {
     const handleEscape = (event) => {
       if (event.key === "Escape") {
         setIsReviewModalOpen(false);
+        resetReviewForm();
       }
     };
 
@@ -51,15 +69,7 @@ const ProductReviews = ({ productId, product }) => {
     try {
       setLoading(true);
       setError(null);
-      
-      const response = await fetch(`http://127.0.0.1:8000/api/products/${productId}/reviews`);
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch reviews: ${response.status}`);
-      }
-      
-      const reviewsData = await response.json();
-      console.log("Reviews data received:", reviewsData);
+      const reviewsData = await ReviewAPI.getProductReviews(productId);
       
       setReviews(reviewsData);
       
@@ -81,6 +91,15 @@ const ProductReviews = ({ productId, product }) => {
         });
         
         setRatingBreakdown(newBreakdown);
+      } else {
+        setAverageRating(0);
+        setRatingBreakdown([
+          { label: "5 stars", value: 0 },
+          { label: "4 stars", value: 0 },
+          { label: "3 stars", value: 0 },
+          { label: "2 stars", value: 0 },
+          { label: "1 stars", value: 0 },
+        ]);
       }
     } catch (error) {
       console.error("Error fetching reviews:", error);
@@ -93,12 +112,77 @@ const ProductReviews = ({ productId, product }) => {
   const handleUpload = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    if (!file.type?.startsWith("image/")) {
+      setUploadedFile(null);
+      setUploadedFileName("");
+      setSubmitError("Please upload an image file.");
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadedFile(null);
+      setUploadedFileName("");
+      setSubmitError("File size must be 10MB or less.");
+      return;
+    }
+
+    setSubmitError("");
+    setUploadedFile(file);
     setUploadedFileName(file.name);
   };
 
-  const handleReviewSubmit = (event) => {
+  const getReviewImageUrl = (review) => {
+    const imagePath = review?.image;
+    if (!imagePath) return "";
+    if (typeof imagePath === "string" && /^https?:\/\//i.test(imagePath)) {
+      return imagePath;
+    }
+    return `${BACKEND_BASE_URL}/${String(imagePath).replace(/^\/+/, "")}`;
+  };
+
+  const handleReviewSubmit = async (event) => {
     event.preventDefault();
-    setIsReviewModalOpen(false);
+
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      setSubmitError("Please login to submit a review.");
+      return;
+    }
+
+    if (!reviewText.trim()) {
+      setSubmitError("Review text is required.");
+      return;
+    }
+
+    try {
+      setSubmitLoading(true);
+      setSubmitError("");
+      setSubmitSuccess("");
+
+      const reviewPayload = {
+        product_id: productId,
+        rating: selectedRating,
+        description: reviewText.trim(),
+      };
+
+      await ReviewAPI.createReview(reviewPayload, uploadedFile);
+
+      setSubmitSuccess("Review submitted successfully.");
+      await fetchReviews();
+      if (typeof onReviewCreated === "function") {
+        onReviewCreated();
+      }
+
+      setTimeout(() => {
+        setIsReviewModalOpen(false);
+        resetReviewForm();
+      }, 700);
+    } catch (submitErr) {
+      setSubmitError(submitErr.message || "Failed to submit review.");
+    } finally {
+      setSubmitLoading(false);
+    }
   };
 
   const productTitle = product?.name || "E-commerce SaaS Template";
@@ -182,6 +266,13 @@ const ProductReviews = ({ productId, product }) => {
                 </span>
               </div>
               <p>{review.description}</p>
+              {getReviewImageUrl(review) && (
+                <img
+                  src={getReviewImageUrl(review)}
+                  alt="Review upload"
+                  className="product__reviewMedia"
+                />
+              )}
             </article>
           ))
         )}
@@ -195,7 +286,11 @@ const ProductReviews = ({ productId, product }) => {
         <button
           className="product__reviewBtn"
           type="button"
-          onClick={() => setIsReviewModalOpen(true)}
+          onClick={() => {
+            setIsReviewModalOpen(true);
+            setSubmitError("");
+            setSubmitSuccess("");
+          }}
         >
           <img src={WriteReviewIcon} alt="Write Review" className="product__icon" style={{ marginRight: '8px', verticalAlign: 'middle' }} />
           Write a Review
@@ -209,6 +304,7 @@ const ProductReviews = ({ productId, product }) => {
           onClick={(event) => {
             if (event.target === event.currentTarget) {
               setIsReviewModalOpen(false);
+              resetReviewForm();
             }
           }}
         >
@@ -222,7 +318,10 @@ const ProductReviews = ({ productId, product }) => {
               className="product__reviewModalClose"
               type="button"
               aria-label="Close review form"
-              onClick={() => setIsReviewModalOpen(false)}
+              onClick={() => {
+                setIsReviewModalOpen(false);
+                resetReviewForm();
+              }}
             >
               ×
             </button>
@@ -284,10 +383,11 @@ const ProductReviews = ({ productId, product }) => {
                 onChange={(event) => setReviewText(event.target.value)}
                 className="product__reviewTextarea"
                 placeholder="Write your experience with the product here..."
+                disabled={submitLoading}
               />
 
               <label className="product__reviewFieldLabel" htmlFor="review-upload">
-                Add Photos/Videos (optional)
+                Add Photo (optional)
               </label>
               <label className="product__reviewUpload" htmlFor="review-upload">
                 <img src={CameraIcon} alt="" />
@@ -299,9 +399,10 @@ const ProductReviews = ({ productId, product }) => {
               <input
                 id="review-upload"
                 type="file"
-                accept="image/*,video/*"
+                accept="image/*"
                 className="product__reviewFileInput"
                 onChange={handleUpload}
+                disabled={submitLoading}
               />
 
               <label className="product__reviewAnon" htmlFor="review-anon">
@@ -310,6 +411,7 @@ const ProductReviews = ({ productId, product }) => {
                   type="checkbox"
                   checked={anonymousReview}
                   onChange={(event) => setAnonymousReview(event.target.checked)}
+                  disabled={submitLoading}
                 />
                 <span className="product__reviewAnonToggle" aria-hidden="true" />
                 <span className="product__reviewAnonText">
@@ -318,8 +420,19 @@ const ProductReviews = ({ productId, product }) => {
                 </span>
               </label>
 
-              <button className="product__reviewSubmitBtn" type="submit">
-                Submit
+              {submitError && (
+                <p className="product__reviewSubmitMessage product__reviewSubmitMessage--error">
+                  {submitError}
+                </p>
+              )}
+              {submitSuccess && (
+                <p className="product__reviewSubmitMessage product__reviewSubmitMessage--success">
+                  {submitSuccess}
+                </p>
+              )}
+
+              <button className="product__reviewSubmitBtn" type="submit" disabled={submitLoading}>
+                {submitLoading ? "Submitting..." : "Submit"}
               </button>
             </form>
           </div>

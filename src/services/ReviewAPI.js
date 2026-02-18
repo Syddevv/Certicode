@@ -1,45 +1,75 @@
 const API_URL = 'http://127.0.0.1:8000/api';
 
-const getAuthHeaders = () => {
+const getAuthHeaders = (isFormData = false) => {
   const token = localStorage.getItem('auth_token');
   return {
-    'Content-Type': 'application/json',
     'Accept': 'application/json',
+    ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
     ...(token ? { 'Authorization': `Bearer ${token}` } : {})
   };
+};
+
+const parseErrorMessage = (data, fallbackMessage) => {
+  if (!data) return fallbackMessage;
+  if (typeof data.message === "string" && data.message.trim()) {
+    return data.message;
+  }
+  if (data.errors && typeof data.errors === "object") {
+    const messages = Object.values(data.errors).flat().filter(Boolean);
+    if (messages.length > 0) return messages.join(" ");
+  }
+  return fallbackMessage;
+};
+
+const handleResponse = async (response, fallbackMessage) => {
+  let data = null;
+
+  try {
+    data = await response.json();
+  } catch {
+    data = null;
+  }
+
+  if (!response.ok) {
+    const error = new Error(parseErrorMessage(data, fallbackMessage));
+    error.status = response.status;
+    error.data = data;
+    throw error;
+  }
+
+  return data;
 };
 
 export const ReviewAPI = {
   async getProductReviews(productId) {
     const response = await fetch(`http://127.0.0.1:8000/api/products/${productId}/reviews`);
-    
-    console.log('ReviewAPI Response status:', response.status);
-    console.log('ReviewAPI Response headers:', response.headers);
-    
-    const data = await response.json();
-    console.log('ReviewAPI Response data:', data);
-    
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch reviews');
-    }
-    
-    return data;
+    return handleResponse(response, 'Failed to fetch reviews');
   },
 
-  async createReview(reviewData) {
+  async createReview(reviewData, imageFile = null) {
+    const hasImage = imageFile instanceof File;
+    let requestBody = null;
+
+    if (hasImage) {
+      const formData = new FormData();
+      Object.entries(reviewData).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, value);
+        }
+      });
+      formData.append('image', imageFile);
+      requestBody = formData;
+    } else {
+      requestBody = JSON.stringify(reviewData);
+    }
+
     const response = await fetch(`${API_URL}/reviews`, {
       method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify(reviewData),
+      headers: getAuthHeaders(hasImage),
+      body: requestBody,
     });
-    
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to create review');
-    }
-    
-    return data;
+
+    return handleResponse(response, 'Failed to create review');
   },
 
   async updateReview(reviewId, reviewData) {
@@ -49,13 +79,7 @@ export const ReviewAPI = {
       body: JSON.stringify(reviewData),
     });
     
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to update review');
-    }
-    
-    return data;
+    return handleResponse(response, 'Failed to update review');
   },
 
   async deleteReview(reviewId) {
@@ -64,13 +88,7 @@ export const ReviewAPI = {
       headers: getAuthHeaders(),
     });
     
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to delete review');
-    }
-    
-    return data;
+    return handleResponse(response, 'Failed to delete review');
   },
 
   async getReviewStats(productId) {
@@ -130,16 +148,6 @@ export const ReviewAPI = {
 
   async getTopReviews() {
     const response = await fetch('http://127.0.0.1:8000/api/top-reviews');
-    
-    console.log('Top Reviews Response status:', response.status);
-    
-    const data = await response.json();
-    console.log('Top Reviews Response data:', data);
-    
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch top reviews');
-    }
-    
-    return data;
+    return handleResponse(response, 'Failed to fetch top reviews');
   },
 };
