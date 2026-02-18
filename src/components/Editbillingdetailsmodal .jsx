@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../styles/BuyerAccountSettings.css";
+import ManagingPaymentMethod from "./ManagingPaymentMethod";
 
 export default function EditBillingDetailsModal({ isOpen, onClose }) {
   const [form, setForm] = useState({
@@ -117,10 +118,7 @@ export default function EditBillingDetailsModal({ isOpen, onClose }) {
             </div>
           </div>
           {/* add new payment */}
-          <button className="ebd-add-method">
-            <span className="ebd-plus-icon">+</span>
-            <span>Add a new payment method</span>
-          </button>
+          <ManagingPaymentMethod />
         </div>
         <div className="ebd-spacer" />
         <button className="ebd-submit-btn" onClick={onClose}>
