@@ -182,7 +182,7 @@ function AppContent() {
         }
       />
       <Route
-        path="/my-purchases/e-commerce-saas-template"
+        path="/my-purchases/:assetSlug"
         element={
           <ProtectedRoute allowedRoles={["Customer"]}>
             <PurchasedAssetDetail />
