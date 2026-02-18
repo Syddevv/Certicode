@@ -172,6 +172,7 @@ const PromoCodes = () => {
   );
 
   const hasVouchers = filteredVouchers.length > 0;
+  const reachedVoucherEnd = filteredVouchers.length <= 4;
 
   if (loading) {
     return (
@@ -298,8 +299,10 @@ const PromoCodes = () => {
                     ))}
                   </div>
 
-                  <button className="promo__more" type="button">
-                    Load More Vouchers
+                  <button className="promo__more" type="button" disabled={reachedVoucherEnd}>
+                    {reachedVoucherEnd
+                      ? "You've reached the end of the promo codes"
+                      : "Load More Vouchers"}
                   </button>
                 </>
               ) : (
