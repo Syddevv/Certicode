@@ -508,7 +508,9 @@ const ProductDetails = () => {
               {activeTab === "features" && (
                 <ProductFeatures features={product.features} productId={product.id} />
               )}
-              {activeTab === "reviews" && <ProductReviews productId={product.id} />}
+              {activeTab === "reviews" && (
+                <ProductReviews productId={product.id} product={product} />
+              )}
             </div>
           </section>
 

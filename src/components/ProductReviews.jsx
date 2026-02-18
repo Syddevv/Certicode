@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from "react";
 import VerifiedIcon from "../assets/Verified.png";
 import WriteReviewIcon from "../assets/write-a-rev.png";
+import CameraIcon from "../assets/camera-icon.png";
 
-const ProductReviews = ({ productId }) => {
+const ProductReviews = ({ productId, product }) => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [selectedRating, setSelectedRating] = useState(4);
+  const [reviewText, setReviewText] = useState("");
+  const [anonymousReview, setAnonymousReview] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState("");
   const [averageRating, setAverageRating] = useState(0);
   const [ratingBreakdown, setRatingBreakdown] = useState([
     { label: "5 stars", value: 0 },
@@ -20,6 +26,26 @@ const ProductReviews = ({ productId }) => {
       fetchReviews();
     }
   }, [productId]);
+
+  useEffect(() => {
+    if (!isReviewModalOpen) return undefined;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleEscape = (event) => {
+      if (event.key === "Escape") {
+        setIsReviewModalOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [isReviewModalOpen]);
 
   const fetchReviews = async () => {
     try {
@@ -63,6 +89,29 @@ const ProductReviews = ({ productId }) => {
       setLoading(false);
     }
   };
+
+  const handleUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploadedFileName(file.name);
+  };
+
+  const handleReviewSubmit = (event) => {
+    event.preventDefault();
+    setIsReviewModalOpen(false);
+  };
+
+  const productTitle = product?.name || "E-commerce SaaS Template";
+  const productPrice = Number(product?.price || 0).toFixed(2);
+  const productImage = product?.featured_image || "";
+  const productType = product?.asset_type || "SaaS Template";
+  const productStack = Array.isArray(product?.technologies)
+    ? product.technologies
+        .slice(0, 2)
+        .map((tech) => (typeof tech === "string" ? tech : tech?.name))
+        .filter(Boolean)
+        .join(" • ") || "React • Node.js"
+    : "React • Node.js";
 
   return (
     <div className="product__reviews">
@@ -143,11 +192,139 @@ const ProductReviews = ({ productId }) => {
         <p>
           Your feedback helps the community and helps us improve our assets.
         </p>
-        <button className="product__reviewBtn" type="button">
+        <button
+          className="product__reviewBtn"
+          type="button"
+          onClick={() => setIsReviewModalOpen(true)}
+        >
           <img src={WriteReviewIcon} alt="Write Review" className="product__icon" style={{ marginRight: '8px', verticalAlign: 'middle' }} />
           Write a Review
         </button>
       </div>
+
+      {isReviewModalOpen && (
+        <div
+          className="product__reviewModalOverlay"
+          role="presentation"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              setIsReviewModalOpen(false);
+            }
+          }}
+        >
+          <div
+            className="product__reviewModal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="review-modal-title"
+          >
+            <button
+              className="product__reviewModalClose"
+              type="button"
+              aria-label="Close review form"
+              onClick={() => setIsReviewModalOpen(false)}
+            >
+              ×
+            </button>
+
+            <h3 id="review-modal-title">Write a Review</h3>
+            <p className="product__reviewModalSubtitle">
+              Tell us about your experience and give this product a rating.
+            </p>
+
+            <div className="product__reviewModalProduct">
+              <div
+                className="product__reviewModalThumb"
+                style={
+                  productImage
+                    ? {
+                        backgroundImage: `url(${productImage})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }
+                    : undefined
+                }
+              />
+              <div className="product__reviewModalProductMeta">
+                <strong>{productTitle}</strong>
+                <span>
+                  {productType} • ${productPrice}
+                </span>
+                <small>{productStack}</small>
+              </div>
+            </div>
+
+            <form onSubmit={handleReviewSubmit} className="product__reviewModalForm">
+              <p className="product__reviewModalPrompt">
+                Please select the rating and review the product below:
+              </p>
+
+              <div className="product__reviewModalStars">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    className={`product__reviewStar${
+                      star <= selectedRating ? " product__reviewStar--active" : ""
+                    }`}
+                    onClick={() => setSelectedRating(star)}
+                    aria-label={`Rate ${star} star${star > 1 ? "s" : ""}`}
+                  >
+                    ★
+                  </button>
+                ))}
+              </div>
+
+              <label className="product__reviewFieldLabel" htmlFor="review-description">
+                Your Review
+              </label>
+              <textarea
+                id="review-description"
+                value={reviewText}
+                onChange={(event) => setReviewText(event.target.value)}
+                className="product__reviewTextarea"
+                placeholder="Write your experience with the product here..."
+              />
+
+              <label className="product__reviewFieldLabel" htmlFor="review-upload">
+                Add Photos/Videos (optional)
+              </label>
+              <label className="product__reviewUpload" htmlFor="review-upload">
+                <img src={CameraIcon} alt="" />
+                <span>Drag & drop or click here</span>
+                <small>
+                  {uploadedFileName || "to upload your files (max 10 MB)"}
+                </small>
+              </label>
+              <input
+                id="review-upload"
+                type="file"
+                accept="image/*,video/*"
+                className="product__reviewFileInput"
+                onChange={handleUpload}
+              />
+
+              <label className="product__reviewAnon" htmlFor="review-anon">
+                <input
+                  id="review-anon"
+                  type="checkbox"
+                  checked={anonymousReview}
+                  onChange={(event) => setAnonymousReview(event.target.checked)}
+                />
+                <span className="product__reviewAnonToggle" aria-hidden="true" />
+                <span className="product__reviewAnonText">
+                  Leave your review anonymously
+                  <small>Your name will be hidden from other users.</small>
+                </span>
+              </label>
+
+              <button className="product__reviewSubmitBtn" type="submit">
+                Submit
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
