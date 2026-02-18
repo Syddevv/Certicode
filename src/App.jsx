@@ -28,6 +28,7 @@ import PurchasedAssetDetail from "./pages/public/PurchasedAssetDetail";
 import CustomerSupport from "./pages/public/CustomerSupport";
 import ContactUs from "./pages/public/ContactUs";
 import SuccessStories from "./pages/public/SuccessStories";
+import SuccessStoryIronclad from "./pages/public/SuccessStoryIronclad";
 import BlogsNews from "./pages/public/BlogsNews";
 import BlogsNewsIndividual from "./pages/public/BlogsNewsIndividual";
 import NotFound from "./pages/public/NotFound";
@@ -160,6 +161,7 @@ function AppContent() {
       <Route path="/customer-support" element={<CustomerSupport />} />
       <Route path="/contact" element={<ContactUs />} />
       <Route path="/success-stories" element={<SuccessStories />} />
+      <Route path="/success-stories/scaling-with-the-ironclad-ui-kit" element={<SuccessStoryIronclad />} />
       <Route path="/blogs-news" element={<BlogsNews />} />
       <Route
         path="/blogs-news/how-secure-software"
