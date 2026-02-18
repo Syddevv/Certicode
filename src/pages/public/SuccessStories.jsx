@@ -137,9 +137,15 @@ const SuccessStories = () => {
                   <span className="stories-card__tag">{story.tag}</span>
                   <h3>{story.title}</h3>
                   <p>{story.text}</p>
-                  <button className="stories-card__link" type="button">
-                    Read Case Study <img src={OrangeArrow} alt="" />
-                  </button>
+                  {story.href ? (
+                    <Link className="stories-card__link" to={story.href}>
+                      Read Case Study <img src={OrangeArrow} alt="" />
+                    </Link>
+                  ) : (
+                    <button className="stories-card__link" type="button">
+                      Read Case Study <img src={OrangeArrow} alt="" />
+                    </button>
+                  )}
                 </div>
               </article>
             ))}
