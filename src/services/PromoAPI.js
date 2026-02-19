@@ -65,7 +65,7 @@ export const PromoAPI = {
     }
   },
 
-    getUserPromoCodes: async () => {
+  getUserPromoCodes: async () => {
     try {
       const token = localStorage.getItem('auth_token');
       
@@ -100,4 +100,38 @@ export const PromoAPI = {
     }
   },
 
+  getUserPromoHistory: async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        throw new Error('Please log in to view promo history');
+      }
+      
+      const response = await fetch(`${API_URL}/user/promo-history`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const responseText = await response.text();
+      
+      if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+        throw new Error('Server error. Please try again.');
+      }
+
+      const data = JSON.parse(responseText);
+      
+      if (!response.ok) {
+        throw new Error(data.message || `Error ${response.status}`);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('PromoAPI - Error fetching promo history:', error);
+      throw error;
+    }
+  }
 };

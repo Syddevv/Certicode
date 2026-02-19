@@ -39,15 +39,44 @@ const CreateNewPassword = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
+  
+  // Add state for token and email
+  const [token, setToken] = useState("");
+  const [email, setEmail] = useState("");
 
-  const token = searchParams.get('token');
-  const email = searchParams.get('email');
-
+  // ADD THIS useEffect FOR DEBUGGING
   useEffect(() => {
-    console.log("Token:", token);
-    console.log("Email:", email);
+    // Log the raw token from URL
+    const rawToken = searchParams.get('token');
+    const rawEmail = searchParams.get('email');
+    
+    console.log("=== DEBUGGING RESET LINK ===");
+    console.log("Raw token from URL:", rawToken);
+    console.log("Raw email from URL:", rawEmail);
+    console.log("Token length:", rawToken?.length);
+    console.log("First 20 chars:", rawToken?.substring(0, 20));
     console.log("Full URL:", window.location.href);
-  }, [token, email]);
+    
+    // Check if token might be URL encoded
+    if (rawToken && rawToken.includes('%')) {
+      console.log("Token appears to be URL encoded, decoding...");
+      const decodedToken = decodeURIComponent(rawToken);
+      console.log("Decoded token:", decodedToken);
+      console.log("Decoded token length:", decodedToken.length);
+    }
+    
+    // Set the token and email in state
+    setToken(rawToken || "");
+    setEmail(rawEmail || "");
+    
+    // Check if token looks valid (should be ~60 chars for Laravel default)
+    if (!rawToken || rawToken.length < 20) {
+      setMessage({ 
+        type: "error", 
+        text: "Invalid reset link. Please request a new password reset." 
+      });
+    }
+  }, [searchParams]);
 
   const rules = useMemo(() => {
     const hasEightChars = newPassword.length >= 8;
@@ -67,6 +96,7 @@ const CreateNewPassword = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     
+    // Use the token and email from state
     if (!token || !email) {
       setMessage({ type: "error", text: "Invalid reset link. Please request a new password reset." });
       return;
@@ -81,6 +111,13 @@ const CreateNewPassword = () => {
       setLoading(true);
       setMessage({ type: "", text: "" });
 
+      // Log what we're sending
+      console.log("Sending reset request with:", {
+        email: email,
+        token_length: token.length,
+        token_preview: token.substring(0, 20) + '...'
+      });
+
       const response = await fetch('http://127.0.0.1:8000/api/reset-password', {
         method: 'POST',
         headers: {
@@ -88,7 +125,7 @@ const CreateNewPassword = () => {
           'Accept': 'application/json',
         },
         body: JSON.stringify({
-          token: token,
+          token: token,  // Send the raw token from URL
           email: email,
           password: newPassword,
           password_confirmation: confirmPassword
@@ -96,6 +133,7 @@ const CreateNewPassword = () => {
       });
 
       const data = await response.json();
+      console.log("Reset password response:", data);
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to reset password');

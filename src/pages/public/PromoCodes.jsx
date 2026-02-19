@@ -20,7 +20,9 @@ const PromoCodes = () => {
   const [vouchers, setVouchers] = useState([]);
   const [historyItems, setHistoryItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(true);
   const [error, setError] = useState("");
+  const [historyError, setHistoryError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [copyingCode, setCopyingCode] = useState(null);
 
@@ -113,38 +115,22 @@ const PromoCodes = () => {
 
   const fetchHistory = async () => {
     try {
-      // MOCK API
-      const mockHistory = [
-        {
-          id: 1,
-          icon: GrayCheck,
-          tone: "neutral",
-          title: "LOYALTY15 Used",
-          desc: 'Applied on "Fintech Banking Dashboard" purchase.',
-          date: "Jan 21, 2026",
-        },
-        {
-          id: 2,
-          icon: DeleteIcon,
-          tone: "danger",
-          title: "SUMMER25 Expired",
-          desc: "25% discount voucher expired without use.",
-          date: "May 01, 2025",
-        },
-        {
-          id: 3,
-          icon: GrayCheck,
-          tone: "neutral",
-          title: "FREELANCE5 Used",
-          desc: 'Applied on "Portfolio Template" purchase.',
-          date: "Mar 05, 2025",
-        },
-      ];
+      setHistoryLoading(true);
+      setHistoryError("");
       
-      setHistoryItems(mockHistory);
+      const data = await PromoAPI.getUserPromoHistory();
+      setHistoryItems(data);
+      
     } catch (error) {
       console.error("Error fetching history:", error);
-      setHistoryItems([]);
+      if (error.message === 'Please log in to view promo history') {
+        setHistoryItems([]);
+      } else {
+        setHistoryError("Failed to load history");
+        setHistoryItems([]);
+      }
+    } finally {
+      setHistoryLoading(false);
     }
   };
 
@@ -324,25 +310,33 @@ const PromoCodes = () => {
               <div className="promo__card promo__card--history">
                 <h3>History Activity</h3>
                 <div className="promo__cardDivider" aria-hidden="true" />
-                <div className="promo__history">
-                  {historyItems.map((item) => (
-                    <div className="promo__historyItem" key={item.id}>
-                      <span
-                        className={`promo__historyIcon promo__historyIcon--${item.tone}`}
-                      >
-                        <img src={item.icon} alt="" aria-hidden="true" />
-                      </span>
-                      <div className="promo__historyBody">
-                        <div className="promo__historyTitle">{item.title}</div>
-                        <div className="promo__historyDesc">{item.desc}</div>
-                        <div className="promo__historyDate">{item.date}</div>
+                {historyLoading ? (
+                  <div className="promo__historyLoading">Loading history...</div>
+                ) : historyError ? (
+                  <div className="promo__historyError">{historyError}</div>
+                ) : historyItems.length > 0 ? (
+                  <div className="promo__history">
+                    {historyItems.map((item) => (
+                      <div className="promo__historyItem" key={item.id}>
+                        <span
+                          className={`promo__historyIcon promo__historyIcon--${item.tone}`}
+                        >
+                          <img src={item.icon || GrayCheck} alt="" aria-hidden="true" />
+                        </span>
+                        <div className="promo__historyBody">
+                          <div className="promo__historyTitle">{item.title}</div>
+                          <div className="promo__historyDesc">{item.desc}</div>
+                          <div className="promo__historyDate">{item.date}</div>
+                          {item.discount_amount && (
+                            <div className="promo__historyDiscount">Saved {item.discount_amount}</div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-                <button className="promo__historyBtn" type="button">
-                  View All History
-                </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="promo__historyEmpty">No promos used yet</p>
+                )}
               </div>
 
               <div className="promo__card promo__card--help">
