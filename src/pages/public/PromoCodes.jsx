@@ -36,56 +36,61 @@ const PromoCodes = () => {
     try {
       setLoading(true);
       setError("");
-      
+
       const activePromos = await PromoAPI.getActivePromos();
-      
+
       const transformedVouchers = activePromos.map((promo, index) => {
         let status = "active";
         let badge = "Active";
-        
+
         if (promo.valid_until) {
           const expiryDate = new Date(promo.valid_until);
           const now = new Date();
-          const daysUntilExpiry = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
-          
+          const daysUntilExpiry = Math.ceil(
+            (expiryDate - now) / (1000 * 60 * 60 * 24),
+          );
+
           if (daysUntilExpiry <= 7) {
             status = "expiring";
             badge = "Expiring Soon";
           }
         }
-        
+
         let valueDisplay = "";
-        if (promo.type === 'percentage') {
+        if (promo.type === "percentage") {
           valueDisplay = `${promo.value}% OFF`;
-        } else if (promo.type === 'fixed') {
+        } else if (promo.type === "fixed") {
           valueDisplay = `$${promo.value} OFF`;
-        } else if (promo.type === 'shipping') {
+        } else if (promo.type === "shipping") {
           valueDisplay = "FREE SHIPPING";
         }
-        
-        const title = promo.description || 
-          (promo.type === 'percentage' ? `Get ${promo.value}% off your order` :
-           promo.type === 'fixed' ? `Save $${promo.value} on your purchase` :
-           "Free shipping on eligible orders");
-        
+
+        const title =
+          promo.description ||
+          (promo.type === "percentage"
+            ? `Get ${promo.value}% off your order`
+            : promo.type === "fixed"
+              ? `Save $${promo.value} on your purchase`
+              : "Free shipping on eligible orders");
+
         let metaLabel = "Expires:";
         let metaValue = "";
         if (promo.valid_until) {
           const expiryDate = new Date(promo.valid_until);
-          metaValue = expiryDate.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
+          metaValue = expiryDate.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
           });
         } else {
           metaValue = "No expiry date";
         }
-        
+
         if (promo.min_order_amount > 0) {
           metaLabel = "Min order:";
           metaValue = `$${promo.min_order_amount}`;
         }
-        
+
         return {
           id: promo.id || index + 1,
           value: valueDisplay,
@@ -98,12 +103,11 @@ const PromoCodes = () => {
           type: promo.type,
           rawValue: promo.value,
           min_order_amount: promo.min_order_amount,
-          valid_until: promo.valid_until
+          valid_until: promo.valid_until,
         };
       });
-      
+
       setVouchers(transformedVouchers);
-      
     } catch (error) {
       console.error("Error fetching vouchers:", error);
       setError("Failed to load vouchers. Please try again.");
@@ -138,7 +142,7 @@ const PromoCodes = () => {
     try {
       setCopyingCode(code);
       await navigator.clipboard.writeText(code);
-      
+
       setTimeout(() => {
         setCopyingCode(null);
       }, 2000);
@@ -152,12 +156,14 @@ const PromoCodes = () => {
     setSearchTerm(e.target.value);
   };
 
-  const filteredVouchers = vouchers.filter(voucher =>
-    voucher.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    voucher.title.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredVouchers = vouchers.filter(
+    (voucher) =>
+      voucher.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      voucher.title.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const hasVouchers = filteredVouchers.length > 0;
+  const reachedVoucherEnd = filteredVouchers.length <= 4;
 
   if (loading) {
     return (
@@ -196,17 +202,13 @@ const PromoCodes = () => {
               <p>
                 Manage your promo codes and exclusive marketplace discounts.
               </p>
-              {error && (
-                <div className="promo__error">
-                  {error}
-                </div>
-              )}
+              {error && <div className="promo__error">{error}</div>}
             </div>
 
             <div className="promo__search">
               <img src={SearchIcon} alt="" aria-hidden="true" />
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Search vouchers..."
                 value={searchTerm}
                 onChange={handleSearch}
@@ -270,8 +272,8 @@ const PromoCodes = () => {
                           {copyingCode === voucher.code ? (
                             <span className="promoCard__copied">Copied!</span>
                           ) : (
-                            <button 
-                              className="promoCard__copy" 
+                            <button
+                              className="promoCard__copy"
                               type="button"
                               onClick={() => handleCopyCode(voucher.code)}
                             >
@@ -284,8 +286,14 @@ const PromoCodes = () => {
                     ))}
                   </div>
 
-                  <button className="promo__more" type="button">
-                    Load More Vouchers
+                  <button
+                    className="promo__more"
+                    type="button"
+                    disabled={reachedVoucherEnd}
+                  >
+                    {reachedVoucherEnd
+                      ? "You've reached the end of the promo codes"
+                      : "Load More Vouchers"}
                   </button>
                 </>
               ) : (

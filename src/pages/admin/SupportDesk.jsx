@@ -8,6 +8,7 @@ import volumeIcon from "../../assets/volume.png";
 import searchIcon from "../../assets/Search.png";
 import notifBell from "../../assets/NotifBell.png";
 import { SupportTicketAPI } from "../../services/SupportTicketAPI";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
 const SupportDesk = () => {
   const navigate = useNavigate(); 
@@ -30,7 +31,7 @@ const SupportDesk = () => {
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
     if (!token) {
-      alert('Please log in to access the Support Desk');
+      showErrorToast("Please log in to access the Support Desk");
       navigate('/login');
       return;
     }
@@ -70,7 +71,7 @@ const SupportDesk = () => {
       setError(error.message || "Failed to load tickets");
       
       if (error.response?.status === 401) {
-        alert('Session expired. Please log in again.');
+        showErrorToast("Session expired. Please log in again.");
         localStorage.removeItem('auth_token');
         navigate('/login');
       }
@@ -81,7 +82,7 @@ const SupportDesk = () => {
 
   const handleBulkClose = async () => {
     if (selectedTickets.length === 0) {
-      alert("Please select tickets to close");
+      showErrorToast("Please select tickets to close");
       return;
     }
 
@@ -91,19 +92,19 @@ const SupportDesk = () => {
 
     try {
       await SupportTicketAPI.bulkCloseTickets(selectedTickets);
-      alert("Tickets closed successfully");
+      showSuccessToast("Tickets closed successfully");
       fetchTickets(currentFilter);
       fetchSupportStats();
       setSelectedTickets([]);
     } catch (error) {
       console.error("Failed to bulk close:", error);
-      alert(error.message || "Failed to close tickets");
+      showErrorToast(error.message || "Failed to close tickets");
     }
   };
 
   const handleAssign = async () => {
     if (selectedTickets.length === 0) {
-      alert("Please select tickets to assign");
+      showErrorToast("Please select tickets to assign");
       return;
     }
 
@@ -116,12 +117,12 @@ const SupportDesk = () => {
       );
 
       await Promise.all(assignPromises);
-      alert("Tickets assigned successfully");
+      showSuccessToast("Tickets assigned successfully");
       fetchTickets(currentFilter);
       setSelectedTickets([]);
     } catch (error) {
       console.error("Failed to assign tickets:", error);
-      alert(error.message || "Network error");
+      showErrorToast(error.message || "Network error");
     }
   };
 

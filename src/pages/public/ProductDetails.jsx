@@ -279,6 +279,16 @@ const ProductDetails = () => {
     return images;
   };
 
+  const handleReviewCreated = () => {
+    setProduct((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        reviews_count: (prev.reviews_count || 0) + 1,
+      };
+    });
+  };
+
   if (loading) {
     return (
       <div>
@@ -508,7 +518,13 @@ const ProductDetails = () => {
               {activeTab === "features" && (
                 <ProductFeatures features={product.features} productId={product.id} />
               )}
-              {activeTab === "reviews" && <ProductReviews productId={product.id} />}
+              {activeTab === "reviews" && (
+                <ProductReviews
+                  productId={product.id}
+                  product={product}
+                  onReviewCreated={handleReviewCreated}
+                />
+              )}
             </div>
           </section>
 

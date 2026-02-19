@@ -9,6 +9,7 @@ import certicodeIcon from "../../assets/certicodeicon.png";
 import registerIllustration from "../../assets/Login Image.png";
 import arrowLeft from "../../assets/arrowleft.png";
 import { api } from "../../services/api";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
 const Register = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -26,11 +27,11 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      alert("Passwords do not match");
+      showErrorToast("Passwords do not match");
       return;
     }
     if (!acceptTerms) {
-      alert("Please accept the terms and conditions");
+      showErrorToast("Please accept the terms and conditions");
       return;
     }
 
@@ -45,11 +46,11 @@ const Register = () => {
       const data = await api.register(userData);
       
       console.log("Registration successful:", data);
-      alert('Registration successful!');
-      window.location.href = '/login';
+      showSuccessToast("Registration successful!");
+      window.location.href = "/login";
     } catch (error) {
       console.error("Registration error:", error);
-      alert(error.message || 'Registration failed. Please try again.');
+      showErrorToast(error.message || "Registration failed. Please try again.");
     }
   };
 
@@ -57,7 +58,7 @@ const Register = () => {
     try {
         await api.googleRedirect();
         } catch (error) {
-          alert('Google login failed. Please try again.');
+          showErrorToast("Google login failed. Please try again.");
     }
   };
 
@@ -65,7 +66,7 @@ const Register = () => {
     try {
       await api.facebookRedirect();
       } catch (error) {
-        alert('Facebook login failed. Please try again.');
+        showErrorToast("Facebook login failed. Please try again.");
     }
   };
 

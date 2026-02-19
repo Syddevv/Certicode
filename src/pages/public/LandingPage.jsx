@@ -612,7 +612,7 @@ const LandingPage = () => {
             </div>
             <Link to="/marketplace">
               <button className="categories__link" type="button">
-                View all marketplace <span aria-hidden="true">›</span>
+                Browse marketplace <span aria-hidden="true">›</span>
               </button>
             </Link>
           </div>

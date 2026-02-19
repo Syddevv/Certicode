@@ -1,0 +1,218 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
+
+.ebd-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.ebd-dialog {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  padding: 28px 28px 24px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 580px;
+}
+
+.ebd-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: #555;
+  line-height: 1;
+  padding: 4px;
+}
+
+.ebd-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: #111;
+}
+
+.ebd-subtitle {
+  font-size: 13.5px;
+  color: #777;
+  margin: 0 0 20px;
+}
+
+.ebd-add-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #222;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 18px;
+}
+
+.ebd-add-link .ebd-plus {
+  font-size: 18px;
+  line-height: 1;
+  color: #444;
+}
+
+.ebd-methods-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.ebd-method-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: 1.5px solid #eee;
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  background: #fff;
+}
+
+.ebd-method-row.selected {
+  border-color: #f5a623;
+  background: #fffaf3;
+}
+
+.ebd-method-logo {
+  width: 42px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ebd-visa-logo {
+  background: #1a1f71;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  border-radius: 4px;
+  width: 42px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 1px;
+}
+
+.ebd-mastercard-logo {
+  display: flex;
+  align-items: center;
+}
+
+.ebd-mc-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+
+.ebd-mc-circle.red {
+  background: #eb001b;
+}
+
+.ebd-mc-circle.orange {
+  background: #f79e1b;
+  margin-left: -8px;
+}
+
+.ebd-paypal-logo {
+  font-size: 20px;
+  color: #003087;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -1px;
+}
+
+.ebd-method-info {
+  flex: 1;
+}
+
+.ebd-method-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #111;
+  margin: 0 0 2px;
+}
+
+.ebd-method-expiry {
+  font-size: 12px;
+  color: #999;
+  margin: 0;
+}
+
+.ebd-radio {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid #ddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+}
+
+.ebd-method-row.selected .ebd-radio {
+  border-color: #f5a623;
+}
+
+.ebd-radio-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #f5a623;
+}
+
+.ebd-submit-btn {
+  width: 100%;
+  padding: 16px;
+  background: #f5a623;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 24px;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.15s;
+}
+
+.ebd-submit-btn:hover {
+  background: #e09610;
+}
+
+.ebd-trigger {
+  padding: 12px 20px;
+  background: #f5a623;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+}
