@@ -16,6 +16,7 @@ import fitlifeIcon from "../../assets/fitlife-tracker.png";
 import totalValueIcon from "../../assets/total-value.png";
 import lastAuditIcon from "../../assets/last-audit.png";
 import { AdminInventoryAPI } from "../../services/AdminInventoryAPI";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
 const Icons = {
   Bell: "🔔",
@@ -141,9 +142,10 @@ const AdminInventory = () => {
       await AdminInventoryAPI.deleteProduct(productId);
       await fetchProducts();
       await fetchStats();
+      showSuccessToast("Asset deleted successfully.");
     } catch (error) {
       console.error("Error deleting product:", error);
-      alert("Failed to delete product");
+      showErrorToast("Failed to delete product.");
     } finally {
       setDeletingId(null);
     }

@@ -28,6 +28,7 @@ import PurchasedAssetDetail from "./pages/public/PurchasedAssetDetail";
 import CustomerSupport from "./pages/public/CustomerSupport";
 import ContactUs from "./pages/public/ContactUs";
 import SuccessStories from "./pages/public/SuccessStories";
+import SuccessStoryIronclad from "./pages/public/SuccessStoryIronclad";
 import BlogsNews from "./pages/public/BlogsNews";
 import BlogsNewsIndividual from "./pages/public/BlogsNewsIndividual";
 import NotFound from "./pages/public/NotFound";
@@ -46,6 +47,7 @@ import AdminNotification from "./pages/admin/AdminNotification";
 
 // Components
 import ProtectedRoute from "./components/ProtectedRoute";
+import ToastContainer from "./components/ToastContainer";
 
 import AdminAddNewAsset from "./pages/admin/AdminAddNewAsset";
 
@@ -54,6 +56,7 @@ import AdminOrderDetails from "./pages/admin/AdminOrderDetails";
 function App() {
   return (
     <BrowserRouter>
+      <ToastContainer />
       {/* Create a wrapper component that uses useAuth */}
       <AppContent />
     </BrowserRouter>
@@ -158,6 +161,7 @@ function AppContent() {
       <Route path="/customer-support" element={<CustomerSupport />} />
       <Route path="/contact" element={<ContactUs />} />
       <Route path="/success-stories" element={<SuccessStories />} />
+      <Route path="/success-stories/scaling-with-the-ironclad-ui-kit" element={<SuccessStoryIronclad />} />
       <Route path="/blogs-news" element={<BlogsNews />} />
       <Route
         path="/blogs-news/how-secure-software"
@@ -182,7 +186,7 @@ function AppContent() {
         }
       />
       <Route
-        path="/my-purchases/e-commerce-saas-template"
+        path="/my-purchases/:assetSlug"
         element={
           <ProtectedRoute allowedRoles={["Customer"]}>
             <PurchasedAssetDetail />

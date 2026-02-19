@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/About.css";
@@ -155,7 +156,9 @@ const About = () => {
               Explore our curated selection of production-ready assets and
               accelerate your development cycle today.
             </p>
-            <button type="button">Browse Marketplace</button>
+            <Link className="about__ctaBtn" to="/marketplace">
+              Browse Marketplace
+            </Link>
           </div>
         </div>
       </section>

@@ -5,6 +5,7 @@ import Sidebar from "../../components/Sidebar";
 import AdminTopbar from "../../components/AdminTopbar";
 import notifBell from "../../assets/NotifBell.png";
 import { AdminSalesAPI } from "../../services/AdminSalesAPI";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
 const Icons = {
   Bell: "🔔",
@@ -101,9 +102,10 @@ const AdminSales = () => {
     setExporting(true);
     try {
       await AdminSalesAPI.exportOrders(filters);
+      showSuccessToast("Sales export started successfully.");
     } catch (error) {
       console.error("Error exporting orders:", error);
-      alert('Failed to export sales data: ' + (error.message || 'Unknown error'));
+      showErrorToast(`Failed to export sales data: ${error.message || "Unknown error"}`);
     } finally {
       setExporting(false);
     }

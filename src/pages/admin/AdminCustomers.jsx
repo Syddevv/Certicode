@@ -9,6 +9,7 @@ import activeCustomersIcon from "../../assets/active-customers.png";
 import totalRevenueIcon from "../../assets/total-revenue.png";
 import avgCustomerSpentIcon from "../../assets/avg-customer-spent.png";
 import { AdminCustomersAPI } from "../../services/AdminCustomersAPI";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
 const Icons = {
   Bell: "🔔",
@@ -95,9 +96,10 @@ const AdminCustomers = () => {
     setExporting(true);
     try {
       await AdminCustomersAPI.exportCustomers();
+      showSuccessToast("Customer export started successfully.");
     } catch (error) {
       console.error("Error exporting customers:", error);
-      alert('Failed to export customer data: ' + (error.message || 'Unknown error'));
+      showErrorToast(`Failed to export customer data: ${error.message || "Unknown error"}`);
     } finally {
       setExporting(false);
     }

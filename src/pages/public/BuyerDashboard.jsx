@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/BuyerDashboard.css";
@@ -17,10 +17,12 @@ import BillingSupportIcon from "../../assets/billingSupport.png";
 import CustomerSupportIcon from "../../assets/CustomerSupport.png";
 import WhiteDownload from "../../assets/whiteDownload.png";
 import { ProfileAPI } from "../../services/ProfileAPI";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
 const API_URL = 'http://127.0.0.1:8000/api';
 
 const BuyerDashboard = () => {
+  const navigate = useNavigate();
   const [purchases, setPurchases] = useState([]);
   const [filteredPurchases, setFilteredPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -116,7 +118,7 @@ const BuyerDashboard = () => {
       const token = localStorage.getItem('auth_token');
       
       if (!token) {
-        alert('Please login to download files');
+        showErrorToast("Please login to download files");
         setDownloading(prev => ({...prev, [productId]: false}));
         return;
       }
@@ -129,19 +131,19 @@ const BuyerDashboard = () => {
       });
       
       if (response.status === 401) {
-        alert('Authentication failed. Please login again.');
+        showErrorToast("Authentication failed. Please login again.");
         setDownloading(prev => ({...prev, [productId]: false}));
         return;
       }
       
       if (response.status === 403) {
-        alert('You need to purchase this product to download files.');
+        showErrorToast("You need to purchase this product to download files.");
         setDownloading(prev => ({...prev, [productId]: false}));
         return;
       }
       
       if (response.status === 404) {
-        alert('No files found for this product.');
+        showErrorToast("No files found for this product.");
         setDownloading(prev => ({...prev, [productId]: false}));
         return;
       }
@@ -165,6 +167,7 @@ const BuyerDashboard = () => {
       link.download = filename;
       document.body.appendChild(link);
       link.click();
+      showSuccessToast(`Download started: ${filename}`);
       
       setTimeout(() => {
         document.body.removeChild(link);
@@ -175,7 +178,7 @@ const BuyerDashboard = () => {
       
     } catch (error) {
       console.error('Download failed:', error);
-      alert(error.message || 'Failed to download. Please try again.');
+      showErrorToast(error.message || "Failed to download. Please try again.");
       setDownloading(prev => ({...prev, [productId]: false}));
     }
   };
@@ -308,14 +311,16 @@ const BuyerDashboard = () => {
                 </span>
               </div>
             </div>
-            <Link to="/account-settings">
-              <button className="buyer-profile__edit" type="button">
-                <span className="buyer-profile__editIcon" aria-hidden="true">
-                  {"\u270e"}
-                </span>
-                Edit Profile
-              </button>
-            </Link>
+            <button
+              className="buyer-profile__edit"
+              type="button"
+              onClick={() => navigate("/account-settings")}
+            >
+              <span className="buyer-profile__editIcon" aria-hidden="true">
+                {"\u270e"}
+              </span>
+              Edit Profile
+            </button>
           </div>
 
           <div className="buyer-tabs">
