@@ -317,7 +317,11 @@ const MyPurchases = () => {
                 </span>
               </div>
             </div>
-            <button className="purchases-profile__edit" type="button">
+            <button
+              className="purchases-profile__edit"
+              type="button"
+              onClick={() => navigate("/account-settings")}
+            >
               <span className="purchases-profile__editIcon" aria-hidden="true">
                 {"\u270e"}
               </span>
