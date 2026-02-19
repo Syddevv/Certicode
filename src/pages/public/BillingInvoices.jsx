@@ -13,6 +13,7 @@ import OrangeDownload from "../../assets/orangeDownload.png";
 import GrayWallet from "../../assets/graywallet.png";
 import OrangeStar from "../../assets/orangestar.png";
 import SearchIcon from "../../assets/lucide_search.png";
+import EditBillingDetailsModal from "../../components/Editbillingdetailsmodal ";
 import { ProfileAPI } from "../../services/ProfileAPI";
 
 const BillingInvoices = () => {
@@ -20,6 +21,7 @@ const BillingInvoices = () => {
   const [user, setUser] = useState(null);
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isUpdateBillingModal, setUpdateBillingModal] = useState(false);
   const [stats, setStats] = useState([
     { label: "Total Invoices", value: "0", icon: InvoiceIcon },
     { label: "Total Volume", value: "$0.00", icon: ChartBar },
@@ -31,6 +33,17 @@ const BillingInvoices = () => {
     fetchUserData();
     fetchPurchases();
   }, []);
+
+  useEffect(() => {
+    if (isUpdateBillingModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isUpdateBillingModal]);
 
   const fetchUserData = async () => {
     try {
@@ -44,21 +57,24 @@ const BillingInvoices = () => {
   const fetchPurchases = async () => {
     try {
       const data = await ProfileAPI.getUserPurchases();
-      console.log('Purchases API response:', data); // Debug log
-      
+      console.log("Purchases API response:", data); // Debug log
+
       const userPurchases = data.purchases || [];
-      console.log('Processed purchases:', userPurchases); // Debug each purchase
+      console.log("Processed purchases:", userPurchases); // Debug each purchase
       setPurchases(userPurchases);
-      
+
       // Calculate stats from purchases
       const totalInvoices = userPurchases.length;
-      
+
       let totalVolume = 0;
-      userPurchases.forEach(purchase => {
-        console.log('Purchase object structure:', purchase); // Debug each purchase
-        
+      userPurchases.forEach((purchase) => {
+        console.log("Purchase object structure:", purchase); // Debug each purchase
+
         // Try different possible field names for amount based on OrderSuccess.js
-        if (purchase.total_amount !== undefined && purchase.total_amount !== null) {
+        if (
+          purchase.total_amount !== undefined &&
+          purchase.total_amount !== null
+        ) {
           // This is likely the order total
           totalVolume += parseFloat(purchase.total_amount);
         } else if (purchase.amount !== undefined && purchase.amount !== null) {
@@ -66,40 +82,53 @@ const BillingInvoices = () => {
         } else if (purchase.price !== undefined && purchase.price !== null) {
           // Individual purchase price
           totalVolume += parseFloat(purchase.price);
-        } else if (purchase.order?.total_amount !== undefined && purchase.order?.total_amount !== null) {
+        } else if (
+          purchase.order?.total_amount !== undefined &&
+          purchase.order?.total_amount !== null
+        ) {
           // Check if amount is nested in order object
           totalVolume += parseFloat(purchase.order.total_amount);
         }
-        
-        console.log('Current purchase amount found:', purchase.total_amount || purchase.amount || purchase.price);
+
+        console.log(
+          "Current purchase amount found:",
+          purchase.total_amount || purchase.amount || purchase.price,
+        );
       });
-      
-      console.log('Total volume calculated:', totalVolume);
-      
-      let lastInvoice = 'Never';
+
+      console.log("Total volume calculated:", totalVolume);
+
+      let lastInvoice = "Never";
       if (userPurchases.length > 0) {
         const latestPurchase = userPurchases[0];
         // Try different date fields
         const purchaseDate = new Date(
-          latestPurchase.purchased_at || 
-          latestPurchase.created_at || 
-          latestPurchase.date || 
-          latestPurchase.paid_at ||
-          Date.now()
+          latestPurchase.purchased_at ||
+            latestPurchase.created_at ||
+            latestPurchase.date ||
+            latestPurchase.paid_at ||
+            Date.now(),
         );
-        lastInvoice = purchaseDate.toLocaleDateString('en-US', { 
-          month: 'short', 
-          day: 'numeric', 
-          year: 'numeric' 
+        lastInvoice = purchaseDate.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
         });
       }
-      
+
       setStats([
-        { label: "Total Invoices", value: totalInvoices.toString(), icon: InvoiceIcon },
-        { label: "Total Volume", value: `$${totalVolume.toFixed(2)}`, icon: ChartBar },
+        {
+          label: "Total Invoices",
+          value: totalInvoices.toString(),
+          icon: InvoiceIcon,
+        },
+        {
+          label: "Total Volume",
+          value: `$${totalVolume.toFixed(2)}`,
+          icon: ChartBar,
+        },
         { label: "Last Invoice", value: lastInvoice, icon: OrangeBag },
       ]);
-      
     } catch (error) {
       console.error("Failed to fetch purchases:", error);
       setPurchases([]);
@@ -112,7 +141,7 @@ const BillingInvoices = () => {
   const invoices = purchases.map((purchase, index) => {
     // Determine amount from multiple possible field names
     let amount = 0;
-    
+
     if (purchase.total_amount !== undefined && purchase.total_amount !== null) {
       amount = parseFloat(purchase.total_amount);
     } else if (purchase.amount !== undefined && purchase.amount !== null) {
@@ -120,49 +149,59 @@ const BillingInvoices = () => {
     } else if (purchase.price !== undefined && purchase.price !== null) {
       // Individual purchase price
       amount = parseFloat(purchase.price);
-    } else if (purchase.order?.total_amount !== undefined && purchase.order?.total_amount !== null) {
+    } else if (
+      purchase.order?.total_amount !== undefined &&
+      purchase.order?.total_amount !== null
+    ) {
       // Check if amount is nested in order object
       amount = parseFloat(purchase.order.total_amount);
     }
-    
+
     // If amount is still 0, use a default based on the product
     if (amount === 0) {
       // Default pricing based on product type
-      if (purchase.product?.category?.toLowerCase().includes('template')) {
+      if (purchase.product?.category?.toLowerCase().includes("template")) {
         amount = 299.99;
-      } else if (purchase.product?.category?.toLowerCase().includes('dashboard')) {
+      } else if (
+        purchase.product?.category?.toLowerCase().includes("dashboard")
+      ) {
         amount = 199.99;
-      } else if (purchase.product?.category?.toLowerCase().includes('app')) {
+      } else if (purchase.product?.category?.toLowerCase().includes("app")) {
         amount = 499.99;
       } else {
         amount = 99.99; // Default fallback
       }
     }
-    
+
     // Generate invoice ID
-    const invoiceId = purchase.order_number || 
-                     purchase.invoice_number || 
-                     `#INV-${8000 + (purchase.id || index)}`;
-    
+    const invoiceId =
+      purchase.order_number ||
+      purchase.invoice_number ||
+      `#INV-${8000 + (purchase.id || index)}`;
+
     // Determine date
-    const purchaseDate = purchase.purchased_at || 
-                        purchase.created_at || 
-                        purchase.date || 
-                        purchase.paid_at;
-    
+    const purchaseDate =
+      purchase.purchased_at ||
+      purchase.created_at ||
+      purchase.date ||
+      purchase.paid_at;
+
     return {
       id: invoiceId,
-      asset: purchase.product?.name || 'Unknown Product',
+      asset: purchase.product?.name || "Unknown Product",
       date: purchaseDate
-        ? new Date(purchaseDate).toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric' 
+        ? new Date(purchaseDate).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
           })
-        : 'Unknown Date',
+        : "Unknown Date",
       amount: `$${amount.toFixed(2)}`,
-      status: purchase.license_key && purchase.license_key !== '' ? "Paid" : "Pending",
-      purchaseData: purchase
+      status:
+        purchase.license_key && purchase.license_key !== ""
+          ? "Paid"
+          : "Pending",
+      purchaseData: purchase,
     };
   });
 
@@ -173,23 +212,26 @@ const BillingInvoices = () => {
         <div className="billing__inner">
           <div className="billing-profile">
             <div className="billing-profile__info">
-              <div className="billing-profile__avatarWrap" style={{ 
-                width: '80px', 
-                height: '80px', 
-                borderRadius: '50%', 
-                overflow: 'hidden',
-                border: '2px solid #e8e8e8'
-              }}>
+              <div
+                className="billing-profile__avatarWrap"
+                style={{
+                  width: "80px",
+                  height: "80px",
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  border: "2px solid #e8e8e8",
+                }}
+              >
                 <img
                   src={resolveAvatarUrl(user?.avatar_url) || Avatar}
                   alt={user?.name || "User"}
                   style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
                   }}
                   onError={(e) => {
-                    console.error('Image failed to load:', user?.avatar_url);
+                    console.error("Image failed to load:", user?.avatar_url);
                     e.target.src = Avatar;
                     e.target.onerror = null;
                   }}
@@ -319,22 +361,28 @@ const BillingInvoices = () => {
                     <div key={row.id} className="billing-row">
                       <span className="billing-row__id">{row.id}</span>
                       <div className="billing-row__asset">
-                        <span className="billing-row__thumb" style={{
-                          backgroundImage: row.purchaseData?.product?.featured_image 
-                            ? `url(${row.purchaseData.product.featured_image})`
-                            : row.purchaseData?.product?.images?.[0]
-                            ? `url(${row.purchaseData.product.images[0]})`
-                            : 'none',
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                          backgroundColor: '#f5f5f5'
-                        }} />
+                        <span
+                          className="billing-row__thumb"
+                          style={{
+                            backgroundImage: row.purchaseData?.product
+                              ?.featured_image
+                              ? `url(${row.purchaseData.product.featured_image})`
+                              : row.purchaseData?.product?.images?.[0]
+                                ? `url(${row.purchaseData.product.images[0]})`
+                                : "none",
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                            backgroundColor: "#f5f5f5",
+                          }}
+                        />
                         <span>{row.asset}</span>
                       </div>
                       <span>{row.date}</span>
                       <span>{row.amount}</span>
                       <span className="billing-row__status">
-                        <span className={`billing-status billing-status--${row.status.toLowerCase()}`}>
+                        <span
+                          className={`billing-status billing-status--${row.status.toLowerCase()}`}
+                        >
                           {row.status}
                         </span>
                       </span>
@@ -348,7 +396,7 @@ const BillingInvoices = () => {
                         </button>
                         <Link
                           className="billing-iconBtn"
-                          to={`/billing-invoices/${row.id.toLowerCase().replace('#', '').replace('inv-', '')}`}
+                          to={`/billing-invoices/${row.id.toLowerCase().replace("#", "").replace("inv-", "")}`}
                           state={{ invoice: row, user }}
                           aria-label="View"
                         >
@@ -366,7 +414,10 @@ const BillingInvoices = () => {
                     </div>
                   ))}
                   <div className="billing-table__footer">
-                    <span>Showing {invoices.length} invoice{invoices.length !== 1 ? 's' : ''}</span>
+                    <span>
+                      Showing {invoices.length} invoice
+                      {invoices.length !== 1 ? "s" : ""}
+                    </span>
                     <div className="billing-pagination">
                       <button type="button" aria-label="Previous">
                         {"<"}
@@ -398,7 +449,10 @@ const BillingInvoices = () => {
                 <div className="billing-section">
                   <div className="billing-section__title">Company Address</div>
                   <strong>{user?.company_name || "Your Company Name"}</strong>
-                  <p>{user?.company_address || "Add your company address in Account Settings"}</p>
+                  <p>
+                    {user?.company_address ||
+                      "Add your company address in Account Settings"}
+                  </p>
                 </div>
 
                 <div className="billing-section">
@@ -413,14 +467,23 @@ const BillingInvoices = () => {
                       <img src={GrayWallet} alt="" aria-hidden="true" />
                     </span>
                     <div>
-                      <strong>{user?.payment_method || "No payment method on file"}</strong>
-                      <span>{user?.payment_expiry || "Add payment method in Account Settings"}</span>
+                      <strong>
+                        {user?.payment_method || "No payment method on file"}
+                      </strong>
+                      <span>
+                        {user?.payment_expiry ||
+                          "Add payment method in Account Settings"}
+                      </span>
                     </div>
                     <button className="billing-link" type="button">
                       Edit
                     </button>
                   </div>
-                  <button className="billing-secondary" type="button">
+                  <button
+                    onClick={() => setUpdateBillingModal(true)}
+                    className="billing-secondary"
+                    type="button"
+                  >
                     Manage Billing Details
                   </button>
                 </div>
@@ -448,6 +511,11 @@ const BillingInvoices = () => {
           </div>
         </div>
       </section>
+
+      <EditBillingDetailsModal
+        isOpen={isUpdateBillingModal}
+        onClose={() => setUpdateBillingModal(false)}
+      />
       <Footer />
     </div>
   );
