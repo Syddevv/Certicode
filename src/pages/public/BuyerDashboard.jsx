@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/BuyerDashboard.css";
@@ -22,6 +22,7 @@ import { showErrorToast, showSuccessToast } from "../../utils/toast";
 const API_URL = 'http://127.0.0.1:8000/api';
 
 const BuyerDashboard = () => {
+  const navigate = useNavigate();
   const [purchases, setPurchases] = useState([]);
   const [filteredPurchases, setFilteredPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -310,14 +311,16 @@ const BuyerDashboard = () => {
                 </span>
               </div>
             </div>
-            <Link to="/account-settings">
-              <button className="buyer-profile__edit" type="button">
-                <span className="buyer-profile__editIcon" aria-hidden="true">
-                  {"\u270e"}
-                </span>
-                Edit Profile
-              </button>
-            </Link>
+            <button
+              className="buyer-profile__edit"
+              type="button"
+              onClick={() => navigate("/account-settings")}
+            >
+              <span className="buyer-profile__editIcon" aria-hidden="true">
+                {"\u270e"}
+              </span>
+              Edit Profile
+            </button>
           </div>
 
           <div className="buyer-tabs">
