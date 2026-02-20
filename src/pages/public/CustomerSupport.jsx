@@ -1,5 +1,6 @@
-import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
+
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/CustomerSupport.css";
@@ -43,45 +44,104 @@ const helpTopics = [
   "Other Topics",
 ];
 
-const helpCards = [
-  {
-    title: "Track your package",
-    text: "Track your packages in Your Orders.",
-  },
-  {
-    title: "Return Items You Ordered",
-    text: "Return your orders using our Online Return Center.",
-  },
-  {
-    title: "Check status of a refund",
-    text: "Track your return and refunds in Your Orders.",
-  },
-  {
-    title: "Track Your Return",
-    text: "Learn how to track your return location and status.",
-  },
-  {
-    title: "How to Update Your Payment Method",
-    text: "Keeping your payment methods up to date prevents purchase and digital service interruptions.",
-  },
-  {
-    title: "Get Product Support",
-    text: "We provide free product support when you need help using a product or if it doesn’t work correctly.",
-  },
-  {
-    title: "Custom Software Development",
-    text: "Learn about our custom software services, project workflows, timelines, and support after delivery.",
-  },
-  {
-    title: "Certicode Software Platform",
-    text: "Get help using Certicode software products, including setup, features, updates, and common troubleshooting issues.",
-  },
-];
+// Cards mapped per topic — add/edit cards per topic here
+const helpCardsByTopic = {
+  "Software Order Status": [
+    {
+      title: "Track your package",
+      text: "Track your packages in Your Orders.",
+    },
+    {
+      title: "Return Items You Ordered",
+      text: "Return your orders using our Online Return Center.",
+    },
+    {
+      title: "Check status of a refund",
+      text: "Track your return and refunds in Your Orders.",
+    },
+    {
+      title: "Track Your Return",
+      text: "Learn how to track your return location and status.",
+    },
+    {
+      title: "How to Update Your Payment Method",
+      text: "Keeping your payment methods up to date prevents purchase and digital service interruptions.",
+    },
+    {
+      title: "Get Product Support",
+      text: "We provide free product support when you need help using a product or if it doesn't work correctly.",
+    },
+    {
+      title: "Custom Software Development",
+      text: "Learn about our custom software services, project workflows, timelines, and support after delivery.",
+    },
+    {
+      title: "Certicode Software Platform",
+      text: "Get help using Certicode software products, including setup, features, updates, and common troubleshooting issues.",
+    },
+  ],
+  "Account Recovery": [
+    {
+      title: "Reset Your Password",
+      text: "Reset your password quickly from the login page.",
+      path: "/customer-support/account-recovery/reset-password",
+    },
+    {
+      title: "Verify via Mobile Number",
+      text: "Verify your account instantly using your phone.",
+      path: "/customer-support/account-recovery/verify-mobile-number",
+    },
+    {
+      title: "Unlock My Account",
+      text: "Unlock your account safely from the dashboard.",
+    },
+    {
+      title: "Recover Without Email or Phone",
+      text: "Recover your account even without email or phone access",
+    },
+    {
+      title: "Report Unauthorized Access",
+      text: "Report any suspicious activity to protect your account.",
+    },
+    {
+      title: "Update Recovery Details",
+      text: "Keep your recovery info up to date for account security.",
+    },
+  ],
+};
+
+
+//topic cards fallback
+const topicPaths = {
+  "Account Setup & Registration": "/support/account-setup",
+  "Software Installation & Setup": "/support/installation",
+  "Login & Password Issues": "/support/login",
+  "Software Order Status": "/",
+  "Returns, Refunds & Product Support": "/support/returns",
+  "Shipping and Delivery": "/support/shipping",
+  "Payment, Pricing and Promotions": "/support/payment",
+  "Software, & Digital Solutions": "/support/software",
+  "Certicode Business Accounts": "/support/business",
+  "Other Topics": "/support/other",
+};
 
 const CustomerSupport = () => {
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("Software Order Status");
+
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, []);
+
+  const handleTabclick = (topic) => {
+    if (helpCardsByTopic[topic]) {
+      setActiveTab(topic);
+    } else if (topicPaths[topic]) {
+      navigate(topicPaths[topic]);
+    }
+  };
+
+  const visibleCards = helpCardsByTopic[activeTab] ?? [];
 
   return (
     <div className="support-page">
@@ -131,19 +191,19 @@ const CustomerSupport = () => {
                 {helpTopics.map((topic) => (
                   <li
                     key={topic}
-                    className={
-                      topic === "Software Order Status" ? "is-active" : ""
-                    }
+                    className={topic === activeTab ? "is-active" : ""}
                   >
-                    <button type="button">{topic}</button>
+                    <button type="button" onClick={() => handleTabclick(topic)}>
+                      {topic}
+                    </button>
                   </li>
                 ))}
               </ul>
             </aside>
 
             <div className="support-cards">
-              {helpCards.map((card) => (
-                <article key={card.title} className="support-card">
+              {visibleCards.map((card) => (
+                <article onClick={()=> navigate(card.path)} key={card.title} className="support-card">
                   <h4>{card.title}</h4>
                   <p>{card.text}</p>
                 </article>
