@@ -13,6 +13,7 @@ import OrangeDownload from "../../assets/orangeDownload.png";
 import GrayWallet from "../../assets/graywallet.png";
 import OrangeStar from "../../assets/orangestar.png";
 import SearchIcon from "../../assets/lucide_search.png";
+import EditBillingDetailsModal from "../../components/Editbillingdetailsmodal ";
 import { ProfileAPI } from "../../services/ProfileAPI";
 import ManagingPaymentMethod from "../../components/ManagingPaymentMethod";
 
@@ -21,7 +22,7 @@ const BillingInvoices = () => {
   const [user, setUser] = useState(null);
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
+  const [isUpdateBillingModal, setUpdateBillingModal] = useState(false);
   const [stats, setStats] = useState([
     { label: "Total Invoices", value: "0", icon: InvoiceIcon },
     { label: "Total Volume", value: "$0.00", icon: ChartBar },
@@ -33,6 +34,17 @@ const BillingInvoices = () => {
     fetchUserData();
     fetchPurchases();
   }, []);
+
+  useEffect(() => {
+    if (isUpdateBillingModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isUpdateBillingModal]);
 
   const fetchUserData = async () => {
     try {
@@ -472,7 +484,11 @@ const BillingInvoices = () => {
                       Edit
                     </button>
                   </div>
-                  <button className="billing-secondary" type="button">
+                  <button
+                    onClick={() => setUpdateBillingModal(true)}
+                    className="billing-secondary"
+                    type="button"
+                  >
                     Manage Billing Details
                   </button>
                 </div>
@@ -500,6 +516,11 @@ const BillingInvoices = () => {
           </div>
         </div>
       </section>
+
+      <EditBillingDetailsModal
+        isOpen={isUpdateBillingModal}
+        onClose={() => setUpdateBillingModal(false)}
+      />
       <Footer />
       <ManagingPaymentMethod open={open} setOpen={setOpen} />
     </div>
