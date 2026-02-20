@@ -26,9 +26,13 @@ import BuyerAccountSettings from "./pages/public/BuyerAccountSettings";
 import About from "./pages/public/About";
 import PurchasedAssetDetail from "./pages/public/PurchasedAssetDetail";
 import CustomerSupport from "./pages/public/CustomerSupport";
+import TechnicalIssues from "./pages/public/TechnicalIssues"; 
+import BillingPayments from "./pages/public/BillingPayments"; 
 import ContactUs from "./pages/public/ContactUs";
 import SuccessStories from "./pages/public/SuccessStories";
+import SuccessStoriesList from "./pages/public/SuccessStoriesList";
 import SuccessStoryIronclad from "./pages/public/SuccessStoryIronclad";
+import SuccessStoryGlobalFintech from "./pages/public/SuccessStoryGlobalFintech";
 import BlogsNews from "./pages/public/BlogsNews";
 import BlogsNewsIndividual from "./pages/public/BlogsNewsIndividual";
 import NotFound from "./pages/public/NotFound";
@@ -159,6 +163,8 @@ function AppContent() {
       <Route path="/about" element={<About />} />
       <Route path="/marketplace/:id" element={<ProductDetails />} />
       <Route path="/customer-support" element={<CustomerSupport />} />
+      <Route path="/customer-support/technical-issues" element={<TechnicalIssues />} />
+      <Route path="/customer-support/billing-payments" element={<BillingPayments />} /> 
       <Route path="/contact" element={<ContactUs />} />
       <Route path="/success-stories" element={<SuccessStories />} />
       <Route
