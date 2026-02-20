@@ -22,6 +22,7 @@ const BillingInvoices = () => {
   const [user, setUser] = useState(null);
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [open, setOpen] = useState(false);
   const [isUpdateBillingModal, setUpdateBillingModal] = useState(false);
   const [stats, setStats] = useState([
     { label: "Total Invoices", value: "0", icon: InvoiceIcon },
