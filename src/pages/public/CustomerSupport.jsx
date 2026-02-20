@@ -19,8 +19,16 @@ import SearchIcon from "../../assets/Search.png";
 
 const categories = [
   { title: "Delivery, Order,\nReturn", icon: DeliveryIcon },
-  { title: "Technical Issues", icon: TechnicalIcon },
-  { title: "Billing & Payments", icon: BillingIcon },
+  {
+    title: "Technical Issues",
+    icon: TechnicalIcon,
+    path: "/customer-support/technical-issues",
+  },
+  {
+    title: "Billing & Payments",
+    icon: BillingIcon,
+    path: "/customer-support/billing-payments",
+  },
   { title: "Software & Security", icon: SoftwareIcon },
   { title: "Account Management", icon: AccountIcon },
   { title: "Services & Maintenance", icon: ServicesIcon },
@@ -161,14 +169,7 @@ const CustomerSupport = () => {
               key={item.title}
               className="support-category"
               type="button"
-              onClick={() => {
-                if (item.id === "technical") {
-                  navigate("/customer-support/technical-issues");
-                }
-                if (item.id === "billing") {
-                  navigate("/customer-support/billing-payments");
-                }
-              }}
+              onClick={() => item.path && navigate(item.path)}
             >
               <span className="support-category__icon">
                 <img src={item.icon} alt="" aria-hidden="true" />

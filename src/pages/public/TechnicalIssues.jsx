@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/TechnicalIssues.css";
-// import SupportHero from "../../assets/SupportTechnical.png";
+import SupportHero from "../../assets/SupportHero.png";
 import ArrowDown from "../../assets/ArrowDown.png";
 
 const technicalIssues = [
@@ -240,7 +240,7 @@ const TechnicalIssues = () => {
 
       <section className="support-tech">
         <div className="support-tech__hero">
-          {/* <img src={SupportHero} alt="Technical support" /> */}
+          <img src={SupportHero} alt="Technical support" />
           <div className="support-tech__heroText"></div>
         </div>
 
