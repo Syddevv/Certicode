@@ -9,6 +9,7 @@ import SalesAdmin from "../assets/SalesAdmin.png";
 import CustomersAdmin from "../assets/CustomersAdmin.png";
 import SettingsAdmin from "../assets/SettingsAdmin.png";
 import SupportAdmin from "../assets/SupportAdmin.png";
+import LogoutModalDialog from "./LogoutModal";
 
 const Icons = {
   Dashboard: <img src={DashboardAdmin} alt="Dashboard" width={20} height={20} />,
@@ -178,10 +179,14 @@ const Sidebar = ({ activePage }) => {
               ) : (
                 <>
                   <img
-                    src={user?.avatar_url || "https://i.pravatar.cc/150?u=a042581f4e29026024d"}
+                    src={
+                      user?.avatar_url ||
+                      "https://i.pravatar.cc/150?u=a042581f4e29026024d"
+                    }
                     alt="Admin"
                     onError={(e) => {
-                      e.target.src = "https://i.pravatar.cc/150?u=a042581f4e29026024d";
+                      e.target.src =
+                        "https://i.pravatar.cc/150?u=a042581f4e29026024d";
                       e.target.onerror = null;
                     }}
                   />
@@ -200,9 +205,16 @@ const Sidebar = ({ activePage }) => {
         </div>
       </aside>
 
-      {showLogout && (
+      {/* {showLogout && (
         <LogoutModal
           onClose={() => setShowLogout(false)}
+        />
+      )} */}
+
+      {showLogout && (
+        <LogoutModalDialog
+          onClose={() => setShowLogout(false)}
+          onConfirm={handleLogout}
         />
       )}
     </>

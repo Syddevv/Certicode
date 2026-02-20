@@ -300,7 +300,7 @@ const BuyerAccountSettings = () => {
     } finally {
       setDeletingAccount(false);
     }
-  };
+  }; 
 
   const handleLogout = async () => {
     const token = localStorage.getItem("auth_token");
