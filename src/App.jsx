@@ -56,6 +56,8 @@ import ToastContainer from "./components/ToastContainer";
 import AdminAddNewAsset from "./pages/admin/AdminAddNewAsset";
 
 import AdminOrderDetails from "./pages/admin/AdminOrderDetails";
+import ResetPasswordRoute from "./pages/public/ResetPasswordRoute";
+import VerifyMobileNumberRoute from "./pages/public/VerifyMobileNumberRoute";
 
 function App() {
   return (
@@ -76,7 +78,6 @@ function AppContent() {
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<CreateNewPassword />} />
-
       {/* ADMIN ROUTES - Protected and Admin only */}
       <Route
         path="/dashboard"
@@ -150,7 +151,6 @@ function AppContent() {
           </ProtectedRoute>
         }
       />
-
       {/* PUBLIC PAGES / USER */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/terms" element={<TermsAndConditions />} />
@@ -167,15 +167,24 @@ function AppContent() {
       <Route path="/customer-support/billing-payments" element={<BillingPayments />} /> 
       <Route path="/contact" element={<ContactUs />} />
       <Route path="/success-stories" element={<SuccessStories />} />
-      <Route path="/success-stories/customer-success-stories" element={<SuccessStoriesList />} />
-      <Route path="/success-stories/global-fintech-solutions-scale-asset-verification" element={<SuccessStoryGlobalFintech />}/>
-      <Route path="/success-stories/scaling-with-the-ironclad-ui-kit" element={<SuccessStoryIronclad />} />
+      <Route
+        path="/success-stories/scaling-with-the-ironclad-ui-kit"
+        element={<SuccessStoryIronclad />}
+      />
       <Route path="/blogs-news" element={<BlogsNews />} />
+
+      <Route
+        path="/customer-support/account-recovery/reset-password"
+        element={<ResetPasswordRoute />}
+      />
+      <Route
+        path="/customer-support/account-recovery/verify-mobile-number"
+        element={<VerifyMobileNumberRoute />}
+      />
       <Route
         path="/blogs-news/how-secure-software"
         element={<BlogsNewsIndividual />}
       />
-
       {/* PROTECTED USER ROUTES - Require authentication */}
       <Route
         path="/buyer-dashboard"
@@ -225,7 +234,6 @@ function AppContent() {
           </ProtectedRoute>
         }
       />
-
       <Route path="/add-asset" element={<AdminAddNewAsset />} />
       {/* 404 */}
       <Route path="*" element={<NotFound />} />
