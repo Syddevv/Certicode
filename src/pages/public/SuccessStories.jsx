@@ -96,9 +96,10 @@ const SuccessStories = () => {
               verification across 14 regions, achieving 3x efficiency without
               increasing headcount.
             </p>
-            <button className="stories-spotlight__link" type="button">
+            <Link className="stories-spotlight__link"
+              to="/success-stories/global-fintech-solutions-scale-asset-verification">
               Read full case study <img src={OrangeArrow} alt="" />
-            </button>
+            </Link>
           </div>
 
           <div className="stories-spotlight__metrics">
