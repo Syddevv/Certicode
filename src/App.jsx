@@ -28,7 +28,9 @@ import PurchasedAssetDetail from "./pages/public/PurchasedAssetDetail";
 import CustomerSupport from "./pages/public/CustomerSupport";
 import ContactUs from "./pages/public/ContactUs";
 import SuccessStories from "./pages/public/SuccessStories";
+import SuccessStoriesList from "./pages/public/SuccessStoriesList";
 import SuccessStoryIronclad from "./pages/public/SuccessStoryIronclad";
+import SuccessStoryGlobalFintech from "./pages/public/SuccessStoryGlobalFintech";
 import BlogsNews from "./pages/public/BlogsNews";
 import BlogsNewsIndividual from "./pages/public/BlogsNewsIndividual";
 import NotFound from "./pages/public/NotFound";
@@ -161,6 +163,8 @@ function AppContent() {
       <Route path="/customer-support" element={<CustomerSupport />} />
       <Route path="/contact" element={<ContactUs />} />
       <Route path="/success-stories" element={<SuccessStories />} />
+      <Route path="/success-stories/customer-success-stories" element={<SuccessStoriesList />} />
+      <Route path="/success-stories/global-fintech-solutions-scale-asset-verification" element={<SuccessStoryGlobalFintech />}/>
       <Route path="/success-stories/scaling-with-the-ironclad-ui-kit" element={<SuccessStoryIronclad />} />
       <Route path="/blogs-news" element={<BlogsNews />} />
       <Route
