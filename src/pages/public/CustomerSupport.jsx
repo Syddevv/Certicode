@@ -97,7 +97,19 @@ const CustomerSupport = () => {
       <section className="support-categories">
         <div className="support-categories__inner">
           {categories.map((item) => (
-            <button key={item.title} className="support-category" type="button">
+            <button
+              key={item.title}
+              className="support-category"
+              type="button"
+              onClick={() => {
+                if (item.id === "technical") {
+                  navigate("/customer-support/technical-issues");
+                }
+                if (item.id === "billing") {
+                  navigate("/customer-support/billing-payments");
+                }
+              }}
+            >
               <span className="support-category__icon">
                 <img src={item.icon} alt="" aria-hidden="true" />
               </span>
