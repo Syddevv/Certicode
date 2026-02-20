@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/SuccessStoryGlobalFintech.css";
-import GlobalFintech from "../../assets/GlobalFintech.png";
+// import GlobalFintech from "../../assets/GlobalFintech.png";
 import CerticodeProfile from "../../assets/CerticodeProfile.png";
 
 const relatedStories = [
@@ -59,7 +59,7 @@ const SuccessStoryGlobalFintech = () => {
           </p>
 
           <div className="global-fintech-case__heroImage">
-            <img src={GlobalFintech} alt="Global fintech team reviewing asset verification dashboards" />
+            {/* <img src={GlobalFintech} alt="Global fintech team reviewing asset verification dashboards" /> */}
           </div>
 
           <div className="global-fintech-case__meta">
@@ -114,11 +114,12 @@ const SuccessStoryGlobalFintech = () => {
               approvals. Centralized oversight allowed teams to manage
               verification across all 14 regions from a single platform, with
               dashboards and reporting that delivered real-time insights into
-              performance and compliance. The platform&apos;s scalable infrastructure
-              could handle growing volumes of assets without additional
-              headcount, allowing Global Fintech Solutions to expand efficiently
-              and confidently. With Certicode, asset verification became faster,
-              more reliable, and easier to manage across multiple regions.
+              performance and compliance. The platform&apos;s scalable
+              infrastructure could handle growing volumes of assets without
+              additional headcount, allowing Global Fintech Solutions to expand
+              efficiently and confidently. With Certicode, asset verification
+              became faster, more reliable, and easier to manage across multiple
+              regions.
             </p>
 
             <h3>Faster, Safer, and Scalable</h3>
@@ -138,11 +139,11 @@ const SuccessStoryGlobalFintech = () => {
             <p className="global-fintech-case__quote">
               <em>
                 &quot;Certicode reduced our asset verification time by 42% while
-                ensuring every purchase meets quality and licensing standards,&quot;
-                says the Head of Operations at Global Fintech Solutions.
-                &quot;We can now scale verification across multiple regions without
-                increasing headcount, which is a huge win for operational
-                efficiency.&quot;
+                ensuring every purchase meets quality and licensing
+                standards,&quot; says the Head of Operations at Global Fintech
+                Solutions. &quot;We can now scale verification across multiple
+                regions without increasing headcount, which is a huge win for
+                operational efficiency.&quot;
               </em>
             </p>
 
@@ -165,14 +166,20 @@ const SuccessStoryGlobalFintech = () => {
         <div className="global-fintech-case__relatedInner">
           <div className="global-fintech-case__relatedTop">
             <h4>RELATED CUSTOMER STORIES</h4>
-            <Link className="global-fintech-case__seeAll" to="/success-stories/customer-success-stories">
+            <Link
+              className="global-fintech-case__seeAll"
+              to="/success-stories/customer-success-stories"
+            >
               See all customer stories
               <span aria-hidden="true">›</span>
             </Link>
           </div>
           <div className="global-fintech-case__relatedGrid">
             {relatedStories.map((story, index) => (
-              <article key={`${story.title}-${index}`} className="global-fintech-mini">
+              <article
+                key={`${story.title}-${index}`}
+                className="global-fintech-mini"
+              >
                 <div className="global-fintech-mini__media" />
                 <div className="global-fintech-mini__body">
                   <span>{story.tag}</span>

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/TechnicalIssues.css";
-import SupportHero from "../../assets/SupportTechnical.png";
+// import SupportHero from "../../assets/SupportTechnical.png";
 import ArrowDown from "../../assets/ArrowDown.png";
 
 const technicalIssues = [
@@ -175,8 +175,8 @@ const technicalIssues = [
     details: (
       <div className="support-tech__content">
         <p>
-          Slow loading or freezing can happen because of high system usage,
-          low memory, browser issues, or temporary server load.
+          Slow loading or freezing can happen because of high system usage, low
+          memory, browser issues, or temporary server load.
         </p>
 
         <h4>
@@ -240,14 +240,18 @@ const TechnicalIssues = () => {
 
       <section className="support-tech">
         <div className="support-tech__hero">
-          <img src={SupportHero} alt="Technical support" />
-          <div className="support-tech__heroText">
-          </div>
+          {/* <img src={SupportHero} alt="Technical support" /> */}
+          <div className="support-tech__heroText"></div>
         </div>
 
         <div className="support-tech__inner">
           <Link to="/customer-support" className="support-tech__backLink">
-            <img src={ArrowDown} alt="" aria-hidden="true" className="support-tech__backIcon" />
+            <img
+              src={ArrowDown}
+              alt=""
+              aria-hidden="true"
+              className="support-tech__backIcon"
+            />
             Back to Customer Support Page
           </Link>
 
@@ -258,20 +262,20 @@ const TechnicalIssues = () => {
               const isOpen = openIssue === index;
               return (
                 <article key={issue.title} className="support-tech__item">
-                    <button
-                      type="button"
-                      className="support-tech__trigger"
-                      onClick={() => setOpenIssue(isOpen ? null : index)}
-                      aria-expanded={isOpen}
-                    >
-                      <span>{issue.title}</span>
-                      <img
-                        src={ArrowDown}
-                        alt=""
-                        aria-hidden="true"
-                        className={`support-tech__icon${isOpen ? " is-open" : ""}`}
-                      />
-                    </button>
+                  <button
+                    type="button"
+                    className="support-tech__trigger"
+                    onClick={() => setOpenIssue(isOpen ? null : index)}
+                    aria-expanded={isOpen}
+                  >
+                    <span>{issue.title}</span>
+                    <img
+                      src={ArrowDown}
+                      alt=""
+                      aria-hidden="true"
+                      className={`support-tech__icon${isOpen ? " is-open" : ""}`}
+                    />
+                  </button>
                   {isOpen && issue.details && (
                     <div className="support-tech__details">{issue.details}</div>
                   )}
