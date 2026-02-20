@@ -140,7 +140,7 @@ function AppContent() {
         }
       />
       <Route
-        path="/ticket"
+        path="/ticket/:id"
         element={
           <ProtectedRoute allowedRoles={["Admin"]}>
             <TicketDetail />

@@ -72,6 +72,11 @@ export const SupportTicketAPI = {
         }
         
         let url = `${API_URL}/support/tickets`;
+        
+        if (filter !== "all") {
+          url += `?${filter === 'high' ? 'priority=high' : `status=${filter}`}`;
+        }
+        
         console.log('🌐 API URL:', url);
         
         const response = await fetch(url, {
@@ -85,9 +90,8 @@ export const SupportTicketAPI = {
         console.log('📊 Response Status:', response.status, response.statusText);
         
         const responseText = await response.text();
-        console.log('📄 Raw Response:', responseText.substring(0, 500)); // First 500 chars
+        console.log('📄 Raw Response:', responseText.substring(0, 500));
         
-        // Try to parse JSON
         let data;
         try {
         data = JSON.parse(responseText);
@@ -126,7 +130,7 @@ export const SupportTicketAPI = {
     }
     },
 
-  getTicketStats: async () => {
+    getTicketStats: async () => {
     try {
       const token = localStorage.getItem('auth_token');
       
@@ -154,7 +158,13 @@ export const SupportTicketAPI = {
         };
       }
 
-      const data = JSON.parse(responseText);
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('Failed to parse stats JSON:', parseError);
+        throw new Error('Invalid JSON response from server');
+      }
       
       if (!response.ok) {
         throw {
@@ -167,6 +177,7 @@ export const SupportTicketAPI = {
       }
 
       return data;
+      
     } catch (error) {
       console.error('SupportTicketAPI - Error fetching stats:', error);
       throw error;
@@ -457,6 +468,109 @@ export const SupportTicketAPI = {
       return data;
     } catch (error) {
       console.error('SupportTicketAPI - Error fetching my tickets:', error);
+      throw error;
+    }
+  },
+  
+  sendReply: async (ticketId, replyData) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        throw {
+          response: { status: 401 },
+          message: 'No authentication token found. Please log in.'
+        };
+      }
+      
+      const formData = new FormData();
+      formData.append('message', replyData.message);
+      formData.append('is_internal_note', replyData.is_internal_note ? '1' : '0');
+      
+      if (replyData.attachment) {
+        formData.append('attachment', replyData.attachment);
+      }
+      
+      const response = await fetch(`${API_URL}/support/tickets/${ticketId}/reply`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const responseText = await response.text();
+      
+      if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+        throw {
+          response: { status: response.status },
+          message: 'Server error. Please try again.'
+        };
+      }
+
+      const data = JSON.parse(responseText);
+      
+      if (!response.ok) {
+        throw {
+          response: {
+            status: response.status,
+            data: data
+          },
+          message: data.message || `Error ${response.status}`
+        };
+      }
+
+      return data;
+    } catch (error) {
+      console.error('SupportTicketAPI - Error sending reply:', error);
+      throw error;
+    }
+  },
+  
+  getReplies: async (ticketId) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        throw {
+          response: { status: 401 },
+          message: 'No authentication token found. Please log in.'
+        };
+      }
+      
+      const response = await fetch(`${API_URL}/support/tickets/${ticketId}/replies`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const responseText = await response.text();
+      
+      if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+        throw {
+          response: { status: response.status },
+          message: 'Server error. Please try again.'
+        };
+      }
+
+      const data = JSON.parse(responseText);
+      
+      if (!response.ok) {
+        throw {
+          response: {
+            status: response.status,
+            data: data
+          },
+          message: data.message || `Error ${response.status}`
+        };
+      }
+
+      return data;
+    } catch (error) {
+      console.error('SupportTicketAPI - Error fetching replies:', error);
       throw error;
     }
   }

@@ -161,17 +161,15 @@ const SupportDesk = () => {
   };
 
   const handleTicketClick = (ticketId) => {
-    // Navigate to /ticket page
-    navigate(`/ticket`);
+    navigate(`/ticket/${ticketId}`);
   };
 
   const handleUrgentItemClick = (ticketId) => {
-    // Navigate to /ticket page for urgent items too
-    navigate(`/ticket`);
+    navigate(`/ticket/${ticketId}`);
   };
 
   const getPriorityClass = (priority) => {
-    switch(priority) {
+    switch(priority?.toLowerCase()) {
       case "high": return "tag red";
       case "medium": return "tag orange";
       case "low": return "tag blue";
@@ -180,7 +178,7 @@ const SupportDesk = () => {
   };
 
   const getStatusClass = (status) => {
-    switch(status) {
+    switch(status?.toLowerCase()) {
       case "open": return "tag green";
       case "in_progress": return "tag orange";
       case "closed": return "tag gray";
@@ -215,7 +213,6 @@ const SupportDesk = () => {
             <img src={notifBell} alt="Notifications" className="topbar-icon" />
             <span className="notification-dot" />
           </Link>
-          <img src="https://i.pravatar.cc/150?u=alex" className="user-avatar-small" alt="user" />
         </AdminTopbar>
 
         <div className="page-header-row">
@@ -251,24 +248,44 @@ const SupportDesk = () => {
           </div>
         </div>
 
-        <div className="stats-row">
-          <div className="stat-card">
-            <div className="stat-label">OPEN TICKETS <span className="badge green">+12%</span></div>
-            <div className="stat-value">{stats.open_tickets}</div>
+          <div className="stats-row">
+            <div className="stat-card">
+              <div className="stat-label">
+                OPEN TICKETS 
+                <span className={`badge ${stats.open_tickets_percentage?.includes('+') ? 'green' : 'red'}`}>
+                  {stats.open_tickets_percentage}
+                </span>
+              </div>
+              <div className="stat-value">{stats.open_tickets}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">
+                AVG. RESPONSE 
+                <span className={`badge ${stats.avg_response_percentage?.includes('-') ? 'green' : 'red'}`}>
+                  {stats.avg_response_percentage}
+                </span>
+              </div>
+              <div className="stat-value">{formatTime(stats.avg_response_minutes)}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">
+                RESOLVED TODAY 
+                <span className={`badge ${stats.resolved_today_percentage?.includes('+') ? 'green' : 'red'}`}>
+                  {stats.resolved_today_percentage}
+                </span>
+              </div>
+              <div className="stat-value">{stats.resolved_today}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">
+                SLA BREACHES 
+                <span className={`badge ${stats.sla_breaches_percentage?.includes('-') ? 'green' : 'red'}`}>
+                  {stats.sla_breaches_percentage}
+                </span>
+              </div>
+              <div className="stat-value">{stats.sla_breaches}</div>
+            </div>
           </div>
-          <div className="stat-card">
-            <div className="stat-label">AVG. RESPONSE <span className="badge red">+5%</span></div>
-            <div className="stat-value">{formatTime(stats.avg_response_minutes)}</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-label">RESOLVED TODAY <span className="badge red">-2%</span></div>
-            <div className="stat-value">{stats.resolved_today}</div>
-          </div>
-          <div className="stat-card">
-            <div className="stat-label">SLA BREACHES <span className="badge green">+1%</span></div>
-            <div className="stat-value">{stats.sla_breaches}</div>
-          </div>
-        </div>
 
         {error && (
           <div className="error-message">
@@ -324,12 +341,12 @@ const SupportDesk = () => {
                         <td><span className="tag gray">{ticket.category}</span></td>
                         <td>
                           <span className={getPriorityClass(ticket.priority)}>
-                            {ticket.priority.toUpperCase()}
+                            {ticket.priority?.toUpperCase()}
                           </span>
                         </td>
                         <td>
                           <span className={getStatusClass(ticket.status)}>
-                            {ticket.status.replace("_", " ").toUpperCase()}
+                            {ticket.status?.replace("_", " ").toUpperCase()}
                           </span>
                         </td>
                         <td className="t-timer">{ticket.sla_timer || "00:00:00"}</td>

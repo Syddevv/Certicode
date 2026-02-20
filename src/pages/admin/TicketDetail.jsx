@@ -1,5 +1,5 @@
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState, useRef } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import AdminTopbar from "../../components/AdminTopbar";
 import "../../styles/ticketDetail.css";
@@ -8,8 +8,6 @@ import notifBell from "../../assets/NotifBell.png";
 import stripeIcon from "../../assets/stripe.png";
 import vectorMailIcon from "../../assets/tabler_mail-filled.png";
 import vectorAssetIcon from "../../assets/Vectorasset.png";
-import vectorShareIcon from "../../assets/Vectorshare.png";
-import tripleDotIcon from "../../assets/tripledot.png";
 import galleryIcon from "../../assets/gallery.png";
 import vectorDownloadIcon from "../../assets/lucide_download.png";
 import lockIcon from "../../assets/lockicon.png";
@@ -18,9 +16,216 @@ import vectorFirstResponseIcon from "../../assets/Vectorfirstresponse.png";
 import vectorServiceTierIcon from "../../assets/Vectorservicetier.png";
 import archiveIcon from "../../assets/archive.png";
 import attachFileIcon from "../../assets/attachfile.png";
+import { SupportTicketAPI } from "../../services/SupportTicketAPI";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
 const TicketDetail = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [ticket, setTicket] = useState(null);
+  const [replies, setReplies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
+  const [replyMessage, setReplyMessage] = useState("");
+  const [isInternalNote, setIsInternalNote] = useState(false);
+  const [attachment, setAttachment] = useState(null);
+  const [status, setStatus] = useState("");
+  const [priority, setPriority] = useState("");
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('auth_token');
+    if (!token) {
+      showErrorToast("Please log in to access the Support Desk");
+      navigate('/login');
+      return;
+    }
+    
+    fetchTicketDetails();
+  }, [id]);
+
+  useEffect(() => {
+    const threadElement = document.querySelector('.conversation-thread');
+    if (threadElement) {
+      threadElement.scrollTop = threadElement.scrollHeight;
+    }
+  }, [replies]);
+
+  const fetchTicketDetails = async () => {
+    setLoading(true);
+    try {
+      const ticketData = await SupportTicketAPI.getTicket(id);
+      setTicket(ticketData);
+      setStatus(ticketData.status || "open");
+      setPriority(ticketData.priority || "medium");
+      
+      await fetchReplies();
+    } catch (error) {
+      console.error("Failed to fetch ticket details:", error);
+      showErrorToast(error.message || "Failed to load ticket details");
+      
+      if (error.response?.status === 401) {
+        localStorage.removeItem('auth_token');
+        navigate('/login');
+      } else if (error.response?.status === 404) {
+        showErrorToast("Ticket not found");
+        navigate('/support');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchReplies = async () => {
+    try {
+      const repliesData = await SupportTicketAPI.getReplies(id);
+      setReplies(Array.isArray(repliesData) ? repliesData : []);
+    } catch (replyError) {
+      console.log("No replies yet or error fetching replies:", replyError);
+      setReplies([]);
+    }
+  };
+
+  const handleStatusChange = async (newStatus) => {
+    try {
+      await SupportTicketAPI.updateTicket(id, { status: newStatus });
+      setStatus(newStatus);
+      setTicket({ ...ticket, status: newStatus });
+      showSuccessToast(`Ticket status updated to ${newStatus}`);
+    } catch (error) {
+      console.error("Failed to update status:", error);
+      showErrorToast(error.message || "Failed to update status");
+    }
+  };
+
+  const handlePriorityChange = async (newPriority) => {
+    try {
+      await SupportTicketAPI.updateTicket(id, { priority: newPriority });
+      setPriority(newPriority);
+      setTicket({ ...ticket, priority: newPriority });
+      showSuccessToast(`Priority updated to ${newPriority}`);
+    } catch (error) {
+      console.error("Failed to update priority:", error);
+      showErrorToast(error.message || "Failed to update priority");
+    }
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        showErrorToast("File size must be less than 10MB");
+        return;
+      }
+      
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'application/pdf'];
+      if (!allowedTypes.includes(file.type)) {
+        showErrorToast("Only PNG, JPG, JPEG, and PDF files are allowed");
+        return;
+      }
+      
+      setAttachment(file);
+    }
+  };
+
+  const handleSendReply = async () => {
+    if (!replyMessage.trim()) {
+      showErrorToast("Please enter a message");
+      return;
+    }
+
+    setSending(true);
+    try {
+      const replyData = {
+        message: replyMessage,
+        is_internal_note: isInternalNote,
+        attachment: attachment
+      };
+      
+      await SupportTicketAPI.sendReply(id, replyData);
+      
+      await fetchReplies();
+      
+      setReplyMessage("");
+      setAttachment(null);
+      setIsInternalNote(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      
+      showSuccessToast(isInternalNote ? "Internal note added" : "Reply sent to customer");
+    } catch (error) {
+      console.error("Failed to send reply:", error);
+      showErrorToast(error.message || "Failed to send reply");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleArchiveAndClose = async () => {
+    if (!window.confirm("Archive and close this ticket?")) {
+      return;
+    }
+
+    try {
+      await SupportTicketAPI.updateTicket(id, { status: "closed" });
+      showSuccessToast("Ticket archived and closed");
+      navigate('/support');
+    } catch (error) {
+      console.error("Failed to close ticket:", error);
+      showErrorToast(error.message || "Failed to close ticket");
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const getInitials = (name) => {
+    if (!name) return "AG";
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  };
+
+  if (loading) {
+    return (
+      <div className="layout">
+        <Sidebar activePage="support" />
+        <main className="main-content detail-bg">
+          <AdminTopbar searchIcon={<img src={searchIcon} alt="Search" className="search-icon" />}>
+            <Link to="/admin-notification" className="notification-link" aria-label="Notifications">
+              <img src={notifBell} alt="Notifications" className="topbar-icon" />
+              <span className="notification-dot"></span>
+            </Link>
+          </AdminTopbar>
+          <div className="detail-container loading-state">
+            <div className="loading-spinner">Loading ticket details...</div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!ticket) {
+    return (
+      <div className="layout">
+        <Sidebar activePage="support" />
+        <main className="main-content detail-bg">
+          <AdminTopbar searchIcon={<img src={searchIcon} alt="Search" className="search-icon" />}>
+            <Link to="/admin-notification" className="notification-link" aria-label="Notifications">
+              <img src={notifBell} alt="Notifications" className="topbar-icon" />
+              <span className="notification-dot"></span>
+            </Link>
+          </AdminTopbar>
+          <div className="detail-container error-state">
+            <div>Ticket not found</div>
+            <button onClick={() => navigate('/support')}>Back to Support Desk</button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="layout">
@@ -32,9 +237,6 @@ const TicketDetail = () => {
             <img src={notifBell} alt="Notifications" className="topbar-icon" />
             <span className="notification-dot"></span>
           </Link>
-          <div className="user-profile">
-            <img src="https://i.pravatar.cc/150?u=alex" alt="User" />
-          </div>
         </AdminTopbar>
 
         <div className="detail-container">
@@ -42,101 +244,127 @@ const TicketDetail = () => {
             <nav className="breadcrumbs">
               <span onClick={() => navigate("/support")} className="crumb-link">Support Desk Inbox</span>
               <span className="crumb-separator">›</span>
-              <span className="crumb-active">API Key Rotation Issue</span>
+              <span className="crumb-active">{ticket.subject}</span>
             </nav>
 
             <div className="ticket-header">
               <div className="header-content">
                 <div className="title-row">
-                  <h1>API Key Rotation Issue</h1>
-                  <span className="badge-active">Active</span>
+                  <h1>{ticket.subject}</h1>
+                  <span className={`badge-${ticket.status === 'open' ? 'active' : ticket.status === 'in_progress' ? 'warning' : 'closed'}`}>
+                    {ticket.status?.replace("_", " ").toUpperCase()}
+                  </span>
                 </div>
                 <div className="meta-row">
-                  <span><img src={stripeIcon} alt="Stripe" className="meta-icon" /> Stripe Integration Services</span>
-                  <span><img src={vectorMailIcon} alt="Email" className="meta-icon" /> dev.support@stripe-integration.com</span>
-                  <span><img src={vectorAssetIcon} alt="Asset" className="meta-icon" /> Asset: PRO-CERT-2026-X9</span>
+                  <span><img src={stripeIcon} alt="Company" className="meta-icon" /> {ticket.company || "No Company"}</span>
+                  <span><img src={vectorMailIcon} alt="Email" className="meta-icon" /> {ticket.email}</span>
+                  {ticket.phone && <span><img src={vectorAssetIcon} alt="Phone" className="meta-icon" /> {ticket.phone}</span>}
                 </div>
-              </div>
-              <div className="header-actions">
-                <button className="btn-icon-square">
-                  <img src={vectorShareIcon} alt="Share" className="action-icon" />
-                </button>
-                <button className="btn-icon-square">
-                  <img src={tripleDotIcon} alt="More" className="action-icon" />
-                </button>
               </div>
             </div>
 
             <div className="conversation-thread">
-
               <div className="message-row client">
-                <div className="avatar-box">MC</div>
+                <div className="avatar-box">{getInitials(`${ticket.first_name} ${ticket.last_name}`)}</div>
                 <div className="message-body">
                   <div className="message-meta">
-                    <strong>Marcus Chen</strong> <span className="time">10:42 AM</span>
+                    <strong>{ticket.first_name} {ticket.last_name}</strong> <span className="time">{formatDate(ticket.created_at)}</span>
                   </div>
                   <div className="message-bubble white-bubble">
-                    <p>Hi Support Team, we are attempting to rotate our production API keys via the admin portal, but we keep receiving a "503 Service Unavailable" error when clicking the "Generate New Key" button.</p>
-                    <p>This is critical as our current keys expire in 48 hours. I've attached a screenshot of the console log.</p>
+                    <p>{ticket.message}</p>
 
-                    <div className="attachment-card">
-                      <div className="file-icon orange-bg">
-                        <img src={galleryIcon} alt="Gallery" className="attachment-icon" />
+                    {ticket.attachment_path && (
+                      <div className="attachment-card">
+                        <div className="file-icon orange-bg">
+                          <img src={galleryIcon} alt="Attachment" className="attachment-icon" />
+                        </div>
+                        <div className="file-info">
+                          <span className="filename">Attachment</span>
+                          <span className="filesize">Click to view</span>
+                        </div>
+                        <a href={`http://127.0.0.1:8000/storage/${ticket.attachment_path}`} target="_blank" rel="noopener noreferrer" className="btn-download">
+                          <img src={vectorDownloadIcon} alt="Download" className="download-icon" />
+                        </a>
                       </div>
-                      <div className="file-info">
-                        <span className="filename">console_error_log.png</span>
-                        <span className="filesize">1.2 MB • Click to preview</span>
-                      </div>
-                      <button className="btn-download">
-                        <img src={vectorDownloadIcon} alt="Download" className="download-icon" />
-                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {replies.map((reply) => (
+                <div key={reply.id} className={`message-row ${reply.is_internal_note ? 'internal-note' : 'agent'}`}>
+                  <div className="message-body">
+                    <div className="message-meta align-right">
+                      <span className="time">{formatDate(reply.created_at)}</span> 
+                      <strong>{reply.user?.name || 'Support Agent'}</strong> 
+                      {reply.is_internal_note && <span className="internal-badge">INTERNAL NOTE</span>}
+                      <span className="tag-ar">{getInitials(reply.user?.name)}</span>
+                    </div>
+                    <div className={`message-bubble ${reply.is_internal_note ? 'internal-bubble' : 'dark-bubble'}`}>
+                      <p>{reply.message}</p>
+                      {reply.attachment_path && (
+                        <div className="attachment-card">
+                          <div className="file-icon orange-bg">
+                            <img src={galleryIcon} alt="Attachment" className="attachment-icon" />
+                          </div>
+                          <div className="file-info">
+                            <span className="filename">Attachment</span>
+                            <span className="filesize">Click to view</span>
+                          </div>
+                          <a href={`http://127.0.0.1:8000/storage/${reply.attachment_path}`} target="_blank" rel="noopener noreferrer" className="btn-download">
+                            <img src={vectorDownloadIcon} alt="Download" className="download-icon" />
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="message-row agent">
-                <div className="message-body">
-                  <div className="message-meta align-right">
-                    <span className="time">10:55 AM</span> <strong>Alex Rivera</strong> <span className="tag-ar">AR</span>
-                  </div>
-                  <div className="message-bubble dark-bubble">
-                    <p>Hello Marcus, thank you for reaching out. I've investigated our load balancer logs for your organization's ID.</p>
-                    <p>It seems there's a transient rate-limiting issue affecting the Key Generation service specifically for your region. I am escalating this to our DevOps team immediately to increase your threshold.</p>
-                  </div>
-                </div>
-              </div>
-
+              ))}
             </div>
 
             <div className="editor-container">
               <div className="editor-toolbar">
-                <div className="tools-left">
-                  <button className="tool-btn"><strong>B</strong></button>
-                  <button className="tool-btn"><em>I</em></button>
-                  <button className="tool-btn">≡</button>
-                  <button className="tool-btn">{"<>"}</button>
-                </div>
                 <div className="tools-right">
                   <label className="checkbox-label">
-                    <input type="checkbox" /> Internal Note
+                    <input 
+                      type="checkbox" 
+                      checked={isInternalNote}
+                      onChange={(e) => setIsInternalNote(e.target.checked)}
+                    /> Internal Note
                   </label>
                 </div>
               </div>
-              <textarea className="editor-textarea" placeholder="Type your message here..."></textarea>
+              <textarea 
+                className="editor-textarea compact" 
+                placeholder="Type your message here..." 
+                value={replyMessage}
+                onChange={(e) => setReplyMessage(e.target.value)}
+                rows="3"
+              ></textarea>
               <div className="editor-footer">
-                <button className="btn-attach">
+                <button className="btn-attach" onClick={() => fileInputRef.current?.click()}>
                   <img src={attachFileIcon} alt="Attach" className="attach-icon" />
-                  Attach files
+                  {attachment ? attachment.name : "Attach files"}
+                  <input 
+                    type="file" 
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    onChange={handleFileSelect}
+                    accept=".png,.jpg,.jpeg,.pdf"
+                  />
                 </button>
-                <button className="btn-send">Send Reply ➔</button>
+                <button 
+                  className="btn-send" 
+                  onClick={handleSendReply}
+                  disabled={sending || !replyMessage.trim()}
+                >
+                  {sending ? "Sending..." : isInternalNote ? "Add Note ➔" : "Send Reply ➔"}
+                </button>
               </div>
             </div>
           </section>
 
           <aside className="ticket-sidebar">
-
-            {/* Card 1: Control Panel */}
             <div className="sidebar-card">
               <div className="card-header">
                 <h3>CONTROL PANEL</h3>
@@ -146,9 +374,10 @@ const TicketDetail = () => {
               <div className="form-group">
                 <label>Status</label>
                 <div className="select-wrapper">
-                  <select>
-                    <option>In-progress</option>
-                    <option>Resolved</option>
+                  <select value={status} onChange={(e) => handleStatusChange(e.target.value)}>
+                    <option value="open">Open</option>
+                    <option value="in_progress">In-progress</option>
+                    <option value="closed">Resolved</option>
                   </select>
                 </div>
               </div>
@@ -156,27 +385,28 @@ const TicketDetail = () => {
               <div className="form-group">
                 <label>Priority Level</label>
                 <div className="segmented-control">
-                  <button>Low</button>
-                  <button>Med</button>
-                  <button className="active">High</button>
+                  <button 
+                    className={priority === 'low' ? 'active' : ''} 
+                    onClick={() => handlePriorityChange('low')}
+                  >
+                    Low
+                  </button>
+                  <button 
+                    className={priority === 'medium' ? 'active' : ''} 
+                    onClick={() => handlePriorityChange('medium')}
+                  >
+                    Med
+                  </button>
+                  <button 
+                    className={priority === 'high' ? 'active' : ''} 
+                    onClick={() => handlePriorityChange('high')}
+                  >
+                    High
+                  </button>
                 </div>
               </div>
             </div>
 
-            {/* Card 2: Assigned Agent */}
-            <div className="sidebar-card">
-              <label className="section-title">ASSIGNED AGENT</label>
-              <div className="agent-card-inner">
-                <img src="https://i.pravatar.cc/150?u=alex" alt="Agent" />
-                <div className="agent-info">
-                  <strong>Alex Rivera</strong>
-                  <span className="text-orange">ASSIGNED TO YOU</span>
-                </div>
-                <button className="btn-swap">⇅</button>
-              </div>
-            </div>
-
-            {/* Card 3: Service Level */}
             <div className="sidebar-card">
               <label className="section-title">SERVICE LEVEL</label>
               <div className="sla-row">
@@ -184,7 +414,7 @@ const TicketDetail = () => {
                   <img src={groupDueInIcon} alt="Due In" className="sla-icon" />
                   SLA Due in
                 </div>
-                <span className="badge-green">2h 15m</span>
+                <span className="badge-green">{ticket.sla_timer || "2h 15m"}</span>
               </div>
               <div className="sla-row">
                 <div className="sla-label">
@@ -203,12 +433,11 @@ const TicketDetail = () => {
             </div>
 
             <div className="sidebar-footer-link">
-              <button>
+              <button onClick={handleArchiveAndClose}>
                 <img src={archiveIcon} alt="Archive" className="archive-icon" />
                 Archive & Close Ticket
               </button>
             </div>
-
           </aside>
         </div>
       </main>
@@ -217,4 +446,3 @@ const TicketDetail = () => {
 };
 
 export default TicketDetail;
-
