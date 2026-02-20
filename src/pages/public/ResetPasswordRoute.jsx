@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
@@ -80,36 +79,71 @@ const helpCardsByTopic = {
       text: "Get help using Certicode software products, including setup, features, updates, and common troubleshooting issues.",
     },
   ],
-  "Account Recovery": [
-    {
-      title: "Reset Your Password",
-      text: "Reset your password quickly from the login page.",
-      path: "/customer-support/account-recovery/reset-password",
-    },
-    {
-      title: "Verify via Mobile Number",
-      text: "Verify your account instantly using your phone.",
-      path: "/customer-support/account-recovery/verify-mobile-number",
-    },
-    {
-      title: "Unlock My Account",
-      text: "Unlock your account safely from the dashboard.",
-    },
-    {
-      title: "Recover Without Email or Phone",
-      text: "Recover your account even without email or phone access",
-    },
-    {
-      title: "Report Unauthorized Access",
-      text: "Report any suspicious activity to protect your account.",
-    },
-    {
-      title: "Update Recovery Details",
-      text: "Keep your recovery info up to date for account security.",
-    },
-  ],
 };
 
+// Detailed content for Account Recovery (rendered as rich article, not cards)
+const AccountRecoveryContent = () => (
+  <div className="support-article">
+    <nav className="support-breadcrumb">
+      <Link to="/customer-support/">Account Recovery</Link>
+      <span className="breadcrumb-sep">&rsaquo;</span>
+      <span className="breadcrumb-current">Reset Your Password</span>
+    </nav>
+
+    <section className="support-article__section">
+      <h2>Reset Your Password</h2>
+      <p>
+        Recover access to your account by resetting your password using your
+        registered email address.
+      </p>
+
+      <h3>Step 1: Click Forgot Password</h3>
+      <ul>
+        <li>
+          On the login page, click <strong>"Forgot Password?"</strong>
+        </li>
+        <li>
+          Enter your <strong>registered email address.</strong>
+        </li>
+      </ul>
+
+      <h3>Step 2: Check Your Email</h3>
+      <ul>
+        <li>
+          Open your inbox and locate the <strong>password reset email.</strong>
+        </li>
+        <li>
+          Click the <strong>reset link.</strong>
+        </li>
+      </ul>
+
+      <h3>Step 3: Set a New Password</h3>
+      <ul>
+        <li>
+          Enter a <strong>new password</strong> and <strong>confirm it.</strong>
+        </li>
+        <li>
+          Press <strong>Save/Confirm.</strong>
+        </li>
+      </ul>
+
+      <h3>Step 4: Log In</h3>
+      <ul>
+        <li>Return to the login page.</li>
+        <li>
+          Enter your <strong>new password.</strong>
+        </li>
+      </ul>
+
+      <h4>If the Issue Persists</h4>
+      <ul>
+        <li>Ensure your email is correct.</li>
+        <li>Check spam/junk folders.</li>
+        <li>Submit a support request if needed.</li>
+      </ul>
+    </section>
+  </div>
+);
 
 //topic cards fallback
 const topicPaths = {
@@ -125,16 +159,16 @@ const topicPaths = {
   "Other Topics": "/support/other",
 };
 
-const CustomerSupport = () => {
+const ResetPasswordRoute = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("Software Order Status");
+  const [activeTab, setActiveTab] = useState("Account Recovery");
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   }, []);
 
   const handleTabclick = (topic) => {
-    if (helpCardsByTopic[topic]) {
+    if (topic === "Account Recovery" || helpCardsByTopic[topic]) {
       setActiveTab(topic);
     } else if (topicPaths[topic]) {
       navigate(topicPaths[topic]);
@@ -146,35 +180,11 @@ const CustomerSupport = () => {
   return (
     <div className="support-page">
       <Navbar />
-      <section className="support-hero">
-        <div className="support-hero__inner">
-          <div className="support-hero__media">
-            <img src={SupportHero} alt="Customer support" />
-          </div>
-        </div>
-      </section>
-
-      <section className="support-categories">
-        <div className="support-categories__inner">
-          {categories.map((item) => (
-            <button key={item.title} className="support-category" type="button">
-              <span className="support-category__icon">
-                <img src={item.icon} alt="" aria-hidden="true" />
-              </span>
-              <span className="support-category__text">
-                {item.title.split("\n").map((line) => (
-                  <span key={line}>{line}</span>
-                ))}
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
 
       <section className="support-library">
         <div className="support-library__inner">
           <div className="support-library__header">
-            <h2>Search our help library</h2>
+            <h2>Help & Customer Support</h2>
             <div className="support-search">
               <img src={SearchIcon} alt="" aria-hidden="true" />
               <input
@@ -202,17 +212,20 @@ const CustomerSupport = () => {
             </aside>
 
             <div className="support-cards">
-              {visibleCards.map((card) => (
-                <article onClick={()=> navigate(card.path)} key={card.title} className="support-card">
-                  <h4>{card.title}</h4>
-                  <p>{card.text}</p>
-                </article>
-              ))}
+              {activeTab === "Account Recovery" ? (
+                <AccountRecoveryContent />
+              ) : (
+                visibleCards.map((card) => (
+                  <article key={card.title} className="support-card">
+                    <h4>{card.title}</h4>
+                    <p>{card.text}</p>
+                  </article>
+                ))
+              )}
             </div>
           </div>
         </div>
       </section>
-
       <section className="support-cta">
         <div className="support-cta__inner">
           <div className="support-cta__card">
@@ -227,10 +240,8 @@ const CustomerSupport = () => {
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 };
 
-export default CustomerSupport;
+export default ResetPasswordRoute;
