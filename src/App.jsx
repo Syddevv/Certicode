@@ -112,6 +112,22 @@ function AppContent() {
         }
       />
       <Route
+        path="/customers/:id"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminCustomerDetails />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/sales/order-details/:id"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminOrderDetails />
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/admin-notification"
         element={
           <ProtectedRoute allowedRoles={["Admin"]}>
