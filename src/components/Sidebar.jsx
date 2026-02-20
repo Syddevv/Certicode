@@ -101,7 +101,7 @@ const Sidebar = ({ activePage }) => {
           <button 
             className="modal-btn modal-btn-secondary"
             onClick={onClose}
-          >
+          >   
             Cancel
           </button>
           <button 
