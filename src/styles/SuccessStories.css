@@ -505,3 +505,156 @@
     font-size: 14px;
   }
 }
+
+.stories-loading {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.stories-loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #f60;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.stories-grid-error {
+  text-align: center;
+  padding: 2rem;
+  margin: 2rem 0;
+  background: #fff3f0;
+  border-radius: 8px;
+}
+
+.stories-grid-error button {
+  background: #f60;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 1rem;
+  transition: background 0.3s ease;
+}
+
+.stories-grid-error button:hover {
+  background: #e55c00;
+}
+
+.stories-card {
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stories-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.stories-card__media {
+  position: relative;
+  overflow: hidden;
+  background: #f5f5f5;
+  min-height: 200px;
+}
+
+.stories-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.stories-card:hover .stories-card__media img {
+  transform: scale(1.05);
+}
+
+.stories-spotlight__link,
+.stories-card__link {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #f60;
+  font-weight: 500;
+  transition: gap 0.3s ease;
+}
+
+.stories-spotlight__link:hover,
+.stories-card__link:hover {
+  gap: 0.75rem;
+}
+
+.stories-spotlight__link img,
+.stories-card__link img {
+  transition: transform 0.3s ease;
+}
+
+.stories-spotlight__link:hover img,
+.stories-card__link:hover img {
+  transform: translateX(4px);
+}
+
+.loading-container {
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.error-container {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.error-container h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin: 0;
+}
+
+.back-link {
+  background: none;
+  border: 2px solid #f60;
+  color: #f60;
+  padding: 0.75rem 2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.back-link:hover {
+  background: #f60;
+  color: white;
+}
+
+.stories-grid__empty {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  font-size: 1.1rem;
+}

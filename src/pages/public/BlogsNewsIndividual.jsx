@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/BlogsNewsIndividual.css";
@@ -7,32 +8,74 @@ import CerticodeProfile from "../../assets/CerticodeProfile.png";
 import OrangeArrow from "../../assets/OrangeArrow.png";
 
 const BlogsNewsIndividual = () => {
+  const { id } = useParams();
+  const [post, setPost] = useState(null);
+  const [related, setRelated] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
-  }, []);
+    fetchPost();
+    fetchRelated();
+  }, [id]);
 
-  const related = [
-    {
-      type: "Blog",
-      title: "How Secure Software Protects Your Business in 2025",
-      date: "Jan 24, 2026",
-    },
-    {
-      type: "Blog",
-      title: "How Secure Software Protects Your Business in 2025",
-      date: "Jan 24, 2026",
-    },
-    {
-      type: "News",
-      title: "Certicode Launches New Cybersecurity Services for SMEs",
-      date: "Jan 24, 2026",
-    },
-    {
-      type: "Blog",
-      title: "How Secure Software Protects Your Business in 2025",
-      date: "Jan 24, 2026",
-    },
-  ];
+  const fetchPost = async () => {
+    try {
+      const response = await fetch(`https://dev.to/api/articles/${id}`);
+      const data = await response.json();
+      setPost(data);
+      
+      // Redirect to actual DEV.to post
+      if (data && data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error("Error fetching post:", error);
+      setLoading(false);
+    }
+  };
+
+  const fetchRelated = async () => {
+    try {
+      const response = await fetch(`https://dev.to/api/articles?tag=software&per_page=4`);
+      const data = await response.json();
+      setRelated(data);
+    } catch (error) {
+      console.error("Error fetching related posts:", error);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  const determineType = (tags) => {
+    if (!tags) return 'Blog';
+    if (tags.includes('news')) return 'News';
+    if (tags.includes('tutorial')) return 'Tutorial';
+    return 'Blog';
+  };
+
+  const openBlogPost = (url) => {
+    window.open(url, '_blank');
+  };
+
+  if (loading) {
+    return (
+      <div className="blog-detail">
+        <Navbar />
+        <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          Redirecting to article...
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="blog-detail">
@@ -74,7 +117,7 @@ const BlogsNewsIndividual = () => {
 
           <div className="blog-detail__body">
             <p>
-              In today’s digital-first world, businesses rely heavily on
+              In today's digital-first world, businesses rely heavily on
               software systems to manage operations, store sensitive data, and
               deliver services to customers. As cyber threats continue to grow
               in complexity, securing these systems has become a critical
@@ -142,25 +185,34 @@ const BlogsNewsIndividual = () => {
             <h4>Related Articles</h4>
             <div className="blog-detail__relatedGrid">
               {related.map((item, index) => (
-                <article key={`${item.title}-${index}`} className="mini-card">
+                <div 
+                  key={`${item.title}-${index}`} 
+                  className="mini-card"
+                  onClick={() => openBlogPost(item.url)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <div className="mini-card__media" />
                   <div className="mini-card__body">
-                    <span className="mini-card__tag">{item.type}</span>
+                    <span className="mini-card__tag">{determineType(item.tag_list)}</span>
                     <h5>{item.title}</h5>
-                    <span className="mini-card__date">{item.date}</span>
+                    <span className="mini-card__date">{formatDate(item.published_at)}</span>
                   </div>
-                </article>
+                </div>
               ))}
             </div>
           </div>
 
           <aside className="blog-detail__next">
             <h4>Up Next</h4>
-            <article className="next-card">
+            <div 
+              className="next-card"
+              onClick={() => related[0] && openBlogPost(related[0].url)}
+              style={{ cursor: 'pointer' }}
+            >
               <div className="next-card__media" />
               <div className="next-card__body">
                 <span className="mini-card__tag">Blog</span>
-                <h5>Beginner’s Guide to Web Application Security</h5>
+                <h5>Beginner's Guide to Web Application Security</h5>
                 <p>
                   Learn the fundamentals of securing your web apps, from
                   authentication to encryption and vulnerability testing...
@@ -170,7 +222,7 @@ const BlogsNewsIndividual = () => {
                 </button>
                 <span className="mini-card__date">Jan 24, 2026</span>
               </div>
-            </article>
+            </div>
           </aside>
         </div>
       </section>
