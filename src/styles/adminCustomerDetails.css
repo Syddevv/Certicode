@@ -75,6 +75,15 @@
   font-weight: 700;
 }
 
+.profile-status .status-pill.inactive {
+  background: #f3f4f6;
+  color: #6b7280;
+  padding: 6px 24px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .divider {
   border: 0;
   border-top: 1px solid #f3f4f6;
@@ -266,6 +275,28 @@
 }
 .status-pill.refunded {
   background: #fee2e2;
+  color: #dc2626;
+}
+
+.table-message {
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.multiline-value {
+  white-space: pre-line;
+}
+
+.details-message-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px;
+  background: #fff;
+  color: #374151;
+}
+
+.details-message-error {
   color: #dc2626;
 }
 

@@ -138,6 +138,7 @@ const AdminSales = () => {
   };
 
   const getStatusBadge = (status) => {
+    const statusKey = String(status || "pending").toLowerCase();
     const statusMap = {
       'completed': 'completed',
       'paid': 'completed',
@@ -148,16 +149,17 @@ const AdminSales = () => {
       'failed': 'refunded'
     };
     
-    const badgeClass = statusMap[status.toLowerCase()] || 'pending';
+    const badgeClass = statusMap[statusKey] || 'pending';
     
     return (
       <span className={`status-pill ${badgeClass}`}>
-        {Icons.Dot} {status.toUpperCase()}
+        {Icons.Dot} {statusKey.toUpperCase()}
       </span>
     );
   };
 
   const getCategoryBadge = (category) => {
+    const categoryKey = String(category || "website").toLowerCase();
     const categoryMap = {
       'mobile app': 'green',
       'website': 'blue',
@@ -167,11 +169,11 @@ const AdminSales = () => {
       'web app': 'blue'
     };
     
-    const badgeClass = categoryMap[category.toLowerCase()] || 'blue';
+    const badgeClass = categoryMap[categoryKey] || 'blue';
     
     return (
       <span className={`mini-badge ${badgeClass}`}>
-        {category.toUpperCase()}
+        {categoryKey.toUpperCase()}
       </span>
     );
   };
@@ -395,17 +397,25 @@ const AdminSales = () => {
                     </td>
                   </tr>
                 ) : (
-                  orders.map((order) => (
-                    <tr key={order.id}>
+                  orders.map((order) => {
+                    const orderId = order.id || order.order_id || order.order_number;
+                    const rowKey = orderId || `${order.order_number}-${order.asset_name}`;
+                    return (
+                    <tr key={rowKey}>
                       <td className="order-id">{order.order_number}</td>
                       <td>
                         <div className="asset-info">
-                          <Link 
-                            to={`/sales/order-details/${order.id}`}
-                            style={{ textDecoration: 'none', color: 'inherit' }}
-                          >
+                          {orderId ? (
+                            <Link 
+                              to={`/sales/order-details/${orderId}`}
+                              state={{ order }}
+                              style={{ textDecoration: 'none', color: 'inherit' }}
+                            >
+                              <strong>{order.asset_name}</strong>
+                            </Link>
+                          ) : (
                             <strong>{order.asset_name}</strong>
-                          </Link>
+                          )}
                           {getCategoryBadge(order.category)}
                         </div>
                       </td>
@@ -424,13 +434,14 @@ const AdminSales = () => {
                         {getStatusBadge(order.status)}
                       </td>
                       {/* <td className="actions-cell">
-                        <Link to={`/sales/order-details/${order.id}`}>
+                        <Link to={`/sales/order-details/${orderId}`}>
                           <button>{Icons.Edit}</button>
                         </Link>
                         <button>{Icons.Settings}</button>
                       </td> */}
                     </tr>
-                  ))
+                  );
+                  })
                 )}
               </tbody>
             </table>

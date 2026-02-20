@@ -392,6 +392,7 @@ const AdminCustomers = () => {
                           <div>
                             <Link 
                               to={`/customers/${customer.id}`}
+                              state={{ customer }}
                               style={{ textDecoration: 'none', color: 'inherit' }}
                             >
                               <strong>{customer.name}</strong>

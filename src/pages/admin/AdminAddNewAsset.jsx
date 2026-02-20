@@ -771,21 +771,23 @@ const AdminAddNewAssets = () => {
             <div className="footer-left">
               {saveStatus && <span className={`status-message ${saveStatus.includes('Error') ? 'error' : 'success'}`}>{saveStatus}</span>}
             </div>
-            <button 
-              type="button" 
-              className="btn secondary"
-              onClick={() => navigate("/inventory")}
-              disabled={loading}
-            >
-              Cancel
-            </button>
-            <button 
-              type="submit" 
-              className="btn primary footer-cta"
-              disabled={loading}
-            >
-              {loading ? 'Saving...' : isEditMode ? 'Update Asset' : 'Publish to Repository'}
-            </button>
+            <div className="footer-actions">
+              <button 
+                type="button" 
+                className="btn secondary"
+                onClick={() => navigate("/inventory")}
+                disabled={loading}
+              >
+                Cancel
+              </button>
+              <button 
+                type="submit" 
+                className="btn primary footer-cta"
+                disabled={loading}
+              >
+                {loading ? 'Saving...' : isEditMode ? 'Update Asset' : 'Publish to Repository'}
+              </button>
+            </div>
           </footer>
         </form>
       </main>
