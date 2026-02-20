@@ -15,6 +15,7 @@ import OrangeStar from "../../assets/orangestar.png";
 import SearchIcon from "../../assets/lucide_search.png";
 import EditBillingDetailsModal from "../../components/Editbillingdetailsmodal ";
 import { ProfileAPI } from "../../services/ProfileAPI";
+import ManagingPaymentMethod from "../../components/ManagingPaymentMethod";
 
 const BillingInvoices = () => {
   const navigate = useNavigate();
@@ -475,7 +476,11 @@ const BillingInvoices = () => {
                           "Add payment method in Account Settings"}
                       </span>
                     </div>
-                    <button className="billing-link" type="button">
+                    <button
+                      className="billing-link"
+                      type="button"
+                      onClick={() => setOpen(true)}
+                    >
                       Edit
                     </button>
                   </div>
@@ -517,6 +522,7 @@ const BillingInvoices = () => {
         onClose={() => setUpdateBillingModal(false)}
       />
       <Footer />
+      <ManagingPaymentMethod open={open} setOpen={setOpen} />
     </div>
   );
 };
