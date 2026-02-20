@@ -15,6 +15,7 @@ import { ProfileAPI } from "../../services/ProfileAPI";
 import { resolveAvatarUrl } from "../../utils/avatar";
 import EditBillingDetailsModal from "../../components/Editbillingdetailsmodal ";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
+import LogoutModal from "../../components/LogoutModal";
 
 const BuyerAccountSettings = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
@@ -36,6 +37,7 @@ const BuyerAccountSettings = () => {
   const [saving, setSaving] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [isLogoutModal, setLogoutModal] = useState(false);
   const [isUpdateBillingModal, setUpdateBillingModal] = useState(false);
 
   const notifyUser = (type, text) => {
@@ -71,7 +73,7 @@ const BuyerAccountSettings = () => {
   }, [isDeleteOpen]);
 
   useEffect(() => {
-    if (isUpdateBillingModal || isDeleteOpen) {
+    if (isUpdateBillingModal || isDeleteOpen || isLogoutModal) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -79,7 +81,7 @@ const BuyerAccountSettings = () => {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isUpdateBillingModal, isDeleteOpen]);
+  }, [isUpdateBillingModal, isDeleteOpen, isLogoutModal]);
 
   const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
@@ -94,7 +96,10 @@ const BuyerAccountSettings = () => {
 
       // Check dimensions
       if (img.width > 1024 || img.height > 1024) {
-        notifyUser("error", "Image dimensions should be less than 1024x1024 pixels");
+        notifyUser(
+          "error",
+          "Image dimensions should be less than 1024x1024 pixels",
+        );
         e.target.value = "";
         return;
       }
@@ -139,7 +144,10 @@ const BuyerAccountSettings = () => {
         }, 3000);
       } catch (error) {
         console.error("Failed to upload avatar:", error);
-        notifyUser("error", error.message || "Failed to upload avatar. Please try again.");
+        notifyUser(
+          "error",
+          error.message || "Failed to upload avatar. Please try again.",
+        );
         e.target.value = "";
       } finally {
         setSaving(false);
@@ -147,7 +155,10 @@ const BuyerAccountSettings = () => {
     };
 
     img.onerror = () => {
-      notifyUser("error", "Failed to load image. Please select a valid image file.");
+      notifyUser(
+        "error",
+        "Failed to load image. Please select a valid image file.",
+      );
       e.target.value = "";
     };
   };
@@ -217,7 +228,10 @@ const BuyerAccountSettings = () => {
       }, 3000);
     } catch (error) {
       console.error("Failed to update profile:", error);
-      notifyUser("error", error.message || "Failed to update profile. Please try again.");
+      notifyUser(
+        "error",
+        error.message || "Failed to update profile. Please try again.",
+      );
     } finally {
       setSaving(false);
     }
@@ -263,7 +277,10 @@ const BuyerAccountSettings = () => {
       }, 3000);
     } catch (error) {
       console.error("Failed to update password:", error);
-      notifyUser("error", error.message || "Failed to update password. Please try again.");
+      notifyUser(
+        "error",
+        error.message || "Failed to update password. Please try again.",
+      );
     } finally {
       setChangingPassword(false);
     }
@@ -295,7 +312,8 @@ const BuyerAccountSettings = () => {
       console.error("Failed to delete account:", error);
       notifyUser(
         "error",
-        error.message || "Failed to delete account. Please check your password.",
+        error.message ||
+          "Failed to delete account. Please check your password.",
       );
     } finally {
       setDeletingAccount(false);
@@ -709,7 +727,7 @@ const BuyerAccountSettings = () => {
               <button
                 className="account-secondary"
                 type="button"
-                onClick={handleLogout}
+                onClick={() => setLogoutModal(true)}
               >
                 Logout
               </button>
@@ -789,6 +807,12 @@ const BuyerAccountSettings = () => {
         </div>
       )}
 
+      {isLogoutModal && (
+        <LogoutModal
+          onClose={() => setLogoutModal(false)}
+          onConfirm={handleLogout}
+        />
+      )}
       <EditBillingDetailsModal
         isOpen={isUpdateBillingModal}
         onClose={() => setUpdateBillingModal(false)}

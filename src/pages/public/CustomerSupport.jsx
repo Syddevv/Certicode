@@ -89,7 +89,7 @@ const helpCardsByTopic = {
     {
       title: "Verify via Mobile Number",
       text: "Verify your account instantly using your phone.",
-      path: "/customer-support/account-recovery/verify-mobile-number",
+      path: "/customer-support/account-recovery/      ",
     },
     {
       title: "Unlock My Account",

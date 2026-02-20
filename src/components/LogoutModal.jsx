@@ -3,7 +3,7 @@ import logo from "../assets/certicodeicon.png";
 
 const LogoutModal = ({ onClose, onConfirm }) => {
   return (
-    <div className="modal-overlay">
+    <div  className="modal-overlay">   
       <div className="logout-modal">
         <img src={logo} alt="Certicode" className="modal-logo" />
 
