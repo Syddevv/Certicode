@@ -144,7 +144,6 @@ const AdminInventory = () => {
 
   const handleDelete = async (productId) => {
     // if (!window.confirm("Are you sure you want to delete this asset?")) return;
-    alert(productId)
     setShowDeleteModal(false);
     setDeletingId(productId);
     try {
