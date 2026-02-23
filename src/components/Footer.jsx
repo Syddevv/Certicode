@@ -41,9 +41,9 @@ const Footer = () => {
             <a className="footer__link" href="#">
               UI/UX Design Kits
             </a>
-            <a className="footer__link" href="#">
+            <Link className="footer__link" to="/custom-projects">
               Custom Projects
-            </a>
+            </Link>
           </div>
 
           <div className="footer__col">
