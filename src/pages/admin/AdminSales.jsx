@@ -6,6 +6,7 @@ import AdminTopbar from "../../components/AdminTopbar";
 import notifBell from "../../assets/NotifBell.png";
 import { AdminSalesAPI } from "../../services/AdminSalesAPI";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
+import ExportConfirmation from "../../components/ExportConfirmationModal";
 
 const Icons = {
   Bell: "🔔",
@@ -13,12 +14,15 @@ const Icons = {
   Filter: "⚡",
   Edit: "📝",
   Settings: "⚙️",
-  Dot: "●"
+  Dot: "●",
 };
 
 const Avatar = ({ name, avatarUrl }) => (
   <img
-    src={avatarUrl || `https://ui-avatars.com/api/?name=${name}&background=random&color=fff`}
+    src={
+      avatarUrl ||
+      `https://ui-avatars.com/api/?name=${name}&background=random&color=fff`
+    }
     alt={name}
     className="user-avatar"
     onError={(e) => {
@@ -38,18 +42,19 @@ const AdminSales = () => {
     gross_volume_change: 0,
     net_revenue_change: 0,
     refund_rate_change: 0,
-    avg_transaction_change: 0
+    avg_transaction_change: 0,
   });
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [exporting, setExporting] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
   const [filters, setFilters] = useState({
     date_range: "30",
     category: "all",
     status: "all",
-    search: ""
+    search: "",
   });
 
   const fetchStats = useCallback(async () => {
@@ -84,12 +89,12 @@ const AdminSales = () => {
   }, [fetchOrders]);
 
   const handleSearch = (term) => {
-    setFilters(prev => ({ ...prev, search: term }));
+    setFilters((prev) => ({ ...prev, search: term }));
     setCurrentPage(1);
   };
 
   const handleFilterChange = (filterName, value) => {
-    setFilters(prev => ({ ...prev, [filterName]: value }));
+    setFilters((prev) => ({ ...prev, [filterName]: value }));
     setCurrentPage(1);
   };
 
@@ -99,13 +104,16 @@ const AdminSales = () => {
   };
 
   const handleExport = async () => {
+    setShowExportModal(false);
     setExporting(true);
     try {
       await AdminSalesAPI.exportOrders(filters);
       showSuccessToast("Sales export started successfully.");
     } catch (error) {
       console.error("Error exporting orders:", error);
-      showErrorToast(`Failed to export sales data: ${error.message || "Unknown error"}`);
+      showErrorToast(
+        `Failed to export sales data: ${error.message || "Unknown error"}`,
+      );
     } finally {
       setExporting(false);
     }
@@ -121,32 +129,36 @@ const AdminSales = () => {
 
   const formatPercentage = (percentage) => {
     if (percentage === undefined || percentage === null) return "0%";
-    return `${percentage >= 0 ? '+' : ''}${percentage.toFixed(1)}%`;
+    return `${percentage >= 0 ? "+" : ""}${percentage.toFixed(1)}%`;
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    const options = { month: "short", day: "numeric", year: "numeric" };
     return date.toLocaleDateString("en-US", options);
   };
 
   const formatTime = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit', hour12: true });
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
   };
 
   const getStatusBadge = (status) => {
     const statusKey = String(status || "pending").toLowerCase();
     const statusMap = {
-      'completed': 'completed',
-      'paid': 'completed',
-      'pending': 'pending',
-      'processing': 'pending',
-      'refunded': 'refunded',
-      'cancelled': 'refunded',
-      'failed': 'refunded'
+      completed: "completed",
+      paid: "completed",
+      pending: "pending",
+      processing: "pending",
+      refunded: "refunded",
+      cancelled: "refunded",
+      failed: "refunded",
     };
     
     const badgeClass = statusMap[statusKey] || 'pending';
@@ -161,12 +173,12 @@ const AdminSales = () => {
   const getCategoryBadge = (category) => {
     const categoryKey = String(category || "website").toLowerCase();
     const categoryMap = {
-      'mobile app': 'green',
-      'website': 'blue',
-      'ui kit': 'purple',
-      'custom projects': 'orange',
-      'desktop app': 'blue',
-      'web app': 'blue'
+      "mobile app": "green",
+      website: "blue",
+      "ui kit": "purple",
+      "custom projects": "orange",
+      "desktop app": "blue",
+      "web app": "blue",
     };
     
     const badgeClass = categoryMap[categoryKey] || 'blue';
@@ -181,14 +193,14 @@ const AdminSales = () => {
   const renderPagination = () => {
     const pages = [];
     const maxVisiblePages = 5;
-    
+
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
+
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
-    
+
     for (let i = startPage; i <= endPage; i++) {
       pages.push(
         <button
@@ -197,14 +209,14 @@ const AdminSales = () => {
           onClick={() => handlePageChange(i)}
         >
           {i}
-        </button>
+        </button>,
       );
     }
-    
+
     return (
       <div className="pagination-controls">
-        <button 
-          className="page-btn" 
+        <button
+          className="page-btn"
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
@@ -212,10 +224,7 @@ const AdminSales = () => {
         </button>
         {startPage > 1 && (
           <>
-            <button 
-              className="page-btn" 
-              onClick={() => handlePageChange(1)}
-            >
+            <button className="page-btn" onClick={() => handlePageChange(1)}>
               1
             </button>
             {startPage > 2 && <span className="dots">...</span>}
@@ -225,16 +234,16 @@ const AdminSales = () => {
         {endPage < totalPages && (
           <>
             {endPage < totalPages - 1 && <span className="dots">...</span>}
-            <button 
-              className="page-btn" 
+            <button
+              className="page-btn"
               onClick={() => handlePageChange(totalPages)}
             >
               {totalPages}
             </button>
           </>
         )}
-        <button 
-          className="page-btn" 
+        <button
+          className="page-btn"
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
@@ -253,13 +262,22 @@ const AdminSales = () => {
 
         <main className="main">
           <AdminTopbar showHamburger onSearch={handleSearch}>
-            <Link to="/admin-notification" className="notification-link" aria-label="Notifications">
-              <img src={notifBell} alt="Notifications" className="notification-icon" />
+            <Link
+              to="/admin-notification"
+              className="notification-link"
+              aria-label="Notifications"
+            >
+              <img
+                src={notifBell}
+                alt="Notifications"
+                className="notification-icon"
+              />
               <span className="notification-dot" />
             </Link>
-            <button 
-              className="btn primary" 
-              onClick={handleExport}
+            <button
+              className="btn primary"
+              // onClick={handleExport}
+              onClick={() => setShowExportModal(true)}
               disabled={exporting}
             >
               {exporting ? "Exporting..." : `${Icons.Export} Export`}
@@ -270,7 +288,8 @@ const AdminSales = () => {
             <div>
               <h2>Sales Management</h2>
               <p className="subtitle">
-                Track and manage all digital asset transactions across CertiCode.
+                Track and manage all digital asset transactions across
+                CertiCode.
               </p>
             </div>
           </div>
@@ -281,7 +300,9 @@ const AdminSales = () => {
                 <small>GROSS VOLUME</small>
               </div>
               <h3>{formatCurrency(stats.gross_volume)}</h3>
-              <span className={`trend-badge ${stats.gross_volume_change >= 0 ? 'positive' : 'negative'}`}>
+              <span
+                className={`trend-badge ${stats.gross_volume_change >= 0 ? "positive" : "negative"}`}
+              >
                 {formatPercentage(stats.gross_volume_change)}
               </span>
             </div>
@@ -291,7 +312,9 @@ const AdminSales = () => {
                 <small>NET REVENUE</small>
               </div>
               <h3>{formatCurrency(stats.net_revenue)}</h3>
-              <span className={`trend-badge ${stats.net_revenue_change >= 0 ? 'positive' : 'negative'}`}>
+              <span
+                className={`trend-badge ${stats.net_revenue_change >= 0 ? "positive" : "negative"}`}
+              >
                 {formatPercentage(stats.net_revenue_change)}
               </span>
             </div>
@@ -301,7 +324,9 @@ const AdminSales = () => {
                 <small>REFUND RATE</small>
               </div>
               <h3>{stats.refund_rate.toFixed(1)}%</h3>
-              <span className={`trend-badge ${stats.refund_rate_change <= 0 ? 'positive' : 'negative'}`}>
+              <span
+                className={`trend-badge ${stats.refund_rate_change <= 0 ? "positive" : "negative"}`}
+              >
                 {formatPercentage(stats.refund_rate_change)}
               </span>
             </div>
@@ -311,7 +336,9 @@ const AdminSales = () => {
                 <small>AVG. TRANSACTION</small>
               </div>
               <h3>{formatCurrency(stats.avg_transaction)}</h3>
-              <span className={`trend-badge ${stats.avg_transaction_change >= 0 ? 'positive' : 'negative'}`}>
+              <span
+                className={`trend-badge ${stats.avg_transaction_change >= 0 ? "positive" : "negative"}`}
+              >
                 {formatPercentage(stats.avg_transaction_change)}
               </span>
             </div>
@@ -322,9 +349,11 @@ const AdminSales = () => {
               <div className="filter-inputs">
                 <div className="select-group">
                   <label>DATE RANGE:</label>
-                  <select 
-                    value={filters.date_range} 
-                    onChange={(e) => handleFilterChange('date_range', e.target.value)}
+                  <select
+                    value={filters.date_range}
+                    onChange={(e) =>
+                      handleFilterChange("date_range", e.target.value)
+                    }
                   >
                     <option value="7">Last 7 Days</option>
                     <option value="30">Last 30 Days</option>
@@ -336,9 +365,11 @@ const AdminSales = () => {
 
                 <div className="select-group">
                   <label>CATEGORY:</label>
-                  <select 
-                    value={filters.category} 
-                    onChange={(e) => handleFilterChange('category', e.target.value)}
+                  <select
+                    value={filters.category}
+                    onChange={(e) =>
+                      handleFilterChange("category", e.target.value)
+                    }
                   >
                     <option value="all">All Assets</option>
                     <option value="Website">Website</option>
@@ -350,9 +381,11 @@ const AdminSales = () => {
 
                 <div className="select-group">
                   <label>STATUS:</label>
-                  <select 
-                    value={filters.status} 
-                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                  <select
+                    value={filters.status}
+                    onChange={(e) =>
+                      handleFilterChange("status", e.target.value)
+                    }
                   >
                     <option value="all">All Status</option>
                     <option value="completed">Completed</option>
@@ -421,7 +454,10 @@ const AdminSales = () => {
                       </td>
                       <td>
                         <div className="customer-info">
-                          <Avatar name={order.customer_name} avatarUrl={order.customer_avatar} />
+                          <Avatar
+                            name={order.customer_name}
+                            avatarUrl={order.customer_avatar}
+                          />
                           <span>{order.customer_name}</span>
                         </div>
                       </td>
@@ -429,10 +465,10 @@ const AdminSales = () => {
                         <div>{formatDate(order.purchased_at)}</div>
                         <small>{formatTime(order.purchased_at)}</small>
                       </td>
-                      <td className="amount">{formatCurrency(order.total_amount)}</td>
-                      <td>
-                        {getStatusBadge(order.status)}
+                      <td className="amount">
+                        {formatCurrency(order.total_amount)}
                       </td>
+                      <td>{getStatusBadge(order.status)}</td>
                       {/* <td className="actions-cell">
                         <Link to={`/sales/order-details/${orderId}`}>
                           <button>{Icons.Edit}</button>
@@ -448,13 +484,23 @@ const AdminSales = () => {
 
             <div className="pagination-bar">
               <span>
-                Showing <strong>{((currentPage - 1) * 10) + 1}-{Math.min(currentPage * 10, totalItems)}</strong> of {totalItems} transactions
+                Showing{" "}
+                <strong>
+                  {(currentPage - 1) * 10 + 1}-
+                  {Math.min(currentPage * 10, totalItems)}
+                </strong>{" "}
+                of {totalItems} transactions
               </span>
               {renderPagination()}
             </div>
           </div>
         </main>
       </div>
+      <ExportConfirmation
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        onConfirm={handleExport}
+      />
     </>
   );
 };

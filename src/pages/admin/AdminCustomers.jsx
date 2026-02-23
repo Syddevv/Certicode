@@ -10,6 +10,7 @@ import totalRevenueIcon from "../../assets/total-revenue.png";
 import avgCustomerSpentIcon from "../../assets/avg-customer-spent.png";
 import { AdminCustomersAPI } from "../../services/AdminCustomersAPI";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
+import ExportConfirmation from "../../components/ExportConfirmationModal";
 
 const Icons = {
   Bell: "🔔",
@@ -22,7 +23,7 @@ const Icons = {
   UserCheck: "👤",
   Dollar: "💲",
   Receipt: "🧾",
-  Sort: "⇅"
+  Sort: "⇅",
 };
 
 const AdminCustomers = () => {
@@ -35,7 +36,7 @@ const AdminCustomers = () => {
     total_customers_change: 0,
     active_customers_change: 0,
     total_revenue_change: 0,
-    avg_order_value_change: 0
+    avg_order_value_change: 0,
   });
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,6 +46,7 @@ const AdminCustomers = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [perPage] = useState(10);
   const [exporting, setExporting] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -58,9 +60,16 @@ const AdminCustomers = () => {
   const fetchCustomers = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await AdminCustomersAPI.getCustomers(currentPage, searchTerm, statusFilter, perPage);
+      const data = await AdminCustomersAPI.getCustomers(
+        currentPage,
+        searchTerm,
+        statusFilter,
+        perPage,
+      );
       setCustomers(data.customers.data || data.customers);
-      setTotalPages(data.pagination?.total_pages || data.customers.last_page || 1);
+      setTotalPages(
+        data.pagination?.total_pages || data.customers.last_page || 1,
+      );
       setTotalItems(data.pagination?.total_items || data.customers.total || 0);
     } catch (error) {
       console.error("Error fetching customers:", error);
@@ -93,13 +102,16 @@ const AdminCustomers = () => {
   };
 
   const handleExport = async () => {
+    setShowExportModal(false);
     setExporting(true);
     try {
       await AdminCustomersAPI.exportCustomers();
       showSuccessToast("Customer export started successfully.");
     } catch (error) {
       console.error("Error exporting customers:", error);
-      showErrorToast(`Failed to export customer data: ${error.message || "Unknown error"}`);
+      showErrorToast(
+        `Failed to export customer data: ${error.message || "Unknown error"}`,
+      );
     } finally {
       setExporting(false);
     }
@@ -115,7 +127,7 @@ const AdminCustomers = () => {
 
   const formatPercentage = (percentage) => {
     if (percentage === undefined || percentage === null) return "0%";
-    return `${percentage >= 0 ? '+' : ''}${percentage.toFixed(1)}%`;
+    return `${percentage >= 0 ? "+" : ""}${percentage.toFixed(1)}%`;
   };
 
   const formatDate = (dateString) => {
@@ -130,7 +142,7 @@ const AdminCustomers = () => {
 
   const getStatusBadge = (customer) => {
     const hasOrders = customer.total_orders > 0;
-    
+
     return hasOrders ? (
       <span className="status-badge active">● ACTIVE</span>
     ) : (
@@ -140,7 +152,10 @@ const AdminCustomers = () => {
 
   const Avatar = ({ name, avatarUrl }) => (
     <img
-      src={avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&size=128`}
+      src={
+        avatarUrl ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff&size=128`
+      }
       alt={name}
       className="avatar-img"
     />
@@ -177,14 +192,14 @@ const AdminCustomers = () => {
   const renderPagination = () => {
     const pages = [];
     const maxVisiblePages = 5;
-    
+
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
+
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
-    
+
     for (let i = startPage; i <= endPage; i++) {
       pages.push(
         <button
@@ -193,14 +208,14 @@ const AdminCustomers = () => {
           onClick={() => handlePageChange(i)}
         >
           {i}
-        </button>
+        </button>,
       );
     }
-    
+
     return (
       <div className="pagination-controls">
-        <button 
-          className="page-btn" 
+        <button
+          className="page-btn"
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
@@ -208,10 +223,7 @@ const AdminCustomers = () => {
         </button>
         {startPage > 1 && (
           <>
-            <button 
-              className="page-btn" 
-              onClick={() => handlePageChange(1)}
-            >
+            <button className="page-btn" onClick={() => handlePageChange(1)}>
               1
             </button>
             {startPage > 2 && <span className="dots">...</span>}
@@ -221,16 +233,16 @@ const AdminCustomers = () => {
         {endPage < totalPages && (
           <>
             {endPage < totalPages - 1 && <span className="dots">...</span>}
-            <button 
-              className="page-btn" 
+            <button
+              className="page-btn"
               onClick={() => handlePageChange(totalPages)}
             >
               {totalPages}
             </button>
           </>
         )}
-        <button 
-          className="page-btn" 
+        <button
+          className="page-btn"
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
@@ -248,17 +260,23 @@ const AdminCustomers = () => {
         <Sidebar activePage="customers" />
 
         <main className="main">
-          <AdminTopbar 
-            showHamburger
-            onSearch={handleSearch}
-          >
-            <Link to="/admin-notification" className="notification-link" aria-label="Notifications">
-              <img src={notifBell} alt="Notifications" className="notification-icon" />
+          <AdminTopbar showHamburger onSearch={handleSearch}>
+            <Link
+              to="/admin-notification"
+              className="notification-link"
+              aria-label="Notifications"
+            >
+              <img
+                src={notifBell}
+                alt="Notifications"
+                className="notification-icon"
+              />
               <span className="notification-dot" />
             </Link>
-            <button 
-              className="btn primary" 
-              onClick={handleExport}
+            <button
+              className="btn primary"
+              // onClick={handleExport}
+              onClick={() => setShowExportModal(true)}
               disabled={exporting}
             >
               {exporting ? "Exporting..." : `${Icons.Export} Export`}
@@ -278,9 +296,15 @@ const AdminCustomers = () => {
             <div className="stat-card">
               <div className="card-top">
                 <div className="icon-box green">
-                  <img src={totalCustomersIcon} alt="Total Customers" className="stat-icon-img" />
+                  <img
+                    src={totalCustomersIcon}
+                    alt="Total Customers"
+                    className="stat-icon-img"
+                  />
                 </div>
-                <span className={`badge ${stats.total_customers_change >= 0 ? 'positive' : 'negative'}`}>
+                <span
+                  className={`badge ${stats.total_customers_change >= 0 ? "positive" : "negative"}`}
+                >
                   {formatPercentage(stats.total_customers_change)}
                 </span>
               </div>
@@ -291,9 +315,15 @@ const AdminCustomers = () => {
             <div className="stat-card">
               <div className="card-top">
                 <div className="icon-box orange">
-                  <img src={activeCustomersIcon} alt="Active Customers" className="stat-icon-img" />
+                  <img
+                    src={activeCustomersIcon}
+                    alt="Active Customers"
+                    className="stat-icon-img"
+                  />
                 </div>
-                <span className={`badge ${stats.active_customers_change >= 0 ? 'positive' : 'negative'}`}>
+                <span
+                  className={`badge ${stats.active_customers_change >= 0 ? "positive" : "negative"}`}
+                >
                   {formatPercentage(stats.active_customers_change)}
                 </span>
               </div>
@@ -304,9 +334,15 @@ const AdminCustomers = () => {
             <div className="stat-card">
               <div className="card-top">
                 <div className="icon-box blue">
-                  <img src={totalRevenueIcon} alt="Total Revenue" className="stat-icon-img" />
+                  <img
+                    src={totalRevenueIcon}
+                    alt="Total Revenue"
+                    className="stat-icon-img"
+                  />
                 </div>
-                <span className={`badge ${stats.total_revenue_change >= 0 ? 'positive' : 'negative'}`}>
+                <span
+                  className={`badge ${stats.total_revenue_change >= 0 ? "positive" : "negative"}`}
+                >
                   {formatPercentage(stats.total_revenue_change)}
                 </span>
               </div>
@@ -317,9 +353,15 @@ const AdminCustomers = () => {
             <div className="stat-card">
               <div className="card-top">
                 <div className="icon-box purple">
-                  <img src={avgCustomerSpentIcon} alt="Avg Customer Spent" className="stat-icon-img" />
+                  <img
+                    src={avgCustomerSpentIcon}
+                    alt="Avg Customer Spent"
+                    className="stat-icon-img"
+                  />
                 </div>
-                <span className={`badge ${stats.avg_order_value_change >= 0 ? 'positive' : 'negative'}`}>
+                <span
+                  className={`badge ${stats.avg_order_value_change >= 0 ? "positive" : "negative"}`}
+                >
                   {formatPercentage(stats.avg_order_value_change)}
                 </span>
               </div>
@@ -332,19 +374,19 @@ const AdminCustomers = () => {
             <div className="toolbar">
               <div className="left-controls">
                 <div className="tab-switcher">
-                  <button 
+                  <button
                     className={`tab-btn ${statusFilter === "all" ? "active" : ""}`}
                     onClick={() => handleFilterClick("all")}
                   >
                     All
                   </button>
-                  <button 
+                  <button
                     className={`tab-btn ${statusFilter === "active" ? "active" : ""}`}
                     onClick={() => handleFilterClick("active")}
                   >
                     Active
                   </button>
-                  <button 
+                  <button
                     className={`tab-btn ${statusFilter === "inactive" ? "active" : ""}`}
                     onClick={() => handleFilterClick("inactive")}
                   >
@@ -388,9 +430,12 @@ const AdminCustomers = () => {
                     <tr key={customer.id}>
                       <td>
                         <div className="user-cell">
-                          <Avatar name={customer.name} avatarUrl={customer.avatar_url} />
+                          <Avatar
+                            name={customer.name}
+                            avatarUrl={customer.avatar_url}
+                          />
                           <div>
-                            <Link 
+                            <Link
                               to={`/customers/${customer.id}`}
                               state={{ customer }}
                               style={{ textDecoration: 'none', color: 'inherit' }}
@@ -398,17 +443,17 @@ const AdminCustomers = () => {
                               <strong>{customer.name}</strong>
                             </Link>
                             <span className="email">{customer.email}</span>
-                            <span className="join-date">Joined: {formatDate(customer.created_at)}</span>
+                            <span className="join-date">
+                              Joined: {formatDate(customer.created_at)}
+                            </span>
                           </div>
                         </div>
                       </td>
-                      <td>
-                        {getPurchaseBadge(customer.total_orders || 0)}
+                      <td>{getPurchaseBadge(customer.total_orders || 0)}</td>
+                      <td className="amount">
+                        {formatCurrency(customer.total_spent)}
                       </td>
-                      <td className="amount">{formatCurrency(customer.total_spent)}</td>
-                      <td>
-                        {getStatusBadge(customer)}
-                      </td>
+                      <td>{getStatusBadge(customer)}</td>
                       {/* <td className="actions">
                         <Link to={`/customers/${customer.id}`}>
                           <button className="more-btn">{Icons.MoreVertical}</button>
@@ -422,13 +467,24 @@ const AdminCustomers = () => {
 
             <div className="pagination-bar">
               <span>
-                Showing <strong>{((currentPage - 1) * perPage) + 1}-{Math.min(currentPage * perPage, totalItems)}</strong> of {totalItems} customers
+                Showing{" "}
+                <strong>
+                  {(currentPage - 1) * perPage + 1}-
+                  {Math.min(currentPage * perPage, totalItems)}
+                </strong>{" "}
+                of {totalItems} customers
               </span>
               {renderPagination()}
             </div>
           </div>
         </main>
       </div>
+
+      <ExportConfirmation
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        onConfirm={handleExport}
+      />
     </>
   );
 };
