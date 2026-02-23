@@ -5,6 +5,7 @@ import AdminTopbar from "../../components/AdminTopbar";
 import "../../styles/platformSetting.css";
 import searchIcon from "../../assets/Search.png";
 import notifBell from "../../assets/NotifBell.png";
+import { IconAppWindowFilled, IconShieldLockFilled } from "@tabler/icons-react";
 
 const PlatformSetting = () => {
   const navigate = useNavigate();
@@ -48,7 +49,22 @@ const PlatformSetting = () => {
           <div className="settings-left">
             <div className="settings-card">
               <div className="card-header-start">
-                <div className="icon-circle blue">🖥️</div>
+                <div
+                  className="act-icon"
+                  style={{
+                    backgroundColor: "#FFF3E8",
+                    borderRadius: "10px",
+                    width: "43px",
+                    height: "43px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    color: "#F97316",
+                  }}
+                >
+                  <IconAppWindowFilled size={25} stroke={1.5} />
+                </div>
                 <div>
                   <h4>Platform Identity</h4>
                   <p className="card-sub">
@@ -97,7 +113,22 @@ const PlatformSetting = () => {
             <div className="settings-card">
               <div className="card-header-between">
                 <div className="header-group">
-                  <div className="icon-circle orange">🛡️</div>
+                  <div
+                    className="act-icon"
+                    style={{
+                      backgroundColor: "#FFF3E8",
+                      borderRadius: "10px",
+                      width: "43px",
+                      height: "43px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
+                      color: "#F97316",
+                    }}
+                  >
+                    <IconShieldLockFilled size={25} stroke={1.5} />
+                  </div>
                   <div>
                     <h4>Security & Access</h4>
                     <p className="card-sub">
