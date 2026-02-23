@@ -8,16 +8,16 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
   const token = localStorage.getItem("auth_token");
   const userRole = localStorage.getItem("user_role");
 
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+  // if (!token) {
+  //   return <Navigate to="/login" replace />;
+  // }
 
-  if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
-    if (userRole === "Admin") {
-      return <Navigate to="/dashboard" replace />;
-    }
-    return <Navigate to="/" replace />;
-  }
+  // if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
+  //   if (userRole === "Admin") {
+  //     return <Navigate to="/dashboard" replace />;
+  //   }
+  //   return <Navigate to="/" replace />;
+  // }
 
   useEffect(() => {
     const handleLogout = () => {
