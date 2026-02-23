@@ -29,6 +29,72 @@ const getReviewerInitial = (review) => {
   return name.charAt(0).toUpperCase() || "U";
 };
 
+const getAbsoluteReviewAssetUrl = (pathValue) => {
+  if (!pathValue || typeof pathValue !== "string") return "";
+  if (/^https?:\/\//i.test(pathValue)) return pathValue;
+  return `${BACKEND_BASE_URL}/${String(pathValue).replace(/^\/+/, "")}`;
+};
+
+const getReviewImagePathFromItem = (item) => {
+  if (!item) return "";
+  if (typeof item === "string") return item;
+
+  if (typeof item === "object") {
+    return (
+      item.url ||
+      item.file_url ||
+      item.image_url ||
+      item.image ||
+      item.path ||
+      item.file_path ||
+      item.image_path ||
+      item.src ||
+      ""
+    );
+  }
+
+  return "";
+};
+
+const toReviewImageArray = (value) => {
+  if (!value) return [];
+  if (Array.isArray(value)) return value;
+  if (Array.isArray(value?.data)) return value.data;
+  return [value];
+};
+
+const getReviewImages = (review) => {
+  const candidates = [
+    review?.review_images,
+    review?.reviewImages,
+    review?.images,
+    review?.media,
+  ];
+
+  const urls = [];
+
+  candidates.forEach((candidate) => {
+    toReviewImageArray(candidate).forEach((item) => {
+      const normalizedUrl = getAbsoluteReviewAssetUrl(
+        getReviewImagePathFromItem(item),
+      );
+      if (normalizedUrl && !urls.includes(normalizedUrl)) {
+        urls.push(normalizedUrl);
+      }
+    });
+  });
+
+  const fallbackSingle = getAbsoluteReviewAssetUrl(
+    review?.image || review?.image_url || review?.photo,
+  );
+
+  if (fallbackSingle && !urls.includes(fallbackSingle)) {
+    urls.push(fallbackSingle);
+  }
+
+  return urls;
+};
+
 const ProductReviews = ({ productId, product, onReviewCreated }) => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -42,6 +108,11 @@ const ProductReviews = ({ productId, product, onReviewCreated }) => {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [submitSuccess, setSubmitSuccess] = useState("");
+  const [reviewImagePreview, setReviewImagePreview] = useState({
+    isOpen: false,
+    images: [],
+    index: 0,
+  });
   const [averageRating, setAverageRating] = useState(0);
   const [ratingBreakdown, setRatingBreakdown] = useState([
     { label: "5 stars", value: 0 },
@@ -87,6 +158,45 @@ const ProductReviews = ({ productId, product, onReviewCreated }) => {
       window.removeEventListener("keydown", handleEscape);
     };
   }, [isReviewModalOpen]);
+
+  useEffect(() => {
+    if (!reviewImagePreview.isOpen) return undefined;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setReviewImagePreview((prev) => ({ ...prev, isOpen: false }));
+      }
+
+      if (event.key === "ArrowRight") {
+        setReviewImagePreview((prev) => {
+          if (!prev.isOpen || prev.images.length <= 1) return prev;
+          return {
+            ...prev,
+            index: (prev.index + 1) % prev.images.length,
+          };
+        });
+      }
+
+      if (event.key === "ArrowLeft") {
+        setReviewImagePreview((prev) => {
+          if (!prev.isOpen || prev.images.length <= 1) return prev;
+          return {
+            ...prev,
+            index: (prev.index - 1 + prev.images.length) % prev.images.length,
+          };
+        });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [reviewImagePreview.isOpen]);
 
   const fetchReviews = async () => {
     try {
@@ -155,15 +265,6 @@ const ProductReviews = ({ productId, product, onReviewCreated }) => {
     setUploadedFileName(file.name);
   };
 
-  const getReviewImageUrl = (review) => {
-    const imagePath = review?.image;
-    if (!imagePath) return "";
-    if (typeof imagePath === "string" && /^https?:\/\//i.test(imagePath)) {
-      return imagePath;
-    }
-    return `${BACKEND_BASE_URL}/${String(imagePath).replace(/^\/+/, "")}`;
-  };
-
   const handleReviewSubmit = async (event) => {
     event.preventDefault();
 
@@ -221,6 +322,34 @@ const ProductReviews = ({ productId, product, onReviewCreated }) => {
         .join(" • ") || "React • Node.js"
     : "React • Node.js";
 
+  const openReviewImagePreview = (images, index) => {
+    if (!Array.isArray(images) || images.length === 0) return;
+    setReviewImagePreview({
+      isOpen: true,
+      images,
+      index,
+    });
+  };
+
+  const closeReviewImagePreview = () => {
+    setReviewImagePreview((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const goToPreviewImage = (direction) => {
+    setReviewImagePreview((prev) => {
+      if (!prev.isOpen || prev.images.length <= 1) return prev;
+      const nextIndex =
+        direction === "next"
+          ? (prev.index + 1) % prev.images.length
+          : (prev.index - 1 + prev.images.length) % prev.images.length;
+
+      return {
+        ...prev,
+        index: nextIndex,
+      };
+    });
+  };
+
   return (
     <div className="product__reviews">
       <div className="product__reviewsSummary">
@@ -258,47 +387,79 @@ const ProductReviews = ({ productId, product, onReviewCreated }) => {
         ) : reviews.length === 0 ? (
           <div className="product__noReviews">No reviews yet. Be the first to review!</div>
         ) : (
-          reviews.map((review) => (
-            <article key={review.id} className="product__reviewCard">
-              <div className="product__reviewHeader">
-                <div className="product__avatar">
-                  {getReviewerInitial(review)}
-                </div>
-                <div className="product__reviewMeta">
-                  <div className="product__reviewTitle">
-                    <strong>{getReviewerName(review)}</strong>
-                    <span className="product__verifiedBadge">
-                      <img src={VerifiedIcon} alt="" />
-                      Verified Purchase
-                    </span>
+          reviews.map((review) => {
+            const reviewImages = getReviewImages(review);
+
+            return (
+              <article key={review.id} className="product__reviewCard">
+                <div className="product__reviewHeader">
+                  <div className="product__avatar">
+                    {getReviewerInitial(review)}
                   </div>
-                  <div className="product__reviewStars">
-                    <span className="product__starsFilled">
-                      {"★".repeat(review.rating)}
-                    </span>
-                    <span className="product__starsEmpty">
-                      {"☆".repeat(5 - review.rating)}
-                    </span>
+                  <div className="product__reviewMeta">
+                    <div className="product__reviewTitle">
+                      <strong>{getReviewerName(review)}</strong>
+                      <span className="product__verifiedBadge">
+                        <img src={VerifiedIcon} alt="" />
+                        Verified Purchase
+                      </span>
+                    </div>
+                    <div className="product__reviewStars">
+                      <span className="product__starsFilled">
+                        {"★".repeat(review.rating)}
+                      </span>
+                      <span className="product__starsEmpty">
+                        {"☆".repeat(5 - review.rating)}
+                      </span>
+                    </div>
                   </div>
+                  <span className="product__reviewDate">
+                    {new Date(review.created_at).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
                 </div>
-                <span className="product__reviewDate">
-                  {new Date(review.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                  })}
-                </span>
-              </div>
-              <p>{review.description}</p>
-              {getReviewImageUrl(review) && (
-                <img
-                  src={getReviewImageUrl(review)}
-                  alt="Review upload"
-                  className="product__reviewMedia"
-                />
-              )}
-            </article>
-          ))
+
+                <p className="product__reviewText">{review.description}</p>
+
+                {reviewImages.length > 0 && (
+                  <div className="product__reviewMediaBlock">
+                    <div className="product__reviewMediaLabel">
+                      Customer photos ({reviewImages.length})
+                    </div>
+                    <div
+                      className={`product__reviewMediaGrid${
+                        reviewImages.length === 1
+                          ? " product__reviewMediaGrid--single"
+                          : ""
+                      }`}
+                    >
+                      {reviewImages.map((imageUrl, index) => (
+                        <button
+                          key={`${review.id}-image-${index}`}
+                          type="button"
+                          className="product__reviewMediaThumb"
+                          onClick={() =>
+                            openReviewImagePreview(reviewImages, index)
+                          }
+                          aria-label={`Open review image ${index + 1} in preview`}
+                        >
+                          <img
+                            src={imageUrl}
+                            alt={`Review upload ${index + 1}`}
+                            className="product__reviewMedia"
+                            loading="lazy"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </article>
+            );
+          })
         )}
       </div>
 
@@ -459,6 +620,68 @@ const ProductReviews = ({ productId, product, onReviewCreated }) => {
                 {submitLoading ? "Submitting..." : "Submit"}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {reviewImagePreview.isOpen && (
+        <div
+          className="product__reviewImageLightbox"
+          role="presentation"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              closeReviewImagePreview();
+            }
+          }}
+        >
+          <div
+            className="product__reviewImageLightboxDialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Review image preview"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="product__reviewImageLightboxClose"
+              aria-label="Close image preview"
+              onClick={closeReviewImagePreview}
+            >
+              ×
+            </button>
+
+            {reviewImagePreview.images.length > 1 && (
+              <button
+                type="button"
+                className="product__reviewImageLightboxNav product__reviewImageLightboxNav--prev"
+                onClick={() => goToPreviewImage("prev")}
+                aria-label="Previous image"
+              >
+                ‹
+              </button>
+            )}
+
+            <img
+              src={reviewImagePreview.images[reviewImagePreview.index]}
+              alt={`Review image ${reviewImagePreview.index + 1}`}
+              className="product__reviewImageLightboxImg"
+            />
+
+            {reviewImagePreview.images.length > 1 && (
+              <button
+                type="button"
+                className="product__reviewImageLightboxNav product__reviewImageLightboxNav--next"
+                onClick={() => goToPreviewImage("next")}
+                aria-label="Next image"
+              >
+                ›
+              </button>
+            )}
+
+            <div className="product__reviewImageLightboxMeta">
+              Image {reviewImagePreview.index + 1} of{" "}
+              {reviewImagePreview.images.length}
+            </div>
           </div>
         </div>
       )}
