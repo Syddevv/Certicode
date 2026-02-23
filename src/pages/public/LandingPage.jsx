@@ -66,6 +66,24 @@ function debounce(func, wait) {
   };
 }
 
+const isAnonymousReview = (review) => {
+  const anonymousValue =
+    review?.is_anonymous ?? review?.isAnonymous ?? review?.anonymous;
+
+  if (typeof anonymousValue === "boolean") return anonymousValue;
+  if (typeof anonymousValue === "number") return anonymousValue === 1;
+  if (typeof anonymousValue === "string") {
+    return ["1", "true", "yes"].includes(anonymousValue.toLowerCase());
+  }
+
+  return false;
+};
+
+const getReviewDisplayName = (review) => {
+  if (isAnonymousReview(review)) return "Anonymous";
+  return review?.user?.name || review?.user_name || "User";
+};
+
 const LandingPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -119,7 +137,7 @@ const LandingPage = () => {
       const formattedReviews = reviewsData.map((review, index) => ({
         id: review.id,
         quote: review.description,
-        name: review.user?.name || "User",
+        name: getReviewDisplayName(review),
         role: "Verified Buyer",
         rating: review.rating,
         avatar: Avatar,

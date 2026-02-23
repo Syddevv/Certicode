@@ -6,6 +6,29 @@ import { ReviewAPI } from "../services/ReviewAPI";
 
 const BACKEND_BASE_URL = "http://127.0.0.1:8000";
 
+const isAnonymousReview = (review) => {
+  const anonymousValue =
+    review?.is_anonymous ?? review?.isAnonymous ?? review?.anonymous;
+
+  if (typeof anonymousValue === "boolean") return anonymousValue;
+  if (typeof anonymousValue === "number") return anonymousValue === 1;
+  if (typeof anonymousValue === "string") {
+    return ["1", "true", "yes"].includes(anonymousValue.toLowerCase());
+  }
+
+  return false;
+};
+
+const getReviewerName = (review) => {
+  if (isAnonymousReview(review)) return "Anonymous";
+  return review?.user?.name || review?.user_name || "User";
+};
+
+const getReviewerInitial = (review) => {
+  const name = getReviewerName(review);
+  return name.charAt(0).toUpperCase() || "U";
+};
+
 const ProductReviews = ({ productId, product, onReviewCreated }) => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -164,6 +187,7 @@ const ProductReviews = ({ productId, product, onReviewCreated }) => {
         product_id: productId,
         rating: selectedRating,
         description: reviewText.trim(),
+        is_anonymous: anonymousReview,
       };
 
       await ReviewAPI.createReview(reviewPayload, uploadedFile);
@@ -238,11 +262,11 @@ const ProductReviews = ({ productId, product, onReviewCreated }) => {
             <article key={review.id} className="product__reviewCard">
               <div className="product__reviewHeader">
                 <div className="product__avatar">
-                  {review.user?.name?.charAt(0) || "U"}
+                  {getReviewerInitial(review)}
                 </div>
                 <div className="product__reviewMeta">
                   <div className="product__reviewTitle">
-                    <strong>{review.user?.name || "User"}</strong>
+                    <strong>{getReviewerName(review)}</strong>
                     <span className="product__verifiedBadge">
                       <img src={VerifiedIcon} alt="" />
                       Verified Purchase

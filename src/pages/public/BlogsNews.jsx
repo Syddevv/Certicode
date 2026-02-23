@@ -3,6 +3,7 @@ import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/BlogsNews.css";
 import OrangeArrow from "../../assets/OrangeArrow.png";
+import { Link } from "react-router-dom";
 
 const BlogsNews = () => {
   const [posts, setPosts] = useState([]);
@@ -32,15 +33,15 @@ const BlogsNews = () => {
     setError(null);
     try {
       const response = await fetch(
-        `https://dev.to/api/articles?tag=software&page=${pageNum}&per_page=12`
+        `https://dev.to/api/articles?tag=software&page=${pageNum}&per_page=12`,
       );
-      
+
       if (!response.ok) {
-        throw new Error('Failed to fetch blogs');
+        throw new Error("Failed to fetch blogs");
       }
-      
+
       const data = await response.json();
-      
+
       if (data.length === 0) {
         setHasMore(false);
       } else {
@@ -51,12 +52,12 @@ const BlogsNews = () => {
             setSideFeatured(data.slice(1, 3));
           }
         } else {
-          setPosts(prev => [...prev, ...data]);
+          setPosts((prev) => [...prev, ...data]);
         }
       }
     } catch (error) {
       console.error("Error fetching posts:", error);
-      setError('Failed to load blogs. Please try again later.');
+      setError("Failed to load blogs. Please try again later.");
     } finally {
       setLoading(false);
     }
@@ -66,21 +67,21 @@ const BlogsNews = () => {
     setLoading(true);
     setError(null);
     try {
-      const tag = selectedCategory.toLowerCase().replace(/\s+/g, '');
+      const tag = selectedCategory.toLowerCase().replace(/\s+/g, "");
       const response = await fetch(
-        `https://dev.to/api/articles?tag=${tag}&per_page=12`
+        `https://dev.to/api/articles?tag=${tag}&per_page=12`,
       );
-      
+
       if (!response.ok) {
-        throw new Error('Failed to fetch blogs');
+        throw new Error("Failed to fetch blogs");
       }
-      
+
       const data = await response.json();
       setPosts(data);
       setHasMore(false);
     } catch (error) {
       console.error("Error fetching posts by category:", error);
-      setError('Failed to load blogs for this category.');
+      setError("Failed to load blogs for this category.");
     } finally {
       setLoading(false);
     }
@@ -89,23 +90,41 @@ const BlogsNews = () => {
   const fetchCategories = async () => {
     try {
       const response = await fetch("https://dev.to/api/tags?per_page=10");
-      
+
       if (!response.ok) {
-        throw new Error('Failed to fetch categories');
+        throw new Error("Failed to fetch categories");
       }
-      
+
       const data = await response.json();
-      
+
       const softwareTags = data
-        .filter(tag => 
-          ['software', 'webdev', 'programming', 'security', 'cloud', 'ai', 'javascript', 'python', 'devops'].includes(tag.name)
+        .filter((tag) =>
+          [
+            "software",
+            "webdev",
+            "programming",
+            "security",
+            "cloud",
+            "ai",
+            "javascript",
+            "python",
+            "devops",
+          ].includes(tag.name),
         )
-        .map(tag => tag.name.charAt(0).toUpperCase() + tag.name.slice(1));
-      
+        .map((tag) => tag.name.charAt(0).toUpperCase() + tag.name.slice(1));
+
       setCategories(["All", ...softwareTags.slice(0, 6)]);
     } catch (error) {
       console.error("Error fetching categories:", error);
-      setCategories(["All", "Software Development", "Web Development", "Programming", "Security", "Cloud", "AI"]);
+      setCategories([
+        "All",
+        "Software Development",
+        "Web Development",
+        "Programming",
+        "Security",
+        "Cloud",
+        "AI",
+      ]);
     }
   };
 
@@ -117,26 +136,30 @@ const BlogsNews = () => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const determineType = (tags) => {
-    if (!tags) return 'Blog';
-    if (tags.includes('news')) return 'News';
-    if (tags.includes('tutorial')) return 'Tutorial';
-    return 'Blog';
+    if (!tags) return "Blog";
+    if (tags.includes("news")) return "News";
+    if (tags.includes("tutorial")) return "Tutorial";
+    return "Blog";
   };
 
   const openBlogPost = (url) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   const getImageUrl = (post) => {
-    return post.cover_image || post.social_image || 'https://via.placeholder.com/800x400?text=No+Image';
+    return (
+      post.cover_image ||
+      post.social_image ||
+      "https://via.placeholder.com/800x400?text=No+Image"
+    );
   };
 
   if (loading && posts.length === 0) {
@@ -159,7 +182,7 @@ const BlogsNews = () => {
         <div className="blogs-error">
           <h2>Unable to load blogs</h2>
           <p>{error}</p>
-          <button 
+          <button
             className="blogs-error-retry"
             onClick={() => {
               setError(null);
@@ -208,22 +231,25 @@ const BlogsNews = () => {
           </aside>
 
           {featuredPost && (
-            <article 
+            <article
               className="blogs-featured"
               onClick={() => openBlogPost(featuredPost.url)}
             >
               <div className="blogs-featured__media">
-                <img 
-                  src={getImageUrl(featuredPost)} 
+                <img
+                  src={getImageUrl(featuredPost)}
                   alt={featuredPost.title}
                   onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = 'https://via.placeholder.com/800x400?text=Blog+Image';
+                    e.target.src =
+                      "https://via.placeholder.com/800x400?text=Blog+Image";
                   }}
                 />
               </div>
               <div className="blogs-featured__body">
-                <span className="blogs-tag">{determineType(featuredPost.tag_list)}</span>
+                <span className="blogs-tag">
+                  {determineType(featuredPost.tag_list)}
+                </span>
                 <h3>{featuredPost.title}</h3>
                 <p>{featuredPost.description || featuredPost.title}</p>
                 <button className="blogs-read" type="button">
@@ -243,19 +269,24 @@ const BlogsNews = () => {
                   onClick={() => openBlogPost(item.url)}
                 >
                   <div className="blogs-side__media">
-                    <img 
-                      src={getImageUrl(item)} 
+                    <img
+                      src={getImageUrl(item)}
                       alt={item.title}
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = 'https://via.placeholder.com/300x200?text=Blog+Image';
+                        e.target.src =
+                          "https://via.placeholder.com/300x200?text=Blog+Image";
                       }}
                     />
                   </div>
                   <div className="blogs-side__body">
-                    <span className="blogs-tag">{determineType(item.tag_list)}</span>
+                    <span className="blogs-tag">
+                      {determineType(item.tag_list)}
+                    </span>
                     <h4>{item.title}</h4>
-                    <span className="blogs-date">{formatDate(item.published_at)}</span>
+                    <span className="blogs-date">
+                      {formatDate(item.published_at)}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -269,53 +300,60 @@ const BlogsNews = () => {
           {error && (
             <div className="blogs-grid-error">
               <p>{error}</p>
-              <button onClick={() => {
-                setError(null);
-                fetchPosts();
-              }}>
+              <button
+                onClick={() => {
+                  setError(null);
+                  fetchPosts();
+                }}
+              >
                 Retry
               </button>
             </div>
           )}
-          
+
           <div className="blogs-grid__cards">
             {posts.slice(3).map((post) => (
-              <div 
-                key={post.id} 
+              <div
+                key={post.id}
                 className="blogs-card"
                 onClick={() => openBlogPost(post.url)}
               >
                 <div className="blogs-card__media">
-                  <img 
-                    src={getImageUrl(post)} 
+                  <img
+                    src={getImageUrl(post)}
                     alt={post.title}
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = 'https://via.placeholder.com/400x300?text=Blog+Image';
+                      e.target.src =
+                        "https://via.placeholder.com/400x300?text=Blog+Image";
                     }}
                   />
                 </div>
                 <div className="blogs-card__body">
-                  <span className="blogs-tag">{determineType(post.tag_list)}</span>
+                  <span className="blogs-tag">
+                    {determineType(post.tag_list)}
+                  </span>
                   <h3>{post.title}</h3>
                   <p>{post.description || post.title}</p>
-                  <span className="blogs-date">{formatDate(post.published_at)}</span>
+                  <span className="blogs-date">
+                    {formatDate(post.published_at)}
+                  </span>
                 </div>
               </div>
             ))}
           </div>
-          
+
           {hasMore && selectedCategory === "All" && !loading && (
-            <button 
-              className="blogs-grid__more" 
+            <button
+              className="blogs-grid__more"
               type="button"
               onClick={loadMore}
               disabled={loading}
             >
-              {loading ? 'Loading...' : 'Load more'}
+              {loading ? "Loading..." : "Load more"}
             </button>
           )}
-          
+
           {loading && (
             <div className="blogs-grid-loading">
               <div className="blogs-loading-spinner"></div>
@@ -333,9 +371,11 @@ const BlogsNews = () => {
               Let Certicode build secure, scalable, and reliable software
               solutions tailored to your needs.
             </p>
-            <button className="blogs-cta__btn" type="button">
-              Get Started Now
-            </button>
+            <Link to="/register">
+              <button className="blogs-cta__btn" type="button">
+                Get Started Now
+              </button>
+            </Link>
           </div>
         </div>
       </section>
