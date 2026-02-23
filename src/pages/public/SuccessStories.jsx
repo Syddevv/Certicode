@@ -8,6 +8,7 @@ import OrangeBadge from "../../assets/orangeBadge.png";
 import OrangeArrow from "../../assets/OrangeArrow.png";
 import JaneDoe from "../../assets/janedoe.png";
 import SearchIcon from "../../assets/lucide_search.png";
+import { Link } from "react-router-dom";
 
 const SuccessStories = () => {
   const [activeTab, setActiveTab] = useState("All Assets");
@@ -16,7 +17,15 @@ const SuccessStories = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const storyTabs = ["All Assets", "Fintech", "SaaS", "Enterprise", "Healthcare", "Government", "E-commerce"];
+  const storyTabs = [
+    "All Assets",
+    "Fintech",
+    "SaaS",
+    "Enterprise",
+    "Healthcare",
+    "Government",
+    "E-commerce",
+  ];
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -28,15 +37,15 @@ const SuccessStories = () => {
     setError(null);
     try {
       const response = await fetch(
-        `https://dev.to/api/articles?tag=case+study&per_page=24`
+        `https://dev.to/api/articles?tag=case+study&per_page=24`,
       );
-      
+
       if (!response.ok) {
-        throw new Error('Failed to fetch success stories');
+        throw new Error("Failed to fetch success stories");
       }
-      
+
       const data = await response.json();
-      
+
       const apiStories = data.map((article) => ({
         id: article.id,
         tag: determineTag(article.tag_list),
@@ -45,217 +54,239 @@ const SuccessStories = () => {
         text: article.description || article.title,
         url: article.url,
         image: article.cover_image || article.social_image,
-        published_at: article.published_at
+        published_at: article.published_at,
       }));
 
       const curatedStories = [
         {
-          id: 'kalamuna-tyk',
-          tag: 'Government',
-          category: 'Government',
-          title: 'How Kalamuna turned a fragile legacy system into a rock-solid API ecosystem',
-          text: 'Tyk powers millions of real-time transit data requests with 99.88% uptime and 0 outages since launch, serving 27 transit agencies in the Bay Area.',
-          url: 'https://tyk.io/case-studies/kalamuna/',
-          image: 'https://tyk.io/wp-content/uploads/2023/08/kalamuna-case-study-featured.jpg',
+          id: "kalamuna-tyk",
+          tag: "Government",
+          category: "Government",
+          title:
+            "How Kalamuna turned a fragile legacy system into a rock-solid API ecosystem",
+          text: "Tyk powers millions of real-time transit data requests with 99.88% uptime and 0 outages since launch, serving 27 transit agencies in the Bay Area.",
+          url: "https://tyk.io/case-studies/kalamuna/",
+          image:
+            "https://tyk.io/wp-content/uploads/2023/08/kalamuna-case-study-featured.jpg",
           metrics: {
-            calls: '325M+ API calls',
-            uptime: '99.88% uptime',
-            outages: '0 outages'
-          }
+            calls: "325M+ API calls",
+            uptime: "99.88% uptime",
+            outages: "0 outages",
+          },
         },
         {
-          id: 'publicis-dataddo',
-          tag: 'Marketing',
-          category: 'Enterprise',
-          title: 'How Publicis Groupe Brasil Uses Dataddo\'s API to Scale a Data Product',
-          text: 'Saved 3 full-time data engineering equivalents on pipeline maintenance and accelerated feature implementation by 2+ months.',
-          url: 'https://blog.dataddo.com/how-publicis-groupe-brasil-uses-dataddos-api-to-scale-a-data-product',
-          image: 'https://images.ctfassets.net/izvxou7dan7k/5qO8XJF4mK9SM1irseDyH3/7a53f3873d4fc52aa68d917d3a45de60/publicis-groupe-header.png',
+          id: "publicis-dataddo",
+          tag: "Marketing",
+          category: "Enterprise",
+          title:
+            "How Publicis Groupe Brasil Uses Dataddo's API to Scale a Data Product",
+          text: "Saved 3 full-time data engineering equivalents on pipeline maintenance and accelerated feature implementation by 2+ months.",
+          url: "https://blog.dataddo.com/how-publicis-groupe-brasil-uses-dataddos-api-to-scale-a-data-product",
+          image:
+            "https://images.ctfassets.net/izvxou7dan7k/5qO8XJF4mK9SM1irseDyH3/7a53f3873d4fc52aa68d917d3a45de60/publicis-groupe-header.png",
           metrics: {
-            engineers: '3 FTEs saved',
-            implementation: '2+ months faster'
-          }
+            engineers: "3 FTEs saved",
+            implementation: "2+ months faster",
+          },
         },
         {
-          id: 'segment-apptopia',
-          tag: 'SaaS',
-          category: 'SaaS',
-          title: 'How Segment achieved 10% conversion rate with Apptopia API',
-          text: 'Segment enriched ~16k accounts with key data points, saving 3-4 hours per week on research and empowering sales outreach.',
-          url: 'https://apptopia.com/case-study-segment',
-          image: 'https://www.apptopia.com/images/case-studies/segment-case-study-header.jpg',
+          id: "segment-apptopia",
+          tag: "SaaS",
+          category: "SaaS",
+          title: "How Segment achieved 10% conversion rate with Apptopia API",
+          text: "Segment enriched ~16k accounts with key data points, saving 3-4 hours per week on research and empowering sales outreach.",
+          url: "https://apptopia.com/case-study-segment",
+          image:
+            "https://www.apptopia.com/images/case-studies/segment-case-study-header.jpg",
           metrics: {
-            accounts: '16k enriched',
-            time: '3-4 hours saved/week'
-          }
+            accounts: "16k enriched",
+            time: "3-4 hours saved/week",
+          },
         },
         {
-          id: 'medimpact-gravitee',
-          tag: 'Healthcare',
-          category: 'Healthcare',
-          title: 'MedImpact enhances API observability with Gravitee',
-          text: '70% faster troubleshooting, handling 305M+ API requests per week with no performance impact for pharmacy benefit operations.',
-          url: 'https://www.gravitee.io/case-studies/medimpact',
-          image: 'https://www.gravitee.io/images/case-studies/medimpact-header.jpg',
+          id: "medimpact-gravitee",
+          tag: "Healthcare",
+          category: "Healthcare",
+          title: "MedImpact enhances API observability with Gravitee",
+          text: "70% faster troubleshooting, handling 305M+ API requests per week with no performance impact for pharmacy benefit operations.",
+          url: "https://www.gravitee.io/case-studies/medimpact",
+          image:
+            "https://www.gravitee.io/images/case-studies/medimpact-header.jpg",
           metrics: {
-            troubleshooting: '70% faster',
-            requests: '305M+ weekly'
-          }
+            troubleshooting: "70% faster",
+            requests: "305M+ weekly",
+          },
         },
         {
-          id: 'noble-apollo',
-          tag: 'SaaS',
-          category: 'SaaS',
-          title: 'How Noble Built a 10% Conversion Rate Engine on Apollo\'s Data Foundation',
-          text: 'Achieved 80-90% enrichment coverage and 3x higher positive reply rates for AI-powered publisher outreach.',
-          url: 'https://www.apollo.io/magazine/noble-customer-story',
-          image: 'https://assets-global.website-files.com/5f6b628089ab63ca7e0f0086/6548e07c3d5eb68c91e0e79b_noble-case-study.jpg',
+          id: "noble-apollo",
+          tag: "SaaS",
+          category: "SaaS",
+          title:
+            "How Noble Built a 10% Conversion Rate Engine on Apollo's Data Foundation",
+          text: "Achieved 80-90% enrichment coverage and 3x higher positive reply rates for AI-powered publisher outreach.",
+          url: "https://www.apollo.io/magazine/noble-customer-story",
+          image:
+            "https://assets-global.website-files.com/5f6b628089ab63ca7e0f0086/6548e07c3d5eb68c91e0e79b_noble-case-study.jpg",
           metrics: {
-            coverage: '80-90% enrichment',
-            conversion: '10% to sale',
-            replies: '3x higher'
-          }
+            coverage: "80-90% enrichment",
+            conversion: "10% to sale",
+            replies: "3x higher",
+          },
         },
         {
-          id: 'centralplains-barchart',
-          tag: 'Agriculture',
-          category: 'Enterprise',
-          title: 'How Central Plains Milling Improved Their Website with Market Data APIs',
-          text: 'Agriculture company leverages Barchart APIs to deliver real-time market data, news, and weather to customers.',
-          url: 'https://www.barchart.com/solutions/case-studies/cpm',
-          image: 'https://www.barchart.com/images/case-studies/cpm-header.jpg'
+          id: "centralplains-barchart",
+          tag: "Agriculture",
+          category: "Enterprise",
+          title:
+            "How Central Plains Milling Improved Their Website with Market Data APIs",
+          text: "Agriculture company leverages Barchart APIs to deliver real-time market data, news, and weather to customers.",
+          url: "https://www.barchart.com/solutions/case-studies/cpm",
+          image: "https://www.barchart.com/images/case-studies/cpm-header.jpg",
         },
         {
-          id: 'nhc-ibm',
-          tag: 'Real Estate',
-          category: 'Enterprise',
-          title: 'NHC transforms digital operations with IBM Cloud Pak',
-          text: '40% faster time to market, handling 2M daily requests with 23% faster API response times.',
-          url: 'https://www.ibm.com/case-studies/nhc',
-          image: 'https://www.ibm.com/case-studies/nhc/images/nhc-header.jpg',
+          id: "nhc-ibm",
+          tag: "Real Estate",
+          category: "Enterprise",
+          title: "NHC transforms digital operations with IBM Cloud Pak",
+          text: "40% faster time to market, handling 2M daily requests with 23% faster API response times.",
+          url: "https://www.ibm.com/case-studies/nhc",
+          image: "https://www.ibm.com/case-studies/nhc/images/nhc-header.jpg",
           metrics: {
-            timeToMarket: '40% faster',
-            requests: '2M daily',
-            responseTime: '23% faster'
-          }
+            timeToMarket: "40% faster",
+            requests: "2M daily",
+            responseTime: "23% faster",
+          },
         },
         {
-          id: 'dvla-aws',
-          tag: 'Government',
-          category: 'Government',
-          title: 'DVLA modernizes driver records with Amazon API Gateway',
-          text: 'UK Driver and Vehicle Licensing Agency manages 47M+ driver records with APIs scaling to billions of transactions per month.',
-          url: 'https://aws.amazon.com/api-gateway/resources/',
-          image: 'https://d1.awsstatic.com/case-studies/dvla-case-study-header.cb3f4a8e7c4b8e7c4b8e7c4b8e7c4b8e7c4b8e7c4.jpg',
+          id: "dvla-aws",
+          tag: "Government",
+          category: "Government",
+          title: "DVLA modernizes driver records with Amazon API Gateway",
+          text: "UK Driver and Vehicle Licensing Agency manages 47M+ driver records with APIs scaling to billions of transactions per month.",
+          url: "https://aws.amazon.com/api-gateway/resources/",
+          image:
+            "https://d1.awsstatic.com/case-studies/dvla-case-study-header.cb3f4a8e7c4b8e7c4b8e7c4b8e7c4b8e7c4b8e7c4.jpg",
           metrics: {
-            records: '47M+ driver records',
-            scale: 'Billions of transactions'
-          }
+            records: "47M+ driver records",
+            scale: "Billions of transactions",
+          },
         },
         {
-          id: 'veracode-aws',
-          tag: 'Security',
-          category: 'Enterprise',
-          title: 'Veracode runs security scans on AWS Lambda and API Gateway',
-          text: 'Cloud-based application-security service supports tens of thousands of vulnerability scans using serverless architecture.',
-          url: 'https://aws.amazon.com/api-gateway/resources/',
-          image: 'https://a0.awsstatic.com/libra-css/images/case-studies/veracode-header.jpg'
+          id: "veracode-aws",
+          tag: "Security",
+          category: "Enterprise",
+          title: "Veracode runs security scans on AWS Lambda and API Gateway",
+          text: "Cloud-based application-security service supports tens of thousands of vulnerability scans using serverless architecture.",
+          url: "https://aws.amazon.com/api-gateway/resources/",
+          image:
+            "https://a0.awsstatic.com/libra-css/images/case-studies/veracode-header.jpg",
         },
         {
-          id: 'browsercompany-datadog',
-          tag: 'Software',
-          category: 'SaaS',
-          title: 'The Browser Company accelerates release velocity with Datadog',
-          text: 'Reduced CI pipeline time by 50% from 1 hour to 30 minutes, improved test performance from 5 minutes to 10 seconds.',
-          url: 'https://www.datadoghq.com/case-studies/the-browser-company/',
-          image: 'https://imgix.datadoghq.com/img/case-studies/browsercompany-header.png',
+          id: "browsercompany-datadog",
+          tag: "Software",
+          category: "SaaS",
+          title:
+            "The Browser Company accelerates release velocity with Datadog",
+          text: "Reduced CI pipeline time by 50% from 1 hour to 30 minutes, improved test performance from 5 minutes to 10 seconds.",
+          url: "https://www.datadoghq.com/case-studies/the-browser-company/",
+          image:
+            "https://imgix.datadoghq.com/img/case-studies/browsercompany-header.png",
           metrics: {
-            pipelineTime: '50% faster',
-            testTime: '5min → 10sec'
-          }
+            pipelineTime: "50% faster",
+            testTime: "5min → 10sec",
+          },
         },
         {
-          id: 'zilliz',
-          tag: 'AI',
-          category: 'Enterprise',
-          title: 'Zilliz Cloud achieves 99.99% uptime with AI-powered vector database',
-          text: 'Leading vector database platform serves millions of AI applications with 50% faster query performance.',
-          url: 'https://zilliz.com/case-studies',
-          image: 'https://zilliz.com/images/case-studies/zilliz-cloud-header.jpg',
+          id: "zilliz",
+          tag: "AI",
+          category: "Enterprise",
+          title:
+            "Zilliz Cloud achieves 99.99% uptime with AI-powered vector database",
+          text: "Leading vector database platform serves millions of AI applications with 50% faster query performance.",
+          url: "https://zilliz.com/case-studies",
+          image:
+            "https://zilliz.com/images/case-studies/zilliz-cloud-header.jpg",
           metrics: {
-            uptime: '99.99%',
-            performance: '50% faster',
-            applications: 'Millions served'
-          }
+            uptime: "99.99%",
+            performance: "50% faster",
+            applications: "Millions served",
+          },
         },
         {
-          id: 'mongodb-atlas',
-          tag: 'Database',
-          category: 'SaaS',
-          title: 'How Toyota connected 1.5M vehicles with MongoDB Atlas',
-          text: 'Toyota connected 1.5 million connected cars across Europe, processing 5.5B messages annually with 99.995% uptime.',
-          url: 'https://www.mongodb.com/customers/toyota',
-          image: 'https://webimages.mongodb.com/_com_assets/cms/toyota-case-study-header.jpg',
+          id: "mongodb-atlas",
+          tag: "Database",
+          category: "SaaS",
+          title: "How Toyota connected 1.5M vehicles with MongoDB Atlas",
+          text: "Toyota connected 1.5 million connected cars across Europe, processing 5.5B messages annually with 99.995% uptime.",
+          url: "https://www.mongodb.com/customers/toyota",
+          image:
+            "https://webimages.mongodb.com/_com_assets/cms/toyota-case-study-header.jpg",
           metrics: {
-            vehicles: '1.5M connected',
-            messages: '5.5B annually',
-            uptime: '99.995%'
-          }
+            vehicles: "1.5M connected",
+            messages: "5.5B annually",
+            uptime: "99.995%",
+          },
         },
         {
-          id: 'auth0-fanduel',
-          tag: 'Gaming',
-          category: 'Enterprise',
-          title: 'FanDuel scales authentication to 12M users with Auth0',
-          text: 'Sports betting platform handles 12M users and 100K concurrent connections with 99.99% uptime during peak events.',
-          url: 'https://auth0.com/customers/fanduel',
-          image: 'https://cdn.auth0.com/blog/customers/fanduel-header.jpg',
+          id: "auth0-fanduel",
+          tag: "Gaming",
+          category: "Enterprise",
+          title: "FanDuel scales authentication to 12M users with Auth0",
+          text: "Sports betting platform handles 12M users and 100K concurrent connections with 99.99% uptime during peak events.",
+          url: "https://auth0.com/customers/fanduel",
+          image: "https://cdn.auth0.com/blog/customers/fanduel-header.jpg",
           metrics: {
-            users: '12M+',
-            concurrent: '100K',
-            uptime: '99.99%'
-          }
-        }
+            users: "12M+",
+            concurrent: "100K",
+            uptime: "99.99%",
+          },
+        },
       ];
 
       const allStories = [...curatedStories, ...apiStories];
-      const uniqueStories = allStories.filter((story, index, self) => 
-        index === self.findIndex(s => s.id === story.id)
+      const uniqueStories = allStories.filter(
+        (story, index, self) =>
+          index === self.findIndex((s) => s.id === story.id),
       );
-      
+
       setStories(uniqueStories);
     } catch (error) {
       console.error("Error fetching success stories:", error);
-      setError('Unable to load success stories. Please try again.');
-      
+      setError("Unable to load success stories. Please try again.");
+
       const fallbackStories = [
         {
-          id: 'kalamuna-tyk',
-          tag: 'Government',
-          category: 'Government',
-          title: 'How Kalamuna turned a fragile legacy system into a rock-solid API ecosystem',
-          text: 'Tyk powers millions of real-time transit data requests with 99.88% uptime and 0 outages since launch.',
-          url: 'https://tyk.io/case-studies/kalamuna/',
-          image: 'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+          id: "kalamuna-tyk",
+          tag: "Government",
+          category: "Government",
+          title:
+            "How Kalamuna turned a fragile legacy system into a rock-solid API ecosystem",
+          text: "Tyk powers millions of real-time transit data requests with 99.88% uptime and 0 outages since launch.",
+          url: "https://tyk.io/case-studies/kalamuna/",
+          image:
+            "https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
         },
         {
-          id: 'publicis-dataddo',
-          tag: 'Marketing',
-          category: 'Enterprise',
-          title: 'How Publicis Groupe Brasil Uses Dataddo\'s API to Scale a Data Product',
-          text: 'Saved 3 full-time data engineering equivalents and accelerated feature implementation by 2+ months.',
-          url: 'https://blog.dataddo.com/how-publicis-groupe-brasil-uses-dataddos-api-to-scale-a-data-product',
-          image: 'https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+          id: "publicis-dataddo",
+          tag: "Marketing",
+          category: "Enterprise",
+          title:
+            "How Publicis Groupe Brasil Uses Dataddo's API to Scale a Data Product",
+          text: "Saved 3 full-time data engineering equivalents and accelerated feature implementation by 2+ months.",
+          url: "https://blog.dataddo.com/how-publicis-groupe-brasil-uses-dataddos-api-to-scale-a-data-product",
+          image:
+            "https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
         },
         {
-          id: 'segment-apptopia',
-          tag: 'SaaS',
-          category: 'SaaS',
-          title: 'How Segment achieved 10% conversion rate with Apptopia API',
-          text: 'Segment enriched ~16k accounts with key data points, saving 3-4 hours per week on research.',
-          url: 'https://apptopia.com/case-study-segment',
-          image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
-        }
+          id: "segment-apptopia",
+          tag: "SaaS",
+          category: "SaaS",
+          title: "How Segment achieved 10% conversion rate with Apptopia API",
+          text: "Segment enriched ~16k accounts with key data points, saving 3-4 hours per week on research.",
+          url: "https://apptopia.com/case-study-segment",
+          image:
+            "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        },
       ];
       setStories(fallbackStories);
     } finally {
@@ -264,71 +295,75 @@ const SuccessStories = () => {
   };
 
   const determineTag = (tags) => {
-    if (!tags || tags.length === 0) return 'Technology';
+    if (!tags || tags.length === 0) return "Technology";
     const tagMap = {
-      'fintech': 'Fintech',
-      'saas': 'SaaS',
-      'enterprise': 'Enterprise',
-      'ecommerce': 'E-commerce',
-      'healthcare': 'Healthcare',
-      'government': 'Government',
-      'security': 'Security',
-      'agriculture': 'Agriculture',
-      'ai': 'AI',
-      'database': 'Database',
-      'gaming': 'Gaming'
+      fintech: "Fintech",
+      saas: "SaaS",
+      enterprise: "Enterprise",
+      ecommerce: "E-commerce",
+      healthcare: "Healthcare",
+      government: "Government",
+      security: "Security",
+      agriculture: "Agriculture",
+      ai: "AI",
+      database: "Database",
+      gaming: "Gaming",
     };
-    
+
     for (const tag of tags) {
       const lowerTag = tag.toLowerCase();
       if (tagMap[lowerTag]) {
         return tagMap[lowerTag];
       }
     }
-    return 'Technology';
+    return "Technology";
   };
 
   const determineCategory = (tags) => {
-    if (!tags || tags.length === 0) return 'Enterprise';
+    if (!tags || tags.length === 0) return "Enterprise";
     const categoryMap = {
-      'saas': 'SaaS',
-      'fintech': 'Fintech',
-      'enterprise': 'Enterprise',
-      'ecommerce': 'E-commerce',
-      'healthcare': 'Healthcare',
-      'government': 'Government',
-      'security': 'Enterprise',
-      'agriculture': 'Enterprise',
-      'ai': 'Enterprise',
-      'database': 'SaaS',
-      'gaming': 'Enterprise'
+      saas: "SaaS",
+      fintech: "Fintech",
+      enterprise: "Enterprise",
+      ecommerce: "E-commerce",
+      healthcare: "Healthcare",
+      government: "Government",
+      security: "Enterprise",
+      agriculture: "Enterprise",
+      ai: "Enterprise",
+      database: "SaaS",
+      gaming: "Enterprise",
     };
-    
+
     for (const tag of tags) {
       const lowerTag = tag.toLowerCase();
       if (categoryMap[lowerTag]) {
         return categoryMap[lowerTag];
       }
     }
-    return 'Enterprise';
+    return "Enterprise";
   };
 
   const filteredStories = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
 
     return stories.filter((story) => {
-      const matchesTab = activeTab === "All Assets" || story.category === activeTab || story.tag === activeTab;
+      const matchesTab =
+        activeTab === "All Assets" ||
+        story.category === activeTab ||
+        story.tag === activeTab;
       if (!matchesTab) return false;
 
       if (!query) return true;
 
-      const searchableText = `${story.title} ${story.text} ${story.tag} ${story.category}`.toLowerCase();
+      const searchableText =
+        `${story.title} ${story.text} ${story.tag} ${story.category}`.toLowerCase();
       return searchableText.includes(query);
     });
   }, [activeTab, searchTerm, stories]);
 
   const openSuccessStory = (url) => {
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   if (loading) {
@@ -373,8 +408,8 @@ const SuccessStories = () => {
               <span className="stories-spotlight__tag">Spotlight Story</span>
               <h2>{stories[0].title}</h2>
               <p>{stories[0].text}</p>
-              <button 
-                className="stories-spotlight__link" 
+              <button
+                className="stories-spotlight__link"
                 type="button"
                 onClick={() => openSuccessStory(stories[0].url)}
               >
@@ -447,26 +482,33 @@ const SuccessStories = () => {
 
           <div className="stories-grid__cards">
             {filteredStories.map((story) => (
-              <article 
-                key={story.id} 
+              <article
+                key={story.id}
                 className="stories-card"
                 onClick={() => openSuccessStory(story.url)}
               >
                 <div className="stories-card__media">
-                  <img 
-                    src={story.image} 
+                  <img
+                    src={story.image}
                     alt={story.title}
                     onError={(e) => {
                       e.target.onerror = null;
                       const industryImages = {
-                        'Government': 'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-                        'Marketing': 'https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-                        'SaaS': 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-                        'Healthcare': 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-                        'Fintech': 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-                        'Enterprise': 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+                        Government:
+                          "https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                        Marketing:
+                          "https://images.unsplash.com/photo-1557804506-669a67965ba0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                        SaaS: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                        Healthcare:
+                          "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                        Fintech:
+                          "https://images.unsplash.com/photo-1563013544-824ae1b704d3?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+                        Enterprise:
+                          "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
                       };
-                      e.target.src = industryImages[story.tag] || 'https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80';
+                      e.target.src =
+                        industryImages[story.tag] ||
+                        "https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80";
                     }}
                   />
                 </div>
@@ -483,11 +525,15 @@ const SuccessStories = () => {
           </div>
 
           {filteredStories.length === 0 && !error && (
-            <p className="stories-grid__empty">No success stories found. Try adjusting your search.</p>
+            <p className="stories-grid__empty">
+              No success stories found. Try adjusting your search.
+            </p>
           )}
 
           {filteredStories.length === 0 && error && (
-            <p className="stories-grid__empty">Unable to load stories. Please try again later.</p>
+            <p className="stories-grid__empty">
+              Unable to load stories. Please try again later.
+            </p>
           )}
 
           <button className="stories-grid__more" type="button">
@@ -521,9 +567,11 @@ const SuccessStories = () => {
               Join professionals worldwide who rely on Certicode for verified,
               production-ready digital assets.
             </p>
-            <button className="stories-cta__btn" type="button">
-              Get Started Now
-            </button>
+            <Link to="/register">
+              <button className="blogs-cta__btn" type="button">
+                Get Started Now
+              </button>
+            </Link>
           </div>
         </div>
       </section>
