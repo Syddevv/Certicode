@@ -58,6 +58,7 @@ const helpCardsByTopic = {
     {
       title: "Track your package",
       text: "Track your packages in Your Orders.",
+      path: "/customer-support/order-status/track-your-package",
     },
     {
       title: "Return Items You Ordered",
@@ -216,7 +217,10 @@ const CustomerSupport = () => {
 
             <div className="support-cards">
               {visibleCards.map((card) => (
-                <article onClick={()=> navigate(card.path)} key={card.title} className="support-card">
+                <article
+                  onClick={() => card.path && navigate(card.path)}
+                  key={card.title}
+                  className="support-card">
                   <h4>{card.title}</h4>
                   <p>{card.text}</p>
                 </article>
