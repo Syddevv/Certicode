@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import "../../styles/adminInventory.css";
 import Sidebar from "../../components/Sidebar";
 import AdminTopbar from "../../components/AdminTopbar";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import webappsIcon from "../../assets/webapps.png";
 import mobileIcon from "../../assets/mobile.png";
 import notifBell from "../../assets/NotifBell.png";
@@ -10,10 +11,7 @@ import uiUxIcon from "../../assets/ui-ux.png";
 import settingsCustomIcon from "../../assets/settings-custom.png";
 import newSaleIcon from "../../assets/new-sale-e-commerce.png";
 import assetUpdatedIcon from "../../assets/asset-updated.png";
-import fintechIcon from "../../assets/fintech-banking.png";
-import developerIcon from "../../assets/developer-portfolio.png";
-<<<<<<< HEAD
-import fitlifeIcon from "../../assets/fitlife-tracker.png";
+
 import totalValueIcon from "../../assets/total-value.png";
 import lastAuditIcon from "../../assets/last-audit.png";
 import actionDeleteIcon from "../../assets/deleteAsset.png";
@@ -34,8 +32,14 @@ const normalizeStatus = (value) => {
 
   const normalized = String(value).trim().toLowerCase();
   if (["active", "published", "live"].includes(normalized)) return "active";
-  if (["draft", "saved as draft", "saved_as_draft", "pending"].includes(normalized)) return "draft";
-  if (["archived", "archive", "inactive"].includes(normalized)) return "archived";
+  if (
+    ["draft", "saved as draft", "saved_as_draft", "pending"].includes(
+      normalized,
+    )
+  )
+    return "draft";
+  if (["archived", "archive", "inactive"].includes(normalized))
+    return "archived";
   return null;
 };
 
@@ -73,32 +77,6 @@ const getProductStatus = (product, overrides = {}) => {
 };
 
 const AdminInventory = ({ statusView = "active" }) => {
-=======
-import fitlifeIcon from "../../assets/fitlife-tracker.png";
-import totalValueIcon from "../../assets/total-value.png";
-import lastAuditIcon from "../../assets/last-audit.png";
-import { AdminInventoryAPI } from "../../services/AdminInventoryAPI";
-import { showErrorToast, showSuccessToast } from "../../utils/toast";
-import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
-
-const Icons = {
-  Bell: "🔔",
-  Add: "+",
-  More: "⋮",
-  Filter: "⚙️",
-  Edit: "📝",
-  Trash: "🗑️",
-  Settings: "⚙️",
-  Web: "🌐",
-  Mobile: "📱",
-  Design: "🎨",
-  Value: "💰",
-  Sales: "🛒",
-  Audit: "⏱️",
-};
-
-const AdminInventory = () => {
->>>>>>> 3307a3105460b38cc0f33c428ca557b96ab9b6a0
   const [products, setProducts] = useState([]);
   const [stats, setStats] = useState({
     total_value: 0,
@@ -116,9 +94,10 @@ const AdminInventory = () => {
     category: "all",
     search: "",
   });
-<<<<<<< HEAD
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [statusOverrides, setStatusOverrides] = useState(() => {
     try {
       const stored = localStorage.getItem(STATUS_OVERRIDE_STORAGE_KEY);
@@ -139,13 +118,6 @@ const AdminInventory = () => {
       JSON.stringify(statusOverrides),
     );
   }, [statusOverrides]);
-=======
-  const [searchTimeout, setSearchTimeout] = useState(null);
-  const [deletingId, setDeletingId] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  const navigate = useNavigate();
->>>>>>> 3307a3105460b38cc0f33c428ca557b96ab9b6a0
 
   const fetchStats = useCallback(async () => {
     try {
@@ -242,16 +214,28 @@ const AdminInventory = () => {
     });
   };
 
+  const openDeleteModal = (productId) => {
+    setPendingDeleteId(productId);
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    if (deletingId) return;
+    setShowDeleteModal(false);
+    setPendingDeleteId(null);
+  };
+
   const handleDelete = async (productId) => {
-<<<<<<< HEAD
-    if (!window.confirm("Are you sure you want to delete this asset?")) return;
-    
+    if (!productId) return;
+
+    setShowDeleteModal(false);
     setDeletingId(productId);
     try {
       await AdminInventoryAPI.deleteProduct(productId);
       await fetchProducts();
       await fetchStats();
       showSuccessToast("Asset deleted successfully.");
+      setPendingDeleteId(null);
     } catch (error) {
       console.error("Error deleting product:", error);
       showErrorToast("Failed to delete product.");
@@ -289,23 +273,6 @@ const AdminInventory = () => {
         : "Asset restored to active assets.",
     );
   };
-=======
-    // if (!window.confirm("Are you sure you want to delete this asset?")) return;
-    setShowDeleteModal(false);
-    setDeletingId(productId);
-    try {
-      await AdminInventoryAPI.deleteProduct(productId);
-      await fetchProducts();
-      await fetchStats();
-      showSuccessToast("Asset deleted successfully.");
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      showErrorToast("Failed to delete product.");
-    } finally {
-      setDeletingId(null);
-    }
-  };
->>>>>>> 3307a3105460b38cc0f33c428ca557b96ab9b6a0
 
   const formatCurrency = (amount) => {
     if (!amount) return "$0.00";
@@ -435,7 +402,8 @@ const AdminInventory = () => {
   const visibleProducts = useMemo(
     () =>
       products.filter(
-        (product) => getProductStatus(product, statusOverrides) === currentStatusView,
+        (product) =>
+          getProductStatus(product, statusOverrides) === currentStatusView,
       ),
     [products, statusOverrides, currentStatusView],
   );
@@ -443,7 +411,8 @@ const AdminInventory = () => {
   const getStatusTabClass = (tabStatus) =>
     `status-tab ${currentStatusView === tabStatus ? "active" : ""}`;
 
-  const getStatusLabel = (status) => status.charAt(0).toUpperCase() + status.slice(1);
+  const getStatusLabel = (status) =>
+    status.charAt(0).toUpperCase() + status.slice(1);
 
   return (
     <>
@@ -484,10 +453,16 @@ const AdminInventory = () => {
               <Link to="/inventory" className={getStatusTabClass("active")}>
                 Active ({stats.active_count || 0})
               </Link>
-              <Link to="/inventory/drafts" className={getStatusTabClass("draft")}>
+              <Link
+                to="/inventory/drafts"
+                className={getStatusTabClass("draft")}
+              >
                 Drafts ({stats.draft_count || 0})
               </Link>
-              <Link to="/inventory/archived" className={getStatusTabClass("archived")}>
+              <Link
+                to="/inventory/archived"
+                className={getStatusTabClass("archived")}
+              >
                 Archived ({stats.archived_count || 0})
               </Link>
             </div>
@@ -575,7 +550,6 @@ const AdminInventory = () => {
                       Loading products...
                     </td>
                   </tr>
-<<<<<<< HEAD
                 ) : visibleProducts.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="no-data-cell">
@@ -584,7 +558,10 @@ const AdminInventory = () => {
                   </tr>
                 ) : (
                   visibleProducts.map((product) => {
-                    const productStatus = getProductStatus(product, statusOverrides);
+                    const productStatus = getProductStatus(
+                      product,
+                      statusOverrides,
+                    );
                     const isDeleting = deletingId === product.id;
                     const canArchive = productStatus !== "archived";
 
@@ -594,9 +571,9 @@ const AdminInventory = () => {
                           <div className="asset-cell">
                             {product.featured_image ? (
                               <div className="asset-icon">
-                                <img 
-                                  src={product.featured_image} 
-                                  alt={product.name} 
+                                <img
+                                  src={product.featured_image}
+                                  alt={product.name}
                                   className="asset-icon-img"
                                   onError={(e) => {
                                     e.target.onerror = null;
@@ -606,7 +583,11 @@ const AdminInventory = () => {
                               </div>
                             ) : (
                               <div className="asset-icon blue">
-                                <img src={newSaleIcon} alt={product.name} className="asset-icon-img" />
+                                <img
+                                  src={newSaleIcon}
+                                  alt={product.name}
+                                  className="asset-icon-img"
+                                />
                               </div>
                             )}
                             <div>
@@ -618,42 +599,64 @@ const AdminInventory = () => {
                         <td>{getCategoryBadge(product.asset_type)}</td>
                         <td className="tech-stack">
                           <div className="tech-tags">
-                            {product.technologies?.slice(0, 3).map((tech, index) => (
-                              <span
-                                key={index}
-                                className={`tech-tag tech-tag--${getToneColor(tech)}`}
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                            {product.technologies?.length > 3 && <span className="tech-more">...</span>}
+                            {product.technologies
+                              ?.slice(0, 3)
+                              .map((tech, index) => (
+                                <span
+                                  key={index}
+                                  className={`tech-tag tech-tag--${getToneColor(tech)}`}
+                                >
+                                  {tech}
+                                </span>
+                              ))}
+                            {product.technologies?.length > 3 && (
+                              <span className="tech-more">...</span>
+                            )}
                           </div>
                         </td>
-                        <td className="price">{formatCurrency(product.price)}</td>
+                        <td className="price">
+                          {formatCurrency(product.price)}
+                        </td>
                         <td>
                           <div className={`status-indicator ${productStatus}`}>
-                            <span className="dot"></span> {getStatusLabel(productStatus).toUpperCase()}
+                            <span className="dot"></span>{" "}
+                            {getStatusLabel(productStatus).toUpperCase()}
                           </div>
                         </td>
                         <td>
                           <div className="action-buttons">
-                            {(productStatus === "draft" || productStatus === "archived") && (
+                            {(productStatus === "draft" ||
+                              productStatus === "archived") && (
                               <button
                                 onClick={() => handleActivate(product)}
-                                title={productStatus === "draft" ? "Publish" : "Restore"}
+                                title={
+                                  productStatus === "draft"
+                                    ? "Publish"
+                                    : "Restore"
+                                }
                                 disabled={isDeleting}
                                 className="action-btn action-btn--activate"
                               >
-                                <img src={actionActivateIcon} alt="" aria-hidden="true" className="action-icon-img" />
+                                <img
+                                  src={actionActivateIcon}
+                                  alt=""
+                                  aria-hidden="true"
+                                  className="action-icon-img"
+                                />
                               </button>
                             )}
-                            <button 
+                            <button
                               onClick={() => handleEdit(product)}
                               title="Edit"
                               disabled={isDeleting}
                               className="action-btn action-btn--edit"
                             >
-                              <img src={actionSettingsIcon} alt="" aria-hidden="true" className="action-icon-img" />
+                              <img
+                                src={actionSettingsIcon}
+                                alt=""
+                                aria-hidden="true"
+                                className="action-icon-img"
+                              />
                             </button>
                             {canArchive && (
                               <button
@@ -662,17 +665,29 @@ const AdminInventory = () => {
                                 disabled={isDeleting}
                                 className="action-btn action-btn--archive"
                               >
-                                <img src={actionArchiveIcon} alt="" aria-hidden="true" className="action-icon-img" />
+                                <img
+                                  src={actionArchiveIcon}
+                                  alt=""
+                                  aria-hidden="true"
+                                  className="action-icon-img"
+                                />
                               </button>
                             )}
-                            <button 
-                              onClick={() => handleDelete(product.id)}
+                            <button
+                              onClick={() => openDeleteModal(product.id)}
                               title="Delete"
                               disabled={isDeleting}
                               className="action-btn action-btn--delete"
                             >
-                              {isDeleting ? "..." : (
-                                <img src={actionDeleteIcon} alt="" aria-hidden="true" className="action-icon-img" />
+                              {isDeleting ? (
+                                "..."
+                              ) : (
+                                <img
+                                  src={actionDeleteIcon}
+                                  alt=""
+                                  aria-hidden="true"
+                                  className="action-icon-img"
+                                />
                               )}
                             </button>
                           </div>
@@ -686,113 +701,17 @@ const AdminInventory = () => {
 
             <div className="pagination-bar">
               <span>
-                Showing <strong>{visibleProducts.length ? ((currentPage - 1) * 5) + 1 : 0}-{visibleProducts.length ? ((currentPage - 1) * 5) + visibleProducts.length : 0}</strong> of {totalItems} assets
-              </span>
-              {renderPagination()}
-            </div>
-=======
-                ) : products.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" className="no-data-cell">
-                      No products found
-                    </td>
-                  </tr>
-                ) : (
-                  products.map((product) => (
-                    <tr key={product.id}>
-                      <td>
-                        <div className="asset-cell">
-                          {product.featured_image ? (
-                            <div className="asset-icon">
-                              <img
-                                src={product.featured_image}
-                                alt={product.name}
-                                className="asset-icon-img"
-                                onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.src = newSaleIcon;
-                                }}
-                              />
-                            </div>
-                          ) : (
-                            <div className="asset-icon blue">
-                              <img
-                                src={newSaleIcon}
-                                alt={product.name}
-                                className="asset-icon-img"
-                              />
-                            </div>
-                          )}
-                          <div>
-                            <strong>{product.name}</strong>
-                            <small>Updated {product.updated_ago}</small>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{getCategoryBadge(product.asset_type)}</td>
-                      <td className="tech-stack">
-                        <div className="tech-tags">
-                          {product.technologies
-                            ?.slice(0, 3)
-                            .map((tech, index) => (
-                              <span
-                                key={index}
-                                className={`tech-tag tech-tag--${getToneColor(tech)}`}
-                              >
-                                {tech}
-                              </span>
-                            ))}
-                          {product.technologies?.length > 3 && (
-                            <span className="tech-more">...</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="price">{formatCurrency(product.price)}</td>
-                      <td>
-                        <div className="status-indicator active">
-                          <span className="dot"></span> ACTIVE
-                        </div>
-                      </td>
-                      <td>
-                        <div className="action-buttons">
-                          <button
-                            onClick={() => handleEdit(product)}
-                            title="Edit"
-                            disabled={deletingId === product.id}
-                          >
-                            {Icons.Settings}
-                          </button>
-                          <button
-                            onClick={() => {
-                              setDeletingId(product.id);
-                              setShowDeleteModal(true);
-                            }}
-                            // onClick={() => handleDelete(product.id)}
-                            title="Delete"
-                            disabled={deletingId === product.id}
-                          >
-                            {deletingId === product.id ? "..." : Icons.Trash}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-
-            <div className="pagination-bar">
-              <span>
                 Showing{" "}
                 <strong>
-                  {(currentPage - 1) * 5 + 1}-
-                  {Math.min(currentPage * 5, totalItems)}
+                  {visibleProducts.length ? (currentPage - 1) * 5 + 1 : 0}-
+                  {visibleProducts.length
+                    ? (currentPage - 1) * 5 + visibleProducts.length
+                    : 0}
                 </strong>{" "}
                 of {totalItems} assets
               </span>
               {renderPagination()}
             </div>
->>>>>>> 3307a3105460b38cc0f33c428ca557b96ab9b6a0
           </div>
 
           <div className="bottom-stats">
@@ -843,8 +762,8 @@ const AdminInventory = () => {
 
       <DeleteConfirmationModal
         isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={() => handleDelete(deletingId)}
+        onClose={closeDeleteModal}
+        onConfirm={() => handleDelete(pendingDeleteId)}
       />
     </>
   );
