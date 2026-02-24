@@ -1,0 +1,185 @@
+.upm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 1100;
+}
+
+.upm-dialog {
+  position: relative;
+  width: min(640px, 100%);
+  min-height: 640px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.14);
+  padding: 34px 48px 36px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+.upm-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  border: none;
+  background: none;
+  color: #4b5563;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 6px;
+}
+
+.upm-title {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.25;
+  font-weight: 800;
+  color: #111827;
+}
+
+.upm-subtitle {
+  margin: 10px 0 14px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.upm-divider {
+  width: 100%;
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 0 0 18px;
+}
+
+.upm-form-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 18px 20px 4px;
+}
+
+.upm-field {
+  margin-bottom: 16px;
+}
+
+.upm-label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.upm-input {
+  width: 100%;
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  padding: 0 12px;
+  box-sizing: border-box;
+  font-size: 13px;
+  color: #111827;
+  outline: none;
+}
+
+.upm-input:focus {
+  border-color: #fb923c;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+}
+
+.upm-card-number-wrap {
+  position: relative;
+}
+
+.upm-input--with-badge {
+  padding-right: 74px;
+}
+
+.upm-card-badge {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  min-width: 38px;
+  height: 28px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+  color: #00579f;
+  font-size: 10px;
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upm-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.upm-checkbox-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 12px;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.upm-checkbox-row input {
+  width: 13px;
+  height: 13px;
+  accent-color: #f97316;
+}
+
+.upm-spacer {
+  flex: 1;
+  min-height: 36px;
+}
+
+.upm-submit-btn {
+  width: 100%;
+  height: 50px;
+  border: none;
+  border-radius: 10px;
+  background: #f97316;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.upm-submit-btn:hover {
+  background: #ea6a0a;
+}
+
+@media (max-width: 640px) {
+  .upm-overlay {
+    padding: 12px;
+  }
+
+  .upm-dialog {
+    min-height: unset;
+    padding: 28px 18px 20px;
+  }
+
+  .upm-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .upm-spacer {
+    min-height: 20px;
+  }
+}
