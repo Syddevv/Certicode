@@ -98,6 +98,7 @@ const AdminInventory = ({ statusView = "active" }) => {
   const [statusUpdatingId, setStatusUpdatingId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
+  const [pendingStatusAction, setPendingStatusAction] = useState(null);
   const [statusOverrides, setStatusOverrides] = useState(() => {
     try {
       const stored = localStorage.getItem(STATUS_OVERRIDE_STORAGE_KEY);
@@ -219,10 +220,19 @@ const AdminInventory = ({ statusView = "active" }) => {
     setShowDeleteModal(true);
   };
 
+  const openStatusActionModal = (type, product) => {
+    setPendingStatusAction({ type, product });
+  };
+
   const closeDeleteModal = () => {
     if (deletingId) return;
     setShowDeleteModal(false);
     setPendingDeleteId(null);
+  };
+
+  const closeStatusActionModal = () => {
+    if (statusUpdatingId) return;
+    setPendingStatusAction(null);
   };
 
   const handleDelete = async (productId) => {
@@ -303,6 +313,22 @@ const AdminInventory = ({ statusView = "active" }) => {
       showErrorToast("Failed to update asset status.");
     } finally {
       setStatusUpdatingId(null);
+    }
+  };
+
+  const handleConfirmStatusAction = async () => {
+    if (!pendingStatusAction?.product) return;
+
+    const { type, product } = pendingStatusAction;
+    setPendingStatusAction(null);
+
+    if (type === "archive") {
+      await handleArchive(product);
+      return;
+    }
+
+    if (type === "restore" || type === "publish") {
+      await handleActivate(product);
     }
   };
 
@@ -662,7 +688,11 @@ const AdminInventory = ({ statusView = "active" }) => {
                             {(productStatus === "draft" ||
                               productStatus === "archived") && (
                               <button
-                                onClick={() => handleActivate(product)}
+                                onClick={() =>
+                                  productStatus === "archived"
+                                    ? openStatusActionModal("restore", product)
+                                    : openStatusActionModal("publish", product)
+                                }
                                 title={
                                   productStatus === "draft"
                                     ? "Publish"
@@ -694,7 +724,7 @@ const AdminInventory = ({ statusView = "active" }) => {
                             </button>
                             {canArchive && (
                               <button
-                                onClick={() => handleArchive(product)}
+                                onClick={() => openStatusActionModal("archive", product)}
                                 title="Archive"
                                 disabled={isBusy}
                                 className="action-btn action-btn--archive"
@@ -798,6 +828,38 @@ const AdminInventory = ({ statusView = "active" }) => {
         isOpen={showDeleteModal}
         onClose={closeDeleteModal}
         onConfirm={() => handleDelete(pendingDeleteId)}
+        isProcessing={!!deletingId}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={!!pendingStatusAction}
+        onClose={closeStatusActionModal}
+        onConfirm={handleConfirmStatusAction}
+        title={
+          pendingStatusAction?.type === "archive"
+            ? "Archive Product"
+            : pendingStatusAction?.type === "restore"
+              ? "Restore Product"
+              : "Publish Draft"
+        }
+        message={
+          pendingStatusAction?.type === "archive"
+            ? `Are you sure you want to archive "${pendingStatusAction?.product?.name || "this product"}"? It will move to Archived assets.`
+            : pendingStatusAction?.type === "restore"
+              ? `Are you sure you want to restore "${pendingStatusAction?.product?.name || "this product"}"? It will move back to Active assets.`
+              : `Are you sure you want to publish "${pendingStatusAction?.product?.name || "this product"}"? It will move to Active assets.`
+        }
+        confirmLabel={
+          pendingStatusAction?.type === "archive"
+            ? "Archive"
+            : pendingStatusAction?.type === "restore"
+              ? "Restore"
+              : "Publish"
+        }
+        confirmVariant={
+          pendingStatusAction?.type === "archive" ? "warning" : "success"
+        }
+        isProcessing={!!statusUpdatingId}
       />
     </>
   );
