@@ -112,17 +112,7 @@ const AdminVouchers = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedFilter, setSelectedFilter] = useState("All Coupon");
-  const [editingCode, setEditingCode] = useState(null);
   const [removingCode, setRemovingCode] = useState(null);
-  const [editForm, setEditForm] = useState({
-    name: "",
-    code: "",
-    discount: "",
-    activeFrom: "",
-    activeTo: "",
-    usageLimit: 0,
-    status: "ACTIVE",
-  });
 
   const mapStatusToTone = (status) => {
     if (status === "ACTIVE") return "active";
@@ -132,19 +122,36 @@ const AdminVouchers = () => {
 
   useEffect(() => {
     const incomingVoucher = location.state?.newVoucher;
-    if (!incomingVoucher) return;
+    const updatedVoucher = location.state?.updatedVoucher;
+    const previousCode = location.state?.previousCode;
+    if (!incomingVoucher && !updatedVoucher) return;
 
     setVouchers((prev) => {
-      const exists = prev.some((item) => item.code === incomingVoucher.code);
-      if (exists) return prev;
-      return [
-        {
-          ...incomingVoucher,
-          updated: "Updated just now",
-          statusTone: mapStatusToTone(incomingVoucher.status),
-        },
-        ...prev,
-      ];
+      if (incomingVoucher) {
+        const exists = prev.some((item) => item.code === incomingVoucher.code);
+        if (exists) return prev;
+        return [
+          {
+            ...incomingVoucher,
+            updated: "Updated just now",
+            statusTone: mapStatusToTone(incomingVoucher.status),
+          },
+          ...prev,
+        ];
+      }
+
+      if (!updatedVoucher) return prev;
+
+      return prev.map((item) =>
+        item.code === (previousCode || updatedVoucher.code)
+          ? {
+              ...item,
+              ...updatedVoucher,
+              statusTone: mapStatusToTone(updatedVoucher.status),
+              updated: "Updated just now",
+            }
+          : item,
+      );
     });
 
     navigate("/vouchers", { replace: true });
@@ -181,45 +188,12 @@ const AdminVouchers = () => {
   }, [selectedFilter, vouchers]);
 
   const handleEdit = (voucher) => {
-    setEditingCode(voucher.code);
-    setEditForm({
-      name: voucher.name,
-      code: voucher.code,
-      discount: voucher.discount,
-      activeFrom: voucher.activeFrom,
-      activeTo: voucher.activeTo,
-      usageLimit: voucher.usageLimit,
-      status: voucher.status,
+    navigate("/vouchers/edit", {
+      state: {
+        voucher,
+        existingCodes: vouchers.map((item) => item.code),
+      },
     });
-  };
-
-  const closeEditModal = () => {
-    setEditingCode(null);
-  };
-
-  const handleEditInputChange = (field, value) => {
-    setEditForm((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleSaveEdit = () => {
-    if (!editingCode) return;
-
-    setVouchers((prev) =>
-      prev.map((item) =>
-        item.code === editingCode
-          ? {
-              ...item,
-              ...editForm,
-              usageLimit: Number(editForm.usageLimit) || 0,
-              statusTone: mapStatusToTone(editForm.status),
-              updated: "Updated just now",
-            }
-          : item,
-      ),
-    );
-
-    showSuccessToast("Voucher updated.");
-    closeEditModal();
   };
 
   const openRemoveModal = (voucherCode) => {
@@ -366,17 +340,17 @@ const AdminVouchers = () => {
                           <div className="voucher-actions">
                             <button
                               type="button"
-                              aria-label={`Edit ${voucher.name}`}
-                              onClick={() => handleEdit(voucher)}
-                            >
-                              <img src={VouchEdit} alt="" aria-hidden="true" className="voucher-action-icon" />
-                            </button>
-                            <button
-                              type="button"
                               aria-label={`Remove ${voucher.name}`}
                               onClick={() => openRemoveModal(voucher.code)}
                             >
                               <img src={VouchRemove} alt="" aria-hidden="true" className="voucher-action-icon" />
+                            </button>
+                            <button
+                              type="button"
+                              aria-label={`Edit ${voucher.name}`}
+                              onClick={() => handleEdit(voucher)}
+                            >
+                              <img src={VouchEdit} alt="" aria-hidden="true" className="voucher-action-icon" />
                             </button>
                           </div>
                         </td>
@@ -411,95 +385,6 @@ const AdminVouchers = () => {
           </section>
         </main>
       </div>
-
-      {editingCode && (
-        <div className="voucher-edit-overlay" onClick={closeEditModal}>
-          <div
-            className="voucher-edit-modal"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <h3>Edit Voucher</h3>
-
-            <div className="voucher-edit-grid">
-              <label>
-                Name
-                <input
-                  type="text"
-                  value={editForm.name}
-                  onChange={(e) => handleEditInputChange("name", e.target.value)}
-                />
-              </label>
-
-              <label>
-                Code
-                <input
-                  type="text"
-                  value={editForm.code}
-                  onChange={(e) => handleEditInputChange("code", e.target.value.toUpperCase())}
-                />
-              </label>
-
-              <label>
-                Discount
-                <input
-                  type="text"
-                  value={editForm.discount}
-                  onChange={(e) => handleEditInputChange("discount", e.target.value)}
-                />
-              </label>
-
-              <label>
-                Usage Limit
-                <input
-                  type="number"
-                  min="0"
-                  value={editForm.usageLimit}
-                  onChange={(e) => handleEditInputChange("usageLimit", e.target.value)}
-                />
-              </label>
-
-              <label>
-                Active From
-                <input
-                  type="text"
-                  value={editForm.activeFrom}
-                  onChange={(e) => handleEditInputChange("activeFrom", e.target.value)}
-                />
-              </label>
-
-              <label>
-                Active To
-                <input
-                  type="text"
-                  value={editForm.activeTo}
-                  onChange={(e) => handleEditInputChange("activeTo", e.target.value)}
-                />
-              </label>
-
-              <label className="voucher-edit-status">
-                Status
-                <select
-                  value={editForm.status}
-                  onChange={(e) => handleEditInputChange("status", e.target.value)}
-                >
-                  <option value="ACTIVE">ACTIVE</option>
-                  <option value="EXPIRING SOON">EXPIRING SOON</option>
-                  <option value="USED">USED</option>
-                </select>
-              </label>
-            </div>
-
-            <div className="voucher-edit-actions">
-              <button type="button" onClick={closeEditModal}>
-                Cancel
-              </button>
-              <button type="button" className="save" onClick={handleSaveEdit}>
-                Save Changes
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {removingCode && (
         <div className="voucher-remove-overlay" onClick={closeRemoveModal}>

@@ -54,6 +54,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminNotification from "./pages/admin/AdminNotification";
 import AdminVouchers from "./pages/admin/AdminVouchers";
 import AdminAddVoucher from "./pages/admin/AdminAddVoucher";
+import AdminEditVoucher from "./pages/admin/AdminEditVoucher";
 
 // Components
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -155,6 +156,14 @@ function AppContent() {
         element={
           <ProtectedRoute allowedRoles={["Admin"]}>
             <AdminAddVoucher />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/vouchers/edit"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminEditVoucher />
           </ProtectedRoute>
         }
       />
