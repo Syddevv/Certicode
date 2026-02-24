@@ -48,6 +48,8 @@ import SupportDesk from "./pages/admin/SupportDesk";
 import TicketDetail from "./pages/admin/TicketDetail";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminNotification from "./pages/admin/AdminNotification";
+import AdminVouchers from "./pages/admin/AdminVouchers";
+import AdminAddVoucher from "./pages/admin/AdminAddVoucher";
 
 // Components
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -119,6 +121,24 @@ function AppContent() {
           </ProtectedRoute>
         }
       />
+      
+      <Route
+        path="/vouchers"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminVouchers />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/vouchers/new"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminAddVoucher />
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/sales/order-details/:id"
         element={
