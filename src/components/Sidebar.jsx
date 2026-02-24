@@ -7,6 +7,7 @@ import DashboardAdmin from "../assets/DashboardAdmin.png";
 import InventoryAdmin from "../assets/InventoryAdmin.png";
 import SalesAdmin from "../assets/SalesAdmin.png";
 import CustomersAdmin from "../assets/CustomersAdmin.png";
+import AdminVoucher from "../assets/AdminVoucher.png";
 import SettingsAdmin from "../assets/SettingsAdmin.png";
 import SupportAdmin from "../assets/SupportAdmin.png";
 import LogoutModalDialog from "./LogoutModal";
@@ -17,6 +18,7 @@ const Icons = {
   Sales: <img src={SalesAdmin} alt="Sales" width={20} height={20} />,
   Customers: <img src={CustomersAdmin} alt="Customers" width={20} height={20} />,
   Settings: <img src={SettingsAdmin} alt="Settings" width={20} height={20} />,
+  Vouchers: <img src={AdminVoucher} alt="Vouchers" width={20} height={20} />,
   Support: <img src={SupportAdmin} alt="Support" width={20} height={20} />,
 };
 
@@ -151,6 +153,12 @@ const Sidebar = ({ activePage }) => {
               <Link to="/customers">
                 <span className="icon">{Icons.Customers}</span>
                 <span>Customers</span>
+              </Link>
+            </li>
+                <li className={activePage === "vouchers" ? "active" : ""}>
+              <Link to="/vouchers">
+                <span className="icon">{Icons.Vouchers}</span>
+                <span>Vouchers</span>
               </Link>
             </li>
           </ul>
