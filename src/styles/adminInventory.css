@@ -119,6 +119,9 @@ body {
   color: #6b7280;
   cursor: pointer;
   border-radius: 6px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
 }
 
 .status-tab.active {
@@ -241,6 +244,9 @@ td:first-child {
 
 .status-indicator.draft { color: #6b7280; }
 .status-indicator.draft .dot { background: #9ca3af; }
+
+.status-indicator.archived { color: #b45309; }
+.status-indicator.archived .dot { background: #f59e0b; }
 
 .action-buttons {
   display: flex;
@@ -486,4 +492,30 @@ td:first-child {
 .action-buttons button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.action-icon-img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.action-btn--activate:hover {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+}
+
+.action-btn--edit:hover {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+.action-btn--archive:hover {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+.action-btn--delete:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
 }

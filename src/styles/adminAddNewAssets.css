@@ -414,10 +414,25 @@
 .footer-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  flex-wrap: wrap;
   font-size: 13px;
   color: #059669;
   margin-right: auto;
+}
+
+.footer-local-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.footer-local-status__icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
 }
 
 .status-dot {
@@ -436,6 +451,14 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
+}
+
+.footer-draft-label {
+  color: #475569;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0 6px;
+  white-space: nowrap;
 }
 
 .footer-cta {

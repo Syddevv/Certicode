@@ -14,6 +14,9 @@ export const AdminInventoryAPI = {
       if (filters.category && filters.category !== 'all') {
         url += `&category=${encodeURIComponent(filters.category)}`;
       }
+      if (filters.status && filters.status !== 'all') {
+        url += `&status=${encodeURIComponent(filters.status)}`;
+      }
       if (filters.search) {
         url += `&search=${encodeURIComponent(filters.search)}`;
       }

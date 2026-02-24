@@ -10,6 +10,7 @@ import technicalConfIcon from "../../assets/technicalconf.png";
 import pricingIcon from "../../assets/pricing.png";
 import mediaAssetsIcon from "../../assets/media-assets.png";
 import uploadIcon from "../../assets/upload.png";
+import greenCheckIcon from "../../assets/greenCheck.png";
 import { AdminInventoryAPI } from "../../services/AdminInventoryAPI";
 
 const getToneColor = (tech) => {
@@ -769,17 +770,18 @@ const AdminAddNewAssets = () => {
 
           <footer className="add-asset-footer">
             <div className="footer-left">
-              {saveStatus && <span className={`status-message ${saveStatus.includes('Error') ? 'error' : 'success'}`}>{saveStatus}</span>}
+              <div className="footer-local-status" aria-live="polite">
+                <img src={greenCheckIcon} alt="" aria-hidden="true" className="footer-local-status__icon" />
+                <span>All changes saved locally</span>
+              </div>
+              {saveStatus && (
+                <span className={`status-message ${saveStatus.includes('Error') ? 'error' : 'success'}`}>
+                  {saveStatus}
+                </span>
+              )}
             </div>
             <div className="footer-actions">
-              <button 
-                type="button" 
-                className="btn secondary"
-                onClick={() => navigate("/inventory")}
-                disabled={loading}
-              >
-                Cancel
-              </button>
+              <span className="footer-draft-label">Saved as Draft</span>
               <button 
                 type="submit" 
                 className="btn primary footer-cta"

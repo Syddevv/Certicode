@@ -39,6 +39,8 @@ import NotFound from "./pages/public/NotFound";
 
 // Admin
 import AdminInventory from "./pages/admin/AdminInventory";
+import AdminInventoryDrafts from "./pages/admin/AdminInventoryDrafts";
+import AdminInventoryArchived from "./pages/admin/AdminInventoryArchived";
 import AdminSales from "./pages/admin/AdminSales";
 import AdminCustomers from "./pages/admin/AdminCustomers";
 import AdminCustomerDetails from "./pages/admin/AdminCustomerDetails"; // <--- IMPORT ADDED HERE
@@ -92,6 +94,22 @@ function AppContent() {
         element={
           <ProtectedRoute allowedRoles={["Admin"]}>
             <AdminInventory />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/inventory/drafts"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminInventoryDrafts />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/inventory/archived"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminInventoryArchived />
           </ProtectedRoute>
         }
       />
