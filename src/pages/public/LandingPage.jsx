@@ -104,16 +104,19 @@ const LandingPage = () => {
 
   useEffect(() => {
     const updateLoginStatus = () => {
-      const token =
-        localStorage.getItem("auth_token") || localStorage.getItem("token");
+      const token = localStorage.getItem("auth_token");
       setIsLoggedIn(!!token);
     };
 
     updateLoginStatus();
     window.addEventListener("storage", updateLoginStatus);
+    window.addEventListener("focus", updateLoginStatus);
 
-    return () => window.removeEventListener("storage", updateLoginStatus);
-  }, []);
+    return () => {
+      window.removeEventListener("storage", updateLoginStatus);
+      window.removeEventListener("focus", updateLoginStatus);
+    };
+  }, [location.pathname, location.hash]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {

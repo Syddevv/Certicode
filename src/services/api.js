@@ -139,6 +139,7 @@ export const api = {
   // Clear all auth data
   clearAuthData() {
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('token');
     localStorage.removeItem('user_id');
     localStorage.removeItem('user_role');
     localStorage.removeItem('user_name');
