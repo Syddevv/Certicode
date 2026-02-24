@@ -70,6 +70,71 @@ const AdminAddNewAssets = () => {
   const techDropdownRef = useRef(null);
   const techSearchRef = useRef(null);
 
+  const parseArrayField = (value) => {
+    if (Array.isArray(value)) return value;
+    if (typeof value === "string") {
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  };
+
+  const getAssetDescription = (asset) =>
+    asset?.description ??
+    asset?.product_description ??
+    asset?.details ??
+    asset?.full_description ??
+    "";
+
+  const populateEditForm = (asset) => {
+    if (!asset) return;
+
+    const techs = parseArrayField(asset.technologies);
+    const images = parseArrayField(asset.images);
+    const files = parseArrayField(asset.project_files);
+
+    setExistingFiles(files);
+    setExistingImages(images);
+
+    const filePreviewsData = files.map((file) => {
+      if (typeof file === "string") {
+        return {
+          name: file.split("/").pop() || "file.zip",
+          size: 0,
+          type: "application/zip",
+          isExisting: true,
+          url: file,
+        };
+      }
+      return {
+        name: file.name || file.filename || "file.zip",
+        size: file.size || 0,
+        type: file.type || file.mime_type || "application/zip",
+        isExisting: true,
+        url: file.url || file.path || file,
+      };
+    });
+
+    setFormData({
+      name: asset.name || "",
+      asset_type: asset.asset_type || "",
+      description: getAssetDescription(asset),
+      technologies: techs,
+      version: asset.version || "1.0",
+      price: asset.price || "",
+    });
+
+    setSelectedTechnologies(techs);
+    setFilePreviews(filePreviewsData);
+
+    setThumbnailPreview(asset.featured_image || "");
+    setGalleryPreviews(images);
+  };
+
   const techOptions = [
     "React",
     "Node.js",
@@ -102,88 +167,30 @@ const AdminAddNewAssets = () => {
   ];
 
   useEffect(() => {
-    if (isEditMode && productData) {
-      let techs = [];
-      if (productData.technologies) {
-        if (Array.isArray(productData.technologies)) {
-          techs = productData.technologies;
-        } else if (typeof productData.technologies === "string") {
-          try {
-            techs = JSON.parse(productData.technologies) || [];
-          } catch {
-            techs = [];
-          }
-        }
+    if (!isEditMode || !productData) return;
+
+    let isMounted = true;
+
+    // Seed form with inventory-row data immediately.
+    populateEditForm(productData);
+
+    // Then fetch full product data for edit mode (description/files can be omitted in table payloads).
+    const fetchFullProduct = async () => {
+      if (!productData.id) return;
+      try {
+        const fullProduct = await AdminInventoryAPI.getProductById(productData.id);
+        if (!isMounted || !fullProduct) return;
+        populateEditForm({ ...productData, ...fullProduct });
+      } catch (error) {
+        console.error("Failed to fetch full product details for edit:", error);
       }
+    };
 
-      let images = [];
-      if (productData.images) {
-        if (Array.isArray(productData.images)) {
-          images = productData.images;
-        } else if (typeof productData.images === "string") {
-          try {
-            images = JSON.parse(productData.images) || [];
-          } catch {
-            images = [];
-          }
-        }
-      }
+    fetchFullProduct();
 
-      let files = [];
-      if (productData.project_files) {
-        if (Array.isArray(productData.project_files)) {
-          files = productData.project_files;
-        } else if (typeof productData.project_files === "string") {
-          try {
-            files = JSON.parse(productData.project_files) || [];
-          } catch {
-            files = [];
-          }
-        }
-      }
-
-      setExistingFiles(files);
-      setExistingImages(images);
-
-      const filePreviewsData = files.map((file) => {
-        if (typeof file === "string") {
-          return {
-            name: file.split("/").pop() || "file.zip",
-            size: 0,
-            type: "application/zip",
-            isExisting: true,
-            url: file,
-          };
-        }
-        return {
-          name: file.name || file.filename || "file.zip",
-          size: file.size || 0,
-          type: file.type || file.mime_type || "application/zip",
-          isExisting: true,
-          url: file.url || file.path || file,
-        };
-      });
-
-      setFormData({
-        name: productData.name || "",
-        asset_type: productData.asset_type || "",
-        description: productData.description || "",
-        technologies: techs,
-        version: productData.version || "1.0",
-        price: productData.price || "",
-      });
-
-      setSelectedTechnologies(techs);
-      setFilePreviews(filePreviewsData);
-
-      if (productData.featured_image) {
-        setThumbnailPreview(productData.featured_image);
-      }
-
-      if (images && images.length > 0) {
-        setGalleryPreviews(images);
-      }
-    }
+    return () => {
+      isMounted = false;
+    };
   }, [isEditMode, productData]);
 
   useEffect(() => {
