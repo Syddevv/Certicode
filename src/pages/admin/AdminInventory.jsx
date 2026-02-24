@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../../styles/adminInventory.css";
 import Sidebar from "../../components/Sidebar";
 import AdminTopbar from "../../components/AdminTopbar";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 import webappsIcon from "../../assets/webapps.png";
 import mobileIcon from "../../assets/mobile.png";
 import notifBell from "../../assets/NotifBell.png";
@@ -10,32 +11,71 @@ import uiUxIcon from "../../assets/ui-ux.png";
 import settingsCustomIcon from "../../assets/settings-custom.png";
 import newSaleIcon from "../../assets/new-sale-e-commerce.png";
 import assetUpdatedIcon from "../../assets/asset-updated.png";
-import fintechIcon from "../../assets/fintech-banking.png";
-import developerIcon from "../../assets/developer-portfolio.png";
-import fitlifeIcon from "../../assets/fitlife-tracker.png";
+
 import totalValueIcon from "../../assets/total-value.png";
 import lastAuditIcon from "../../assets/last-audit.png";
+import actionDeleteIcon from "../../assets/deleteAsset.png";
+import actionSettingsIcon from "../../assets/setting.png";
+import actionArchiveIcon from "../../assets/archiveIcon.png";
+import actionActivateIcon from "../../assets/greenCheck.png";
 import { AdminInventoryAPI } from "../../services/AdminInventoryAPI";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
-import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
 
 const Icons = {
-  Bell: "🔔",
   Add: "+",
-  More: "⋮",
-  Filter: "⚙️",
-  Edit: "📝",
-  Trash: "🗑️",
-  Settings: "⚙️",
-  Web: "🌐",
-  Mobile: "📱",
-  Design: "🎨",
-  Value: "💰",
-  Sales: "🛒",
-  Audit: "⏱️",
 };
 
-const AdminInventory = () => {
+const STATUS_OVERRIDE_STORAGE_KEY = "admin_inventory_status_overrides";
+
+const normalizeStatus = (value) => {
+  if (value === null || value === undefined || value === "") return null;
+
+  const normalized = String(value).trim().toLowerCase();
+  if (["active", "published", "live"].includes(normalized)) return "active";
+  if (
+    ["draft", "saved as draft", "saved_as_draft", "pending"].includes(
+      normalized,
+    )
+  )
+    return "draft";
+  if (["archived", "archive", "inactive"].includes(normalized))
+    return "archived";
+  return null;
+};
+
+const parseArrayField = (value) => {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      if (value.includes(",")) {
+        return value
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean);
+      }
+    }
+  }
+  return [];
+};
+
+const getProductStatus = (product, overrides = {}) => {
+  const productId = product?.id != null ? String(product.id) : null;
+  const directStatus =
+    normalizeStatus(product?.status) ||
+    normalizeStatus(product?.inventory_status) ||
+    normalizeStatus(product?.state);
+
+  if (directStatus) return directStatus;
+  if (productId && overrides[productId]) return overrides[productId];
+  if (product?.is_archived || product?.archived) return "archived";
+  if (product?.is_draft || product?.draft) return "draft";
+  return "active";
+};
+
+const AdminInventory = ({ statusView = "active" }) => {
   const [products, setProducts] = useState([]);
   const [stats, setStats] = useState({
     total_value: 0,
@@ -55,9 +95,30 @@ const AdminInventory = () => {
   });
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [statusUpdatingId, setStatusUpdatingId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+  const [pendingStatusAction, setPendingStatusAction] = useState(null);
+  const [statusOverrides, setStatusOverrides] = useState(() => {
+    try {
+      const stored = localStorage.getItem(STATUS_OVERRIDE_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
 
   const navigate = useNavigate();
+  const currentStatusView = ["active", "draft", "archived"].includes(statusView)
+    ? statusView
+    : "active";
+
+  useEffect(() => {
+    localStorage.setItem(
+      STATUS_OVERRIDE_STORAGE_KEY,
+      JSON.stringify(statusOverrides),
+    );
+  }, [statusOverrides]);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -71,8 +132,16 @@ const AdminInventory = () => {
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await AdminInventoryAPI.getProducts(currentPage, filters);
-      setProducts(data.products);
+      const data = await AdminInventoryAPI.getProducts(currentPage, {
+        ...filters,
+        status: currentStatusView,
+      });
+      const normalizedProducts = (data.products || []).map((product) => ({
+        ...product,
+        technologies: parseArrayField(product.technologies),
+      }));
+
+      setProducts(normalizedProducts);
       setTotalPages(data.pagination?.total_pages || 1);
       setTotalItems(data.pagination?.total_items || 0);
     } catch (error) {
@@ -80,7 +149,7 @@ const AdminInventory = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, filters]);
+  }, [currentPage, filters, currentStatusView]);
 
   useEffect(() => {
     fetchStats();
@@ -89,6 +158,10 @@ const AdminInventory = () => {
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [currentStatusView]);
 
   const handleSearch = (term) => {
     if (searchTimeout) {
@@ -142,8 +215,29 @@ const AdminInventory = () => {
     });
   };
 
+  const openDeleteModal = (productId) => {
+    setPendingDeleteId(productId);
+    setShowDeleteModal(true);
+  };
+
+  const openStatusActionModal = (type, product) => {
+    setPendingStatusAction({ type, product });
+  };
+
+  const closeDeleteModal = () => {
+    if (deletingId) return;
+    setShowDeleteModal(false);
+    setPendingDeleteId(null);
+  };
+
+  const closeStatusActionModal = () => {
+    if (statusUpdatingId) return;
+    setPendingStatusAction(null);
+  };
+
   const handleDelete = async (productId) => {
-    // if (!window.confirm("Are you sure you want to delete this asset?")) return;
+    if (!productId) return;
+
     setShowDeleteModal(false);
     setDeletingId(productId);
     try {
@@ -151,11 +245,90 @@ const AdminInventory = () => {
       await fetchProducts();
       await fetchStats();
       showSuccessToast("Asset deleted successfully.");
+      setPendingDeleteId(null);
     } catch (error) {
       console.error("Error deleting product:", error);
       showErrorToast("Failed to delete product.");
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const setLocalProductStatus = (productId, nextStatus) => {
+    const key = String(productId);
+    setStatusOverrides((prev) => ({ ...prev, [key]: nextStatus }));
+    setProducts((prev) =>
+      prev.map((product) =>
+        product.id === productId
+          ? {
+              ...product,
+              status: nextStatus,
+              inventory_status: nextStatus,
+            }
+          : product,
+      ),
+    );
+  };
+
+  const clearLocalStatusOverride = (productId) => {
+    const key = String(productId);
+    setStatusOverrides((prev) => {
+      if (!(key in prev)) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  };
+
+  const handleArchive = async (product) => {
+    setStatusUpdatingId(product.id);
+    try {
+      await AdminInventoryAPI.updateProductStatus(product.id, "archived");
+      clearLocalStatusOverride(product.id);
+      await fetchProducts();
+      await fetchStats();
+      showSuccessToast("Asset moved to archived.");
+    } catch (error) {
+      console.error("Error archiving product:", error);
+      showErrorToast("Failed to archive asset.");
+    } finally {
+      setStatusUpdatingId(null);
+    }
+  };
+
+  const handleActivate = async (product) => {
+    setStatusUpdatingId(product.id);
+    try {
+      await AdminInventoryAPI.updateProductStatus(product.id, "active");
+      clearLocalStatusOverride(product.id);
+      await fetchProducts();
+      await fetchStats();
+      showSuccessToast(
+        currentStatusView === "draft"
+          ? "Draft published to active assets."
+          : "Asset restored to active assets.",
+      );
+    } catch (error) {
+      console.error("Error updating product status:", error);
+      showErrorToast("Failed to update asset status.");
+    } finally {
+      setStatusUpdatingId(null);
+    }
+  };
+
+  const handleConfirmStatusAction = async () => {
+    if (!pendingStatusAction?.product) return;
+
+    const { type, product } = pendingStatusAction;
+    setPendingStatusAction(null);
+
+    if (type === "archive") {
+      await handleArchive(product);
+      return;
+    }
+
+    if (type === "restore" || type === "publish") {
+      await handleActivate(product);
     }
   };
 
@@ -284,6 +457,21 @@ const AdminInventory = () => {
     return categoryMap[category] || category;
   };
 
+  const visibleProducts = useMemo(
+    () =>
+      products.filter(
+        (product) =>
+          getProductStatus(product, statusOverrides) === currentStatusView,
+      ),
+    [products, statusOverrides, currentStatusView],
+  );
+
+  const getStatusTabClass = (tabStatus) =>
+    `status-tab ${currentStatusView === tabStatus ? "active" : ""}`;
+
+  const getStatusLabel = (status) =>
+    status.charAt(0).toUpperCase() + status.slice(1);
+
   return (
     <>
       <input type="checkbox" id="sidebar-toggle" />
@@ -320,15 +508,21 @@ const AdminInventory = () => {
             </div>
 
             <div className="status-tabs">
-              <button className="status-tab active">
+              <Link to="/inventory" className={getStatusTabClass("active")}>
                 Active ({stats.active_count || 0})
-              </button>
-              <button className="status-tab">
+              </Link>
+              <Link
+                to="/inventory/drafts"
+                className={getStatusTabClass("draft")}
+              >
                 Drafts ({stats.draft_count || 0})
-              </button>
-              <button className="status-tab">
+              </Link>
+              <Link
+                to="/inventory/archived"
+                className={getStatusTabClass("archived")}
+              >
                 Archived ({stats.archived_count || 0})
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -414,92 +608,157 @@ const AdminInventory = () => {
                       Loading products...
                     </td>
                   </tr>
-                ) : products.length === 0 ? (
+                ) : visibleProducts.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="no-data-cell">
-                      No products found
+                      No {currentStatusView} assets found
                     </td>
                   </tr>
                 ) : (
-                  products.map((product) => (
-                    <tr key={product.id}>
-                      <td>
-                        <div className="asset-cell">
-                          {product.featured_image ? (
-                            <div className="asset-icon">
-                              <img
-                                src={product.featured_image}
-                                alt={product.name}
-                                className="asset-icon-img"
-                                onError={(e) => {
-                                  e.target.onerror = null;
-                                  e.target.src = newSaleIcon;
-                                }}
-                              />
+                  visibleProducts.map((product) => {
+                    const productStatus = getProductStatus(
+                      product,
+                      statusOverrides,
+                    );
+                    const isDeleting = deletingId === product.id;
+                    const isStatusUpdating = statusUpdatingId === product.id;
+                    const isBusy = isDeleting || isStatusUpdating;
+                    const canArchive = productStatus !== "archived";
+
+                    return (
+                      <tr key={product.id}>
+                        <td>
+                          <div className="asset-cell">
+                            {product.featured_image ? (
+                              <div className="asset-icon">
+                                <img
+                                  src={product.featured_image}
+                                  alt={product.name}
+                                  className="asset-icon-img"
+                                  onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = newSaleIcon;
+                                  }}
+                                />
+                              </div>
+                            ) : (
+                              <div className="asset-icon blue">
+                                <img
+                                  src={newSaleIcon}
+                                  alt={product.name}
+                                  className="asset-icon-img"
+                                />
+                              </div>
+                            )}
+                            <div>
+                              <strong>{product.name}</strong>
+                              <small>Updated {product.updated_ago}</small>
                             </div>
-                          ) : (
-                            <div className="asset-icon blue">
-                              <img
-                                src={newSaleIcon}
-                                alt={product.name}
-                                className="asset-icon-img"
-                              />
-                            </div>
-                          )}
-                          <div>
-                            <strong>{product.name}</strong>
-                            <small>Updated {product.updated_ago}</small>
                           </div>
-                        </div>
-                      </td>
-                      <td>{getCategoryBadge(product.asset_type)}</td>
-                      <td className="tech-stack">
-                        <div className="tech-tags">
-                          {product.technologies
-                            ?.slice(0, 3)
-                            .map((tech, index) => (
-                              <span
-                                key={index}
-                                className={`tech-tag tech-tag--${getToneColor(tech)}`}
+                        </td>
+                        <td>{getCategoryBadge(product.asset_type)}</td>
+                        <td className="tech-stack">
+                          <div className="tech-tags">
+                            {product.technologies
+                              ?.slice(0, 3)
+                              .map((tech, index) => (
+                                <span
+                                  key={index}
+                                  className={`tech-tag tech-tag--${getToneColor(tech)}`}
+                                >
+                                  {tech}
+                                </span>
+                              ))}
+                            {product.technologies?.length > 3 && (
+                              <span className="tech-more">...</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="price">
+                          {formatCurrency(product.price)}
+                        </td>
+                        <td>
+                          <div className={`status-indicator ${productStatus}`}>
+                            <span className="dot"></span>{" "}
+                            {getStatusLabel(productStatus).toUpperCase()}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="action-buttons">
+                            {(productStatus === "draft" ||
+                              productStatus === "archived") && (
+                              <button
+                                onClick={() =>
+                                  productStatus === "archived"
+                                    ? openStatusActionModal("restore", product)
+                                    : openStatusActionModal("publish", product)
+                                }
+                                title={
+                                  productStatus === "draft"
+                                    ? "Publish"
+                                    : "Restore"
+                                }
+                                disabled={isBusy}
+                                className="action-btn action-btn--activate"
                               >
-                                {tech}
-                              </span>
-                            ))}
-                          {product.technologies?.length > 3 && (
-                            <span className="tech-more">...</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="price">{formatCurrency(product.price)}</td>
-                      <td>
-                        <div className="status-indicator active">
-                          <span className="dot"></span> ACTIVE
-                        </div>
-                      </td>
-                      <td>
-                        <div className="action-buttons">
-                          <button
-                            onClick={() => handleEdit(product)}
-                            title="Edit"
-                            disabled={deletingId === product.id}
-                          >
-                            {Icons.Settings}
-                          </button>
-                          <button
-                            onClick={() => {
-                              setDeletingId(product.id);
-                              setShowDeleteModal(true);
-                            }}
-                            // onClick={() => handleDelete(product.id)}
-                            title="Delete"
-                            disabled={deletingId === product.id}
-                          >
-                            {deletingId === product.id ? "..." : Icons.Trash}
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                                <img
+                                  src={actionActivateIcon}
+                                  alt=""
+                                  aria-hidden="true"
+                                  className="action-icon-img"
+                                />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleEdit(product)}
+                              title="Edit"
+                              disabled={isBusy}
+                              className="action-btn action-btn--edit"
+                            >
+                              <img
+                                src={actionSettingsIcon}
+                                alt=""
+                                aria-hidden="true"
+                                className="action-icon-img"
+                              />
+                            </button>
+                            {canArchive && (
+                              <button
+                                onClick={() => openStatusActionModal("archive", product)}
+                                title="Archive"
+                                disabled={isBusy}
+                                className="action-btn action-btn--archive"
+                              >
+                                <img
+                                  src={actionArchiveIcon}
+                                  alt=""
+                                  aria-hidden="true"
+                                  className="action-icon-img"
+                                />
+                              </button>
+                            )}
+                            <button
+                              onClick={() => openDeleteModal(product.id)}
+                              title="Delete"
+                              disabled={isBusy}
+                              className="action-btn action-btn--delete"
+                            >
+                              {isDeleting ? (
+                                "..."
+                              ) : (
+                                <img
+                                  src={actionDeleteIcon}
+                                  alt=""
+                                  aria-hidden="true"
+                                  className="action-icon-img"
+                                />
+                              )}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -508,8 +767,10 @@ const AdminInventory = () => {
               <span>
                 Showing{" "}
                 <strong>
-                  {(currentPage - 1) * 5 + 1}-
-                  {Math.min(currentPage * 5, totalItems)}
+                  {visibleProducts.length ? (currentPage - 1) * 5 + 1 : 0}-
+                  {visibleProducts.length
+                    ? (currentPage - 1) * 5 + visibleProducts.length
+                    : 0}
                 </strong>{" "}
                 of {totalItems} assets
               </span>
@@ -565,8 +826,40 @@ const AdminInventory = () => {
 
       <DeleteConfirmationModal
         isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onConfirm={() => handleDelete(deletingId)}
+        onClose={closeDeleteModal}
+        onConfirm={() => handleDelete(pendingDeleteId)}
+        isProcessing={!!deletingId}
+      />
+
+      <DeleteConfirmationModal
+        isOpen={!!pendingStatusAction}
+        onClose={closeStatusActionModal}
+        onConfirm={handleConfirmStatusAction}
+        title={
+          pendingStatusAction?.type === "archive"
+            ? "Archive Product"
+            : pendingStatusAction?.type === "restore"
+              ? "Restore Product"
+              : "Publish Draft"
+        }
+        message={
+          pendingStatusAction?.type === "archive"
+            ? `Are you sure you want to archive "${pendingStatusAction?.product?.name || "this product"}"? It will move to Archived assets.`
+            : pendingStatusAction?.type === "restore"
+              ? `Are you sure you want to restore "${pendingStatusAction?.product?.name || "this product"}"? It will move back to Active assets.`
+              : `Are you sure you want to publish "${pendingStatusAction?.product?.name || "this product"}"? It will move to Active assets.`
+        }
+        confirmLabel={
+          pendingStatusAction?.type === "archive"
+            ? "Archive"
+            : pendingStatusAction?.type === "restore"
+              ? "Restore"
+              : "Publish"
+        }
+        confirmVariant={
+          pendingStatusAction?.type === "archive" ? "warning" : "success"
+        }
+        isProcessing={!!statusUpdatingId}
       />
     </>
   );

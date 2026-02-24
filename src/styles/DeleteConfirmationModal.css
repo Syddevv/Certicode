@@ -53,19 +53,53 @@
   background: #e5e7eb;
 }
 
+.cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .delete-btn {
   flex: 1;
-  background: #fff0f0;
-  border: 1px solid #fecaca;
   padding: 12px;
   border-radius: 10px;
   font-size: 14px;
   font-weight: 600;
-  color: #ef4444;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, border-color 0.15s;
+  border: 1px solid transparent;
 }
 
-.delete-btn:hover {
+.delete-btn--danger {
+  background: #fff0f0;
+  border-color: #fecaca;
+  color: #ef4444;
+}
+
+.delete-btn--danger:hover {
   background: #fee2e2;
+}
+
+.delete-btn--warning {
+  background: #fff7ed;
+  border-color: #fed7aa;
+  color: #c2410c;
+}
+
+.delete-btn--warning:hover {
+  background: #ffedd5;
+}
+
+.delete-btn--success {
+  background: #ecfdf5;
+  border-color: #bbf7d0;
+  color: #15803d;
+}
+
+.delete-btn--success:hover {
+  background: #dcfce7;
+}
+
+.delete-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
