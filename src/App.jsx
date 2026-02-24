@@ -188,6 +188,7 @@ function AppContent() {
         element={<SuccessStoryIronclad />}
       />
       <Route path="/blogs-news" element={<BlogsNews />} />
+      <Route path="/custom-projects" element={<CustomService />} />
 
       <Route
         path="/customer-support/account-recovery/reset-password"
