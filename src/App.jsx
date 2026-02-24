@@ -64,6 +64,7 @@ import AdminAddNewAsset from "./pages/admin/AdminAddNewAsset";
 import AdminOrderDetails from "./pages/admin/AdminOrderDetails";
 import ResetPasswordRoute from "./pages/public/ResetPasswordRoute";
 import VerifyMobileNumberRoute from "./pages/public/VerifyMobileNumberRoute";
+import ViewVoucher from "./pages/admin/ViewVoucher";
 
 function App() {
   return (
@@ -235,7 +236,6 @@ function AppContent() {
       />
       <Route path="/blogs-news" element={<BlogsNews />} />
       <Route path="/custom-projects" element={<CustomService />} />
-
       <Route
         path="/customer-support/account-recovery/reset-password"
         element={<ResetPasswordRoute />}
@@ -253,6 +253,7 @@ function AppContent() {
         path="/customer-support/order-status/track-your-package"
         element={<TrackYourPackageRoute />}
       />
+      <Route path="/inventory/view-voucher-details" element={<ViewVoucher />} />
 
       {/* PROTECTED USER ROUTES - Require authentication */}
       <Route

@@ -1,0 +1,275 @@
+/* ===========================
+   View Voucher Page Styles
+   =========================== */
+
+/* Page Wrapper */
+.view-voucher-wrapper {
+  min-height: 100vh;
+  padding: 10;
+}
+
+/* Breadcrumb */
+.view-voucher-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 15px 10px;
+  font-size: 13px;
+}
+
+.view-voucher-breadcrumb a {
+  color: #6b7280;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.view-voucher-breadcrumb a:hover {
+  color: #374151;
+}
+
+.view-voucher-breadcrumb .breadcrumb-separator {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.view-voucher-breadcrumb .breadcrumb-active {
+  color: #f97316;
+  font-weight: 500;
+}
+
+/* Page Header */
+.view-voucher-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.view-voucher-header h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 5px 0;
+}
+
+.view-voucher-header .header-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+  max-width: 520px;
+}
+
+.btn-edit-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #f97316;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.btn-edit-content:hover {
+  background: #ea6c0a;
+}
+
+.btn-edit-content svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Card */
+.voucher-card {
+  margin: 28px 10px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px 28px 28px;
+}
+
+/* Card Title */
+.voucher-card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding-bottom: 0;
+}
+
+.voucher-card-title .title-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+.voucher-card-title span.title-text {
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+}
+
+/* Divider */
+.voucher-divider {
+  border: none;
+  border-top: 1px solid #f3f4f6;
+  margin: 0 0 24px 0;
+}
+
+/* Fields Grid */
+.voucher-fields-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px 20px;
+  margin-bottom: 24px;
+}
+
+.voucher-fields-row.three-col {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Individual Field */
+.voucher-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.voucher-field label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.voucher-field .field-value {
+  font-size: 14px;
+  color: #111827;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.voucher-field .field-value.mono {
+  font-family: "Courier New", Courier, monospace;
+  letter-spacing: 0.5px;
+  font-size: 13.5px;
+}
+
+.voucher-field .field-value.center-val {
+  text-align: center;
+}
+
+/* Status Badge */
+.status-active {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #16a34a;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  flex-shrink: 0;
+}
+
+/* Products Section */
+.products-section {
+  margin-top: 4px;
+}
+
+.products-section .products-label {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 12px;
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.product-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: #fff;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+
+.product-item:hover {
+  border-color: #f97316;
+  background: #fff7ed;
+}
+
+.product-thumbnail {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  background: #4b5563;
+  flex-shrink: 0;
+}
+
+.product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.product-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  line-height: 1.3;
+}
+
+.product-meta {
+  font-size: 12px;
+  color: #9ca3af;
+  line-height: 1.3;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .voucher-fields-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .voucher-fields-row {
+    grid-template-columns: 1fr;
+  }
+
+  .products-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .view-voucher-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
