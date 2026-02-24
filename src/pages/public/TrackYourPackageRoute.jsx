@@ -31,7 +31,7 @@ const topicPaths = {
   "Other Topics": "/support/other",
 };
 
-const TrackYourPackageArticle = () => {
+export const TrackYourPackageArticle = () => {
   const [helpfulVote, setHelpfulVote] = useState("");
 
   return (
@@ -60,17 +60,22 @@ const TrackYourPackageArticle = () => {
         </ol>
 
         <h2>Order Delivery Status</h2>
-        <p>Digital products are delivered instantly after payment confirmation.</p>
+        <p>
+          Digital products are delivered instantly after payment confirmation.
+        </p>
         <p>Your order status may show:</p>
         <ul>
           <li>
-            <strong>Processing</strong> - Payment received, preparing your download files
+            <strong>Processing</strong> - Payment received, preparing your
+            download files
           </li>
           <li>
-            <strong>Delivered</strong> - Files and license key available in your dashboard
+            <strong>Delivered</strong> - Files and license key available in your
+            dashboard
           </li>
           <li>
-            <strong>License Issued</strong> - Activation key successfully generated
+            <strong>License Issued</strong> - Activation key successfully
+            generated
           </li>
           <li>
             <strong>Action Required</strong> - Please verify email or payment
@@ -78,7 +83,8 @@ const TrackYourPackageArticle = () => {
         </ul>
 
         <p>
-          If your order remains in Processing for more than 15 minutes, contact support.
+          If your order remains in Processing for more than 15 minutes, contact
+          support.
         </p>
 
         <h2>Accessing Your Digital Files</h2>
@@ -91,10 +97,15 @@ const TrackYourPackageArticle = () => {
             Click <strong>Download</strong>
           </li>
         </ol>
-        <p>Your license key and documentation will be available in the same section.</p>
+        <p>
+          Your license key and documentation will be available in the same
+          section.
+        </p>
 
         <h2>Verifying Your Email Address</h2>
-        <p>Email verification ensures secure delivery of your digital assets.</p>
+        <p>
+          Email verification ensures secure delivery of your digital assets.
+        </p>
         <p>If you did not receive verification:</p>
         <ul>
           <li>Check your Spam/Junk folder</li>
@@ -146,7 +157,7 @@ const TrackYourPackageArticle = () => {
   );
 };
 
-const TrackYourPackageRoute = () => {
+export const TrackYourPackageRoute = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Software Order Status");
 
@@ -191,7 +202,10 @@ const TrackYourPackageRoute = () => {
                     key={topic}
                     className={topic === activeTab ? "is-active" : ""}
                   >
-                    <button type="button" onClick={() => handleTopicClick(topic)}>
+                    <button
+                      type="button"
+                      onClick={() => handleTopicClick(topic)}
+                    >
                       {topic}
                     </button>
                   </li>
@@ -209,8 +223,8 @@ const TrackYourPackageRoute = () => {
           <div className="support-cta__card">
             <h2>Need More Help?</h2>
             <p>
-              If you&apos;re experiencing issues with downloads, licenses, or system
-              deployment, contact:
+              If you&apos;re experiencing issues with downloads, licenses, or
+              system deployment, contact:
             </p>
             <Link className="support-cta__btn" to="/contact">
               Contact Certicode
@@ -223,5 +237,3 @@ const TrackYourPackageRoute = () => {
     </div>
   );
 };
-
-export default TrackYourPackageRoute;
