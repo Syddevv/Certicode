@@ -453,12 +453,24 @@
   gap: 10px;
 }
 
-.footer-draft-label {
+.footer-draft-button {
+  border: none;
+  background: transparent;
   color: #475569;
   font-size: 14px;
   font-weight: 600;
   padding: 0 6px;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.footer-draft-button:hover:not(:disabled) {
+  color: #1e293b;
+}
+
+.footer-draft-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .footer-cta {

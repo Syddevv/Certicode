@@ -161,6 +161,43 @@ export const AdminInventoryAPI = {
     }
   },
 
+  updateProductStatus: async (productId, status) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+
+      if (!token) {
+        throw new Error('No authentication token found.');
+      }
+
+      const response = await fetch(`${API_URL}/products/${productId}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status })
+      });
+
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        let errorData;
+        try {
+          errorData = JSON.parse(responseText);
+        } catch {
+          errorData = { message: 'Server error' };
+        }
+        throw new Error(errorData.message || `Error ${response.status}: ${response.statusText}`);
+      }
+
+      return JSON.parse(responseText);
+    } catch (error) {
+      console.error('AdminInventoryAPI - Error updating product status:', error);
+      throw error;
+    }
+  },
+
   updateProduct: async (productId, productData) => {
   try {
     const token = localStorage.getItem('auth_token');
@@ -176,6 +213,9 @@ export const AdminInventoryAPI = {
     formData.append('description', productData.description || '');
     formData.append('version', productData.version || '1.0');
     formData.append('price', productData.price || 0);
+    if (productData.status) {
+      formData.append('status', productData.status);
+    }
     
     if (productData.technologies && Array.isArray(productData.technologies)) {
       formData.append('technologies', JSON.stringify(productData.technologies));

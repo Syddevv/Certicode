@@ -63,14 +63,13 @@ const parseArrayField = (value) => {
 
 const getProductStatus = (product, overrides = {}) => {
   const productId = product?.id != null ? String(product.id) : null;
-  if (productId && overrides[productId]) return overrides[productId];
-
   const directStatus =
     normalizeStatus(product?.status) ||
     normalizeStatus(product?.inventory_status) ||
     normalizeStatus(product?.state);
 
   if (directStatus) return directStatus;
+  if (productId && overrides[productId]) return overrides[productId];
   if (product?.is_archived || product?.archived) return "archived";
   if (product?.is_draft || product?.draft) return "draft";
   return "active";
@@ -96,6 +95,7 @@ const AdminInventory = ({ statusView = "active" }) => {
   });
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [statusUpdatingId, setStatusUpdatingId] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [statusOverrides, setStatusOverrides] = useState(() => {
@@ -260,18 +260,50 @@ const AdminInventory = ({ statusView = "active" }) => {
     );
   };
 
-  const handleArchive = (product) => {
-    setLocalProductStatus(product.id, "archived");
-    showSuccessToast("Asset moved to archived.");
+  const clearLocalStatusOverride = (productId) => {
+    const key = String(productId);
+    setStatusOverrides((prev) => {
+      if (!(key in prev)) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   };
 
-  const handleActivate = (product) => {
-    setLocalProductStatus(product.id, "active");
-    showSuccessToast(
-      currentStatusView === "draft"
-        ? "Draft published to active assets."
-        : "Asset restored to active assets.",
-    );
+  const handleArchive = async (product) => {
+    setStatusUpdatingId(product.id);
+    try {
+      await AdminInventoryAPI.updateProductStatus(product.id, "archived");
+      clearLocalStatusOverride(product.id);
+      await fetchProducts();
+      await fetchStats();
+      showSuccessToast("Asset moved to archived.");
+    } catch (error) {
+      console.error("Error archiving product:", error);
+      showErrorToast("Failed to archive asset.");
+    } finally {
+      setStatusUpdatingId(null);
+    }
+  };
+
+  const handleActivate = async (product) => {
+    setStatusUpdatingId(product.id);
+    try {
+      await AdminInventoryAPI.updateProductStatus(product.id, "active");
+      clearLocalStatusOverride(product.id);
+      await fetchProducts();
+      await fetchStats();
+      showSuccessToast(
+        currentStatusView === "draft"
+          ? "Draft published to active assets."
+          : "Asset restored to active assets.",
+      );
+    } catch (error) {
+      console.error("Error updating product status:", error);
+      showErrorToast("Failed to update asset status.");
+    } finally {
+      setStatusUpdatingId(null);
+    }
   };
 
   const formatCurrency = (amount) => {
@@ -563,6 +595,8 @@ const AdminInventory = ({ statusView = "active" }) => {
                       statusOverrides,
                     );
                     const isDeleting = deletingId === product.id;
+                    const isStatusUpdating = statusUpdatingId === product.id;
+                    const isBusy = isDeleting || isStatusUpdating;
                     const canArchive = productStatus !== "archived";
 
                     return (
@@ -634,7 +668,7 @@ const AdminInventory = ({ statusView = "active" }) => {
                                     ? "Publish"
                                     : "Restore"
                                 }
-                                disabled={isDeleting}
+                                disabled={isBusy}
                                 className="action-btn action-btn--activate"
                               >
                                 <img
@@ -648,7 +682,7 @@ const AdminInventory = ({ statusView = "active" }) => {
                             <button
                               onClick={() => handleEdit(product)}
                               title="Edit"
-                              disabled={isDeleting}
+                              disabled={isBusy}
                               className="action-btn action-btn--edit"
                             >
                               <img
@@ -662,7 +696,7 @@ const AdminInventory = ({ statusView = "active" }) => {
                               <button
                                 onClick={() => handleArchive(product)}
                                 title="Archive"
-                                disabled={isDeleting}
+                                disabled={isBusy}
                                 className="action-btn action-btn--archive"
                               >
                                 <img
@@ -676,7 +710,7 @@ const AdminInventory = ({ statusView = "active" }) => {
                             <button
                               onClick={() => openDeleteModal(product.id)}
                               title="Delete"
-                              disabled={isDeleting}
+                              disabled={isBusy}
                               className="action-btn action-btn--delete"
                             >
                               {isDeleting ? (

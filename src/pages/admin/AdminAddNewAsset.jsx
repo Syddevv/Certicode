@@ -56,6 +56,7 @@ const AdminAddNewAssets = () => {
   const [techSearch, setTechSearch] = useState("");
   const [filteredTechs, setFilteredTechs] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [submitIntent, setSubmitIntent] = useState(null);
   const [saveStatus, setSaveStatus] = useState("");
   const [showTechDropdown, setShowTechDropdown] = useState(false);
   const [thumbnailPreview, setThumbnailPreview] = useState("");
@@ -349,14 +350,18 @@ const AdminAddNewAssets = () => {
     document.getElementById("change-thumbnail").click();
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const submitAsset = async (intent, e) => {
+    if (e) e.preventDefault();
+
+    const isDraftSave = intent === "draft";
     setLoading(true);
+    setSubmitIntent(intent);
     setSaveStatus("");
 
     if (!formData.name || !formData.asset_type || !formData.price) {
       setSaveStatus("Error: Please fill in all required fields");
       setLoading(false);
+      setSubmitIntent(null);
       return;
     }
 
@@ -378,6 +383,10 @@ const AdminAddNewAssets = () => {
       };
 
       if (isEditMode && productData?.id) {
+        if (isDraftSave) {
+          productDataForAPI.status = "draft";
+        }
+
         productDataForAPI.existing_images = existingImageUrls;
         productDataForAPI.existing_project_files = existingFileUrls;
 
@@ -401,9 +410,12 @@ const AdminAddNewAssets = () => {
         );
         setSaveStatus(result.message || "Product updated successfully!");
       } else {
+        productDataForAPI.status = isDraftSave ? "draft" : "active";
+
         if (!thumbnailFile) {
           setSaveStatus("Error: Featured image is required for new products");
           setLoading(false);
+          setSubmitIntent(null);
           return;
         }
 
@@ -421,14 +433,21 @@ const AdminAddNewAssets = () => {
         setSaveStatus(result.message || "Product created successfully!");
       }
 
-      setTimeout(() => navigate("/inventory"), 1500);
+      setTimeout(
+        () => navigate(isDraftSave ? "/inventory/drafts" : "/inventory"),
+        1500,
+      );
     } catch (error) {
       console.error("Error saving product:", error);
       setSaveStatus(`Error: ${error.message || "Failed to save product"}`);
     } finally {
       setLoading(false);
+      setSubmitIntent(null);
     }
   };
+
+  const handleSubmit = (e) => submitAsset("publish", e);
+  const handleSaveDraft = (e) => submitAsset("draft", e);
 
   return (
     <div className="layout">
@@ -844,14 +863,25 @@ const AdminAddNewAssets = () => {
               )}
             </div>
             <div className="footer-actions">
-              <span className="footer-draft-label">Saved as Draft</span>
+              <button
+                type="button"
+                className="footer-draft-button"
+                onClick={handleSaveDraft}
+                disabled={loading}
+              >
+                {loading && submitIntent === "draft"
+                  ? "Saving Draft..."
+                  : "Save as Draft"}
+              </button>
               <button
                 type="submit"
                 className="btn primary footer-cta"
                 disabled={loading}
               >
-                {loading
-                  ? "Saving..."
+                {loading && submitIntent === "publish"
+                  ? isEditMode
+                    ? "Updating..."
+                    : "Publishing..."
                   : isEditMode
                     ? "Update Asset"
                     : "Publish to Repository"}
