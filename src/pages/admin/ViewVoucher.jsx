@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import AdminTopbar from "../../components/AdminTopbar";
 import "../../styles/ViewVoucher.css";
@@ -32,7 +32,7 @@ const products = [
   },
 ];
 
-const voucher = {
+const fallbackVoucher = {
   voucherName: "Valid on all UI Kits",
   voucherCode: "CERT5OUIKIT",
   discountType: "Percentage (%)",
@@ -60,14 +60,35 @@ function Field({ label, value, mono = false, center = false }) {
 }
 
 export default function ViewVoucher() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const handleSearch = (term) => {};
+  const incomingVoucher = location.state?.voucher;
+
+  const discountText = String(incomingVoucher?.discount || "");
+  const voucher = {
+    voucherName: incomingVoucher?.name || fallbackVoucher.voucherName,
+    voucherCode: incomingVoucher?.code || fallbackVoucher.voucherCode,
+    discountType: discountText.includes("%")
+      ? "Percentage (%)"
+      : "Fixed Amount",
+    discountValue:
+      discountText.replace(/[^\d.]/g, "") || fallbackVoucher.discountValue,
+    minimumPurchaseAmount: fallbackVoucher.minimumPurchaseAmount,
+    maximumDiscount: fallbackVoucher.maximumDiscount,
+    availableFrom: incomingVoucher?.activeFrom || fallbackVoucher.availableFrom,
+    availableTo: incomingVoucher?.activeTo || fallbackVoucher.availableTo,
+    usageLimit: String(incomingVoucher?.usageLimit ?? fallbackVoucher.usageLimit),
+    status: incomingVoucher?.status || fallbackVoucher.status,
+    applicableTo: fallbackVoucher.applicableTo,
+  };
 
   return (
     <>
       <input type="checkbox" id="sidebar-toggle" />
 
       <div className="layout">
-        <Sidebar activePage="inventory" />
+        <Sidebar activePage="vouchers" />
 
         <main className="main view-voucher-wrapper">
           <AdminTopbar showHamburger onSearch={handleSearch}>
@@ -87,7 +108,7 @@ export default function ViewVoucher() {
 
           {/* Breadcrumb */}
           <nav className="view-voucher-breadcrumb">
-            <Link to="/inventory">Inventory</Link>
+            <Link to="/vouchers">Vouchers</Link>
             <span className="breadcrumb-separator">›</span>
             <span className="breadcrumb-active">View Voucher Details</span>
           </nav>
@@ -101,7 +122,18 @@ export default function ViewVoucher() {
                 selected voucher for viewing purposes only.
               </p>
             </div>
-            <button className="btn-edit-content">
+            <button
+              type="button"
+              className="btn-edit-content"
+              onClick={() =>
+                navigate("/vouchers/edit", {
+                  state: {
+                    voucher: incomingVoucher,
+                    existingCodes: [],
+                  },
+                })
+              }
+            >
               <svg
                 viewBox="0 0 16 16"
                 fill="none"

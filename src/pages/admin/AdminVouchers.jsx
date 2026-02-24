@@ -15,7 +15,6 @@ import ActiveFilter from "../../assets/ActiveFilter.png";
 import Expiring from "../../assets/Expiring.png";
 import Used from "../../assets/Used.png";
 import FilterVouch from "../../assets/FilterVouch.png";
-import { showSuccessToast } from "../../utils/toast";
 
 
 const voucherStats = [
@@ -112,7 +111,6 @@ const AdminVouchers = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedFilter, setSelectedFilter] = useState("All Coupon");
-  const [removingCode, setRemovingCode] = useState(null);
 
   const mapStatusToTone = (status) => {
     if (status === "ACTIVE") return "active";
@@ -194,21 +192,6 @@ const AdminVouchers = () => {
         existingCodes: vouchers.map((item) => item.code),
       },
     });
-  };
-
-  const openRemoveModal = (voucherCode) => {
-    setRemovingCode(voucherCode);
-  };
-
-  const closeRemoveModal = () => {
-    setRemovingCode(null);
-  };
-
-  const confirmRemove = () => {
-    if (!removingCode) return;
-    setVouchers((prev) => prev.filter((item) => item.code !== removingCode));
-    setRemovingCode(null);
-    showSuccessToast("Voucher removed.");
   };
 
   return (
@@ -340,8 +323,12 @@ const AdminVouchers = () => {
                           <div className="voucher-actions">
                             <button
                               type="button"
-                              aria-label={`Remove ${voucher.name}`}
-                              onClick={() => openRemoveModal(voucher.code)}
+                              aria-label={`View ${voucher.name}`}
+                              onClick={() =>
+                                navigate("/inventory/view-voucher-details", {
+                                  state: { voucher },
+                                })
+                              }
                             >
                               <img src={VouchRemove} alt="" aria-hidden="true" className="voucher-action-icon" />
                             </button>
@@ -386,28 +373,6 @@ const AdminVouchers = () => {
         </main>
       </div>
 
-      {removingCode && (
-        <div className="voucher-remove-overlay" onClick={closeRemoveModal}>
-          <div
-            className="voucher-remove-modal"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <h3>Remove Voucher</h3>
-            <p>
-              Are you sure you want to remove this voucher?
-              <br />
-            </p>
-            <div className="voucher-remove-actions">
-              <button type="button" className="cancel" onClick={closeRemoveModal}>
-                Cancel
-              </button>
-              <button type="button" className="remove" onClick={confirmRemove}>
-                Remove
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };
