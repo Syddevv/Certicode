@@ -581,8 +581,22 @@ td {
 
 .asset-info {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
+}
+
+.asset-info .mini-badge {
+    margin-left: 0;
+}
+
+.table-wrapper table th:first-child,
+.table-wrapper table td:first-child {
+    padding-right: 28px;
+}
+
+.table-wrapper table th:nth-child(2),
+.table-wrapper table td:nth-child(2) {
+    padding-left: 28px;
 }
 
 .customer-info {

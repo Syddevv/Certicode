@@ -66,6 +66,24 @@ function debounce(func, wait) {
   };
 }
 
+const isAnonymousReview = (review) => {
+  const anonymousValue =
+    review?.is_anonymous ?? review?.isAnonymous ?? review?.anonymous;
+
+  if (typeof anonymousValue === "boolean") return anonymousValue;
+  if (typeof anonymousValue === "number") return anonymousValue === 1;
+  if (typeof anonymousValue === "string") {
+    return ["1", "true", "yes"].includes(anonymousValue.toLowerCase());
+  }
+
+  return false;
+};
+
+const getReviewDisplayName = (review) => {
+  if (isAnonymousReview(review)) return "Anonymous";
+  return review?.user?.name || review?.user_name || "User";
+};
+
 const LandingPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -79,9 +97,26 @@ const LandingPage = () => {
   const [allReviews, setAllReviews] = useState([]);
   const [currentReviewPage, setCurrentReviewPage] = useState(0);
   const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    const updateLoginStatus = () => {
+      const token = localStorage.getItem("auth_token");
+      setIsLoggedIn(!!token);
+    };
+
+    updateLoginStatus();
+    window.addEventListener("storage", updateLoginStatus);
+    window.addEventListener("focus", updateLoginStatus);
+
+    return () => {
+      window.removeEventListener("storage", updateLoginStatus);
+      window.removeEventListener("focus", updateLoginStatus);
+    };
+  }, [location.pathname, location.hash]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -119,7 +154,7 @@ const LandingPage = () => {
       const formattedReviews = reviewsData.map((review, index) => ({
         id: review.id,
         quote: review.description,
-        name: review.user?.name || "User",
+        name: getReviewDisplayName(review),
         role: "Verified Buyer",
         rating: review.rating,
         avatar: Avatar,
@@ -756,26 +791,28 @@ const LandingPage = () => {
         </div>
       </section>
 
-      <section className="cta">
-        <div className="container cta__inner">
-          <div className="ctaCard">
-            <div className="ctaCard__content">
-              <h2 className="ctaCard__title">
-                Ready to Scale Your Digital Presence?
-              </h2>
-              <p className="ctaCard__subtitle">
-                Join thousands of businesses already using CertiCode to
-                accelerate their digital transformation.
-              </p>
-              <Link to="/register">
-                <button className="ctaCard__button" type="button">
-                  Get Started Now
-                </button>
-              </Link>
+      {!isLoggedIn && (
+        <section className="cta">
+          <div className="container cta__inner">
+            <div className="ctaCard">
+              <div className="ctaCard__content">
+                <h2 className="ctaCard__title">
+                  Ready to Scale Your Digital Presence?
+                </h2>
+                <p className="ctaCard__subtitle">
+                  Join thousands of businesses already using CertiCode to
+                  accelerate their digital transformation.
+                </p>
+                <Link to="/register">
+                  <button className="ctaCard__button" type="button">
+                    Get Started Now
+                  </button>
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <Footer />
     </div>

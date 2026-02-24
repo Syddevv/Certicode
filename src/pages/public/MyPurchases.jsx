@@ -48,8 +48,10 @@ const MyPurchases = () => {
 
   const handleItemClick = (purchase) => {
     if (!purchase) return;
-    const productName = purchase.product?.name || `asset-${purchase.id || "detail"}`;
-    const assetSlug = createAssetSlug(productName) || `asset-${purchase.id || "detail"}`;
+    const productName =
+      purchase.product?.name || `asset-${purchase.id || "detail"}`;
+    const assetSlug =
+      createAssetSlug(productName) || `asset-${purchase.id || "detail"}`;
     navigate(`/my-purchases/${assetSlug}`, {
       state: { purchase },
     });
@@ -100,7 +102,10 @@ const MyPurchases = () => {
       .replace(/[_-]/g, " ")
       .replace(/\s+/g, " ")
       .trim()
-      .replace(/\w\S*/g, (word) => word[0].toUpperCase() + word.slice(1).toLowerCase());
+      .replace(
+        /\w\S*/g,
+        (word) => word[0].toUpperCase() + word.slice(1).toLowerCase(),
+      );
   };
 
   const getAssetTypeLabel = (product) => {
@@ -115,10 +120,10 @@ const MyPurchases = () => {
 
   const getAssetTags = (product) => {
     if (!product) return [{ label: "Digital", tone: "gray" }];
-    
-    const name = product.name?.toLowerCase() || '';
-    const category = product.category?.toLowerCase() || '';
-    
+
+    const name = product.name?.toLowerCase() || "";
+    const category = product.category?.toLowerCase() || "";
+
     const techKeywords = [
       { keyword: "react", label: "React", tone: "blue" },
       { keyword: "node", label: "Node.js", tone: "green" },
@@ -135,20 +140,20 @@ const MyPurchases = () => {
       { keyword: "template", label: "Template", tone: "green" },
       { keyword: "app", label: "App", tone: "purple" },
       { keyword: "dashboard", label: "Dashboard", tone: "violet" },
-      { keyword: "ui kit", label: "UI Kit", tone: "rose" }
+      { keyword: "ui kit", label: "UI Kit", tone: "rose" },
     ];
-    
+
     const tags = [];
-    techKeywords.forEach(tech => {
+    techKeywords.forEach((tech) => {
       if (name.includes(tech.keyword) || category.includes(tech.keyword)) {
         tags.push({ label: tech.label, tone: tech.tone });
       }
     });
-    
+
     if (tags.length === 0) {
       tags.push({ label: "Digital", tone: "blue" });
     }
-    
+
     return tags.slice(0, 2);
   };
 
@@ -160,17 +165,17 @@ const MyPurchases = () => {
     const fromField = Array.isArray(rawTech)
       ? rawTech.map((entry) => toTitleCase(entry))
       : rawTech
-      ? rawTech
-          .split(",")
-          .map((entry) => toTitleCase(entry))
-          .filter(Boolean)
-      : [];
+        ? rawTech
+            .split(",")
+            .map((entry) => toTitleCase(entry))
+            .filter(Boolean)
+        : [];
 
     return Array.from(new Set([...fromTags, ...fromField]));
   };
 
   const getStatus = (purchase) => {
-    if (purchase.license_key && purchase.license_key !== '') {
+    if (purchase.license_key && purchase.license_key !== "") {
       return "Active";
     }
     return "Update Ready";
@@ -179,7 +184,7 @@ const MyPurchases = () => {
   const getUpdatedDate = (purchased_at) => {
     if (!purchased_at) return "Updated Recently";
     const date = new Date(purchased_at);
-    return `Updated ${date.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    return `Updated ${date.toLocaleDateString("en-US", { day: "numeric", month: "short", year: "numeric" })}`;
   };
 
   const assetTypeOptions = React.useMemo(() => {
@@ -193,7 +198,9 @@ const MyPurchases = () => {
   const techStackOptions = React.useMemo(() => {
     const stacks = new Set();
     purchases.forEach((purchase) => {
-      getTechStackLabels(purchase.product).forEach((label) => stacks.add(label));
+      getTechStackLabels(purchase.product).forEach((label) =>
+        stacks.add(label),
+      );
     });
     return Array.from(stacks).sort((a, b) => a.localeCompare(b));
   }, [purchases]);
@@ -217,7 +224,8 @@ const MyPurchases = () => {
         .filter(Boolean)
         .join(" ");
 
-      const matchesSearch = searchValue.length === 0 || searchBlob.includes(searchValue);
+      const matchesSearch =
+        searchValue.length === 0 || searchBlob.includes(searchValue);
       const matchesAssetType =
         assetTypeFilter === "All" || assetTypeLabel === assetTypeFilter;
       const matchesTechStack =
@@ -225,7 +233,9 @@ const MyPurchases = () => {
       const matchesLicense =
         licenseFilter === "All" || status === licenseFilter;
 
-      return matchesSearch && matchesAssetType && matchesTechStack && matchesLicense;
+      return (
+        matchesSearch && matchesAssetType && matchesTechStack && matchesLicense
+      );
     };
 
     const getPurchaseDateValue = (purchase) => {
@@ -246,14 +256,20 @@ const MyPurchases = () => {
         return getPurchaseDateValue(a) - getPurchaseDateValue(b);
       }
       if (sortBy === "name-asc") {
-        return normalizeText(a.product?.name).localeCompare(normalizeText(b.product?.name));
+        return normalizeText(a.product?.name).localeCompare(
+          normalizeText(b.product?.name),
+        );
       }
       if (sortBy === "name-desc") {
-        return normalizeText(b.product?.name).localeCompare(normalizeText(a.product?.name));
+        return normalizeText(b.product?.name).localeCompare(
+          normalizeText(a.product?.name),
+        );
       }
       if (sortBy === "status") {
         const statusOrder = { Active: 0, "Update Ready": 1 };
-        return (statusOrder[getStatus(a)] ?? 99) - (statusOrder[getStatus(b)] ?? 99);
+        return (
+          (statusOrder[getStatus(a)] ?? 99) - (statusOrder[getStatus(b)] ?? 99)
+        );
       }
       return 0;
     });
@@ -283,23 +299,26 @@ const MyPurchases = () => {
         <div className="purchases__inner">
           <div className="purchases-profile">
             <div className="purchases-profile__info">
-              <div className="purchases-profile__avatarWrap" style={{ 
-                width: '80px', 
-                height: '80px', 
-                borderRadius: '50%', 
-                overflow: 'hidden',
-                border: '2px solid #e8e8e8'
-              }}>
+              <div
+                className="purchases-profile__avatarWrap"
+                style={{
+                  width: "80px",
+                  height: "80px",
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  border: "2px solid #e8e8e8",
+                }}
+              >
                 <img
                   src={resolveAvatarUrl(user?.avatar_url) || Avatar}
                   alt={user?.name || "User"}
                   style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover'
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
                   }}
                   onError={(e) => {
-                    console.error('Image failed to load:', user?.avatar_url);
+                    console.error("Image failed to load:", user?.avatar_url);
                     e.target.src = Avatar;
                     e.target.onerror = null;
                   }}
@@ -372,14 +391,19 @@ const MyPurchases = () => {
                   <div className="purchases-filters">
                     <div className="purchases-filters__top">
                       <div className="purchases-search">
-                        <span className="purchases-search__icon" aria-hidden="true">
+                        <span
+                          className="purchases-search__icon"
+                          aria-hidden="true"
+                        >
                           <img src={SearchIcon} alt="" />
                         </span>
                         <input
                           type="text"
                           placeholder="Search your assets by name or tech stack..."
                           value={searchTerm}
-                          onChange={(event) => setSearchTerm(event.target.value)}
+                          onChange={(event) =>
+                            setSearchTerm(event.target.value)
+                          }
                         />
                       </div>
                       <button
@@ -387,7 +411,10 @@ const MyPurchases = () => {
                         type="button"
                         onClick={() => setFiltersOpen((prev) => !prev)}
                       >
-                        <span className="purchases-action__icon" aria-hidden="true">
+                        <span
+                          className="purchases-action__icon"
+                          aria-hidden="true"
+                        >
                           <svg viewBox="0 0 24 24">
                             <path
                               d="M4 6h16M7 12h10M10 18h4"
@@ -401,7 +428,10 @@ const MyPurchases = () => {
                         Filter
                       </button>
                       <label className="purchases-action purchases-action--select">
-                        <span className="purchases-action__icon" aria-hidden="true">
+                        <span
+                          className="purchases-action__icon"
+                          aria-hidden="true"
+                        >
                           <svg viewBox="0 0 24 24">
                             <path
                               d="M7 6h10M5 12h14M9 18h6"
@@ -437,7 +467,9 @@ const MyPurchases = () => {
                           <select
                             className="purchases-chipSelect"
                             value={assetTypeFilter}
-                            onChange={(event) => setAssetTypeFilter(event.target.value)}
+                            onChange={(event) =>
+                              setAssetTypeFilter(event.target.value)
+                            }
                           >
                             <option value="All">All</option>
                             {assetTypeOptions.map((option) => (
@@ -454,7 +486,9 @@ const MyPurchases = () => {
                           <select
                             className="purchases-chipSelect"
                             value={techStackFilter}
-                            onChange={(event) => setTechStackFilter(event.target.value)}
+                            onChange={(event) =>
+                              setTechStackFilter(event.target.value)
+                            }
                           >
                             <option value="All">All</option>
                             {techStackOptions.map((option) => (
@@ -472,7 +506,9 @@ const MyPurchases = () => {
                           <select
                             className="purchases-chipSelect"
                             value={licenseFilter}
-                            onChange={(event) => setLicenseFilter(event.target.value)}
+                            onChange={(event) =>
+                              setLicenseFilter(event.target.value)
+                            }
                           >
                             <option value="All">All</option>
                             <option value="Active">Active</option>
@@ -480,7 +516,11 @@ const MyPurchases = () => {
                           </select>
                           <img src={ArrowDown} alt="" aria-hidden="true" />
                         </label>
-                        <button className="purchases-clear" type="button" onClick={clearFilters}>
+                        <button
+                          className="purchases-clear"
+                          type="button"
+                          onClick={clearFilters}
+                        >
                           Clear All
                         </button>
                       </div>
@@ -490,7 +530,11 @@ const MyPurchases = () => {
                   {filteredPurchases.length === 0 ? (
                     <div className="purchases-empty">
                       <p>No assets match your current search or filters.</p>
-                      <button className="purchases-btn" type="button" onClick={clearFilters}>
+                      <button
+                        className="purchases-btn"
+                        type="button"
+                        onClick={clearFilters}
+                      >
                         Clear filters
                       </button>
                     </div>
@@ -499,8 +543,10 @@ const MyPurchases = () => {
                       {filteredPurchases.map((purchase) => {
                         const tags = getAssetTags(purchase.product);
                         const status = getStatus(purchase);
-                        const updatedDate = getUpdatedDate(purchase.purchased_at);
-                        
+                        const updatedDate = getUpdatedDate(
+                          purchase.purchased_at,
+                        );
+
                         return (
                           <article
                             key={purchase.id}
@@ -508,19 +554,22 @@ const MyPurchases = () => {
                             role="button"
                             tabIndex={0}
                             onClick={() => handleItemClick(purchase)}
-                            onKeyDown={(event) => handleItemKeyDown(event, purchase)}
+                            onKeyDown={(event) =>
+                              handleItemKeyDown(event, purchase)
+                            }
                           >
-                            <div 
+                            <div
                               className="purchases-item__media"
                               style={{
-                                backgroundImage: purchase.product?.featured_image 
+                                backgroundImage: purchase.product
+                                  ?.featured_image
                                   ? `url(${purchase.product.featured_image})`
                                   : purchase.product?.images?.[0]
-                                  ? `url(${purchase.product.images[0]})`
-                                  : 'none',
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                                backgroundColor: '#f5f5f5'
+                                    ? `url(${purchase.product.images[0]})`
+                                    : "none",
+                                backgroundSize: "cover",
+                                backgroundPosition: "center",
+                                backgroundColor: "#f5f5f5",
                               }}
                             />
                             <div className="purchases-item__body">
@@ -534,9 +583,13 @@ const MyPurchases = () => {
                                   </span>
                                 ))}
                               </div>
-                              <h4>{purchase.product?.name || 'Unknown Product'}</h4>
+                              <h4>
+                                {purchase.product?.name || "Unknown Product"}
+                              </h4>
                               <p>
-                                {getAssetTypeLabel(purchase.product)} <span>{"\u2022"}</span> {purchase.product?.version || 'v1.0.0'}
+                                {getAssetTypeLabel(purchase.product)}{" "}
+                                <span>{"\u2022"}</span>{" "}
+                                {purchase.product?.version || "v1.0.0"}
                               </p>
                             </div>
                             <div className="purchases-item__meta">
@@ -548,14 +601,20 @@ const MyPurchases = () => {
                                 <span className="purchases-status__dot" />
                                 {status}
                               </span>
-                              <span className="purchases-updated">{updatedDate}</span>
+                              <span className="purchases-updated">
+                                {updatedDate}
+                              </span>
                             </div>
                             <button
                               className="purchases-download"
                               type="button"
                               onClick={(event) => event.stopPropagation()}
                             >
-                              <img src={WhiteDownload} alt="" aria-hidden="true" />
+                              <img
+                                src={WhiteDownload}
+                                alt=""
+                                aria-hidden="true"
+                              />
                               Download
                             </button>
                             <button
@@ -595,7 +654,10 @@ const MyPurchases = () => {
                         <img src={OrangeBadge} alt="" aria-hidden="true" />
                       </div>
                       <div>
-                        <strong>{filteredPurchases[0].product?.version || 'v1.0.0'} Available</strong>
+                        <strong>
+                          {filteredPurchases[0].product?.version || "v1.0.0"}{" "}
+                          Available
+                        </strong>
                         <p>
                           Critical security patches and new Dark Mode components
                           added.
@@ -607,7 +669,9 @@ const MyPurchases = () => {
                     </div>
 
                     <div className="purchases-info">
-                      <div className="purchases-info__title">License Details</div>
+                      <div className="purchases-info__title">
+                        License Details
+                      </div>
                       <div className="purchases-info__row">
                         <span>License Type</span>
                         <strong>Commercial License</strong>
@@ -619,7 +683,9 @@ const MyPurchases = () => {
                       {filteredPurchases[0].license_key && (
                         <div className="purchases-info__row">
                           <span>Key</span>
-                          <strong className="purchases-key">{filteredPurchases[0].license_key}</strong>
+                          <strong className="purchases-key">
+                            {filteredPurchases[0].license_key}
+                          </strong>
                         </div>
                       )}
                     </div>
@@ -644,7 +710,8 @@ const MyPurchases = () => {
 
                     <button className="purchases-primary" type="button">
                       <img src={WhiteDownload} alt="" aria-hidden="true" />
-                      Download Latest ({filteredPurchases[0].product?.version || 'v1.0.0'})
+                      Download Latest (
+                      {filteredPurchases[0].product?.version || "v1.0.0"})
                     </button>
                     <button className="purchases-secondary" type="button">
                       View Full License
@@ -663,12 +730,15 @@ const MyPurchases = () => {
                     Extend your assets with tailored features, integrations, or
                     workflows built by our enterprise team.
                   </p>
-                  <button
-                    className="purchases-secondary purchases-secondary--filled"
-                    type="button"
-                  >
-                    Learn More
-                  </button>
+                  <Link to="/custom-service">
+                    {" "}
+                    <button
+                      className="purchases-secondary purchases-secondary--filled"
+                      type="button"
+                    >
+                      Learn More
+                    </button>
+                  </Link>
                 </div>
                 <img
                   className="purchases-cta__spark"

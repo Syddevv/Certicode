@@ -12,6 +12,7 @@ import newSaleIcon from "../../assets/new-sale-e-commerce.png";
 import assetUpdatedIcon from "../../assets/asset-updated.png";
 import fintechIcon from "../../assets/fintech-banking.png";
 import developerIcon from "../../assets/developer-portfolio.png";
+<<<<<<< HEAD
 import fitlifeIcon from "../../assets/fitlife-tracker.png";
 import totalValueIcon from "../../assets/total-value.png";
 import lastAuditIcon from "../../assets/last-audit.png";
@@ -72,6 +73,32 @@ const getProductStatus = (product, overrides = {}) => {
 };
 
 const AdminInventory = ({ statusView = "active" }) => {
+=======
+import fitlifeIcon from "../../assets/fitlife-tracker.png";
+import totalValueIcon from "../../assets/total-value.png";
+import lastAuditIcon from "../../assets/last-audit.png";
+import { AdminInventoryAPI } from "../../services/AdminInventoryAPI";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
+import DeleteConfirmationModal from "../../components/DeleteConfirmationModal";
+
+const Icons = {
+  Bell: "🔔",
+  Add: "+",
+  More: "⋮",
+  Filter: "⚙️",
+  Edit: "📝",
+  Trash: "🗑️",
+  Settings: "⚙️",
+  Web: "🌐",
+  Mobile: "📱",
+  Design: "🎨",
+  Value: "💰",
+  Sales: "🛒",
+  Audit: "⏱️",
+};
+
+const AdminInventory = () => {
+>>>>>>> 3307a3105460b38cc0f33c428ca557b96ab9b6a0
   const [products, setProducts] = useState([]);
   const [stats, setStats] = useState({
     total_value: 0,
@@ -79,7 +106,7 @@ const AdminInventory = ({ statusView = "active" }) => {
     last_audit: "",
     active_count: 0,
     draft_count: 0,
-    archived_count: 0
+    archived_count: 0,
   });
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -87,8 +114,9 @@ const AdminInventory = ({ statusView = "active" }) => {
   const [totalItems, setTotalItems] = useState(0);
   const [filters, setFilters] = useState({
     category: "all",
-    search: ""
+    search: "",
   });
+<<<<<<< HEAD
   const [searchTimeout, setSearchTimeout] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [statusOverrides, setStatusOverrides] = useState(() => {
@@ -111,6 +139,13 @@ const AdminInventory = ({ statusView = "active" }) => {
       JSON.stringify(statusOverrides),
     );
   }, [statusOverrides]);
+=======
+  const [searchTimeout, setSearchTimeout] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const navigate = useNavigate();
+>>>>>>> 3307a3105460b38cc0f33c428ca557b96ab9b6a0
 
   const fetchStats = useCallback(async () => {
     try {
@@ -161,7 +196,7 @@ const AdminInventory = ({ statusView = "active" }) => {
     }
 
     const timeout = setTimeout(() => {
-      setFilters(prev => ({ ...prev, search: term }));
+      setFilters((prev) => ({ ...prev, search: term }));
       setCurrentPage(1);
     }, 300);
 
@@ -169,7 +204,7 @@ const AdminInventory = ({ statusView = "active" }) => {
   };
 
   const handleCategoryChange = (category) => {
-    setFilters(prev => ({ ...prev, category }));
+    setFilters((prev) => ({ ...prev, category }));
     setCurrentPage(1);
   };
 
@@ -182,26 +217,33 @@ const AdminInventory = ({ statusView = "active" }) => {
     const productDataForEdit = {
       ...product,
       description: product.description || "",
-      technologies: Array.isArray(product.technologies) 
-        ? product.technologies 
-        : (product.technologies ? JSON.parse(product.technologies) : []),
-      images: Array.isArray(product.images) 
-        ? product.images 
-        : (product.images ? JSON.parse(product.images) : []),
-      project_files: Array.isArray(product.project_files) 
-        ? product.project_files 
-        : (product.project_files ? JSON.parse(product.project_files) : [])
+      technologies: Array.isArray(product.technologies)
+        ? product.technologies
+        : product.technologies
+          ? JSON.parse(product.technologies)
+          : [],
+      images: Array.isArray(product.images)
+        ? product.images
+        : product.images
+          ? JSON.parse(product.images)
+          : [],
+      project_files: Array.isArray(product.project_files)
+        ? product.project_files
+        : product.project_files
+          ? JSON.parse(product.project_files)
+          : [],
     };
-    
-    navigate("/add-asset", { 
-      state: { 
+
+    navigate("/add-asset", {
+      state: {
         editMode: true,
-        productData: productDataForEdit
-      } 
+        productData: productDataForEdit,
+      },
     });
   };
 
   const handleDelete = async (productId) => {
+<<<<<<< HEAD
     if (!window.confirm("Are you sure you want to delete this asset?")) return;
     
     setDeletingId(productId);
@@ -247,6 +289,23 @@ const AdminInventory = ({ statusView = "active" }) => {
         : "Asset restored to active assets.",
     );
   };
+=======
+    // if (!window.confirm("Are you sure you want to delete this asset?")) return;
+    setShowDeleteModal(false);
+    setDeletingId(productId);
+    try {
+      await AdminInventoryAPI.deleteProduct(productId);
+      await fetchProducts();
+      await fetchStats();
+      showSuccessToast("Asset deleted successfully.");
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      showErrorToast("Failed to delete product.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+>>>>>>> 3307a3105460b38cc0f33c428ca557b96ab9b6a0
 
   const formatCurrency = (amount) => {
     if (!amount) return "$0.00";
@@ -258,58 +317,58 @@ const AdminInventory = ({ statusView = "active" }) => {
 
   const getCategoryBadge = (assetType) => {
     const badgeMap = {
-      'website': 'gray',
-      'web app': 'gray', 
-      'mobile app': 'gray',
-      'ui kit': 'gray',
-      'ui/ux kits': 'gray',
-      'desktop app': 'gray',
-      'custom projects': 'gray'
+      website: "gray",
+      "web app": "gray",
+      "mobile app": "gray",
+      "ui kit": "gray",
+      "ui/ux kits": "gray",
+      "desktop app": "gray",
+      "custom projects": "gray",
     };
-    
-    const badgeClass = badgeMap[assetType?.toLowerCase()] || 'gray';
-    
+
+    const badgeClass = badgeMap[assetType?.toLowerCase()] || "gray";
+
     return (
       <span className={`badge ${badgeClass}`}>
-        {assetType?.toUpperCase() || 'UNCATEGORIZED'}
+        {assetType?.toUpperCase() || "UNCATEGORIZED"}
       </span>
     );
   };
 
   const getToneColor = (tech) => {
     const colorMap = {
-      'React': 'blue',
-      'Node.js': 'green',
-      'Python': 'gold',
-      'Django': 'green',
-      'Flutter': 'purple',
-      'Firebase': 'pink',
-      'Swift': 'indigo',
-      'Figma': 'rose',
-      'Adobe XD': 'violet',
-      'Tailwind': 'orange',
-      'Laravel': 'red',
-      'Vue.js': 'green',
-      'HTML': 'orange',
-      'CSS': 'blue',
-      'JavaScript': 'yellow',
-      'Stripe': 'violet',
+      React: "blue",
+      "Node.js": "green",
+      Python: "gold",
+      Django: "green",
+      Flutter: "purple",
+      Firebase: "pink",
+      Swift: "indigo",
+      Figma: "rose",
+      "Adobe XD": "violet",
+      Tailwind: "orange",
+      Laravel: "red",
+      "Vue.js": "green",
+      HTML: "orange",
+      CSS: "blue",
+      JavaScript: "yellow",
+      Stripe: "violet",
     };
-    
-    return colorMap[tech] || 'green';
+
+    return colorMap[tech] || "green";
   };
 
   const renderPagination = () => {
     const pages = [];
     const maxVisiblePages = 5;
-    
+
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
+
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
-    
+
     for (let i = startPage; i <= endPage; i++) {
       pages.push(
         <button
@@ -318,14 +377,14 @@ const AdminInventory = ({ statusView = "active" }) => {
           onClick={() => handlePageChange(i)}
         >
           {i}
-        </button>
+        </button>,
       );
     }
-    
+
     return (
       <div className="pagination-controls">
-        <button 
-          className="page-btn" 
+        <button
+          className="page-btn"
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
         >
@@ -333,10 +392,7 @@ const AdminInventory = ({ statusView = "active" }) => {
         </button>
         {startPage > 1 && (
           <>
-            <button 
-              className="page-btn" 
-              onClick={() => handlePageChange(1)}
-            >
+            <button className="page-btn" onClick={() => handlePageChange(1)}>
               1
             </button>
             {startPage > 2 && <span className="dots">...</span>}
@@ -346,16 +402,16 @@ const AdminInventory = ({ statusView = "active" }) => {
         {endPage < totalPages && (
           <>
             {endPage < totalPages - 1 && <span className="dots">...</span>}
-            <button 
-              className="page-btn" 
+            <button
+              className="page-btn"
               onClick={() => handlePageChange(totalPages)}
             >
               {totalPages}
             </button>
           </>
         )}
-        <button 
-          className="page-btn" 
+        <button
+          className="page-btn"
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
         >
@@ -367,11 +423,11 @@ const AdminInventory = ({ statusView = "active" }) => {
 
   const getCategoryName = (category) => {
     const categoryMap = {
-      'all': 'All Assets',
-      'Website': 'Web Apps',
-      'Mobile App': 'Mobile Apps',
-      'UI Kit': 'UI/UX Kits',
-      'Custom Projects': 'Custom Projects'
+      all: "All Assets",
+      Website: "Web Apps",
+      "Mobile App": "Mobile Apps",
+      "UI Kit": "UI/UX Kits",
+      "Custom Projects": "Custom Projects",
     };
     return categoryMap[category] || category;
   };
@@ -398,8 +454,16 @@ const AdminInventory = ({ statusView = "active" }) => {
 
         <main className="main">
           <AdminTopbar showHamburger onSearch={handleSearch}>
-            <Link to="/admin-notification" className="notification-link" aria-label="Notifications">
-              <img src={notifBell} alt="Notifications" className="notification-icon" />
+            <Link
+              to="/admin-notification"
+              className="notification-link"
+              aria-label="Notifications"
+            >
+              <img
+                src={notifBell}
+                alt="Notifications"
+                className="notification-icon"
+              />
               <span className="notification-dot" />
             </Link>
             <Link to="/add-asset" className="btn primary">
@@ -411,7 +475,8 @@ const AdminInventory = ({ statusView = "active" }) => {
             <div>
               <h2>Admin Inventory Management</h2>
               <p className="subtitle">
-                Track and manage all digital offerings from CertiCode repository.
+                Track and manage all digital offerings from CertiCode
+                repository.
               </p>
             </div>
 
@@ -430,46 +495,65 @@ const AdminInventory = ({ statusView = "active" }) => {
 
           <div className="filter-bar">
             <div className="filter-group">
-              <button 
-                className={`filter-pill ${filters.category === 'all' ? 'active' : ''}`}
-                onClick={() => handleCategoryChange('all')}
+              <button
+                className={`filter-pill ${filters.category === "all" ? "active" : ""}`}
+                onClick={() => handleCategoryChange("all")}
               >
                 All Assets
               </button>
-              <button 
-                className={`filter-pill ${filters.category === 'Website' ? 'active' : ''}`}
-                onClick={() => handleCategoryChange('Website')}
+              <button
+                className={`filter-pill ${filters.category === "Website" ? "active" : ""}`}
+                onClick={() => handleCategoryChange("Website")}
               >
                 <span>
-                  <img src={webappsIcon} alt="Web Apps" className="filter-icon" />
-                </span> {getCategoryName('Website')}
+                  <img
+                    src={webappsIcon}
+                    alt="Web Apps"
+                    className="filter-icon"
+                  />
+                </span>{" "}
+                {getCategoryName("Website")}
               </button>
-              <button 
-                className={`filter-pill ${filters.category === 'Mobile App' ? 'active' : ''}`}
-                onClick={() => handleCategoryChange('Mobile App')}
+              <button
+                className={`filter-pill ${filters.category === "Mobile App" ? "active" : ""}`}
+                onClick={() => handleCategoryChange("Mobile App")}
               >
                 <span>
-                  <img src={mobileIcon} alt="Mobile Apps" className="filter-icon" />
-                </span> {getCategoryName('Mobile App')}
+                  <img
+                    src={mobileIcon}
+                    alt="Mobile Apps"
+                    className="filter-icon"
+                  />
+                </span>{" "}
+                {getCategoryName("Mobile App")}
               </button>
-              <button 
-                className={`filter-pill ${filters.category === 'UI Kit' ? 'active' : ''}`}
-                onClick={() => handleCategoryChange('UI Kit')}
+              <button
+                className={`filter-pill ${filters.category === "UI Kit" ? "active" : ""}`}
+                onClick={() => handleCategoryChange("UI Kit")}
               >
                 <span>
-                  <img src={uiUxIcon} alt="UI/UX Kits" className="filter-icon" />
-                </span> {getCategoryName('UI Kit')}
+                  <img
+                    src={uiUxIcon}
+                    alt="UI/UX Kits"
+                    className="filter-icon"
+                  />
+                </span>{" "}
+                {getCategoryName("UI Kit")}
               </button>
-              <button 
-                className={`filter-pill ${filters.category === 'Custom Projects' ? 'active' : ''}`}
-                onClick={() => handleCategoryChange('Custom Projects')}
+              <button
+                className={`filter-pill ${filters.category === "Custom Projects" ? "active" : ""}`}
+                onClick={() => handleCategoryChange("Custom Projects")}
               >
                 <span>
-                  <img src={settingsCustomIcon} alt="Custom Projects" className="filter-icon" />
-                </span> {getCategoryName('Custom Projects')}
+                  <img
+                    src={settingsCustomIcon}
+                    alt="Custom Projects"
+                    className="filter-icon"
+                  />
+                </span>{" "}
+                {getCategoryName("Custom Projects")}
               </button>
             </div>
-
           </div>
 
           <div className="table-container">
@@ -491,6 +575,7 @@ const AdminInventory = ({ statusView = "active" }) => {
                       Loading products...
                     </td>
                   </tr>
+<<<<<<< HEAD
                 ) : visibleProducts.length === 0 ? (
                   <tr>
                     <td colSpan="6" className="no-data-cell">
@@ -605,12 +690,119 @@ const AdminInventory = ({ statusView = "active" }) => {
               </span>
               {renderPagination()}
             </div>
+=======
+                ) : products.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="no-data-cell">
+                      No products found
+                    </td>
+                  </tr>
+                ) : (
+                  products.map((product) => (
+                    <tr key={product.id}>
+                      <td>
+                        <div className="asset-cell">
+                          {product.featured_image ? (
+                            <div className="asset-icon">
+                              <img
+                                src={product.featured_image}
+                                alt={product.name}
+                                className="asset-icon-img"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = newSaleIcon;
+                                }}
+                              />
+                            </div>
+                          ) : (
+                            <div className="asset-icon blue">
+                              <img
+                                src={newSaleIcon}
+                                alt={product.name}
+                                className="asset-icon-img"
+                              />
+                            </div>
+                          )}
+                          <div>
+                            <strong>{product.name}</strong>
+                            <small>Updated {product.updated_ago}</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>{getCategoryBadge(product.asset_type)}</td>
+                      <td className="tech-stack">
+                        <div className="tech-tags">
+                          {product.technologies
+                            ?.slice(0, 3)
+                            .map((tech, index) => (
+                              <span
+                                key={index}
+                                className={`tech-tag tech-tag--${getToneColor(tech)}`}
+                              >
+                                {tech}
+                              </span>
+                            ))}
+                          {product.technologies?.length > 3 && (
+                            <span className="tech-more">...</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="price">{formatCurrency(product.price)}</td>
+                      <td>
+                        <div className="status-indicator active">
+                          <span className="dot"></span> ACTIVE
+                        </div>
+                      </td>
+                      <td>
+                        <div className="action-buttons">
+                          <button
+                            onClick={() => handleEdit(product)}
+                            title="Edit"
+                            disabled={deletingId === product.id}
+                          >
+                            {Icons.Settings}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setDeletingId(product.id);
+                              setShowDeleteModal(true);
+                            }}
+                            // onClick={() => handleDelete(product.id)}
+                            title="Delete"
+                            disabled={deletingId === product.id}
+                          >
+                            {deletingId === product.id ? "..." : Icons.Trash}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+
+            <div className="pagination-bar">
+              <span>
+                Showing{" "}
+                <strong>
+                  {(currentPage - 1) * 5 + 1}-
+                  {Math.min(currentPage * 5, totalItems)}
+                </strong>{" "}
+                of {totalItems} assets
+              </span>
+              {renderPagination()}
+            </div>
+>>>>>>> 3307a3105460b38cc0f33c428ca557b96ab9b6a0
           </div>
 
           <div className="bottom-stats">
             <div className="stat-card">
               <div className="stat-icon-circle orange">
-                <img src={totalValueIcon} alt="Total Value" className="stat-icon-img" />
+                <img
+                  src={totalValueIcon}
+                  alt="Total Value"
+                  className="stat-icon-img"
+                />
               </div>
               <div>
                 <small>TOTAL VALUE</small>
@@ -620,7 +812,11 @@ const AdminInventory = ({ statusView = "active" }) => {
 
             <div className="stat-card">
               <div className="stat-icon-circle green">
-                <img src={assetUpdatedIcon} alt="Monthly Sales" className="stat-icon-img" />
+                <img
+                  src={assetUpdatedIcon}
+                  alt="Monthly Sales"
+                  className="stat-icon-img"
+                />
               </div>
               <div>
                 <small>MONTHLY SALES</small>
@@ -630,7 +826,11 @@ const AdminInventory = ({ statusView = "active" }) => {
 
             <div className="stat-card">
               <div className="stat-icon-circle blue">
-                <img src={lastAuditIcon} alt="Last Audit" className="stat-icon-img" />
+                <img
+                  src={lastAuditIcon}
+                  alt="Last Audit"
+                  className="stat-icon-img"
+                />
               </div>
               <div>
                 <small>LAST AUDIT</small>
@@ -640,6 +840,12 @@ const AdminInventory = ({ statusView = "active" }) => {
           </div>
         </main>
       </div>
+
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={() => handleDelete(deletingId)}
+      />
     </>
   );
 };

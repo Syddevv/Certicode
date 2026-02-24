@@ -26,8 +26,8 @@ import BuyerAccountSettings from "./pages/public/BuyerAccountSettings";
 import About from "./pages/public/About";
 import PurchasedAssetDetail from "./pages/public/PurchasedAssetDetail";
 import CustomerSupport from "./pages/public/CustomerSupport";
-import TechnicalIssues from "./pages/public/TechnicalIssues"; 
-import BillingPayments from "./pages/public/BillingPayments"; 
+import TechnicalIssues from "./pages/public/TechnicalIssues";
+import BillingPayments from "./pages/public/BillingPayments";
 import ContactUs from "./pages/public/ContactUs";
 import SuccessStories from "./pages/public/SuccessStories";
 import SuccessStoriesList from "./pages/public/SuccessStoriesList";
@@ -36,6 +36,8 @@ import SuccessStoryGlobalFintech from "./pages/public/SuccessStoryGlobalFintech"
 import BlogsNews from "./pages/public/BlogsNews";
 import BlogsNewsIndividual from "./pages/public/BlogsNewsIndividual";
 import NotFound from "./pages/public/NotFound";
+import CustomService from "./pages/public/CustomService";
+import { TrackYourPackageRoute } from "./pages/public/TrackYourPackageRoute";
 
 // Admin
 import AdminInventory from "./pages/admin/AdminInventory";
@@ -197,8 +199,14 @@ function AppContent() {
       <Route path="/about" element={<About />} />
       <Route path="/marketplace/:id" element={<ProductDetails />} />
       <Route path="/customer-support" element={<CustomerSupport />} />
-      <Route path="/customer-support/technical-issues" element={<TechnicalIssues />} />
-      <Route path="/customer-support/billing-payments" element={<BillingPayments />} /> 
+      <Route
+        path="/customer-support/technical-issues"
+        element={<TechnicalIssues />}
+      />
+      <Route
+        path="/customer-support/billing-payments"
+        element={<BillingPayments />}
+      />
       <Route path="/contact" element={<ContactUs />} />
       <Route path="/success-stories" element={<SuccessStories />} />
       <Route
@@ -220,6 +228,12 @@ function AppContent() {
         path="/blogs-news/how-secure-software"
         element={<BlogsNewsIndividual />}
       />
+      <Route path="/custom-service" element={<CustomService />} />
+      <Route
+        path="/customer-support/order-status/track-your-package"
+        element={<TrackYourPackageRoute />}
+      />
+
       {/* PROTECTED USER ROUTES - Require authentication */}
       <Route
         path="/buyer-dashboard"
