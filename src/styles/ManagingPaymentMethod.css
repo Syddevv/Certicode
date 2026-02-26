@@ -71,6 +71,14 @@
   color: #444;
 }
 
+.ebd-add-link:hover {
+  color: #f97316;
+}
+
+.ebd-add-link:hover .ebd-plus {
+  color: #f97316;
+}
+
 .ebd-methods-list {
   display: flex;
   flex-direction: column;
@@ -102,6 +110,13 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.ebd-payment-logo-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .ebd-visa-logo {
@@ -187,22 +202,23 @@
 }
 
 .ebd-submit-btn {
+  margin-top: auto;
   width: 100%;
-  padding: 16px;
-  background: #f5a623;
-  color: #fff;
+  height: 36px;
   border: none;
-  border-radius: 12px;
-  font-size: 16px;
+  border-radius: 10px;
+  background: #f97316;
+  color: #fff;
+  font-size: 12px;
   font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
-  margin-top: 24px;
-  font-family: 'DM Sans', sans-serif;
   transition: background 0.15s;
+  border-radius: 7px;
 }
 
 .ebd-submit-btn:hover {
-  background: #e09610;
+  background: #ea6a0a;
 }
 
 .ebd-trigger {
@@ -215,4 +231,340 @@
   font-weight: 600;
   cursor: pointer;
   font-family: 'DM Sans', sans-serif;
+}
+
+.ebd-editpm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.ebd-editpm-dialog {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  min-height: 580px;
+  padding: 28px 28px 24px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ebd-editpm-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #555;
+  line-height: 1;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.ebd-editpm-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: #111;
+}
+
+.ebd-editpm-subtitle {
+  font-size: 13.5px;
+  color: #777;
+  margin: 0 0 20px;
+}
+
+.ebd-editpm-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.ebd-editpm-label {
+  color: #111827;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ebd-editpm-input {
+  width: 100%;
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
+  padding: 0 10px;
+  color: #111827;
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+}
+
+.ebd-editpm-input:focus {
+  border-color: #f97316;
+}
+
+.ebd-editpm-inputWrap {
+  position: relative;
+}
+
+.ebd-editpm-inputWrap .ebd-editpm-input {
+  padding-right: 48px;
+}
+
+.ebd-editpm-logoTag {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ebd-editpm-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.ebd-editpm-row > div {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.ebd-editpm-check {
+  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 11px;
+}
+
+.ebd-editpm-check input {
+  width: 12px;
+  height: 12px;
+  accent-color: #f97316;
+}
+
+.ebd-editpm-update {
+  margin-top: auto;
+  width: 100%;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: #f97316;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 7px;
+}
+
+.ebd-editpm-update:hover {
+  background: #ea6a0a;
+}
+
+.ebd-editpm-update:disabled {
+  background: #fdba74;
+  cursor: not-allowed;
+}
+
+.ebd-editpm-error {
+  margin: 6px 0 0;
+  color: #dc2626;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .ebd-editpm-title {
+    font-size: 24px;
+  }
+}
+
+.ebd-addpm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.ebd-addpm-dialog {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  min-height: 580px;
+  padding: 28px 28px 24px;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ebd-addpm-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 18px;
+  color: #555;
+  line-height: 1;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.ebd-addpm-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 6px;
+  color: #111;
+}
+
+.ebd-addpm-subtitle {
+  font-size: 13.5px;
+  color: #777;
+  margin: 0 0 10px;
+}
+
+.ebd-addpm-option {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.ebd-addpm-option.is-active {
+  border-color: #f5c59f;
+  background: #fff7ef;
+}
+
+.ebd-addpm-optionHead {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ebd-addpm-option strong {
+  display: block;
+  font-size: 15px;
+  color: #1f2937;
+}
+
+.ebd-addpm-option span {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.ebd-addpm-radio {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #d1d5db;
+  flex-shrink: 0;
+  background: #fff;
+}
+
+.ebd-addpm-option.is-active .ebd-addpm-radio {
+  border-color: #f97316;
+  box-shadow: inset 0 0 0 3px #fff;
+  background: #f97316;
+}
+
+.ebd-addpm-cardFields {
+  padding: 0 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ebd-addpm-cardFields label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.ebd-addpm-cardFields input {
+  width: 100%;
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+}
+
+.ebd-addpm-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.ebd-addpm-optionPayPal {
+  width: 100%;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ebd-addpm-save {
+  width: 100%;
+  height: 36px;
+  padding: 0;
+  margin-top: auto;
+  background: #f97316;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: background 0.15s;
+  border-radius: 7px;
+}
+
+.ebd-addpm-save:hover {
+  background: #ea6a0a;
+}
+
+.ebd-addpm-error {
+  margin: 6px 0 0;
+  color: #dc2626;
+  font-size: 12px;
+  line-height: 1.4;
 }
