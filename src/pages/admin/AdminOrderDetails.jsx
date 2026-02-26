@@ -14,7 +14,8 @@ import fallbackAvatar from "../../assets/default-profile.png";
 import { resolveAvatarUrl } from "../../utils/avatar";
 import { AdminSalesAPI } from "../../services/AdminSalesAPI";
 import { AdminCustomersAPI } from "../../services/AdminCustomersAPI";
-import { showErrorToast } from "../../utils/toast";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
+import { downloadInvoicePdf } from "../../utils/invoicePdf";
 
 const COMPLETED_STATUSES = ["completed", "paid", "success", "succeeded"];
 
@@ -197,6 +198,8 @@ const AdminOrderDetails = () => {
   const routeOrder = location.state?.order || null;
   const [loading, setLoading] = useState(!routeOrder);
   const [downloading, setDownloading] = useState(false);
+  const [resolvedCustomerId, setResolvedCustomerId] = useState(null);
+  const [resolvingCustomerId, setResolvingCustomerId] = useState(false);
   const [error, setError] = useState("");
   const [details, setDetails] = useState(() =>
     routeOrder ? normalizeOrderPayload({ order: routeOrder }) : null,
@@ -272,6 +275,104 @@ const AdminOrderDetails = () => {
     fetchCustomerDetails();
   }, [details?.customer?.id, details?.customer?.customer_id, details?.order?.customer_id]);
 
+  useEffect(() => {
+    const directCustomerId =
+      details?.customer?.id ||
+      details?.customer?.customer_id ||
+      details?.customer?.user_id ||
+      details?.order?.customer_id ||
+      details?.order?.user_id ||
+      details?.order?.customer?.id ||
+      details?.order?.user?.id ||
+      null;
+
+    if (directCustomerId) {
+      setResolvedCustomerId(null);
+      return;
+    }
+
+    const customerEmail =
+      details?.customer?.email ||
+      details?.order?.customer_email ||
+      details?.order?.email ||
+      "";
+    const customerName =
+      details?.customer?.name ||
+      details?.order?.customer_name ||
+      "";
+
+    const query = String(customerEmail || customerName).trim();
+    if (!query) return;
+
+    let cancelled = false;
+
+    const resolveCustomerId = async () => {
+      setResolvingCustomerId(true);
+      try {
+        const response = await AdminCustomersAPI.getCustomers(1, query, "", 50);
+        const customersCollection = response?.customers;
+        const items = Array.isArray(customersCollection)
+          ? customersCollection
+          : Array.isArray(customersCollection?.data)
+            ? customersCollection.data
+            : [];
+
+        const normalizedEmail = String(customerEmail).trim().toLowerCase();
+        const normalizedName = String(customerName).trim().toLowerCase();
+
+        const match =
+          items.find(
+            (item) =>
+              normalizedEmail &&
+              String(item?.email || "")
+                .trim()
+                .toLowerCase() === normalizedEmail,
+          ) ||
+          items.find(
+            (item) =>
+              normalizedName &&
+              String(item?.name || "")
+                .trim()
+                .toLowerCase() === normalizedName,
+          ) ||
+          items[0];
+
+        const matchedId = match?.id || match?.customer_id || null;
+        if (!cancelled) {
+          setResolvedCustomerId(matchedId);
+        }
+      } catch (lookupError) {
+        if (!cancelled) {
+          setResolvedCustomerId(null);
+        }
+        console.error("Failed to resolve customer profile ID:", lookupError);
+      } finally {
+        if (!cancelled) {
+          setResolvingCustomerId(false);
+        }
+      }
+    };
+
+    resolveCustomerId();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    details?.customer?.id,
+    details?.customer?.customer_id,
+    details?.customer?.user_id,
+    details?.customer?.email,
+    details?.customer?.name,
+    details?.order?.customer_id,
+    details?.order?.user_id,
+    details?.order?.customer?.id,
+    details?.order?.user?.id,
+    details?.order?.customer_email,
+    details?.order?.customer_name,
+    details?.order?.email,
+  ]);
+
   const viewModel = useMemo(() => {
     if (!details) return null;
 
@@ -335,7 +436,15 @@ const AdminOrderDetails = () => {
         "Full Source Code License (Commercial)",
       assetTags,
       assetPrice: formatCurrency(asset.price || order.item_price || order.total_amount || order.amount),
-      customerId: customer.id || customer.customer_id || order.customer_id || null,
+      customerId:
+        customer.id ||
+        customer.customer_id ||
+        customer.user_id ||
+        order.customer_id ||
+        order.user_id ||
+        order.customer?.id ||
+        order.user?.id ||
+        null,
       customerName: customer.name || order.customer_name || "Customer",
       customerSubline,
       customerAvatar: resolveAvatarUrl(customer.avatar_url || customer.avatar || order.customer_avatar) || fallbackAvatar,
@@ -356,6 +465,8 @@ const AdminOrderDetails = () => {
     };
   }, [details, id]);
 
+  const customerProfileId = viewModel?.customerId || resolvedCustomerId;
+
   const handleDownloadInvoice = async () => {
     if (!viewModel?.orderPk) {
       showErrorToast("Order ID is missing. Unable to download invoice.");
@@ -369,14 +480,44 @@ const AdminOrderDetails = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      showSuccessToast(`Invoice download started: invoice_${viewModel.orderPk}.pdf`);
       return;
     }
 
     try {
       setDownloading(true);
       await AdminSalesAPI.downloadInvoice(viewModel.orderPk);
+      showSuccessToast(`Invoice download started: invoice_${viewModel.orderPk}.pdf`);
     } catch (downloadError) {
-      showErrorToast(downloadError.message || "Failed to download invoice.");
+      try {
+        const filename = downloadInvoicePdf({
+          invoiceNumber: `INV-${viewModel.orderPk}`,
+          orderNumber: viewModel.orderId,
+          issuedDate: (() => {
+            const placed = String(viewModel.placedLabel || "");
+            const match = placed.match(/Placed on (.+?) at/);
+            return match?.[1] || "Unknown Date";
+          })(),
+          status: viewModel.statusLabel,
+          billedToName: viewModel.customerName,
+          billedToLine: viewModel.customerAddress,
+          productName: viewModel.assetName,
+          productId: viewModel.orderPk,
+          licenseLabel: viewModel.assetLicense,
+          subtotal: viewModel.assetPrice,
+          tax: "$0.00",
+          discount: "$0.00",
+          total: viewModel.totalAmount,
+        });
+        showSuccessToast(
+          `Print dialog opened for ${filename}. Choose "Save as PDF".`,
+        );
+      } catch (fallbackError) {
+        console.error("Admin invoice fallback export failed:", fallbackError);
+        showErrorToast(
+          downloadError.message || "Failed to download invoice.",
+        );
+      }
     } finally {
       setDownloading(false);
     }
@@ -553,13 +694,13 @@ const AdminOrderDetails = () => {
                       <p className="tax-text">{viewModel.taxId}</p>
                     </div>
 
-                    {viewModel.customerId ? (
-                      <Link to={`/customers/${viewModel.customerId}`} className="btn-outline">
+                    {customerProfileId ? (
+                      <Link to={`/customers/${customerProfileId}`} className="btn-outline">
                         View Customer Profile
                       </Link>
                     ) : (
                       <button className="btn-outline" type="button" disabled>
-                        View Customer Profile
+                        {resolvingCustomerId ? "Locating Customer..." : "View Customer Profile"}
                       </button>
                     )}
                   </div>

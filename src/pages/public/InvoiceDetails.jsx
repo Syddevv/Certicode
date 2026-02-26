@@ -6,6 +6,8 @@ import "../../styles/InvoiceDetails.css";
 import PrintIcon from "../../assets/PrintIcon.png";
 import WhiteDownload from "../../assets/whiteDownload.png";
 import BillingSupport from "../../assets/billingSupport.png";
+import { downloadInvoicePdf } from "../../utils/invoicePdf";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
 const InvoiceDetails = () => {
   const { invoiceId } = useParams();
@@ -137,6 +139,30 @@ const InvoiceDetails = () => {
     window.print();
   };
 
+  const handleDownloadPdf = () => {
+    try {
+      const filename = downloadInvoicePdf({
+        invoiceNumber: details.invoiceNumber,
+        orderNumber: details.orderNumber,
+        issuedDate: details.issuedDate,
+        status: details.status,
+        billedToName: details.billedToName,
+        billedToLine: details.billedToLine,
+        productName: details.productName,
+        productId: details.productId,
+        licenseLabel: details.licenseLabel,
+        subtotal: details.subtotal,
+        tax: details.tax,
+        discount: details.discount,
+        total: details.total,
+      });
+      showSuccessToast(`Print dialog opened for ${filename}. Choose "Save as PDF".`);
+    } catch (error) {
+      console.error("Invoice PDF download failed:", error);
+      showErrorToast("Failed to download invoice PDF.");
+    }
+  };
+
   return (
     <div>
       <Navbar />
@@ -173,7 +199,11 @@ const InvoiceDetails = () => {
                 <img src={PrintIcon} alt="" aria-hidden="true" />
                 Print
               </button>
-              <button className="invoice-details__primary" type="button">
+              <button
+                className="invoice-details__primary"
+                type="button"
+                onClick={handleDownloadPdf}
+              >
                 <img src={WhiteDownload} alt="" aria-hidden="true" />
                 Download PDF
               </button>

@@ -16,6 +16,8 @@ import SearchIcon from "../../assets/lucide_search.png";
 import EditBillingDetailsModal from "../../components/Editbillingdetailsmodal ";
 import { ProfileAPI } from "../../services/ProfileAPI";
 import ManagingPaymentMethod from "../../components/ManagingPaymentMethod";
+import { downloadInvoicePdf } from "../../utils/invoicePdf";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
 const BillingInvoices = () => {
   const navigate = useNavigate();
@@ -136,6 +138,45 @@ const BillingInvoices = () => {
       setPurchases([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleInvoiceDownload = (row) => {
+    try {
+      const purchase = row?.purchaseData || {};
+      const product = purchase?.product || {};
+      const orderNumber =
+        purchase.order_number ||
+        purchase.order?.order_number ||
+        purchase.order?.id ||
+        purchase.id ||
+        "N/A";
+
+      const billedToLine = [user?.company_name, user?.company_address || user?.address]
+        .filter(Boolean)
+        .join(" • ");
+
+      const filename = downloadInvoicePdf({
+        invoiceNumber: String(row?.id || "INV-0000").replace(/^#/, ""),
+        orderNumber,
+        issuedDate: row?.date || "Unknown Date",
+        status: row?.status || "Pending",
+        billedToName: user?.name || "Customer",
+        billedToLine,
+        productName: row?.asset || "Digital Asset",
+        productId:
+          product?.sku || product?.product_id || product?.id || purchase.product_id || "N/A",
+        licenseLabel:
+          purchase.license_type || purchase.license?.type || purchase.license?.name || "Commercial",
+        subtotal: row?.amount || "$0.00",
+        tax: "$0.00",
+        discount: "$0.00",
+        total: row?.amount || "$0.00",
+      });
+      showSuccessToast(`Print dialog opened for ${filename}. Choose "Save as PDF".`);
+    } catch (error) {
+      console.error("Invoice download failed:", error);
+      showErrorToast("Failed to download invoice.");
     }
   };
 
@@ -393,6 +434,7 @@ const BillingInvoices = () => {
                           className="billing-iconBtn"
                           type="button"
                           aria-label="Download"
+                          onClick={() => handleInvoiceDownload(row)}
                         >
                           <img src={OrangeDownload} alt="" aria-hidden="true" />
                         </button>

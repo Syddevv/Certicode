@@ -8,7 +8,8 @@ import downloadIcon from "../../assets/whiteDownload.png";
 import fallbackAvatar from "../../assets/default-profile.png";
 import { resolveAvatarUrl } from "../../utils/avatar";
 import { AdminCustomersAPI } from "../../services/AdminCustomersAPI";
-import { showErrorToast } from "../../utils/toast";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
+import { downloadCustomerProfilePdf } from "../../utils/customerProfilePdf";
 
 const PER_PAGE = 10;
 
@@ -114,6 +115,7 @@ const AdminCustomerDetails = () => {
   const [orders, setOrders] = useState([]);
   const [loadingCustomer, setLoadingCustomer] = useState(!routeCustomer);
   const [loadingOrders, setLoadingOrders] = useState(true);
+  const [exportingProfile, setExportingProfile] = useState(false);
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -250,6 +252,26 @@ const AdminCustomerDetails = () => {
     setCurrentPage(page);
   };
 
+  const handleExportProfile = async () => {
+    if (!viewModel) return;
+
+    try {
+      setExportingProfile(true);
+      const filename = downloadCustomerProfilePdf({
+        customer: viewModel,
+        transactions: mappedOrders,
+      });
+      showSuccessToast(
+        `Print dialog opened for ${filename}. Choose "Save as PDF".`,
+      );
+    } catch (exportError) {
+      console.error("Failed to export customer profile:", exportError);
+      showErrorToast("Failed to export customer profile.");
+    } finally {
+      setExportingProfile(false);
+    }
+  };
+
   return (
     <>
       <input type="checkbox" id="sidebar-toggle" />
@@ -267,13 +289,18 @@ const AdminCustomerDetails = () => {
               />
               <span className="notification-dot" />
             </Link>
-            <button className="btn primary export-profile-btn" type="button" disabled={!viewModel}>
+            <button
+              className="btn primary export-profile-btn"
+              type="button"
+              disabled={!viewModel || exportingProfile}
+              onClick={handleExportProfile}
+            >
               <img
                 src={downloadIcon}
                 alt="Export profile"
                 className="export-profile-icon"
               />
-              Export Profile
+              {exportingProfile ? "Exporting..." : "Export Profile"}
             </button>
           </AdminTopbar>
 
