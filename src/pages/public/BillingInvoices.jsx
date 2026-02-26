@@ -24,6 +24,7 @@ const BillingInvoices = () => {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [isUpdateBillingModal, setUpdateBillingModal] = useState(false);
+  const [selectedPrimaryMethod, setSelectedPrimaryMethod] = useState(null);
   const [stats, setStats] = useState([
     { label: "Total Invoices", value: "0", icon: InvoiceIcon },
     { label: "Total Volume", value: "$0.00", icon: ChartBar },
@@ -59,36 +60,32 @@ const BillingInvoices = () => {
   const fetchPurchases = async () => {
     try {
       const data = await ProfileAPI.getUserPurchases();
-      console.log("Purchases API response:", data); // Debug log
+      console.log("Purchases API response:", data); 
 
       const userPurchases = data.purchases || [];
-      console.log("Processed purchases:", userPurchases); // Debug each purchase
+      console.log("Processed purchases:", userPurchases);
       setPurchases(userPurchases);
 
-      // Calculate stats from purchases
+
       const totalInvoices = userPurchases.length;
 
       let totalVolume = 0;
       userPurchases.forEach((purchase) => {
-        console.log("Purchase object structure:", purchase); // Debug each purchase
+        console.log("Purchase object structure:", purchase); 
 
-        // Try different possible field names for amount based on OrderSuccess.js
         if (
           purchase.total_amount !== undefined &&
           purchase.total_amount !== null
         ) {
-          // This is likely the order total
           totalVolume += parseFloat(purchase.total_amount);
         } else if (purchase.amount !== undefined && purchase.amount !== null) {
           totalVolume += parseFloat(purchase.amount);
         } else if (purchase.price !== undefined && purchase.price !== null) {
-          // Individual purchase price
           totalVolume += parseFloat(purchase.price);
         } else if (
           purchase.order?.total_amount !== undefined &&
           purchase.order?.total_amount !== null
         ) {
-          // Check if amount is nested in order object
           totalVolume += parseFloat(purchase.order.total_amount);
         }
 
@@ -103,7 +100,6 @@ const BillingInvoices = () => {
       let lastInvoice = "Never";
       if (userPurchases.length > 0) {
         const latestPurchase = userPurchases[0];
-        // Try different date fields
         const purchaseDate = new Date(
           latestPurchase.purchased_at ||
             latestPurchase.created_at ||
@@ -139,9 +135,29 @@ const BillingInvoices = () => {
     }
   };
 
-  // Convert purchases to invoices for display
+  const inferMethodId = (paymentMethodName) => {
+    const normalized = (paymentMethodName || "").toLowerCase();
+    if (normalized.includes("mastercard")) return "mastercard";
+    if (normalized.includes("paypal")) return "paypal";
+    if (normalized.includes("visa")) return "visa";
+    return "visa";
+  };
+
+  const primaryMethodNameRaw =
+    selectedPrimaryMethod?.name || user?.payment_method || "";
+  const primaryMethodName = primaryMethodNameRaw
+    ? primaryMethodNameRaw.replace(/\*+/g, "").replace(/\s{2,}/g, " ").trim()
+    : "No payment method on file";
+  const primaryMethodExpiry =
+    selectedPrimaryMethod?.expiry ||
+    user?.payment_expiry ||
+    "Add payment method in Account Settings";
+  const primaryMethodType = primaryMethodNameRaw
+    ? selectedPrimaryMethod?.id || inferMethodId(primaryMethodNameRaw)
+    : null;
+  const showPrimaryMethodSubtitle = primaryMethodType !== "paypal";
+
   const invoices = purchases.map((purchase, index) => {
-    // Determine amount from multiple possible field names
     let amount = 0;
 
     if (purchase.total_amount !== undefined && purchase.total_amount !== null) {
@@ -149,19 +165,15 @@ const BillingInvoices = () => {
     } else if (purchase.amount !== undefined && purchase.amount !== null) {
       amount = parseFloat(purchase.amount);
     } else if (purchase.price !== undefined && purchase.price !== null) {
-      // Individual purchase price
       amount = parseFloat(purchase.price);
     } else if (
       purchase.order?.total_amount !== undefined &&
       purchase.order?.total_amount !== null
     ) {
-      // Check if amount is nested in order object
       amount = parseFloat(purchase.order.total_amount);
     }
 
-    // If amount is still 0, use a default based on the product
     if (amount === 0) {
-      // Default pricing based on product type
       if (purchase.product?.category?.toLowerCase().includes("template")) {
         amount = 299.99;
       } else if (
@@ -171,17 +183,15 @@ const BillingInvoices = () => {
       } else if (purchase.product?.category?.toLowerCase().includes("app")) {
         amount = 499.99;
       } else {
-        amount = 99.99; // Default fallback
+        amount = 99.99; 
       }
     }
 
-    // Generate invoice ID
     const invoiceId =
       purchase.order_number ||
       purchase.invoice_number ||
       `#INV-${8000 + (purchase.id || index)}`;
 
-    // Determine date
     const purchaseDate =
       purchase.purchased_at ||
       purchase.created_at ||
@@ -466,16 +476,28 @@ const BillingInvoices = () => {
                   <div className="billing-section__title">Primary Method</div>
                   <div className="billing-method">
                     <span className="billing-method__icon">
-                      <img src={GrayWallet} alt="" aria-hidden="true" />
+                      {primaryMethodType ? (
+                        <div className="ebd-method-logo" aria-hidden="true">
+                          {primaryMethodType === "visa" && (
+                            <div className="ebd-visa-logo">VISA</div>
+                          )}
+                          {primaryMethodType === "mastercard" && (
+                            <div className="ebd-mastercard-logo">
+                              <div className="ebd-mc-circle red" />
+                              <div className="ebd-mc-circle orange" />
+                            </div>
+                          )}
+                          {primaryMethodType === "paypal" && (
+                            <div className="ebd-paypal-logo">P</div>
+                          )}
+                        </div>
+                      ) : (
+                        <img src={GrayWallet} alt="" aria-hidden="true" />
+                      )}
                     </span>
                     <div>
-                      <strong>
-                        {user?.payment_method || "No payment method on file"}
-                      </strong>
-                      <span>
-                        {user?.payment_expiry ||
-                          "Add payment method in Account Settings"}
-                      </span>
+                      <strong>{primaryMethodName}</strong>
+                      {showPrimaryMethodSubtitle && <span>{primaryMethodExpiry}</span>}
                     </div>
                     <button
                       className="billing-link"
@@ -523,7 +545,12 @@ const BillingInvoices = () => {
         onClose={() => setUpdateBillingModal(false)}
       />
       <Footer />
-      <ManagingPaymentMethod open={open} setOpen={setOpen} />
+      <ManagingPaymentMethod
+        open={open}
+        setOpen={setOpen}
+        selectedMethodId={selectedPrimaryMethod?.id || inferMethodId(user?.payment_method)}
+        onSelectMethod={setSelectedPrimaryMethod}
+      />
     </div>
   );
 };
