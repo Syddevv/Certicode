@@ -16,6 +16,7 @@ import OrangeStar from "../../assets/orangestar.png";
 import BillingSupportIcon from "../../assets/billingSupport.png";
 import CustomerSupportIcon from "../../assets/CustomerSupport.png";
 import WhiteDownload from "../../assets/whiteDownload.png";
+import EditPenIcon from "../../assets/edit_pen.png";
 import { ProfileAPI } from "../../services/ProfileAPI";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
@@ -114,6 +115,12 @@ const BuyerDashboard = () => {
   const handleDownload = async (productId) => {
     try {
       setDownloading(prev => ({...prev, [productId]: true}));
+
+      if (mockData.enabled) {
+        showSuccessToast("Mock download started.");
+        setDownloading(prev => ({...prev, [productId]: false}));
+        return;
+      }
       
       const token = localStorage.getItem('auth_token');
       
@@ -317,7 +324,7 @@ const BuyerDashboard = () => {
               onClick={() => navigate("/account-settings")}
             >
               <span className="buyer-profile__editIcon" aria-hidden="true">
-                {"\u270e"}
+                <img src={EditPenIcon} alt="" aria-hidden="true" />
               </span>
               Edit Profile
             </button>
