@@ -91,8 +91,14 @@ const PlatformSetting = () => {
                 </div>
                 <div className="input-group">
                   <label>Default Currency</label>
-                  <select className="full-select">
-                    <option>USD - US Dollar</option>
+                  <select className="full-select" defaultValue="USD">
+                    <option value="EUR">EUR - Euro</option>
+                    <option value="EUR">EUR - Euro</option>
+                    <option value="GBP">GBP - British Pound Sterling</option>
+                    <option value="USD">USD - US Dollar</option>
+                    <option value="JPY">JPY - Japanese Yen</option>
+                    <option value="PHP">PHP - Philippine Peso</option>
+                    <option value="SGD">SGD - Singapore Dollar</option>
                   </select>
                   <span className="input-hint">
                     Base currency for all billing calculations.
@@ -100,8 +106,25 @@ const PlatformSetting = () => {
                 </div>
                 <div className="input-group">
                   <label>Timezone</label>
-                  <select className="full-select">
-                    <option>(UTC-05:00) Eastern Time (US & Canada)</option>
+                  <select className="full-select" defaultValue="EST">
+                    <option value="EST">
+                      (UTC-05:00) Eastern Time (US & Canada)
+                    </option>
+                    <option value="PHT">
+                      (UTC+08:00) Philippine Time (PHT)
+                    </option>
+                    <option value="JST">
+                      (UTC+09:00) Japan Standard Time (JST)
+                    </option>
+                    <option value="CET">
+                      (UTC+01:00) Central European Time (CET)
+                    </option>
+                    <option value="SGT">
+                      (UTC+08:00) Singapore Time (SGT)
+                    </option>
+                    <option value="GMT">
+                      (UTC+00:00) Greenwich Mean Time (GMT) – United Kingdom
+                    </option>
                   </select>
                   <span className="input-hint">
                     System wide date and time reporting.
