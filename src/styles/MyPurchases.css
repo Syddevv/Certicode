@@ -106,7 +106,18 @@
 }
 
 .purchases-profile__editIcon {
-  font-size: 13px;
+  width: 13px;
+  height: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.purchases-profile__editIcon img {
+  width: 13px;
+  height: 13px;
+  display: block;
+  object-fit: contain;
 }
 
 .purchases-tabs {
