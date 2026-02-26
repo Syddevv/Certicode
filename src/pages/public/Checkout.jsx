@@ -11,7 +11,6 @@ import CustomerSupport from "../../assets/CustomerSupport.png";
 import { CartAPI } from "../../services/CartAPI";
 import { loadStripe } from "@stripe/stripe-js";
 import {
-import {
    Elements,
    CardNumberElement,
    CardExpiryElement,
@@ -62,6 +61,7 @@ const Checkout = () => {
   const [appliedPromo, setAppliedPromo] = useState(null);
   const [cardComplete, setCardComplete] = useState(false);
   const [cardError, setCardError] = useState("");
+  const [cardFields, setCardFields] = useState({
     number: false,
     expiry: false,
     cvc: false,
@@ -267,7 +267,7 @@ const Checkout = () => {
         return;
       }
 
-      const cardElement = elements.getElement(CardElement);
+      const cardElement = elements.getElement(CardNumberElement);
       
       const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
         clientSecret,
