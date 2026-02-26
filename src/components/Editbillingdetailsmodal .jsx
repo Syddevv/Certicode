@@ -1,9 +1,16 @@
 import React, { useState } from "react";
 import "../styles/BuyerAccountSettings.css";
 import ManagingPaymentMethod from "./ManagingPaymentMethod";
-import UpdatePaymentMethodModal from "./UpdatePaymentMethodModal";
+import VisaLogo from "../assets/visa logo.png";
+import MastercardLogo from "../assets/mastercard logo.png";
+import PaypalLogo from "../assets/paypal logo.png";
 
-export default function EditBillingDetailsModal({ isOpen, onClose }) {
+export default function EditBillingDetailsModal({
+  isOpen,
+  onClose,
+  primaryMethod,
+  onSelectPrimaryMethod,
+}) {
   const [form, setForm] = useState({
     companyName: "Horizon Tech Solutions LLC",
     companyAddress: "452 Marke Street, Ste 1200, San Francisco, CA 94104",
@@ -12,10 +19,20 @@ export default function EditBillingDetailsModal({ isOpen, onClose }) {
   });
   const [open, setOpen] = useState(false);
   const [isEditPaymentOpen, setIsEditPaymentOpen] = useState(false);
+  const [formError, setFormError] = useState("");
+  const primaryMethodId = primaryMethod?.id || "visa";
+  const primaryMethodName = primaryMethod?.name || "Visa ending 4242";
+  const primaryMethodExpiry = primaryMethod?.expiry || "Expires 12/34";
+  const logoMap = {
+    visa: VisaLogo,
+    mastercard: MastercardLogo,
+    paypal: PaypalLogo,
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    setFormError("");
   };
 
   const handleOpenEditPaymentModal = () => {
@@ -23,7 +40,26 @@ export default function EditBillingDetailsModal({ isOpen, onClose }) {
     if (isOpen) onClose();
   };
 
-  if (!isOpen && !isEditPaymentOpen) return null;
+  const handleOpenAddPaymentModal = () => {
+    setOpen(true);
+    if (isOpen) onClose();
+  };
+
+  const isFormValid =
+    form.companyName.trim().length > 0 &&
+    form.companyAddress.trim().length > 0 &&
+    form.country.trim().length > 0 &&
+    form.taxId.trim().length > 0;
+
+  const handleUpdateBillingDetails = () => {
+    if (!isFormValid) {
+      setFormError("Please fill in all required fields before updating.");
+      return;
+    }
+    onClose();
+  };
+
+  if (!isOpen && !isEditPaymentOpen && !open) return null;
 
   return (
     <>
@@ -40,7 +76,7 @@ export default function EditBillingDetailsModal({ isOpen, onClose }) {
               ✕
             </button>
             <h2 className="ebd-title" id="ebd-title">
-              Edit Billing Details
+              Billing Details
             </h2>
             <p className="ebd-subtitle">
               Review your billing details to ensure uninterrupted service.
@@ -119,10 +155,16 @@ export default function EditBillingDetailsModal({ isOpen, onClose }) {
               <div className="ebd-field">
                 <label className="ebd-label">Primary Method*</label>
                 <div className="ebd-method-card">
-                  <div className="ebd-visa-badge">VISA</div>
+                  <img
+                    src={logoMap[primaryMethodId] || VisaLogo}
+                    alt={`${primaryMethodId} logo`}
+                    className="ebd-method-badge-img"
+                  />
                   <div className="ebd-card-info">
-                    <p className="ebd-card-name">Visa ending 4242</p>
-                    <p className="ebd-card-expiry">Expires 12/29</p>
+                    <p className="ebd-card-name">{primaryMethodName}</p>
+                    {primaryMethodId !== "paypal" && (
+                      <p className="ebd-card-expiry">{primaryMethodExpiry}</p>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -137,23 +179,38 @@ export default function EditBillingDetailsModal({ isOpen, onClose }) {
               <button
                 type="button"
                 className="ebd-add-method"
-                onClick={() => setOpen(true)}
+                onClick={handleOpenAddPaymentModal}
               >
                 <span className="ebd-plus-icon">+</span>
                 <span>Add a new payment method</span>
               </button>
             </div>
             <div className="ebd-spacer" />
-            <button type="button" className="ebd-submit-btn" onClick={onClose}>
+            {formError && <p className="ebd-form-error">{formError}</p>}
+            <button
+              type="button"
+              className="ebd-submit-btn"
+              onClick={handleUpdateBillingDetails}
+              disabled={!isFormValid}
+            >
               Update Billing Details
             </button>
           </div>
         </div>
       )}
-      <ManagingPaymentMethod open={open} setOpen={setOpen} />
-      <UpdatePaymentMethodModal
-        isOpen={isEditPaymentOpen}
-        onClose={() => setIsEditPaymentOpen(false)}
+      <ManagingPaymentMethod
+        open={open}
+        setOpen={setOpen}
+        addMode
+        selectedMethodId={primaryMethodId}
+        onSelectMethod={onSelectPrimaryMethod}
+      />
+      <ManagingPaymentMethod
+        open={isEditPaymentOpen}
+        setOpen={setIsEditPaymentOpen}
+        selectedMethodId={primaryMethodId}
+        editMethodId={primaryMethodId}
+        onSelectMethod={onSelectPrimaryMethod}
       />
     </>
   );
