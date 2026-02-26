@@ -159,7 +159,15 @@ const PlatformSetting = () => {
                   className="full-select"
                   style={{ width: "auto", padding: "6px 12px" }}
                 >
-                  <option>30 Minutes</option>
+                  <option value="5minutes">5 Minutes</option>
+                  <option value="10minutes">10 Minutes</option>
+                  <option value="15minutes">15 Minutes</option>
+                  <option value="20minutes">20 Minutes</option>
+                  <option value="30minutes">30 Minutes</option>
+                  <option value="45minutes">45 Minutes</option>
+                  <option value="60minutes">60 Minutes</option>
+                  <option value="90minutes">90 Minutes</option>
+                  <option value="2hours">2 Hours</option>
                 </select>
               </div>
 
@@ -169,7 +177,7 @@ const PlatformSetting = () => {
                   <p>Limit admin access to specific IP ranges</p>
                 </div>
                 <label className="switch">
-                  <input type="checkbox" disabled />
+                  <input type="checkbox" defaultChecked />
                   <span className="slider"></span>
                 </label>
               </div>
