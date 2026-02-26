@@ -7,6 +7,11 @@ import notifBell from "../../assets/NotifBell.png";
 import { AdminSalesAPI } from "../../services/AdminSalesAPI";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
 import ExportConfirmation from "../../components/ExportConfirmationModal";
+import {
+  formatAdminCurrency,
+  loadAdminPlatformPreferences,
+  subscribeAdminPlatformPreferences,
+} from "../../utils/adminPlatformPreferences";
 
 const Icons = {
   Bell: "🔔",
@@ -50,6 +55,9 @@ const AdminSales = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [exporting, setExporting] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [platformPreferences, setPlatformPreferences] = useState(() =>
+    loadAdminPlatformPreferences(),
+  );
   const [filters, setFilters] = useState({
     date_range: "30",
     category: "all",
@@ -88,6 +96,13 @@ const AdminSales = () => {
     fetchOrders();
   }, [fetchOrders]);
 
+  useEffect(() => {
+    setPlatformPreferences(loadAdminPlatformPreferences());
+    return subscribeAdminPlatformPreferences((nextPreferences) => {
+      setPlatformPreferences(nextPreferences);
+    });
+  }, []);
+
   const handleSearch = (term) => {
     setFilters((prev) => ({ ...prev, search: term }));
     setCurrentPage(1);
@@ -120,11 +135,7 @@ const AdminSales = () => {
   };
 
   const formatCurrency = (amount) => {
-    if (!amount) return "$0.00";
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
+    return formatAdminCurrency(amount ?? 0, platformPreferences.currency);
   };
 
   const formatPercentage = (percentage) => {

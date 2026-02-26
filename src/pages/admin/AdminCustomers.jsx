@@ -11,6 +11,11 @@ import avgCustomerSpentIcon from "../../assets/avg-customer-spent.png";
 import { AdminCustomersAPI } from "../../services/AdminCustomersAPI";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
 import ExportConfirmation from "../../components/ExportConfirmationModal";
+import {
+  formatAdminCurrency,
+  loadAdminPlatformPreferences,
+  subscribeAdminPlatformPreferences,
+} from "../../utils/adminPlatformPreferences";
 
 const Icons = {
   Bell: "🔔",
@@ -47,6 +52,9 @@ const AdminCustomers = () => {
   const [perPage] = useState(10);
   const [exporting, setExporting] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [platformPreferences, setPlatformPreferences] = useState(() =>
+    loadAdminPlatformPreferences(),
+  );
 
   const fetchStats = useCallback(async () => {
     try {
@@ -86,6 +94,13 @@ const AdminCustomers = () => {
     fetchCustomers();
   }, [fetchCustomers]);
 
+  useEffect(() => {
+    setPlatformPreferences(loadAdminPlatformPreferences());
+    return subscribeAdminPlatformPreferences((nextPreferences) => {
+      setPlatformPreferences(nextPreferences);
+    });
+  }, []);
+
   const handleSearch = (term) => {
     setSearchTerm(term);
     setCurrentPage(1);
@@ -118,11 +133,7 @@ const AdminCustomers = () => {
   };
 
   const formatCurrency = (amount) => {
-    if (!amount) return "$0.00";
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
+    return formatAdminCurrency(amount ?? 0, platformPreferences.currency);
   };
 
   const formatPercentage = (percentage) => {

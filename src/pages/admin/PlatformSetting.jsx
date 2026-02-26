@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import AdminTopbar from "../../components/AdminTopbar";
@@ -6,9 +6,45 @@ import "../../styles/platformSetting.css";
 import searchIcon from "../../assets/Search.png";
 import notifBell from "../../assets/NotifBell.png";
 import { IconAppWindowFilled, IconShieldLockFilled } from "@tabler/icons-react";
+import {
+  loadAdminPlatformPreferences,
+  saveAdminPlatformPreferences,
+  SUPPORTED_CURRENCIES,
+} from "../../utils/adminPlatformPreferences";
+import { showSuccessToast } from "../../utils/toast";
 
 const PlatformSetting = () => {
   const navigate = useNavigate();
+  const initialPreferences = useMemo(() => loadAdminPlatformPreferences(), []);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState(() => ({
+    platformName: initialPreferences.platformName,
+    supportEmail: initialPreferences.supportEmail,
+    currency: initialPreferences.currency,
+    timezone: initialPreferences.timezone,
+    mfaRequired: true,
+    sessionTimeout: "30minutes",
+    ipWhitelisting: true,
+  }));
+
+  const handleChange = (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleSaveChanges = () => {
+    setSaving(true);
+    try {
+      saveAdminPlatformPreferences({
+        platformName: form.platformName,
+        supportEmail: form.supportEmail,
+        currency: form.currency,
+        timezone: form.timezone,
+      });
+      showSuccessToast("Platform settings saved.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="layout">
@@ -28,7 +64,9 @@ const PlatformSetting = () => {
             <img src={notifBell} alt="Notifications" className="topbar-icon" />
             <span className="notification-dot" />
           </Link>
-          <button className="btn primary">Save Changes</button>
+          <button className="btn primary" onClick={handleSaveChanges} disabled={saving}>
+            {saving ? "Saving..." : "Save Changes"}
+          </button>
         </AdminTopbar>
 
         <div className="page-header">
@@ -77,28 +115,38 @@ const PlatformSetting = () => {
               <div className="platform-form-grid">
                 <div className="input-group">
                   <label>Platform Name</label>
-                  <input type="text" defaultValue="CertiCode" />
+                  <input
+                    type="text"
+                    value={form.platformName}
+                    onChange={(e) => handleChange("platformName", e.target.value)}
+                  />
                   <span className="input-hint">
                     Appears in email footers and browser tabs.
                   </span>
                 </div>
                 <div className="input-group">
                   <label>Support Email Address</label>
-                  <input type="email" defaultValue="support@certicode.com" />
+                  <input
+                    type="email"
+                    value={form.supportEmail}
+                    onChange={(e) => handleChange("supportEmail", e.target.value)}
+                  />
                   <span className="input-hint">
                     Used for automated system communications.
                   </span>
                 </div>
                 <div className="input-group">
                   <label>Default Currency</label>
-                  <select className="full-select" defaultValue="USD">
-                    <option value="EUR">EUR - Euro</option>
-                    <option value="EUR">EUR - Euro</option>
-                    <option value="GBP">GBP - British Pound Sterling</option>
-                    <option value="USD">USD - US Dollar</option>
-                    <option value="JPY">JPY - Japanese Yen</option>
-                    <option value="PHP">PHP - Philippine Peso</option>
-                    <option value="SGD">SGD - Singapore Dollar</option>
+                  <select
+                    className="full-select"
+                    value={form.currency}
+                    onChange={(e) => handleChange("currency", e.target.value)}
+                  >
+                    {SUPPORTED_CURRENCIES.map((currency) => (
+                      <option key={currency.code} value={currency.code}>
+                        {currency.label}
+                      </option>
+                    ))}
                   </select>
                   <span className="input-hint">
                     Base currency for all billing calculations.
@@ -106,7 +154,11 @@ const PlatformSetting = () => {
                 </div>
                 <div className="input-group">
                   <label>Timezone</label>
-                  <select className="full-select" defaultValue="EST">
+                  <select
+                    className="full-select"
+                    value={form.timezone}
+                    onChange={(e) => handleChange("timezone", e.target.value)}
+                  >
                     <option value="EST">
                       (UTC-05:00) Eastern Time (US & Canada)
                     </option>
@@ -168,7 +220,11 @@ const PlatformSetting = () => {
                   <p>Require MFA for all administrative accounts</p>
                 </div>
                 <label className="switch">
-                  <input type="checkbox" defaultChecked />
+                  <input
+                    type="checkbox"
+                    checked={form.mfaRequired}
+                    onChange={(e) => handleChange("mfaRequired", e.target.checked)}
+                  />
                   <span className="slider"></span>
                 </label>
               </div>
@@ -181,6 +237,8 @@ const PlatformSetting = () => {
                 <select
                   className="full-select"
                   style={{ width: "auto", padding: "6px 12px" }}
+                  value={form.sessionTimeout}
+                  onChange={(e) => handleChange("sessionTimeout", e.target.value)}
                 >
                   <option value="5minutes">5 Minutes</option>
                   <option value="10minutes">10 Minutes</option>
@@ -200,7 +258,13 @@ const PlatformSetting = () => {
                   <p>Limit admin access to specific IP ranges</p>
                 </div>
                 <label className="switch">
-                  <input type="checkbox" defaultChecked />
+                  <input
+                    type="checkbox"
+                    checked={form.ipWhitelisting}
+                    onChange={(e) =>
+                      handleChange("ipWhitelisting", e.target.checked)
+                    }
+                  />
                   <span className="slider"></span>
                 </label>
               </div>

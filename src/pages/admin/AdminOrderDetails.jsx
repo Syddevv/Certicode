@@ -16,6 +16,11 @@ import { AdminSalesAPI } from "../../services/AdminSalesAPI";
 import { AdminCustomersAPI } from "../../services/AdminCustomersAPI";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
 import { downloadInvoicePdf } from "../../utils/invoicePdf";
+import {
+  formatAdminCurrency,
+  loadAdminPlatformPreferences,
+  subscribeAdminPlatformPreferences,
+} from "../../utils/adminPlatformPreferences";
 
 const COMPLETED_STATUSES = ["completed", "paid", "success", "succeeded"];
 
@@ -26,12 +31,9 @@ const toNumber = (value) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
-const formatCurrency = (value) => {
+const formatCurrency = (value, currencyCode = "USD") => {
   const amount = toNumber(value) ?? 0;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
+  return formatAdminCurrency(amount, currencyCode);
 };
 
 const formatDateTime = (value, fallback = "") => {
@@ -200,6 +202,9 @@ const AdminOrderDetails = () => {
   const [downloading, setDownloading] = useState(false);
   const [resolvedCustomerId, setResolvedCustomerId] = useState(null);
   const [resolvingCustomerId, setResolvingCustomerId] = useState(false);
+  const [platformPreferences, setPlatformPreferences] = useState(() =>
+    loadAdminPlatformPreferences(),
+  );
   const [error, setError] = useState("");
   const [details, setDetails] = useState(() =>
     routeOrder ? normalizeOrderPayload({ order: routeOrder }) : null,
@@ -274,6 +279,13 @@ const AdminOrderDetails = () => {
 
     fetchCustomerDetails();
   }, [details?.customer?.id, details?.customer?.customer_id, details?.order?.customer_id]);
+
+  useEffect(() => {
+    setPlatformPreferences(loadAdminPlatformPreferences());
+    return subscribeAdminPlatformPreferences((nextPreferences) => {
+      setPlatformPreferences(nextPreferences);
+    });
+  }, []);
 
   useEffect(() => {
     const directCustomerId =
@@ -424,7 +436,10 @@ const AdminOrderDetails = () => {
     return {
       orderId: order.order_number || order.order_id || `#ORD-${id}`,
       placedLabel: formatPlacedLabel(order.purchased_at || order.paid_at || order.created_at),
-      totalAmount: formatCurrency(order.total_amount || order.amount || order.grand_total),
+      totalAmount: formatCurrency(
+        order.total_amount || order.amount || order.grand_total,
+        platformPreferences.currency,
+      ),
       statusLabel: statusRaw.toUpperCase(),
       statusClass: normalizeStatusClass(statusRaw),
       paymentVerified: isCompleted,
@@ -435,7 +450,10 @@ const AdminOrderDetails = () => {
         order.license_name ||
         "Full Source Code License (Commercial)",
       assetTags,
-      assetPrice: formatCurrency(asset.price || order.item_price || order.total_amount || order.amount),
+      assetPrice: formatCurrency(
+        asset.price || order.item_price || order.total_amount || order.amount,
+        platformPreferences.currency,
+      ),
       customerId:
         customer.id ||
         customer.customer_id ||
@@ -463,7 +481,7 @@ const AdminOrderDetails = () => {
       invoiceUrl,
       orderPk: order.id || id,
     };
-  }, [details, id]);
+  }, [details, id, platformPreferences.currency]);
 
   const customerProfileId = viewModel?.customerId || resolvedCustomerId;
 

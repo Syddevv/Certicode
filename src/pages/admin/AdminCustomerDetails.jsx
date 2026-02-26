@@ -10,6 +10,11 @@ import { resolveAvatarUrl } from "../../utils/avatar";
 import { AdminCustomersAPI } from "../../services/AdminCustomersAPI";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
 import { downloadCustomerProfilePdf } from "../../utils/customerProfilePdf";
+import {
+  formatAdminCurrency,
+  loadAdminPlatformPreferences,
+  subscribeAdminPlatformPreferences,
+} from "../../utils/adminPlatformPreferences";
 
 const PER_PAGE = 10;
 
@@ -20,12 +25,9 @@ const toNumber = (value) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
-const formatCurrency = (value) => {
+const formatCurrency = (value, currencyCode = "USD") => {
   const amount = toNumber(value) ?? 0;
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
+  return formatAdminCurrency(amount, currencyCode);
 };
 
 const formatDate = (value, fallback = "") => {
@@ -116,6 +118,9 @@ const AdminCustomerDetails = () => {
   const [loadingCustomer, setLoadingCustomer] = useState(!routeCustomer);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [exportingProfile, setExportingProfile] = useState(false);
+  const [platformPreferences, setPlatformPreferences] = useState(() =>
+    loadAdminPlatformPreferences(),
+  );
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -181,6 +186,13 @@ const AdminCustomerDetails = () => {
     fetchCustomerOrders();
   }, [id, currentPage]);
 
+  useEffect(() => {
+    setPlatformPreferences(loadAdminPlatformPreferences());
+    return subscribeAdminPlatformPreferences((nextPreferences) => {
+      setPlatformPreferences(nextPreferences);
+    });
+  }, []);
+
   const viewModel = useMemo(() => {
     if (!customer) return null;
 
@@ -219,11 +231,11 @@ const AdminCustomerDetails = () => {
       address: formatAddress(customer.address || customer.billing_address || customer.delivery_address),
       statusLabel: isActive ? "ACTIVE" : "INACTIVE",
       statusClass: isActive ? "active" : "inactive",
-      totalSpent: formatCurrency(totalSpent),
+      totalSpent: formatCurrency(totalSpent, platformPreferences.currency),
       totalOrders: Math.max(0, Number(orderCount || 0)),
       lastOrderDate: formatDate(latestOrderDate, "No orders yet"),
     };
-  }, [customer, orders, totalItems, id]);
+  }, [customer, orders, totalItems, id, platformPreferences.currency]);
 
   const mappedOrders = useMemo(() => {
     return orders.map((order) => {
@@ -237,7 +249,10 @@ const AdminCustomerDetails = () => {
         orderNumber: order.order_number || `#ORD-${orderId}`,
         assetName: order.asset_name || order.product_name || order.product?.name || "Digital Asset",
         category,
-        amount: formatCurrency(order.total_amount || order.amount),
+        amount: formatCurrency(
+          order.total_amount || order.amount,
+          platformPreferences.currency,
+        ),
         dateLabel: formatDate(orderDate, "-"),
         timeLabel: formatTime(orderDate, "-"),
         statusLabel: statusRaw,
@@ -245,7 +260,7 @@ const AdminCustomerDetails = () => {
         rawOrder: order,
       };
     });
-  }, [orders]);
+  }, [orders, platformPreferences.currency]);
 
   const handlePageChange = (page) => {
     if (page < 1 || page > totalPages) return;
