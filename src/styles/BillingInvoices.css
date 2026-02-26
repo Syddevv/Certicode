@@ -468,36 +468,59 @@
 
 .billing-method {
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) auto;
-  gap: 10px;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  gap: 12px;
   align-items: center;
   border: 1px solid #eef2f7;
-  border-radius: 12px;
-  padding: 10px;
+  border-radius: 16px;
+  padding: 12px;
   background: #f8fafc;
   margin-top: 8px;
 }
 
 .billing-method__icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 10px;
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
   background: #ffffff;
-  display: grid;
-  place-items: center;
+  border: 1px solid #dbe3ec;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0;
+  line-height: 0;
 }
 
 .billing-method__icon img {
-  width: 16px;
-  height: 16px;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+.billing-method__icon .ebd-method-logo {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 42px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .billing-method strong {
+  display: block;
   font-size: 12px;
   color: #0f172a;
 }
 
 .billing-method span {
+  display: block;
   font-size: 10px;
   color: #94a3b8;
 }
@@ -585,9 +608,6 @@
   opacity: 0.15;
   pointer-events: none;
 }
-
-
-/*update billing invoices */
 
 .ebd-overlay {
   position: fixed;
