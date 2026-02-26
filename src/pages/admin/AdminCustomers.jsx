@@ -394,13 +394,6 @@ const AdminCustomers = () => {
                   </button>
                 </div>
               </div>
-
-              <div className="right-controls">
-                <div className="view-toggle">
-                  <button className="toggle-btn active">{Icons.List}</button>
-                  <button className="toggle-btn">{Icons.Grid}</button>
-                </div>
-              </div>
             </div>
 
             <table>

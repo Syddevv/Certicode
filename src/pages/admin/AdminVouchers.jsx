@@ -16,7 +16,6 @@ import Expiring from "../../assets/Expiring.png";
 import Used from "../../assets/Used.png";
 import FilterVouch from "../../assets/FilterVouch.png";
 
-
 const voucherStats = [
   {
     label: "TOTAL VOUCHER",
@@ -29,14 +28,12 @@ const voucherStats = [
     value: 112,
     tone: "green",
     icon: ActiveVouch,
-
   },
   {
     label: "TOTAL USED",
     value: 170,
     tone: "blue",
     icon: UsedVouch,
-
   },
 ];
 
@@ -208,7 +205,11 @@ const AdminVouchers = () => {
               className="notification-link"
               aria-label="Notifications"
             >
-              <img src={notifBell} alt="Notifications" className="notification-icon" />
+              <img
+                src={notifBell}
+                alt="Notifications"
+                className="notification-icon"
+              />
               <span className="notification-dot" />
             </Link>
             <Link
@@ -272,7 +273,12 @@ const AdminVouchers = () => {
                 ))}
               </div>
               <button type="button" className="vouchers-more-filters">
-                <img src={FilterVouch} alt="" aria-hidden="true" className="vouchers-filter-icon" />
+                <img
+                  src={FilterVouch}
+                  alt=""
+                  aria-hidden="true"
+                  className="vouchers-filter-icon"
+                />
                 More Filters
               </button>
             </div>
@@ -309,13 +315,19 @@ const AdminVouchers = () => {
                           <span className="voucher-code">{voucher.code}</span>
                         </td>
                         <td>
-                          <span className="voucher-discount">{voucher.discount}</span>
+                          <span className="voucher-discount">
+                            {voucher.discount}
+                          </span>
                         </td>
                         <td>{voucher.activeFrom}</td>
                         <td>{voucher.activeTo}</td>
-                        <td className="voucher-usage-limit">{voucher.usageLimit}</td>
+                        <td className="voucher-usage-limit">
+                          {voucher.usageLimit}
+                        </td>
                         <td>
-                          <span className={`voucher-status ${voucher.statusTone}`}>
+                          <span
+                            className={`voucher-status ${voucher.statusTone}`}
+                          >
                             {voucher.status}
                           </span>
                         </td>
@@ -330,14 +342,24 @@ const AdminVouchers = () => {
                                 })
                               }
                             >
-                              <img src={VouchRemove} alt="" aria-hidden="true" className="voucher-action-icon" />
+                              <img
+                                src={VouchRemove}
+                                alt=""
+                                aria-hidden="true"
+                                className="voucher-action-icon"
+                              />
                             </button>
                             <button
                               type="button"
                               aria-label={`Edit ${voucher.name}`}
                               onClick={() => handleEdit(voucher)}
                             >
-                              <img src={VouchEdit} alt="" aria-hidden="true" className="voucher-action-icon" />
+                              <img
+                                src={VouchEdit}
+                                alt=""
+                                aria-hidden="true"
+                                className="voucher-action-icon"
+                              />
                             </button>
                           </div>
                         </td>
@@ -352,27 +374,46 @@ const AdminVouchers = () => {
               <span>
                 Showing{" "}
                 <strong>
-                  {filteredVouchers.length === 0 ? "0-0" : `1-${filteredVouchers.length}`}
+                  {filteredVouchers.length === 0
+                    ? "0-0"
+                    : `1-${filteredVouchers.length}`}
                 </strong>{" "}
                 of {filteredVouchers.length} vouchers
               </span>
               <div className="vouchers-pagination-controls">
-                <button type="button" className="voucher-page-nav-btn" aria-label="Previous page">
-                  <img src={PaginationLeft} alt="" aria-hidden="true" className="voucher-page-nav-icon" />
+                <button
+                  type="button"
+                  className="voucher-page-nav-btn"
+                  aria-label="Previous page"
+                >
+                  <img
+                    src={PaginationLeft}
+                    alt=""
+                    aria-hidden="true"
+                    className="voucher-page-nav-icon"
+                  />
                 </button>
                 <button type="button" className="active">
                   1
                 </button>
                 <button type="button">2</button>
-                <button type="button" className="voucher-page-nav-btn" aria-label="Next page">
-                  <img src={PaginationRight} alt="" aria-hidden="true" className="voucher-page-nav-icon" />
+                <button
+                  type="button"
+                  className="voucher-page-nav-btn"
+                  aria-label="Next page"
+                >
+                  <img
+                    src={PaginationRight}
+                    alt=""
+                    aria-hidden="true"
+                    className="voucher-page-nav-icon"
+                  />
                 </button>
               </div>
             </div>
           </section>
         </main>
       </div>
-
     </>
   );
 };
