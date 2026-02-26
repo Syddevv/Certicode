@@ -493,11 +493,13 @@
 }
 
 .billing-method strong {
+  display: block;
   font-size: 12px;
   color: #0f172a;
 }
 
 .billing-method span {
+  display: block;
   font-size: 10px;
   color: #94a3b8;
 }
