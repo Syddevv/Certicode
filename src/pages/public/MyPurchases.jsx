@@ -11,6 +11,7 @@ import SearchIcon from "../../assets/lucide_search.png";
 import WhiteDownload from "../../assets/whiteDownload.png";
 import OrangeBadge from "../../assets/orangeBadge.png";
 import OrangeStar from "../../assets/orangestar.png";
+import EditPenIcon from "../../assets/edit_pen.png";
 import { ProfileAPI } from "../../services/ProfileAPI";
 
 const MyPurchases = () => {
@@ -342,7 +343,7 @@ const MyPurchases = () => {
               onClick={() => navigate("/account-settings")}
             >
               <span className="purchases-profile__editIcon" aria-hidden="true">
-                {"\u270e"}
+                <img src={EditPenIcon} alt="" aria-hidden="true" />
               </span>
               Edit Profile
             </button>
