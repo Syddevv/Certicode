@@ -13,6 +13,10 @@ import OrangeDownload from "../../assets/orangeDownload.png";
 import GrayWallet from "../../assets/graywallet.png";
 import OrangeStar from "../../assets/orangestar.png";
 import SearchIcon from "../../assets/lucide_search.png";
+import VisaLogo from "../../assets/visa logo.png";
+import MastercardLogo from "../../assets/mastercard logo.png";
+import PaypalLogo from "../../assets/paypal logo.png";
+import EditPenIcon from "../../assets/edit_pen.png";
 import EditBillingDetailsModal from "../../components/Editbillingdetailsmodal ";
 import { ProfileAPI } from "../../services/ProfileAPI";
 import ManagingPaymentMethod from "../../components/ManagingPaymentMethod";
@@ -156,6 +160,11 @@ const BillingInvoices = () => {
     ? selectedPrimaryMethod?.id || inferMethodId(primaryMethodNameRaw)
     : null;
   const showPrimaryMethodSubtitle = primaryMethodType !== "paypal";
+  const paymentLogoMap = {
+    visa: VisaLogo,
+    mastercard: MastercardLogo,
+    paypal: PaypalLogo,
+  };
 
   const invoices = purchases.map((purchase, index) => {
     let amount = 0;
@@ -264,7 +273,7 @@ const BillingInvoices = () => {
               onClick={() => navigate("/account-settings")}
             >
               <span className="billing-profile__editIcon" aria-hidden="true">
-                {"\u270e"}
+                <img src={EditPenIcon} alt="" aria-hidden="true" />
               </span>
               Edit Profile
             </button>
@@ -477,20 +486,12 @@ const BillingInvoices = () => {
                   <div className="billing-method">
                     <span className="billing-method__icon">
                       {primaryMethodType ? (
-                        <div className="ebd-method-logo" aria-hidden="true">
-                          {primaryMethodType === "visa" && (
-                            <div className="ebd-visa-logo">VISA</div>
-                          )}
-                          {primaryMethodType === "mastercard" && (
-                            <div className="ebd-mastercard-logo">
-                              <div className="ebd-mc-circle red" />
-                              <div className="ebd-mc-circle orange" />
-                            </div>
-                          )}
-                          {primaryMethodType === "paypal" && (
-                            <div className="ebd-paypal-logo">P</div>
-                          )}
-                        </div>
+                        <img
+                          src={paymentLogoMap[primaryMethodType]}
+                          alt=""
+                          aria-hidden="true"
+                          className="billing-payment-logo"
+                        />
                       ) : (
                         <img src={GrayWallet} alt="" aria-hidden="true" />
                       )}
@@ -543,6 +544,16 @@ const BillingInvoices = () => {
       <EditBillingDetailsModal
         isOpen={isUpdateBillingModal}
         onClose={() => setUpdateBillingModal(false)}
+        primaryMethod={
+          primaryMethodType
+            ? {
+                id: primaryMethodType,
+                name: primaryMethodName,
+                expiry: primaryMethodExpiry,
+              }
+            : null
+        }
+        onSelectPrimaryMethod={setSelectedPrimaryMethod}
       />
       <Footer />
       <ManagingPaymentMethod
