@@ -4,8 +4,8 @@ import "../styles/UpdatePaymentMethodModal.css";
 export default function UpdatePaymentMethodModal({ isOpen, onClose }) {
   const [form, setForm] = useState({
     cardHolder: "John Doe",
-    cardNumber: "1234 5678 9101 4242",
-    expiry: "12/26",
+    cardNumber: "4242424242424242",
+    expiry: "12/34",
     cvc: "123",
     isDefault: false,
   });
