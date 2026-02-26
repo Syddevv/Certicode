@@ -1,4 +1,3 @@
-/* Checkout.css */
 .checkout {
   padding: 40px 0 90px;
   background: #f6f7fb;
@@ -293,8 +292,8 @@
 }
 
 .checkout__payTop img {
-  width: 18px;
-  height: 18px;
+  width: 15px;
+  height: 15px;
   opacity: 0.75;
 }
 
@@ -720,6 +719,127 @@
   margin-top: 8px;
 }
 
+.checkout__card--payment {
+  border-radius: 24px;
+  padding: 22px 22px 18px;
+}
+
+.checkout__card--payment .checkout__cardHeader {
+  margin-bottom: 8px;
+}
+
+.checkout__card--payment .checkout__step {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #f5d9c4;
+  background: #f8ebe1;
+}
+
+.checkout__payOption {
+  border-radius: 20px;
+  border: 1px solid #d9dde3;
+  padding: 22px 24px;
+  background: #f9fafb;
+  box-shadow: none;
+  transform: none;
+  margin-bottom: 0;
+}
+
+.checkout__payOption + .checkout__payOption {
+  margin-top: 14px;
+}
+
+.checkout__payOption:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: #cfd5dd;
+}
+
+.checkout__payOption--active {
+  background: #f7eee6;
+  border-color: #f4c9a9;
+  box-shadow: none;
+}
+
+.checkout__payOption--active .checkout__payTitle {
+  color: #111827;
+}
+
+.checkout__radio {
+  width: 24px;
+  height: 24px;
+  border-width: 2px;
+  border-color: #d4d8de;
+}
+
+.checkout__radio--active {
+  border-color: #f97316;
+  background: #fff;
+}
+
+.checkout__radio--active::after {
+  width: 12px;
+  height: 12px;
+  background: #f97316;
+}
+
+.checkout__paySub {
+  color: #8b9bb2;
+}
+
+.checkout__payTop img {
+  width: 32px;
+  height: 32px;
+  opacity: 0.95;
+}
+
+.checkout__payFields {
+  margin-top: 6px;
+}
+
+.checkout__stripeContainer {
+  border: 1px solid #d6dce4;
+  border-radius: 20px;
+  background: #f7f9fc;
+  padding: 24px;
+  display: grid;
+  gap: 18px;
+}
+
+.checkout__stripeInput {
+  border: 1px solid #d6dce4;
+  border-radius: 12px;
+  background: #fff;
+  min-height: 44px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkout__stripeInput .checkout__cardElement {
+  width: 100%;
+}
+
+.checkout__inlineLock {
+  width: 16px;
+  height: 16px;
+  opacity: 0.8;
+}
+
+.checkout__stripeContainer .checkout__field span {
+  color: #111827;
+}
+
+.checkout__stripeContainer .checkout__field .StripeElement {
+  padding: 0;
+  border: 0;
+  min-height: unset;
+  background: transparent;
+  box-shadow: none;
+}
+
+
 .checkout__payOption {
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -845,9 +965,6 @@
   }
 }
 
-/* STRIPE!!! */
-
-/* Stripe CardElement Styling */
 .checkout__stripeContainer {
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -859,7 +976,6 @@
   margin-bottom: 12px;
 }
 
-/* Main CardElement container */
 .checkout__cardElement .StripeElement {
   width: 100%;
   padding: 12px 16px;
@@ -872,33 +988,28 @@
   align-items: center;
 }
 
-/* Focus state */
 .checkout__cardElement .StripeElement--focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Invalid state */
 .checkout__cardElement .StripeElement--invalid {
   border-color: #ef4444;
 }
 
-/* Complete state */
 .checkout__cardElement .StripeElement--complete {
   border-color: #10b981;
 }
 
-/* Base styling (from CARD_ELEMENT_OPTIONS.style.base) */
 .checkout__cardElement .StripeElement * {
   font-family: "Helvetica Neue", Helvetica, sans-serif !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
   font-size: 16px !important;
-  color: #32325d !important;
+  color: #32325d !important;  
   line-height: 24px !important;
 }
 
-/* Card number, expiry, CVC inputs */
 .checkout__cardElement .StripeElement input,
 .checkout__cardElement .StripeElement .CardNumberElement-input,
 .checkout__cardElement .StripeElement .CardExpiryElement-input,
@@ -906,7 +1017,7 @@
   font-family: "Helvetica Neue", Helvetica, sans-serif !important;
   -webkit-font-smoothing: antialiased !important;
   -moz-osx-font-smoothing: grayscale !important;
-  font-size: 16px !important;
+  font-size: 14px !important;
   line-height: 24px !important;
   color: #32325d !important;
   background: transparent !important;
@@ -918,14 +1029,12 @@
   width: 100% !important;
 }
 
-/* Placeholder styling (from ::placeholder) */
 .checkout__cardElement .StripeElement input::placeholder,
 .checkout__cardElement .StripeElement .__PrivateStripeElement-input::placeholder {
   color: #aab7c4 !important;
   opacity: 1 !important;
 }
 
-/* Autofill styling (from :-webkit-autofill) */
 .checkout__cardElement .StripeElement input:-webkit-autofill,
 .checkout__cardElement .StripeElement .__PrivateStripeElement-input:-webkit-autofill {
   color: #32325d !important;
@@ -935,7 +1044,6 @@
   transition: background-color 5000s ease-in-out 0s !important;
 }
 
-/* Invalid color (from CARD_ELEMENT_OPTIONS.style.invalid) */
 .checkout__cardElement .StripeElement--invalid * {
   color: #fa755a !important;
 }
@@ -944,7 +1052,6 @@
   color: #fa755a !important;
 }
 
-/* Complete color (from CARD_ELEMENT_OPTIONS.style.complete) */
 .checkout__cardElement .StripeElement--complete * {
   color: #10b981 !important;
 }
