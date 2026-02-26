@@ -11,13 +11,44 @@ import CustomerSupport from "../../assets/CustomerSupport.png";
 import { CartAPI } from "../../services/CartAPI";
 import { loadStripe } from "@stripe/stripe-js";
 import {
-  Elements,
-  CardElement,
-  useStripe,
-  useElements
+import {
+   Elements,
+   CardNumberElement,
+   CardExpiryElement,
+   CardCvcElement,
+   useStripe,
+   useElements
 } from "@stripe/react-stripe-js";
 
 const stripePromise = loadStripe("pk_test_51SuOSqBxaeRiDCkhh3cSl1fXqOcfJwRwM03TZlYXqYpqYBtBlaj0mNstAP2JlrFg8tEWvCvtJp4wP8SGsqLcbPWC00K7wU9ufv");
+const CARD_ELEMENT_OPTIONS = {
+  placeholder: "",
+  style: {
+    base: {
+      color: "#111827",
+      fontSize: "16px",
+      "::placeholder": {
+        color: "#9ca3af",
+        fontSize: "12px",
+      },
+    },
+    invalid: {
+      color: "#ef4444",
+    },
+  },
+};
+const CARD_NUMBER_OPTIONS = {
+  ...CARD_ELEMENT_OPTIONS,
+  placeholder: "1234 1234 1234 1234",
+};
+const CARD_EXPIRY_OPTIONS = {
+  ...CARD_ELEMENT_OPTIONS,
+  placeholder: "MM / YY",
+};
+const CARD_CVC_OPTIONS = {
+  ...CARD_ELEMENT_OPTIONS,
+  placeholder: "123",
+};
 
 const Checkout = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -31,6 +62,10 @@ const Checkout = () => {
   const [appliedPromo, setAppliedPromo] = useState(null);
   const [cardComplete, setCardComplete] = useState(false);
   const [cardError, setCardError] = useState("");
+    number: false,
+    expiry: false,
+    cvc: false,
+  });
   const navigate = useNavigate();
 
   const stripe = useStripe();
@@ -124,8 +159,13 @@ const Checkout = () => {
     setPaymentMethod(method);
   };
 
-  const handleCardElementChange = (event) => {
-    setCardComplete(event.complete);
+  const handleCardElementChange = (field, event) => {
+    setCardFields((prev) => {
+      const next = { ...prev, [field]: event.complete };
+      setCardComplete(next.number && next.expiry && next.cvc);
+      return next;
+    });
+
     if (event.error) {
       setCardError(event.error.message);
       setError(event.error.message);
@@ -134,6 +174,7 @@ const Checkout = () => {
       setError("");
     }
   };
+
 
   const handleCompletePurchase = async () => {
     if (!formData.fullName.trim()) {
@@ -152,7 +193,7 @@ const Checkout = () => {
         return;
       }
       
-      const cardElement = elements.getElement(CardElement);
+      const cardElement = elements.getElement(CardNumberElement);
       if (!cardElement) {
         setError("Card details are not complete");
         return;
@@ -469,26 +510,47 @@ const Checkout = () => {
                   
                   {paymentMethod === 'card' && (
                     <div className="checkout__payFields">
-                      <label className="checkout__field">
-                        <span>Card Details</span>
-                        <div className="checkout__stripeContainer">
-                          <div className="checkout__cardInputWrapper">
-                            <CardElement 
-                              onChange={handleCardElementChange}
+                      <div className="checkout__stripeContainer">
+                        <label className="checkout__field">
+                          <span>Card Number</span>
+                          <div className="checkout__stripeInput">
+                            <CardNumberElement
+                              options={CARD_NUMBER_OPTIONS}
+                              onChange={(event) => handleCardElementChange("number", event)}
                               className="checkout__cardElement"
                             />
+                            <img src={Padlock} alt="" aria-hidden="true" className="checkout__inlineLock" />
                           </div>
-                          <div className="checkout__cardSecure">
-                          </div>
+                        </label>
+                        <div className="checkout__fields checkout__fields--two">
+                          <label className="checkout__field">
+                            <span>Expiry</span>
+                            <div className="checkout__stripeInput">
+                              <CardExpiryElement
+                                options={CARD_EXPIRY_OPTIONS}
+                                onChange={(event) => handleCardElementChange("expiry", event)}
+                                className="checkout__cardElement"
+                              />
+                            </div>
+                          </label>
+                          <label className="checkout__field">
+                            <span>CVC</span>
+                            <div className="checkout__stripeInput">
+                              <CardCvcElement
+                                options={CARD_CVC_OPTIONS}
+                                onChange={(event) => handleCardElementChange("cvc", event)}
+                                className="checkout__cardElement"
+                              />
+                            </div>
+                          </label>
                         </div>
-                        {cardError && <div className="checkout__cardError">{cardError}</div>}
-                      </label>
+                      </div>
+                      {cardError && <div className="checkout__cardError">{cardError}</div>}
                     </div>
                   )}
                 </div>
 
-                {/* PAYPAL */}
-                {/* <div className={`checkout__payOption ${paymentMethod === 'paypal' ? 'checkout__payOption--active' : ''}`}
+                <div className={`checkout__payOption ${paymentMethod === 'paypal' ? 'checkout__payOption--active' : ''}`}
                      onClick={() => handlePaymentMethodChange('paypal')}>
                   <div className="checkout__payTop">
                     <div className="checkout__payLeft">
@@ -500,14 +562,14 @@ const Checkout = () => {
                     </div>
                     <img src={GrayWallet} alt="" aria-hidden="true" />
                   </div>
-                </div> */}
+                </div>
               </section>
 
               <Link className="checkout__back" to="/marketplace">
                 &lsaquo; Back to Marketplace
               </Link>
             </div>
-
+            
             <aside className="checkout__aside">
               <div className="checkout__summary">
                 <h3>Order Summary</h3>
