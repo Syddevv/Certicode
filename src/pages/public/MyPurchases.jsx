@@ -12,6 +12,9 @@ import WhiteDownload from "../../assets/whiteDownload.png";
 import OrangeBadge from "../../assets/orangeBadge.png";
 import OrangeStar from "../../assets/orangestar.png";
 import { ProfileAPI } from "../../services/ProfileAPI";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
+
+const API_URL = "http://127.0.0.1:8000/api";
 
 const MyPurchases = () => {
   const navigate = useNavigate();
@@ -24,6 +27,7 @@ const MyPurchases = () => {
   const [licenseFilter, setLicenseFilter] = useState("All");
   const [sortBy, setSortBy] = useState("recent");
   const [filtersOpen, setFiltersOpen] = useState(true);
+  const [downloading, setDownloading] = useState({});
 
   const techStackLabels = [
     "React",
@@ -290,6 +294,77 @@ const MyPurchases = () => {
     setTechStackFilter("All");
     setLicenseFilter("All");
     setSortBy("recent");
+  };
+
+  const handleDownload = async (productId) => {
+    if (!productId) {
+      showErrorToast("No product found for download.");
+      return;
+    }
+
+    try {
+      setDownloading((prev) => ({ ...prev, [productId]: true }));
+
+      const token = localStorage.getItem("auth_token");
+
+      if (!token) {
+        showErrorToast("Please login to download files");
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/products/${productId}/download`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 401) {
+        showErrorToast("Authentication failed. Please login again.");
+        return;
+      }
+
+      if (response.status === 403) {
+        showErrorToast("You need to purchase this product to download files.");
+        return;
+      }
+
+      if (response.status === 404) {
+        showErrorToast("No files found for this product.");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Download failed: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+
+      let filename = "download.zip";
+      const disposition = response.headers.get("content-disposition");
+      if (disposition) {
+        const match = disposition.match(/filename="?([^"]+)"?/);
+        if (match) filename = match[1];
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      showSuccessToast(`Download started: ${filename}`);
+
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+    } catch (error) {
+      console.error("Download failed:", error);
+      showErrorToast(error.message || "Failed to download. Please try again.");
+    } finally {
+      setDownloading((prev) => ({ ...prev, [productId]: false }));
+    }
   };
 
   return (
@@ -608,14 +683,23 @@ const MyPurchases = () => {
                             <button
                               className="purchases-download"
                               type="button"
-                              onClick={(event) => event.stopPropagation()}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                handleDownload(purchase.product?.id);
+                              }}
+                              disabled={
+                                !purchase.product?.id ||
+                                !!downloading[purchase.product?.id]
+                              }
                             >
                               <img
                                 src={WhiteDownload}
                                 alt=""
                                 aria-hidden="true"
                               />
-                              Download
+                              {downloading[purchase.product?.id]
+                                ? "Downloading..."
+                                : "Download"}
                             </button>
                             <button
                               className="purchases-more"
@@ -708,10 +792,21 @@ const MyPurchases = () => {
                       </div>
                     </div>
 
-                    <button className="purchases-primary" type="button">
+                    <button
+                      className="purchases-primary"
+                      type="button"
+                      onClick={() =>
+                        handleDownload(filteredPurchases[0]?.product?.id)
+                      }
+                      disabled={
+                        !filteredPurchases[0]?.product?.id ||
+                        !!downloading[filteredPurchases[0]?.product?.id]
+                      }
+                    >
                       <img src={WhiteDownload} alt="" aria-hidden="true" />
-                      Download Latest (
-                      {filteredPurchases[0].product?.version || "v1.0.0"})
+                      {downloading[filteredPurchases[0]?.product?.id]
+                        ? "Downloading..."
+                        : `Download Latest (${filteredPurchases[0].product?.version || "v1.0.0"})`}
                     </button>
                     <button className="purchases-secondary" type="button">
                       View Full License
