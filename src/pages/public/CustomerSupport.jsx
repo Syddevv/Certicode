@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
@@ -137,6 +136,7 @@ const topicPaths = {
 const CustomerSupport = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("Software Order Status");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -151,6 +151,37 @@ const CustomerSupport = () => {
   };
 
   const visibleCards = helpCardsByTopic[activeTab] ?? [];
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const isSearching = normalizedQuery.length > 0;
+
+  const searchableCards = Object.entries(helpCardsByTopic).flatMap(
+    ([topic, cards]) =>
+      cards.map((card) => ({
+        ...card,
+        topic,
+      }))
+  );
+
+  const filteredTopics = helpTopics.filter((topic) => {
+    const topicMatches = topic.toLowerCase().includes(normalizedQuery);
+    if (topicMatches) return true;
+    const topicCards = helpCardsByTopic[topic] ?? [];
+    return topicCards.some(
+      (card) =>
+        card.title.toLowerCase().includes(normalizedQuery) ||
+        card.text.toLowerCase().includes(normalizedQuery)
+    );
+  });
+
+  const filteredCards = searchableCards.filter(
+    (card) =>
+      card.title.toLowerCase().includes(normalizedQuery) ||
+      card.text.toLowerCase().includes(normalizedQuery) ||
+      card.topic.toLowerCase().includes(normalizedQuery)
+  );
+
+  const cardsToRender = isSearching ? filteredCards : visibleCards;
+  const topicsToRender = isSearching ? filteredTopics : helpTopics;
 
   return (
     <div className="support-page">
@@ -194,6 +225,8 @@ const CustomerSupport = () => {
               <input
                 type="search"
                 placeholder="Search for solutions, guides, or FAQs..."
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
               />
             </div>
           </div>
@@ -202,7 +235,7 @@ const CustomerSupport = () => {
             <aside className="support-topics">
               <h3>All help topics</h3>
               <ul>
-                {helpTopics.map((topic) => (
+                {topicsToRender.map((topic) => (
                   <li
                     key={topic}
                     className={topic === activeTab ? "is-active" : ""}
@@ -216,15 +249,22 @@ const CustomerSupport = () => {
             </aside>
 
             <div className="support-cards">
-              {visibleCards.map((card) => (
-                <article
-                  onClick={() => card.path && navigate(card.path)}
-                  key={card.title}
-                  className="support-card">
-                  <h4>{card.title}</h4>
-                  <p>{card.text}</p>
-                </article>
-              ))}
+              {cardsToRender.length > 0 ? (
+                cardsToRender.map((card) => (
+                  <article
+                    onClick={() => card.path && navigate(card.path)}
+                    key={`${card.topic ?? activeTab}-${card.title}`}
+                    className="support-card"
+                  >
+                    <h4>{card.title}</h4>
+                    <p>{card.text}</p>
+                  </article>
+                ))
+              ) : (
+                <p className="support-cards__empty">
+                  No support articles found for "{searchQuery.trim()}".
+                </p>
+              )}
             </div>
           </div>
         </div>
