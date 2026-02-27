@@ -10,6 +10,7 @@ import registerIllustration from "../../assets/Login Image.png";
 import arrowLeft from "../../assets/arrowleft.png";
 import { api } from "../../services/api";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
+import OtpVerificationModal from "../../components/OtpVerificationModal";
 
 const Register = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -19,10 +20,36 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
+  const [pendingUserData, setPendingUserData] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const togglePassword = () => setPasswordVisible(!passwordVisible);
   const toggleConfirmPassword = () =>
     setConfirmPasswordVisible(!confirmPasswordVisible);
+
+  const registerUser = async (userData, otpCode = "") => {
+    try {
+      setIsSubmitting(true);
+
+      const payload = {
+        ...userData,
+        ...(otpCode ? { otp_code: otpCode } : {}),
+      };
+
+      const data = await api.register(payload);
+
+      console.log("Registration successful:", data);
+      showSuccessToast("Registration successful!");
+      return true;
+    } catch (error) {
+      console.error("Registration error:", error);
+      showErrorToast(error.message || "Registration failed. Please try again.");
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,14 +70,65 @@ const Register = () => {
         password_confirmation: confirmPassword
       };
 
-      const data = await api.register(userData);
-      
-      console.log("Registration successful:", data);
-      showSuccessToast("Registration successful!");
-      window.location.href = "/login";
+      const requiresOtp = email.trim().toLowerCase().endsWith("@gmail.com");
+
+      if (requiresOtp) {
+        try {
+          setIsSubmitting(true);
+          await api.sendRegistrationOtp(email.trim().toLowerCase());
+          setPendingUserData(userData);
+          setIsOtpModalOpen(true);
+          showSuccessToast("OTP sent to your Gmail address.");
+        } finally {
+          setIsSubmitting(false);
+        }
+        return;
+      }
+
+      const registered = await registerUser(userData);
+      if (registered) {
+        window.location.href = "/login";
+      }
     } catch (error) {
-      console.error("Registration error:", error);
       showErrorToast(error.message || "Registration failed. Please try again.");
+    }
+  };
+
+  const handleOtpVerify = async (otpCode) => {
+    if (!pendingUserData) {
+      showErrorToast("Registration data is missing. Please try again.");
+      return;
+    }
+
+    const registered = await registerUser(pendingUserData, otpCode);
+    if (registered) {
+      setIsOtpModalOpen(false);
+      setPendingUserData(null);
+      window.location.href = "/login";
+    }
+  };
+
+  const handleOtpClose = () => {
+    if (isSubmitting) return;
+    setIsOtpModalOpen(false);
+    setPendingUserData(null);
+  };
+
+  const handleResendOtp = async () => {
+    const otpEmail = pendingUserData?.email || email;
+    if (!otpEmail) {
+      showErrorToast("Email is missing for OTP resend.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await api.sendRegistrationOtp(otpEmail.trim().toLowerCase());
+      showSuccessToast("A new OTP has been sent.");
+    } catch (error) {
+      showErrorToast(error.message || "Failed to resend OTP.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -185,8 +263,8 @@ const Register = () => {
               </label>
             </div>
 
-            <button type="submit" className="login-button">
-              Sign Up
+            <button type="submit" className="login-button" disabled={isSubmitting}>
+              {isSubmitting ? "Processing..." : "Sign Up"}
             </button>
 
             <div className="divider">
@@ -246,6 +324,15 @@ const Register = () => {
         <img src={arrowLeft} alt="" className="back-home-icon" />
         Back to Home
       </Link>
+
+      <OtpVerificationModal
+        isOpen={isOtpModalOpen}
+        email={pendingUserData?.email || email}
+        loading={isSubmitting}
+        onClose={handleOtpClose}
+        onVerify={handleOtpVerify}
+        onResend={handleResendOtp}
+      />
     </div>
   );
 };

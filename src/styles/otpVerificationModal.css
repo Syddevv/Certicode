@@ -1,0 +1,148 @@
+.otp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 20px;
+}
+
+.otp-modal {
+  background: #ffffff;
+  width: 420px;
+  border-radius: 20px;
+  padding: 32px 28px;
+  text-align: center;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+}
+
+.otp-modal-logo {
+  width: 140px;
+  margin-bottom: 16px;
+}
+
+.otp-modal h3 {
+  font-size: 20px;
+  margin-bottom: 12px;
+  color: #111827;
+}
+
+.otp-modal p {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.otp-modal p strong {
+  color: #374151;
+  font-weight: 700;
+}
+
+.otp-inputs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.otp-input-box {
+  width: 46px;
+  height: 52px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  outline: none;
+}
+
+.otp-input-box:focus {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+}
+
+.otp-input-box:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.otp-resend-btn {
+  border: none;
+  background: transparent;
+  color: #f97316;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 18px;
+}
+
+.otp-resend-btn:disabled {
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.otp-modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.otp-cancel-btn {
+  flex: 1;
+  background: #e5e7eb;
+  border: none;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #374151;
+}
+
+.otp-verify-btn {
+  flex: 1;
+  background: #fb923c;
+  border: none;
+  color: #fff;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.otp-verify-btn:hover:enabled {
+  background: #f97316;
+}
+
+.otp-cancel-btn:disabled,
+.otp-verify-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.otp-modal-footer {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+@media (max-width: 520px) {
+  .otp-modal {
+    width: 100%;
+    padding: 28px 18px;
+  }
+
+  .otp-inputs {
+    gap: 8px;
+  }
+
+  .otp-input-box {
+    width: 42px;
+    height: 48px;
+    font-size: 20px;
+  }
+}
+
