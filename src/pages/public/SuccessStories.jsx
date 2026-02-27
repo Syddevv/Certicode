@@ -5,7 +5,7 @@ import "../../styles/SuccessStories.css";
 import VerificationSpeed from "../../assets/VerificationSpeed.png";
 import ChartBar from "../../assets/ChartBar.png";
 import OrangeBadge from "../../assets/orangeBadge.png";
-import OrangeArrow from "../../assets/OrangeArrow.png";
+import ReadMoreIcon from "../../assets/readmore.png";
 import JaneDoe from "../../assets/janedoe.png";
 import SearchIcon from "../../assets/lucide_search.png";
 import QuoteIcon from "../../assets/quote.png";
@@ -414,7 +414,7 @@ const SuccessStories = () => {
                 type="button"
                 onClick={() => openSuccessStory(stories[0].url)}
               >
-                Read full case study <img src={OrangeArrow} alt="" />
+                Read full case study <img src={ReadMoreIcon} alt="" />
               </button>
             </div>
 
@@ -492,7 +492,7 @@ const SuccessStories = () => {
                   <img
                     src={story.image}
                     alt={story.title}
-                    onError={(e) => {
+                    onError={(e) => {  
                       e.target.onerror = null;
                       const industryImages = {
                         Government:
@@ -518,7 +518,7 @@ const SuccessStories = () => {
                   <h3>{story.title}</h3>
                   <p>{story.text}</p>
                   <button className="stories-card__link" type="button">
-                    Read Case Study <img src={OrangeArrow} alt="" />
+                    Read Case Study <img src={ReadMoreIcon} alt="" />
                   </button>
                 </div>
               </article>
@@ -537,9 +537,12 @@ const SuccessStories = () => {
             </p>
           )}
 
-          <button className="stories-grid__more" type="button">
+          <Link
+            className="stories-grid__more"
+            to="/success-stories/customer-success-stories"
+          >
             Load more success stories
-          </button>
+          </Link>
         </div>
       </section>
 
