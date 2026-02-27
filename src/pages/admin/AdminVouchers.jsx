@@ -197,7 +197,11 @@ const AdminVouchers = () => {
               className="notification-link"
               aria-label="Notifications"
             >
-              <img src={notifBell} alt="Notifications" className="notification-icon" />
+              <img
+                src={notifBell}
+                alt="Notifications"
+                className="notification-icon"
+              />
               <span className="notification-dot" />
             </Link>
             <Link
@@ -262,7 +266,12 @@ const AdminVouchers = () => {
                 ))}
               </div>
               <button type="button" className="vouchers-more-filters">
-                <img src={FilterVouch} alt="" aria-hidden="true" className="vouchers-filter-icon" />
+                <img
+                  src={FilterVouch}
+                  alt=""
+                  aria-hidden="true"
+                  className="vouchers-filter-icon"
+                />
                 More Filters
               </button>
             </div>

@@ -20,6 +20,11 @@ import actionArchiveIcon from "../../assets/archiveIcon.png";
 import actionActivateIcon from "../../assets/greenCheck.png";
 import { AdminInventoryAPI } from "../../services/AdminInventoryAPI";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
+import {
+  formatAdminCurrency,
+  loadAdminPlatformPreferences,
+  subscribeAdminPlatformPreferences,
+} from "../../utils/adminPlatformPreferences";
 
 const Icons = {
   Add: "+",
@@ -99,6 +104,9 @@ const AdminInventory = ({ statusView = "active" }) => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [pendingStatusAction, setPendingStatusAction] = useState(null);
+  const [platformPreferences, setPlatformPreferences] = useState(() =>
+    loadAdminPlatformPreferences(),
+  );
   const [statusOverrides, setStatusOverrides] = useState(() => {
     try {
       const stored = localStorage.getItem(STATUS_OVERRIDE_STORAGE_KEY);
@@ -158,6 +166,13 @@ const AdminInventory = ({ statusView = "active" }) => {
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+  useEffect(() => {
+    setPlatformPreferences(loadAdminPlatformPreferences());
+    return subscribeAdminPlatformPreferences((nextPreferences) => {
+      setPlatformPreferences(nextPreferences);
+    });
+  }, []);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -333,11 +348,7 @@ const AdminInventory = ({ statusView = "active" }) => {
   };
 
   const formatCurrency = (amount) => {
-    if (!amount) return "$0.00";
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
+    return formatAdminCurrency(amount ?? 0, platformPreferences.currency);
   };
 
   const getCategoryBadge = (assetType) => {

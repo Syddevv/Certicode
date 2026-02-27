@@ -12,6 +12,11 @@ import auditCompletedIcon from "../../assets/audit-completed.png";
 import addedNewProjectIcon from "../../assets/added-new-project.png";
 import notifBell from "../../assets/NotifBell.png";
 import { AdminDashboardAPI } from "../../services/AdminDashboardAPI";
+import {
+  formatAdminCurrency,
+  loadAdminPlatformPreferences,
+  subscribeAdminPlatformPreferences,
+} from "../../utils/adminPlatformPreferences";
 
 const Icons = {
   Bell: "🔔",
@@ -59,6 +64,9 @@ const AdminDashboard = () => {
   });
   const [salesPeriod, setSalesPeriod] = useState("6months");
   const [currentPage, setCurrentPage] = useState(1);
+  const [platformPreferences, setPlatformPreferences] = useState(() =>
+    loadAdminPlatformPreferences(),
+  );
 
   const fetchDashboardData = useCallback(async (page = 1) => {
     setLoading((prev) => ({ ...prev, dashboard: true, orders: true }));
@@ -89,12 +97,15 @@ const AdminDashboard = () => {
     fetchSalesOverview(salesPeriod);
   }, [currentPage, salesPeriod, fetchDashboardData, fetchSalesOverview]);
 
+  useEffect(() => {
+    setPlatformPreferences(loadAdminPlatformPreferences());
+    return subscribeAdminPlatformPreferences((nextPreferences) => {
+      setPlatformPreferences(nextPreferences);
+    });
+  }, []);
+
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-    }).format(amount);
+    return formatAdminCurrency(amount, platformPreferences.currency);
   };
 
   const formatPercent = (percent) => {

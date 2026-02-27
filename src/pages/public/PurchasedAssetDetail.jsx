@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import "../../styles/PurchasedAssetDetail.css";
@@ -16,10 +16,15 @@ import OrangeCalendar from "../../assets/orangeCalendar.png";
 import InvoiceIcon from "../../assets/Invoice.png";
 import ViewProductIcon from "../../assets/ViewProduct.png";
 import OrangeStar from "../../assets/orangestar.png";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
+
+const API_URL = "http://127.0.0.1:8000/api";
 
 const PurchasedAssetDetail = () => {
   const [activeTab, setActiveTab] = useState("version");
+  const [isDownloading, setIsDownloading] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const fallbackPurchase = {
     id: "ORD-99283-CX",
@@ -39,6 +44,7 @@ const PurchasedAssetDetail = () => {
 
   const purchase = location.state?.purchase || fallbackPurchase;
   const product = purchase.product || fallbackPurchase.product;
+  const productId = product?.id || purchase.product_id || null;
 
   const rawTechStack = Array.isArray(product.tech_stack)
     ? product.tech_stack
@@ -88,6 +94,145 @@ const PurchasedAssetDetail = () => {
     purchase.license?.type ||
     purchase.license?.name ||
     "Commercial License - Perpetual";
+
+  const setupGuideUrl =
+    product?.setup_guide_url ||
+    product?.documentation_url ||
+    product?.docs_url ||
+    product?.guide_url ||
+    purchase?.setup_guide_url ||
+    null;
+
+  const handleDownload = async () => {
+    if (!productId) {
+      showErrorToast("No product found for download.");
+      return;
+    }
+
+    try {
+      setIsDownloading(true);
+
+      const token = localStorage.getItem("auth_token");
+      if (!token) {
+        showErrorToast("Please login to download files");
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/products/${productId}/download`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 401) {
+        showErrorToast("Authentication failed. Please login again.");
+        return;
+      }
+
+      if (response.status === 403) {
+        showErrorToast("You need to purchase this product to download files.");
+        return;
+      }
+
+      if (response.status === 404) {
+        showErrorToast("No files found for this product.");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Download failed: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+
+      let filename = "download.zip";
+      const disposition = response.headers.get("content-disposition");
+      if (disposition) {
+        const match = disposition.match(/filename="?([^"]+)"?/);
+        if (match) filename = match[1];
+      }
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      showSuccessToast(`Download started: ${filename}`);
+
+      setTimeout(() => {
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+    } catch (error) {
+      console.error("Download failed:", error);
+      showErrorToast(error.message || "Failed to download. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleViewMarketplace = () => {
+    if (productId) {
+      navigate(`/marketplace/${productId}`);
+      return;
+    }
+    navigate("/marketplace");
+  };
+
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareData = {
+      title: product.name || "Purchased Asset",
+      text: `Check my purchased asset: ${product.name || "Purchased Asset"}`,
+      url: shareUrl,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        showSuccessToast("Link copied to clipboard.");
+        return;
+      }
+
+      showErrorToast("Sharing is not supported on this device.");
+    } catch (error) {
+      if (error?.name !== "AbortError") {
+        console.error("Share failed:", error);
+        showErrorToast("Failed to share link.");
+      }
+    }
+  };
+
+  const handleOpenSetupGuide = () => {
+    if (setupGuideUrl) {
+      window.open(setupGuideUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    if (productId) {
+      navigate(`/marketplace/${productId}`);
+      showSuccessToast("Opening asset details to view documentation.");
+      return;
+    }
+
+    showErrorToast("Setup guide is not available for this asset.");
+  };
+
+  const handleChangelog = () => {
+    if (productId) {
+      navigate(`/marketplace/${productId}`);
+      showSuccessToast("Opening marketplace details for version info.");
+      return;
+    }
+    showErrorToast("Changelog is not available for this asset.");
+  };
 
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
@@ -154,15 +299,31 @@ const PurchasedAssetDetail = () => {
                   "Complete multivendor marketplace solution with admin dashboard and full control over vendors, products, orders, and payouts."}
               </p>
               <div className="purchased-detail__summaryActions">
-                <button className="purchased-detail__download" type="button">
+                <button
+                  className="purchased-detail__download"
+                  type="button"
+                  onClick={handleDownload}
+                  disabled={isDownloading || !productId}
+                >
                   <img src={WhiteDownload} alt="" aria-hidden="true" />
-                  {`Download Asset (${fileSize})`}
+                  {isDownloading
+                    ? "Downloading..."
+                    : `Download Asset (${fileSize})`}
                 </button>
                 <div className="purchased-detail__actions">
-                  <button className="purchased-detail__iconBtn" type="button">
+                  <button
+                    className="purchased-detail__iconBtn"
+                    type="button"
+                    onClick={handleShare}
+                    aria-label="Share asset link"
+                  >
                     <img src={ShareIcon} alt="" aria-hidden="true" />
                   </button>
-                  <button className="purchased-detail__ghostBtn" type="button">
+                  <button
+                    className="purchased-detail__ghostBtn"
+                    type="button"
+                    onClick={handleViewMarketplace}
+                  >
                     <img src={ViewProductIcon} alt="" aria-hidden="true" />
                     View Details on Marketplace
                   </button>
@@ -212,7 +373,11 @@ const PurchasedAssetDetail = () => {
                   />
                   <h3>Documentation & Resources</h3>
                 </div>
-                <div className="purchased-detail__resourceCard">
+                <button
+                  className="purchased-detail__resourceCard"
+                  type="button"
+                  onClick={handleOpenSetupGuide}
+                >
                   <div className="purchased-detail__resourceIcon">
                     <img src={GuideIcon} alt="" aria-hidden="true" />
                   </div>
@@ -221,7 +386,7 @@ const PurchasedAssetDetail = () => {
                     <span>PDF & Online Docs</span>
                   </div>
                   <span className="purchased-detail__resourceArrow">›</span>
-                </div>
+                </button>
               </section>
 
               <section className="purchased-detail__section">
@@ -243,9 +408,11 @@ const PurchasedAssetDetail = () => {
                   <button
                     className="purchased-detail__fileDownload"
                     type="button"
+                    onClick={handleDownload}
+                    disabled={isDownloading || !productId}
                   >
                     <img src={OrangeDownload} alt="" aria-hidden="true" />
-                    Download
+                    {isDownloading ? "Downloading..." : "Download"}
                   </button>
                 </div>
               </section>
@@ -289,6 +456,7 @@ const PurchasedAssetDetail = () => {
                   <button
                     className="purchased-detail__upgradeBtn"
                     type="button"
+                    onClick={() => navigate("/custom-service")}
                   >
                     Upgrade License
                   </button>
@@ -364,6 +532,7 @@ const PurchasedAssetDetail = () => {
                       <button
                         className="purchased-detail__tableLink"
                         type="button"
+                        onClick={handleChangelog}
                       >
                         Changelog
                       </button>
