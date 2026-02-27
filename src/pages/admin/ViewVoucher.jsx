@@ -1,49 +1,181 @@
-import React from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import AdminTopbar from "../../components/AdminTopbar";
-import "../../styles/ViewVoucher.css";
+import "../../styles/viewVoucher.css";
 import notifBell from "../../assets/NotifBell.png";
 import { IconDiscountFilled } from "@tabler/icons-react";
-const products = [
-  {
-    id: 1,
-    name: "E-commerce SaaS Template",
-    type: "Saas Template",
-    version: "v2.4.1",
-  },
-  {
-    id: 2,
-    name: "Developer Portfolio Website",
-    type: "Website Template",
-    version: "v2.4.1",
-  },
-  {
-    id: 3,
-    name: "UI/UX Kit",
-    type: "UI/UX Design",
-    version: "v2.4.1",
-  },
-  {
-    id: 4,
-    name: "Foodie App",
-    type: "Website App",
-    version: "v2.4.1",
-  },
-];
+import { AdminPromoAPI } from "../../services/AdminPromoAPI";
+import { AdminInventoryAPI } from "../../services/AdminInventoryAPI";
+import { showErrorToast } from "../../utils/toast";
 
-const fallbackVoucher = {
-  voucherName: "Valid on all UI Kits",
-  voucherCode: "CERT5OUIKIT",
-  discountType: "Percentage (%)",
-  discountValue: "50",
-  minimumPurchaseAmount: "50",
-  maximumDiscount: "100",
-  availableFrom: "March 5, 2026",
-  availableTo: "April 5, 2026",
-  usageLimit: "10",
-  status: "ACTIVE",
-  applicableTo: "Specific Product",
+const parsePossibleIds = (value) => {
+  if (!value) return [];
+
+  if (Array.isArray(value)) {
+    return value
+      .map((item) =>
+        typeof item === "object" ? item?.id ?? item?.product_id ?? item?.asset_id : item,
+      )
+      .filter((item) => item !== undefined && item !== null && item !== "");
+  }
+
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return parsePossibleIds(parsed);
+    } catch {
+      return value
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+  }
+
+  return [];
+};
+
+const getVoucherPayload = (response) =>
+  response?.voucher ?? response?.data ?? response?.promo ?? response;
+
+const normalizeProduct = (product, index = 0) => ({
+  id: product?.id ?? product?.product_id ?? product?.asset_id ?? `product-${index + 1}`,
+  title: product?.title ?? product?.name ?? `Product ${index + 1}`,
+  category:
+    product?.category ??
+    product?.asset_type ??
+    product?.type ??
+    product?.meta ??
+    "Uncategorized",
+  version: product?.version ?? product?.updated_ago ?? "N/A",
+});
+
+const normalizeVoucher = (voucher) => {
+  const productsRaw =
+    voucher?.products ??
+    voucher?.applicable_products ??
+    voucher?.applicableProducts ??
+    voucher?.selected_products ??
+    [];
+
+  const normalizedProducts = Array.isArray(productsRaw)
+    ? productsRaw.map((product, index) => normalizeProduct(product, index))
+    : [];
+
+  const productIds = Array.from(
+    new Set(
+      [
+        ...parsePossibleIds(voucher?.product_ids),
+        ...parsePossibleIds(voucher?.applicable_product_ids),
+        ...parsePossibleIds(productsRaw),
+      ].map((id) => String(id)),
+    ),
+  );
+
+  return {
+    id: voucher?.id,
+    code: voucher?.code || "-",
+    description: voucher?.description || null,
+    type: voucher?.type || "fixed",
+    value: voucher?.value,
+    min_order_amount: voucher?.min_order_amount,
+    max_discount: voucher?.max_discount ?? voucher?.maximum_discount ?? null,
+    valid_from: voucher?.valid_from,
+    valid_until: voucher?.valid_until,
+    max_uses: voucher?.max_uses,
+    used_count: voucher?.used_count ?? 0,
+    is_active: voucher?.is_active !== undefined ? voucher.is_active : true,
+    applicable_to:
+      voucher?.applicable_to ?? voucher?.applies_to ?? (productIds.length ? "specific_products" : "all_products"),
+    products: normalizedProducts,
+    productIds,
+  };
+};
+
+const formatDate = (value) => {
+  if (!value) return "Not set";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "Not set";
+
+  return parsed.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+};
+
+const formatMoney = (value) => {
+  if (value === null || value === undefined || value === "") return "N/A";
+  const numericValue = Number(value);
+  if (Number.isNaN(numericValue)) return "N/A";
+  return `$${numericValue.toFixed(2)}`;
+};
+
+const getStatusMeta = (voucher) => {
+  const now = new Date();
+  const validUntil = voucher.valid_until ? new Date(voucher.valid_until) : null;
+  const validFrom = voucher.valid_from ? new Date(voucher.valid_from) : null;
+
+  if (!voucher.is_active) {
+    return { label: "INACTIVE", tone: "inactive" };
+  }
+
+  if (validFrom && validFrom > now) {
+    return { label: "SCHEDULED", tone: "scheduled" };
+  }
+
+  if (validUntil && validUntil < now) {
+    return { label: "EXPIRED", tone: "expired" };
+  }
+
+  if (voucher.max_uses && voucher.used_count >= voucher.max_uses) {
+    return { label: "USED UP", tone: "used" };
+  }
+
+  if (validUntil) {
+    const daysUntilExpiry = Math.ceil((validUntil - now) / (1000 * 60 * 60 * 24));
+    if (daysUntilExpiry <= 7) {
+      return { label: "EXPIRING SOON", tone: "expiring" };
+    }
+  }
+
+  return { label: "ACTIVE", tone: "active" };
+};
+
+const getDiscountTypeLabel = (type) => {
+  if (type === "percentage") return "Percentage (%)";
+  if (type === "fixed") return "Fixed Amount ($)";
+  return type || "N/A";
+};
+
+const getDiscountValueLabel = (type, value) => {
+  if (value === null || value === undefined || value === "") return "N/A";
+  const numericValue = Number(value);
+  if (Number.isNaN(numericValue)) return String(value);
+
+  if (type === "percentage") {
+    return `${numericValue}%`;
+  }
+
+  return `$${numericValue.toFixed(2)}`;
+};
+
+const getApplicableToLabel = (value, hasProducts) => {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
+
+  if (["specific", "specific_product", "specific_products", "products", "product"].includes(normalized)) {
+    return "Specific Product";
+  }
+
+  if (["all", "all_products", "global"].includes(normalized)) {
+    return "All Products";
+  }
+
+  return hasProducts ? "Specific Product" : "All Products";
 };
 
 function Field({ label, value, mono = false, center = false }) {
@@ -62,26 +194,79 @@ function Field({ label, value, mono = false, center = false }) {
 export default function ViewVoucher() {
   const location = useLocation();
   const navigate = useNavigate();
-  const handleSearch = (term) => {};
+  const { id: voucherIdParam } = useParams();
   const incomingVoucher = location.state?.voucher;
 
-  const discountText = String(incomingVoucher?.discount || "");
-  const voucher = {
-    voucherName: incomingVoucher?.name || fallbackVoucher.voucherName,
-    voucherCode: incomingVoucher?.code || fallbackVoucher.voucherCode,
-    discountType: discountText.includes("%")
-      ? "Percentage (%)"
-      : "Fixed Amount",
-    discountValue:
-      discountText.replace(/[^\d.]/g, "") || fallbackVoucher.discountValue,
-    minimumPurchaseAmount: fallbackVoucher.minimumPurchaseAmount,
-    maximumDiscount: fallbackVoucher.maximumDiscount,
-    availableFrom: incomingVoucher?.activeFrom || fallbackVoucher.availableFrom,
-    availableTo: incomingVoucher?.activeTo || fallbackVoucher.availableTo,
-    usageLimit: String(incomingVoucher?.usageLimit ?? fallbackVoucher.usageLimit),
-    status: incomingVoucher?.status || fallbackVoucher.status,
-    applicableTo: fallbackVoucher.applicableTo,
-  };
+  const [voucher, setVoucher] = useState(incomingVoucher ? normalizeVoucher(incomingVoucher) : null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const voucherId = voucherIdParam || incomingVoucher?.id;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchVoucher = async () => {
+      if (!voucherId) {
+        setError("Voucher ID is missing.");
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError("");
+
+      try {
+        const response = await AdminPromoAPI.getVoucher(voucherId);
+        const payload = getVoucherPayload(response);
+        const normalizedVoucher = normalizeVoucher(payload);
+
+        if (normalizedVoucher.products.length === 0 && normalizedVoucher.productIds.length > 0) {
+          const productRequests = normalizedVoucher.productIds.map(async (productId, index) => {
+            try {
+              const productResponse = await AdminInventoryAPI.getProductById(productId);
+              return normalizeProduct(productResponse, index);
+            } catch {
+              return {
+                id: productId,
+                title: `Product #${productId}`,
+                category: "Unknown",
+                version: "N/A",
+              };
+            }
+          });
+
+          normalizedVoucher.products = await Promise.all(productRequests);
+        }
+
+        if (isMounted) {
+          setVoucher(normalizedVoucher);
+        }
+      } catch (fetchError) {
+        console.error("Error fetching voucher details:", fetchError);
+        if (isMounted) {
+          const message = fetchError.message || "Failed to load voucher details.";
+          setError(message);
+          showErrorToast(message);
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchVoucher();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [voucherId]);
+
+  const statusMeta = useMemo(() => {
+    if (!voucher) return { label: "N/A", tone: "inactive" };
+    return getStatusMeta(voucher);
+  }, [voucher]);
 
   return (
     <>
@@ -91,7 +276,7 @@ export default function ViewVoucher() {
         <Sidebar activePage="vouchers" />
 
         <main className="main view-voucher-wrapper">
-          <AdminTopbar showHamburger onSearch={handleSearch}>
+          <AdminTopbar showHamburger>
             <Link
               to="/admin-notification"
               className="notification-link"
@@ -106,20 +291,17 @@ export default function ViewVoucher() {
             </Link>
           </AdminTopbar>
 
-          {/* Breadcrumb */}
           <nav className="view-voucher-breadcrumb">
             <Link to="/vouchers">Vouchers</Link>
             <span className="breadcrumb-separator">›</span>
             <span className="breadcrumb-active">View Voucher Details</span>
           </nav>
 
-          {/* Page Header */}
           <div className="view-voucher-header">
             <div>
               <h2>View Voucher Details</h2>
               <p className="header-subtitle">
-                The information below displays the complete details of the
-                selected voucher for viewing purposes only.
+                The information below displays the complete details of the selected voucher.
               </p>
             </div>
             <button
@@ -128,11 +310,11 @@ export default function ViewVoucher() {
               onClick={() =>
                 navigate("/vouchers/edit", {
                   state: {
-                    voucher: incomingVoucher,
-                    existingCodes: [],
+                    voucher,
                   },
                 })
               }
+              disabled={!voucher || loading}
             >
               <svg
                 viewBox="0 0 16 16"
@@ -151,84 +333,100 @@ export default function ViewVoucher() {
             </button>
           </div>
 
-          {/* Voucher Card */}
-          <div className="voucher-card">
-            {/* Card Title */}
-            <div className="voucher-card-title">
-              <span className="title-icon">
-                <IconDiscountFilled color="#F97316" />
-              </span>
-              <span className="title-text">Voucher Details</span>
+          {loading ? (
+            <div className="voucher-state-card">Loading voucher details...</div>
+          ) : error ? (
+            <div className="voucher-state-card voucher-state-card--error">{error}</div>
+          ) : !voucher ? (
+            <div className="voucher-state-card voucher-state-card--error">
+              Voucher details are unavailable.
             </div>
-
-            <hr className="voucher-divider" />
-
-            {/* Row 1 */}
-            <div className="voucher-fields-row">
-              <Field label="Voucher Name" value={voucher.voucherName} />
-              <Field label="Voucher Code" value={voucher.voucherCode} mono />
-              <Field
-                label="Discount Type"
-                value={voucher.discountType}
-                center
-              />
-              <Field
-                label="Discount Value"
-                value={voucher.discountValue}
-                center
-              />
-            </div>
-
-            {/* Row 2 */}
-            <div className="voucher-fields-row">
-              <Field
-                label="Minimum Purchase Amount"
-                value={voucher.minimumPurchaseAmount}
-              />
-              <Field
-                label="Maximum Discount (for % type)"
-                value={voucher.maximumDiscount}
-              />
-              <Field label="Available from" value={voucher.availableFrom} />
-              <Field label="Available to" value={voucher.availableTo} />
-            </div>
-
-            {/* Row 3 */}
-            <div className="voucher-fields-row">
-              <Field label="Usage Limit" value={voucher.usageLimit} />
-
-              <div className="voucher-field">
-                <label>Status</label>
-                <span className="status-active">
-                  <span className="status-dot" />
-                  {voucher.status}
+          ) : (
+            <div className="voucher-card">
+              <div className="voucher-card-title">
+                <span className="title-icon">
+                  <IconDiscountFilled color="#F97316" />
                 </span>
+                <span className="title-text">Voucher Details</span>
               </div>
 
-              <div className="voucher-field">
-                <label>Applicable to:</label>
-                <span className="field-value">{voucher.applicableTo}</span>
-              </div>
-            </div>
+              <hr className="voucher-divider" />
 
-            {/* Products */}
-            <div className="products-section">
-              <p className="products-label">Select (Select Multiple)</p>
-              <div className="products-grid">
-                {products.map((product) => (
-                  <div className="product-item" key={product.id}>
-                    <div className="product-thumbnail" />
-                    <div className="product-info">
-                      <span className="product-name">{product.name}</span>
-                      <span className="product-meta">
-                        {product.type} • {product.version}
-                      </span>
-                    </div>
+              <div className="voucher-fields-row">
+                <Field
+                  label="Voucher Name"
+                  value={voucher.description || `Voucher ${voucher.code}`}
+                />
+                <Field label="Voucher Code" value={voucher.code} mono />
+                <Field
+                  label="Discount Type"
+                  value={getDiscountTypeLabel(voucher.type)}
+                  center
+                />
+                <Field
+                  label="Discount Value"
+                  value={getDiscountValueLabel(voucher.type, voucher.value)}
+                  center
+                />
+              </div>
+
+              <div className="voucher-fields-row">
+                <Field
+                  label="Minimum Purchase Amount"
+                  value={formatMoney(voucher.min_order_amount)}
+                />
+                <Field
+                  label="Maximum Discount (for % type)"
+                  value={formatMoney(voucher.max_discount)}
+                />
+                <Field label="Available from" value={formatDate(voucher.valid_from)} />
+                <Field label="Available to" value={formatDate(voucher.valid_until)} />
+              </div>
+
+              <div className="voucher-fields-row">
+                <Field
+                  label="Usage Limit"
+                  value={voucher.max_uses ? `${voucher.used_count}/${voucher.max_uses}` : "Unlimited"}
+                />
+
+                <div className="voucher-field">
+                  <label>Status</label>
+                  <span className={`status-badge status-badge--${statusMeta.tone}`}>
+                    <span className="status-dot" />
+                    {statusMeta.label}
+                  </span>
+                </div>
+
+                <div className="voucher-field">
+                  <label>Applicable to:</label>
+                  <span className="field-value">
+                    {getApplicableToLabel(voucher.applicable_to, voucher.products.length > 0)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="products-section">
+                <p className="products-label">Select (Select Multiple)</p>
+                {voucher.products.length === 0 ? (
+                  <p className="products-empty">No specific products attached to this voucher.</p>
+                ) : (
+                  <div className="products-grid">
+                    {voucher.products.map((product) => (
+                      <div className="product-item" key={product.id}>
+                        <div className="product-thumbnail" />
+                        <div className="product-info">
+                          <span className="product-name">{product.title}</span>
+                          <span className="product-meta">
+                            {product.category} • {product.version}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
             </div>
-          </div>
+          )}
         </main>
       </div>
     </>

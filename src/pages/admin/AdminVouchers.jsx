@@ -148,16 +148,10 @@ const AdminVouchers = () => {
     });
   };
 
-  const handleDelete = async (id, code) => {
-    if (window.confirm(`Are you sure you want to delete voucher "${code}"?`)) {
-      try {
-        await AdminPromoAPI.deleteVoucher(id);
-        fetchVouchers();
-        fetchStats();
-      } catch (error) {
-        alert(error.message || "Failed to delete voucher");
-      }
-    }
+  const handleViewDetails = (voucher) => {
+    navigate(`/vouchers/${voucher.id}`, {
+      state: { voucher },
+    });
   };
 
   const handlePageChange = (page) => {
@@ -329,17 +323,17 @@ const AdminVouchers = () => {
                               <div className="voucher-actions">
                                 <button
                                   type="button"
+                                  aria-label={`View details for ${voucher.code}`}
+                                  onClick={() => handleViewDetails(voucher)}
+                                >
+                                  <img src={VouchRemove} alt="" aria-hidden="true" className="voucher-action-icon" />
+                                </button>
+                                <button
+                                  type="button"
                                   aria-label={`Edit ${voucher.code}`}
                                   onClick={() => handleEdit(voucher)}
                                 >
                                   <img src={VouchEdit} alt="" aria-hidden="true" className="voucher-action-icon" />
-                                </button>
-                                <button
-                                  type="button"
-                                  aria-label={`Delete ${voucher.code}`}
-                                  onClick={() => handleDelete(voucher.id, voucher.code)}
-                                >
-                                  <img src={VouchRemove} alt="" aria-hidden="true" className="voucher-action-icon" />
                                 </button>
                               </div>
                             </td>

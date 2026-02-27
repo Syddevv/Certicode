@@ -202,8 +202,12 @@ const Cart = () => {
     try {
       setPromoLoading(true);
       setPromoError("");
+
+      const productIds = cartItems
+        .map((item) => item.product_id)
+        .filter((id) => id !== null && id !== undefined && id !== "");
       
-      const result = await PromoAPI.validatePromo(promoCode, subtotal);
+      const result = await PromoAPI.validatePromo(promoCode, subtotal, productIds);
       
       if (result.valid) {
         localStorage.setItem('appliedPromo', JSON.stringify(result.promo));
@@ -220,8 +224,6 @@ const Cart = () => {
     } catch (error) {
       console.error("Error applying promo:", error);
       setPromoError(error.message || "Failed to apply promo code");
-      
-      applyMockPromo();
     } finally {
       setPromoLoading(false);
     }

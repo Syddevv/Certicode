@@ -113,6 +113,27 @@
   background: #fff;
 }
 
+.add-voucher-grid .required {
+  color: #ef4444;
+}
+
+.add-voucher-grid .field-hint {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.checkbox-label {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 10px !important;
+}
+
+.checkbox-label input {
+  width: 16px;
+  height: 16px;
+}
+
 .add-voucher-status-pill {
   display: inline-flex;
   align-items: center;
@@ -169,6 +190,13 @@
   border-radius: 10px;
   background: #6b7b94;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.voucher-product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .voucher-product-info {
@@ -215,6 +243,17 @@
 
 .voucher-add-more:hover {
   color: #f97316;
+}
+
+.voucher-add-more:disabled {
+  cursor: not-allowed;
+  color: #cbd5e1;
+}
+
+.voucher-products-state {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 10px;
 }
 
 .add-voucher-footer {

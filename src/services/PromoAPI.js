@@ -1,7 +1,7 @@
 const API_URL = 'http://127.0.0.1:8000/api';
 
 export const PromoAPI = {
-  validatePromo: async (code, subtotal) => {
+  validatePromo: async (code, subtotal, productIds = []) => {
     try {
       const token = localStorage.getItem('auth_token');
       
@@ -14,7 +14,8 @@ export const PromoAPI = {
         },
         body: JSON.stringify({
           code: code,
-          subtotal: subtotal
+          subtotal: subtotal,
+          product_ids: Array.isArray(productIds) ? productIds : []
         })
       });
 

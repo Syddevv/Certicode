@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "../styles/ProductSelectorModal.css";
 import {
-  IconStack2,
   IconWorldWww,
   IconDeviceMobile,
   IconPalette,
@@ -34,16 +33,73 @@ const PRODUCTS = [
   { id: 4, name: "UI/UX Kits", category: "UI/UX Design", version: "v2.43" },
 ];
 
-export default function ProductSelector({ onClose, onSelect }) {
+const normalizeProducts = (products) =>
+  (Array.isArray(products) ? products : []).map((product, index) => ({
+    id: product?.id ?? product?.product_id ?? product?.asset_id ?? `product-${index + 1}`,
+    title: product?.title ?? product?.name ?? `Product ${index + 1}`,
+    category:
+      product?.category ??
+      product?.asset_type ??
+      product?.type ??
+      product?.meta ??
+      "Uncategorized",
+    version: product?.version ?? product?.updated_ago ?? "N/A",
+    featured_image: product?.featured_image ?? null,
+  }));
+
+const matchesFilter = (activeFilter, product) => {
+  if (activeFilter === "All Assets") return true;
+
+  const category = String(product.category || "").toLowerCase();
+  if (activeFilter === "Web Apps") return /web|website|saas/.test(category);
+  if (activeFilter === "Mobile Apps") return /mobile|ios|android/.test(category);
+  if (activeFilter === "UI/UX Kits") return /ui|ux|design/.test(category);
+  if (activeFilter === "Custom Projects") return /custom/.test(category);
+
+  return true;
+};
+
+export default function ProductSelector({
+  onClose,
+  onSelect,
+  products = PRODUCTS,
+  selectedIds = [],
+  loading = false,
+}) {
   const [activeFilter, setActiveFilter] = useState("All Assets");
-  const [selected, setSelected] = useState([1, 2]);
   const [search, setSearch] = useState("");
+  const normalizedProducts = useMemo(() => normalizeProducts(products), [products]);
+  const fallbackSelected = useMemo(
+    () => normalizedProducts.slice(0, 2).map((item) => String(item.id)),
+    [normalizedProducts],
+  );
+  const [selected, setSelected] = useState(
+    selectedIds.length ? selectedIds.map((id) => String(id)) : fallbackSelected,
+  );
+
+  useEffect(() => {
+    if (selectedIds.length) {
+      setSelected(selectedIds.map((id) => String(id)));
+      return;
+    }
+    setSelected(fallbackSelected);
+  }, [selectedIds, fallbackSelected]);
 
   const toggleSelect = (id) => {
+    const normalizedId = String(id);
     setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+      prev.includes(normalizedId)
+        ? prev.filter((x) => x !== normalizedId)
+        : [...prev, normalizedId],
     );
   };
+
+  const filteredProducts = normalizedProducts.filter((product) => {
+    const matchesSearch =
+      product.title.toLowerCase().includes(search.toLowerCase()) ||
+      product.category.toLowerCase().includes(search.toLowerCase());
+    return matchesSearch && matchesFilter(activeFilter, product);
+  });
 
   return (
     <div className="ps-overlay" onClick={onClose}>
@@ -103,32 +159,47 @@ export default function ProductSelector({ onClose, onSelect }) {
         </div>
 
         <div className="ps-list">
-          {PRODUCTS.filter((p) =>
-            p.name.toLowerCase().includes(search.toLowerCase()),
-          ).map((product) => {
-            const isSelected = selected.includes(product.id);
-            return (
-              <div
-                key={product.id}
-                className={`ps-item${isSelected ? " selected" : ""}`}
-                onClick={() => toggleSelect(product.id)}
-              >
-                <div className="ps-thumb"></div>
-                <div className="ps-info">
-                  <span className="ps-name">{product.name}</span>
-                  <span className="ps-meta">
-                    {product.category} • {product.version}
-                  </span>
+          {loading ? (
+            <div className="ps-empty-state">Loading products...</div>
+          ) : filteredProducts.length === 0 ? (
+            <div className="ps-empty-state">No products found.</div>
+          ) : (
+            filteredProducts.map((product) => {
+              const isSelected = selected.includes(String(product.id));
+              return (
+                <div
+                  key={product.id}
+                  className={`ps-item${isSelected ? " selected" : ""}`}
+                  onClick={() => toggleSelect(product.id)}
+                >
+                  <div className="ps-thumb">
+                    {product.featured_image && (
+                      <img src={product.featured_image} alt="" aria-hidden="true" />
+                    )}
+                  </div>
+                  <div className="ps-info">
+                    <span className="ps-name">{product.title}</span>
+                    <span className="ps-meta">
+                      {product.category} • {product.version}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })
+          )}
         </div>
 
         <div className="ps-footer">
           <button
             className="ps-select-btn"
-            onClick={() => onSelect && onSelect(selected)}
+            onClick={() =>
+              onSelect &&
+              onSelect(
+                normalizedProducts.filter((product) =>
+                  selected.includes(String(product.id)),
+                ),
+              )
+            }
           >
             Select
           </button>

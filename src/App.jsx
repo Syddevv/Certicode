@@ -54,7 +54,6 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminNotification from "./pages/admin/AdminNotification";
 import AdminVouchers from "./pages/admin/AdminVouchers";
 import AdminAddVoucher from "./pages/admin/AdminAddVoucher";
-import AdminEditVoucher from "./pages/admin/AdminEditVoucher";
 
 // Components
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -168,6 +167,14 @@ function AppContent() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/vouchers/:id"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <ViewVoucher />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path="/sales/order-details/:id"
@@ -262,7 +269,14 @@ function AppContent() {
         path="/customer-support/order-status/track-your-package"
         element={<TrackYourPackageRoute />}
       />
-      <Route path="/inventory/view-voucher-details" element={<ViewVoucher />} />
+      <Route
+        path="/inventory/view-voucher-details"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <ViewVoucher />
+          </ProtectedRoute>
+        }
+      />
 
       {/* PROTECTED USER ROUTES - Require authentication */}
       <Route
