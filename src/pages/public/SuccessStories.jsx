@@ -8,6 +8,7 @@ import OrangeBadge from "../../assets/orangeBadge.png";
 import OrangeArrow from "../../assets/OrangeArrow.png";
 import JaneDoe from "../../assets/janedoe.png";
 import SearchIcon from "../../assets/lucide_search.png";
+import QuoteIcon from "../../assets/quote.png";
 import { Link } from "react-router-dom";
 
 const SuccessStories = () => {
@@ -544,7 +545,7 @@ const SuccessStories = () => {
 
       <section className="stories-quote">
         <div className="stories-quote__inner">
-          <span className="stories-quote__mark">"</span>
+          <img className="stories-quote__mark" src={QuoteIcon} alt="" aria-hidden="true" />
           <p>
             "Certicode removed the uncertainty from buying digital assets. What
             used to take days of review is now instant and reliable."
@@ -567,8 +568,8 @@ const SuccessStories = () => {
               Join professionals worldwide who rely on Certicode for verified,
               production-ready digital assets.
             </p>
-            <Link to="/register">
-              <button className="blogs-cta__btn" type="button">
+            <Link to="/marketplace">
+              <button className="stories-cta__btn" type="button">
                 Get Started Now
               </button>
             </Link>
