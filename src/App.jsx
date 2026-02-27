@@ -31,8 +31,6 @@ import BillingPayments from "./pages/public/BillingPayments";
 import ContactUs from "./pages/public/ContactUs";
 import SuccessStories from "./pages/public/SuccessStories";
 import SuccessStoriesList from "./pages/public/SuccessStoriesList";
-import SuccessStoryIronclad from "./pages/public/SuccessStoryIronclad";
-import SuccessStoryGlobalFintech from "./pages/public/SuccessStoryGlobalFintech";
 import BlogsNews from "./pages/public/BlogsNews";
 import BlogsNewsIndividual from "./pages/public/BlogsNewsIndividual";
 import NotFound from "./pages/public/NotFound";
@@ -239,10 +237,7 @@ function AppContent() {
       />
       <Route path="/contact" element={<ContactUs />} />
       <Route path="/success-stories" element={<SuccessStories />} />
-      <Route
-        path="/success-stories/scaling-with-the-ironclad-ui-kit"
-        element={<SuccessStoryIronclad />}
-      />
+      <Route path="/success-stories/customer-success-stories" element={<SuccessStoriesList />}/>
       <Route path="/blogs-news" element={<BlogsNews />} />
       <Route path="/custom-projects" element={<CustomService />} />
       <Route
