@@ -164,7 +164,7 @@ function AppContent() {
         path="/vouchers/edit"
         element={
           <ProtectedRoute allowedRoles={["Admin"]}>
-            <AdminEditVoucher />
+            <AdminAddVoucher />
           </ProtectedRoute>
         }
       />

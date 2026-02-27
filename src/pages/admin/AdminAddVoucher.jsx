@@ -1,114 +1,110 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import AdminTopbar from "../../components/AdminTopbar";
-import MultiProductSelector from "../../components/MultiProductSelector";
 import "../../styles/adminAddVoucher.css";
 import notifBell from "../../assets/NotifBell.png";
 import GenDetails from "../../assets/GenDetails.png";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
+import { AdminPromoAPI } from "../../services/AdminPromoAPI";
 
-const formatDate = (dateValue) => {
-  if (!dateValue) return "";
-  const date = new Date(dateValue);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });    
-};
-
-const buildDiscount = (type, value) => {
-  const amount = Number(value) || 0;
-  if (type === "percent") return `${amount}% OFF`;
-  return `$${amount.toFixed(2)} OFF`;
+const formatDateForInput = (dateString) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toISOString().slice(0, 16);
 };
 
 const AdminAddVoucher = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const productOptions = [
-    { id: "saas-template", title: "E-commerce SaaS Template", meta: "Saas Template", version: "v2.4.1" },
-    { id: "portfolio-website", title: "Developer Portfolio Website", meta: "Website Template", version: "v2.4.1" },
-    { id: "uiux-kit", title: "UI/UX Kit", meta: "UI/UX Design", version: "v2.4.1" },
-    { id: "foodie-app", title: "Foodie App", meta: "Website App", version: "v2.4.1" },
-    { id: "mobile-finance", title: "Mobile Finance App", meta: "Mobile App", version: "v2.4.1" },
-    { id: "analytics-web", title: "Analytics Dashboard", meta: "Web App", version: "v2.4.1" },
-  ];
+  const isEditing = location.state?.voucher ? true : false;
+  const existingVoucher = location.state?.voucher || null;
+  
   const [loading, setLoading] = useState(false);
-  const [isProductSelectorOpen, setIsProductSelectorOpen] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState(productOptions.slice(0, 4));
   const [formData, setFormData] = useState({
-    name: "",
     code: "",
-    discountType: "fixed",
-    discountValue: "",
-    minPurchaseAmount: "",
-    maxDiscount: "",
-    availableFrom: "",
-    availableTo: "",
-    usageLimit: "",
-    status: "ACTIVE",
-    applicableTo: "Specific Product",
+    description: "",
+    type: "percentage",
+    value: "",
+    min_order_amount: "",
+    max_uses: "",
+    valid_from: "",
+    valid_until: "",
+    is_active: true
   });
 
+  useEffect(() => {
+    if (existingVoucher) {
+      setFormData({
+        code: existingVoucher.code || "",
+        description: existingVoucher.description || "",
+        type: existingVoucher.type || "percentage",
+        value: existingVoucher.value || "",
+        min_order_amount: existingVoucher.min_order_amount || "",
+        max_uses: existingVoucher.max_uses || "",
+        valid_from: formatDateForInput(existingVoucher.valid_from),
+        valid_until: formatDateForInput(existingVoucher.valid_until),
+        is_active: existingVoucher.is_active !== undefined ? existingVoucher.is_active : true
+      });
+    }
+  }, [existingVoucher]);
+
   const handleInputChange = (event) => {
-    const { name, value } = event.target;
+    const { name, value, type, checked } = event.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (
-      !formData.name ||
-      !formData.code ||
-      !formData.discountValue ||
-      !formData.availableFrom ||
-      !formData.availableTo ||
-      !formData.usageLimit
-    ) {
+    if (!formData.code || !formData.value) {
       showErrorToast("Please fill in all required voucher fields.");
+      return;
+    }
+
+    if (formData.type === 'percentage' && parseFloat(formData.value) > 100) {
+      showErrorToast("Percentage discount cannot exceed 100%.");
       return;
     }
 
     setLoading(true);
 
-    const voucherPayload = {
-      name: formData.name.trim(),
-      code: formData.code.trim().toUpperCase(),
-      discount: buildDiscount(formData.discountType, formData.discountValue),
-      activeFrom: formatDate(formData.availableFrom),
-      activeTo: formatDate(formData.availableTo),
-      usageLimit: Number(formData.usageLimit) || 0,
-      status: formData.status,
-      applicableTo: formData.applicableTo,
-      selectedProducts: selectedProducts.map((item) => item.title),
-    };
+    try {
+      const submitData = {
+        code: formData.code.trim().toUpperCase(),
+        description: formData.description || null,
+        type: formData.type,
+        value: parseFloat(formData.value),
+        min_order_amount: formData.min_order_amount ? parseFloat(formData.min_order_amount) : null,
+        max_uses: formData.max_uses ? parseInt(formData.max_uses) : null,
+        valid_from: formData.valid_from || null,
+        valid_until: formData.valid_until || null,
+        is_active: formData.is_active
+      };
 
-    const existingCodes = location.state?.existingCodes || [];
-    const duplicate = existingCodes.includes(voucherPayload.code);
-
-    if (duplicate) {
+      if (isEditing && existingVoucher) {
+        await AdminPromoAPI.updateVoucher(existingVoucher.id, submitData);
+        showSuccessToast("Voucher updated successfully.");
+      } else {
+        await AdminPromoAPI.createVoucher(submitData);
+        showSuccessToast("Voucher created successfully.");
+      }
+      
+      navigate("/vouchers");
+    } catch (error) {
+      showErrorToast(error.message || `Failed to ${isEditing ? 'update' : 'create'} voucher`);
+    } finally {
       setLoading(false);
-      showErrorToast("Voucher code already exists.");
-      return;
     }
-
-    setLoading(false);
-    showSuccessToast("Voucher created successfully.");
-    navigate("/vouchers", { state: { newVoucher: voucherPayload } });
   };
 
-  const handleRemoveProduct = (id) => {
-    setSelectedProducts((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const handleAddMoreProduct = () => {
-    setIsProductSelectorOpen(true);
+  const getDiscountPlaceholder = () => {
+    if (formData.type === 'percentage') return "e.g 20";
+    if (formData.type === 'fixed') return "e.g 50.00";
+    return "0";
   };
 
   return (
@@ -132,15 +128,15 @@ const AdminAddVoucher = () => {
 
         <section className="add-voucher-header">
           <nav className="add-voucher-breadcrumbs">
-            <Link to="/vouchers" className="crumb-link">
-              Vouchers
-            </Link>
+            <Link to="/vouchers" className="crumb-link">Vouchers</Link>
             <span className="separator">›</span>
-            <span className="current">Add New Voucher</span>
+            <span className="current">{isEditing ? 'Edit Voucher' : 'Add New Voucher'}</span>
           </nav>
-          <h1>Create New Voucher</h1>
+          <h1>{isEditing ? 'Edit Voucher' : 'Create New Voucher'}</h1>
           <p className="subtitle">
-            Populate the details below to list a new voucher in the repository.
+            {isEditing 
+              ? 'Update the voucher details below.' 
+              : 'Populate the details below to create a new promo code in the system.'}
           </p>
         </section>
 
@@ -153,167 +149,120 @@ const AdminAddVoucher = () => {
 
             <div className="add-voucher-grid">
               <label>
-                Voucher Name
+                Voucher Description
                 <input
                   type="text"
-                  name="name"
-                  placeholder="e.g First time user voucher"
-                  value={formData.name}
+                  name="description"
+                  placeholder="e.g Get 20% off your order"
+                  value={formData.description}
                   onChange={handleInputChange}
-                  required
                 />
               </label>
 
               <label>
-                Voucher Code
+                Voucher Code <span className="required">*</span>
                 <input
                   type="text"
                   name="code"
-                  placeholder="e.g FIRSTTIME20"
+                  placeholder="e.g SAVE20"
                   value={formData.code}
                   onChange={handleInputChange}
                   required
+                  maxLength="50"
+                  disabled={isEditing}
                 />
+                <small className="field-hint">Will be automatically uppercase</small>
               </label>
 
               <label>
-                Discount Type
+                Discount Type <span className="required">*</span>
                 <select
-                  name="discountType"
-                  value={formData.discountType}
+                  name="type"
+                  value={formData.type}
                   onChange={handleInputChange}
+                  required
                 >
-                  <option value="fixed">Fixed Amount</option>
-                  <option value="percent">Percentage</option>
+                  <option value="percentage">Percentage (%)</option>
+                  <option value="fixed">Fixed Amount ($)</option>
                 </select>
               </label>
 
               <label>
-                Discount Value
+                Discount Value <span className="required">*</span>
                 <input
                   type="number"
-                  name="discountValue"
-                  placeholder="e.g 50"
-                  value={formData.discountValue}
+                  name="value"
+                  placeholder={getDiscountPlaceholder()}
+                  value={formData.value}
                   onChange={handleInputChange}
                   min="0"
+                  max={formData.type === 'percentage' ? 100 : null}
+                  step="0.01"
                   required
                 />
+                {formData.type === 'percentage' && (
+                  <small className="field-hint">Maximum 100%</small>
+                )}
               </label>
 
               <label>
-                Minimum Purchase Amount
+                Minimum Order Amount
                 <input
                   type="number"
-                  name="minPurchaseAmount"
+                  name="min_order_amount"
                   placeholder="e.g 50.00"
-                  value={formData.minPurchaseAmount}
+                  value={formData.min_order_amount}
                   onChange={handleInputChange}
                   min="0"
+                  step="0.01"
                 />
+                <small className="field-hint">Leave empty for no minimum</small>
               </label>
 
               <label>
-                Maximum Discount (for % type)
+                Maximum Uses
                 <input
                   type="number"
-                  name="maxDiscount"
-                  placeholder="e.g 50.00"
-                  value={formData.maxDiscount}
-                  onChange={handleInputChange}
-                  min="0"
-                />
-              </label>
-
-              <label>
-                Available from
-                <input
-                  type="date"
-                  name="availableFrom"
-                  value={formData.availableFrom}
-                  onChange={handleInputChange}
-                  required
-                />
-              </label>
-
-              <label>
-                Available to
-                <input
-                  type="date"
-                  name="availableTo"
-                  value={formData.availableTo}
-                  onChange={handleInputChange}
-                  required
-                />
-              </label>
-
-              <label>
-                Usage Limit
-                <input
-                  type="number"
-                  name="usageLimit"
-                  placeholder="e.g 10"
-                  value={formData.usageLimit}
+                  name="max_uses"
+                  placeholder="e.g 100"
+                  value={formData.max_uses}
                   onChange={handleInputChange}
                   min="1"
-                  required
                 />
+                <small className="field-hint">Leave empty for unlimited</small>
               </label>
 
               <label>
-                Status
-                <span className="add-voucher-status-pill active">
-                  <span className="dot">•</span> {formData.status}
-                </span>
-              </label>
-
-              <label className="full-width">
-                Applicable to
-                <select
-                  name="applicableTo"
-                  value={formData.applicableTo}
+                Valid From
+                <input
+                  type="datetime-local"
+                  name="valid_from"
+                  value={formData.valid_from}
                   onChange={handleInputChange}
-                >
-                  <option value="Specific Product">Specific Product</option>
-                  <option value="All Products">All Products</option>
-                </select>
+                />
+                <small className="field-hint">Leave empty to start immediately</small>
               </label>
 
-              {formData.applicableTo === "Specific Product" && (
-                <div className="full-width voucher-products-section">
-                  <h3>Select (Select Multiple)</h3>
+              <label>
+                Valid Until
+                <input
+                  type="datetime-local"
+                  name="valid_until"
+                  value={formData.valid_until}
+                  onChange={handleInputChange}
+                />
+                <small className="field-hint">Leave empty for no expiry</small>
+              </label>
 
-                  <div className="voucher-products-grid">
-                    {selectedProducts.map((product) => (
-                      <article key={product.id} className="voucher-product-card">
-                        <div className="voucher-product-thumb" aria-hidden="true" />
-                        <div className="voucher-product-info">
-                          <strong>{product.title}</strong>
-                          <span>
-                            {product.meta} • {product.version}
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          className="voucher-product-remove"
-                          aria-label={`Remove ${product.title}`}
-                          onClick={() => handleRemoveProduct(product.id)}
-                        >
-                          ×
-                        </button>
-                      </article>
-                    ))}
-                  </div>
-
-                  <button
-                    type="button"
-                    className="voucher-add-more"
-                    onClick={handleAddMoreProduct}
-                  >
-                    + Add More
-                  </button>
-                </div>
-              )}
+              <label className="full-width checkbox-label">
+                <input
+                  type="checkbox"
+                  name="is_active"
+                  checked={formData.is_active}
+                  onChange={handleInputChange}
+                />
+                <span>Active</span>
+              </label>
             </div>
           </section>
 
@@ -326,21 +275,15 @@ const AdminAddVoucher = () => {
                 onClick={() => navigate("/vouchers")}
                 disabled={loading}
               >
-                Saved as Draft
+                Cancel
               </button>
               <button type="submit" className="btn primary" disabled={loading}>
-                {loading ? "Creating..." : "Create Voucher"}
+                {loading ? "Saving..." : (isEditing ? "Update Voucher" : "Create Voucher")}
               </button>
             </div>
           </footer>
         </form>
       </main>
-      {isProductSelectorOpen && (
-        <MultiProductSelector
-          onClose={() => setIsProductSelectorOpen(false)}
-          onSelect={() => setIsProductSelectorOpen(false)}
-        />
-      )}
     </div>
   );
 };

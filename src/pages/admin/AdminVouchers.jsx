@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import "../../styles/adminVouchers.css";
 import Sidebar from "../../components/Sidebar";
@@ -15,192 +15,181 @@ import ActiveFilter from "../../assets/ActiveFilter.png";
 import Expiring from "../../assets/Expiring.png";
 import Used from "../../assets/Used.png";
 import FilterVouch from "../../assets/FilterVouch.png";
-
-
-const voucherStats = [
-  {
-    label: "TOTAL VOUCHER",
-    value: 100,
-    tone: "orange",
-    icon: TotalVouch,
-  },
-  {
-    label: "TOTAL ACTIVE",
-    value: 112,
-    tone: "green",
-    icon: ActiveVouch,
-
-  },
-  {
-    label: "TOTAL USED",
-    value: 170,
-    tone: "blue",
-    icon: UsedVouch,
-
-  },
-];
-
-const initialVouchers = [
-  {
-    name: "Valid on all UI Kits",
-    updated: "Updated 2 days ago",
-    code: "CERT50UIKIT",
-    discount: "$50.00 OFF",
-    activeFrom: "Mar 5, 2026",
-    activeTo: "Apr 5, 2026",
-    usageLimit: 10,
-    status: "ACTIVE",
-    statusTone: "active",
-  },
-  {
-    name: "Mobile App Templates",
-    updated: "19/02/26",
-    code: "MOBAPP20OFF",
-    discount: "20% OFF",
-    activeFrom: "Feb 15, 2026",
-    activeTo: "Feb 25, 2026",
-    usageLimit: 10,
-    status: "EXPIRING SOON",
-    statusTone: "expiring",
-  },
-  {
-    name: "SaaS Launch Promo",
-    updated: "19/02/26",
-    code: "LAUNCHSAAS",
-    discount: "$100.00 OFF",
-    activeFrom: "Feb 5, 2025",
-    activeTo: "Mar 5, 2026",
-    usageLimit: 5,
-    status: "EXPIRING SOON",
-    statusTone: "expiring",
-  },
-  {
-    name: "Loyalty Discount",
-    updated: "19/02/26",
-    code: "LOYALTY15",
-    discount: "15% OFF",
-    activeFrom: "Dec 5, 2025",
-    activeTo: "Dec 5, 2026",
-    usageLimit: 8,
-    status: "USED",
-    statusTone: "used",
-  },
-  {
-    name: "First time User Promo",
-    updated: "19/02/26",
-    code: "FIRSTTIME20",
-    discount: "20% OFF",
-    activeFrom: "Dec 15, 2025",
-    activeTo: "Dec 31, 2025",
-    usageLimit: 6,
-    status: "USED",
-    statusTone: "used",
-  },
-];
+import { AdminPromoAPI } from "../../services/AdminPromoAPI";
 
 const filters = ["All Coupon", "Active", "Expiring Soon", "Used"];
 
 const filterIcons = {
   Active: ActiveFilter,
   "Expiring Soon": Expiring,
-  Used,
+  Used: Used,
 };
 
 const AdminVouchers = () => {
-  const [vouchers, setVouchers] = useState(initialVouchers);
+  const [vouchers, setVouchers] = useState([]);
+  const [stats, setStats] = useState({
+    total_vouchers: 0,
+    active_vouchers: 0,
+    total_uses: 0,
+    expiring_soon: 0,
+    expired_vouchers: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState("All Coupon");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    current_page: 1,
+    last_page: 1,
+    per_page: 5,
+    total: 0
+  });
+  
   const location = useLocation();
   const navigate = useNavigate();
-  const [selectedFilter, setSelectedFilter] = useState("All Coupon");
 
-  const mapStatusToTone = (status) => {
-    if (status === "ACTIVE") return "active";
-    if (status === "EXPIRING SOON") return "expiring";
-    return "used";
-  };
+  useEffect(() => {
+    fetchVouchers();
+    fetchStats();
+  }, [currentPage, selectedFilter]);
 
   useEffect(() => {
     const incomingVoucher = location.state?.newVoucher;
     const updatedVoucher = location.state?.updatedVoucher;
-    const previousCode = location.state?.previousCode;
-    if (!incomingVoucher && !updatedVoucher) return;
-
-    setVouchers((prev) => {
-      if (incomingVoucher) {
-        const exists = prev.some((item) => item.code === incomingVoucher.code);
-        if (exists) return prev;
-        return [
-          {
-            ...incomingVoucher,
-            updated: "Updated just now",
-            statusTone: mapStatusToTone(incomingVoucher.status),
-          },
-          ...prev,
-        ];
-      }
-
-      if (!updatedVoucher) return prev;
-
-      return prev.map((item) =>
-        item.code === (previousCode || updatedVoucher.code)
-          ? {
-              ...item,
-              ...updatedVoucher,
-              statusTone: mapStatusToTone(updatedVoucher.status),
-              updated: "Updated just now",
-            }
-          : item,
-      );
-    });
-
-    navigate("/vouchers", { replace: true });
+    
+    if (incomingVoucher || updatedVoucher) {
+      fetchVouchers();
+      fetchStats();
+      navigate("/vouchers", { replace: true, state: {} });
+    }
   }, [location.state, navigate]);
 
-  const totalVoucherCount = vouchers.length;
-  const totalActiveCount = useMemo(
-    () => vouchers.filter((item) => item.statusTone === "active").length,
-    [vouchers],
-  );
-  const totalUsedCount = useMemo(
-    () => vouchers.filter((item) => item.statusTone === "used").length,
-    [vouchers],
-  );
+  const fetchVouchers = async () => {
+    try {
+      setLoading(true);
+      let status = "";
+      if (selectedFilter === "Active") status = "active";
+      else if (selectedFilter === "Expiring Soon") status = "expiring";
+      else if (selectedFilter === "Used") status = "used";
+      
+      const response = await AdminPromoAPI.getVouchers(currentPage, 5, '', status);
+      setVouchers(response.vouchers);
+      setPagination(response.pagination);
+    } catch (error) {
+      console.error("Error fetching vouchers:", error);
+      setError("Failed to load vouchers");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const stats = [
-    { ...voucherStats[0], value: totalVoucherCount },
-    { ...voucherStats[1], value: totalActiveCount },
-    { ...voucherStats[2], value: totalUsedCount },
-  ];
+  const fetchStats = async () => {
+    try {
+      const response = await AdminPromoAPI.getVoucherStats();
+      setStats(response);
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    }
+  };
 
-  const filteredVouchers = useMemo(() => {
-    if (selectedFilter === "All Coupon") return vouchers;
-    if (selectedFilter === "Active") {
-      return vouchers.filter((item) => item.statusTone === "active");
+  const formatDate = (dateString) => {
+    if (!dateString) return "No expiry";
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const getStatusAndTone = (voucher) => {
+    const now = new Date();
+    const validUntil = voucher.valid_until ? new Date(voucher.valid_until) : null;
+    const validFrom = voucher.valid_from ? new Date(voucher.valid_from) : null;
+    
+    if (!voucher.is_active) {
+      return { status: "INACTIVE", tone: "used" };
     }
-    if (selectedFilter === "Expiring Soon") {
-      return vouchers.filter((item) => item.statusTone === "expiring");
+    
+    if (validFrom && validFrom > now) {
+      return { status: "SCHEDULED", tone: "expiring" };
     }
-    if (selectedFilter === "Used") {
-      return vouchers.filter((item) => item.statusTone === "used");
+    
+    if (validUntil && validUntil < now) {
+      return { status: "EXPIRED", tone: "used" };
     }
-    return vouchers;
-  }, [selectedFilter, vouchers]);
+    
+    if (voucher.max_uses && voucher.used_count >= voucher.max_uses) {
+      return { status: "USED UP", tone: "used" };
+    }
+    
+    if (validUntil) {
+      const daysUntilExpiry = Math.ceil((validUntil - now) / (1000 * 60 * 60 * 24));
+      if (daysUntilExpiry <= 7) {
+        return { status: "EXPIRING SOON", tone: "expiring" };
+      }
+    }
+    
+    return { status: "ACTIVE", tone: "active" };
+  };
+
+  const formatDiscount = (voucher) => {
+    if (voucher.type === 'percentage') {
+      return `${voucher.value}% OFF`;
+    } else if (voucher.type === 'fixed') {
+      return `$${parseFloat(voucher.value).toFixed(2)} OFF`;
+    }
+    return '';
+  };
 
   const handleEdit = (voucher) => {
     navigate("/vouchers/edit", {
-      state: {
-        voucher,
-        existingCodes: vouchers.map((item) => item.code),
-      },
+      state: { voucher: voucher }
     });
   };
+
+  const handleDelete = async (id, code) => {
+    if (window.confirm(`Are you sure you want to delete voucher "${code}"?`)) {
+      try {
+        await AdminPromoAPI.deleteVoucher(id);
+        fetchVouchers();
+        fetchStats();
+      } catch (error) {
+        alert(error.message || "Failed to delete voucher");
+      }
+    }
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const statCards = [
+    {
+      label: "TOTAL VOUCHERS",
+      value: stats.total_vouchers || 0,
+      tone: "orange",
+      icon: TotalVouch,
+    },
+    {
+      label: "ACTIVE VOUCHERS",
+      value: stats.active_vouchers || 0,
+      tone: "green",
+      icon: ActiveVouch,
+    },
+    {
+      label: "TOTAL USES",
+      value: stats.total_uses || 0,
+      tone: "blue",
+      icon: UsedVouch,
+    },
+  ];
 
   return (
     <>
       <input type="checkbox" id="sidebar-toggle" />
-
       <div className="layout">
         <Sidebar activePage="vouchers" />
-
         <main className="main vouchers-main">
           <AdminTopbar showHamburger>
             <Link
@@ -213,12 +202,9 @@ const AdminVouchers = () => {
             </Link>
             <Link
               to="/vouchers/new"
-              state={{ existingCodes: vouchers.map((item) => item.code) }}
               className="btn primary vouchers-add-btn"
             >
-              <span className="vouchers-add-plus" aria-hidden="true">
-                +
-              </span>
+              <span className="vouchers-add-plus" aria-hidden="true">+</span>
               Add New Coupon
             </Link>
           </AdminTopbar>
@@ -228,10 +214,11 @@ const AdminVouchers = () => {
             <p className="subtitle">
               Manage and control all discount vouchers in the CertiCode system.
             </p>
+            {error && <div className="error-message">{error}</div>}
           </div>
 
           <section className="vouchers-stats-grid">
-            {stats.map((item) => (
+            {statCards.map((item) => (
               <article key={item.label} className="vouchers-stat-card">
                 <div className={`vouchers-stat-icon ${item.tone}`}>
                   <img
@@ -243,7 +230,7 @@ const AdminVouchers = () => {
                 </div>
                 <div className="vouchers-stat-text">
                   <small>{item.label}</small>
-                  <h3>{item.value}</h3>
+                  <h3>{item.value.toLocaleString()}</h3>
                 </div>
               </article>
             ))}
@@ -257,7 +244,10 @@ const AdminVouchers = () => {
                     key={filter}
                     type="button"
                     className={`vouchers-filter-pill ${selectedFilter === filter ? "active" : ""}`}
-                    onClick={() => setSelectedFilter(filter)}
+                    onClick={() => {
+                      setSelectedFilter(filter);
+                      setCurrentPage(1);
+                    }}
                   >
                     {filterIcons[filter] && (
                       <img
@@ -278,101 +268,128 @@ const AdminVouchers = () => {
             </div>
 
             <div className="vouchers-table-wrap">
-              <table className="vouchers-table">
-                <thead>
-                  <tr>
-                    <th>NAME</th>
-                    <th>CODE</th>
-                    <th>DISCOUNT</th>
-                    <th>ACTIVE FROM</th>
-                    <th>ACTIVE TO</th>
-                    <th>USAGE LIMIT</th>
-                    <th>STATUS</th>
-                    <th>ACTIONS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredVouchers.length === 0 ? (
+              {loading ? (
+                <div className="loading-state">Loading vouchers...</div>
+              ) : (
+                <table className="vouchers-table">
+                  <thead>
                     <tr>
-                      <td colSpan="8" className="voucher-empty-cell">
-                        No vouchers found for this filter.
-                      </td>
+                      <th>NAME</th>
+                      <th>CODE</th>
+                      <th>DISCOUNT</th>
+                      <th>ACTIVE FROM</th>
+                      <th>ACTIVE TO</th>
+                      <th>USAGE LIMIT</th>
+                      <th>STATUS</th>
+                      <th>ACTIONS</th>
                     </tr>
-                  ) : (
-                    filteredVouchers.map((voucher) => (
-                      <tr key={voucher.code}>
-                        <td className="voucher-name-cell">
-                          <strong>{voucher.name}</strong>
-                          <span>{voucher.updated}</span>
-                        </td>
-                        <td>
-                          <span className="voucher-code">{voucher.code}</span>
-                        </td>
-                        <td>
-                          <span className="voucher-discount">{voucher.discount}</span>
-                        </td>
-                        <td>{voucher.activeFrom}</td>
-                        <td>{voucher.activeTo}</td>
-                        <td className="voucher-usage-limit">{voucher.usageLimit}</td>
-                        <td>
-                          <span className={`voucher-status ${voucher.statusTone}`}>
-                            {voucher.status}
-                          </span>
-                        </td>
-                        <td>
-                          <div className="voucher-actions">
-                            <button
-                              type="button"
-                              aria-label={`View ${voucher.name}`}
-                              onClick={() =>
-                                navigate("/inventory/view-voucher-details", {
-                                  state: { voucher },
-                                })
-                              }
-                            >
-                              <img src={VouchRemove} alt="" aria-hidden="true" className="voucher-action-icon" />
-                            </button>
-                            <button
-                              type="button"
-                              aria-label={`Edit ${voucher.name}`}
-                              onClick={() => handleEdit(voucher)}
-                            >
-                              <img src={VouchEdit} alt="" aria-hidden="true" className="voucher-action-icon" />
-                            </button>
-                          </div>
+                  </thead>
+                  <tbody>
+                    {vouchers.length === 0 ? (
+                      <tr>
+                        <td colSpan="8" className="voucher-empty-cell">
+                          No vouchers found. Click "Add New Coupon" to create one.
                         </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    ) : (
+                      vouchers.map((voucher) => {
+                        const { status, tone } = getStatusAndTone(voucher);
+                        return (
+                          <tr key={voucher.id}>
+                            <td className="voucher-name-cell">
+                              <strong>{voucher.description || `Voucher ${voucher.code}`}</strong>
+                              <span>Updated {new Date(voucher.updated_at).toLocaleDateString()}</span>
+                            </td>
+                            <td>
+                              <span className="voucher-code">{voucher.code}</span>
+                            </td>
+                            <td>
+                              <span className="voucher-discount">{formatDiscount(voucher)}</span>
+                            </td>
+                            <td>{voucher.valid_from ? formatDate(voucher.valid_from) : 'Immediate'}</td>
+                            <td>{voucher.valid_until ? formatDate(voucher.valid_until) : 'No expiry'}</td>
+                            <td className="voucher-usage-limit">
+                              {voucher.max_uses ? `${voucher.used_count || 0}/${voucher.max_uses}` : 'Unlimited'}
+                            </td>
+                            <td>
+                              <span className={`voucher-status ${tone}`}>
+                                {status}
+                              </span>
+                            </td>
+                            <td>
+                              <div className="voucher-actions">
+                                <button
+                                  type="button"
+                                  aria-label={`Edit ${voucher.code}`}
+                                  onClick={() => handleEdit(voucher)}
+                                >
+                                  <img src={VouchEdit} alt="" aria-hidden="true" className="voucher-action-icon" />
+                                </button>
+                                <button
+                                  type="button"
+                                  aria-label={`Delete ${voucher.code}`}
+                                  onClick={() => handleDelete(voucher.id, voucher.code)}
+                                >
+                                  <img src={VouchRemove} alt="" aria-hidden="true" className="voucher-action-icon" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              )}
             </div>
 
-            <div className="vouchers-pagination">
-              <span>
-                Showing{" "}
-                <strong>
-                  {filteredVouchers.length === 0 ? "0-0" : `1-${filteredVouchers.length}`}
-                </strong>{" "}
-                of {filteredVouchers.length} vouchers
-              </span>
-              <div className="vouchers-pagination-controls">
-                <button type="button" className="voucher-page-nav-btn" aria-label="Previous page">
-                  <img src={PaginationLeft} alt="" aria-hidden="true" className="voucher-page-nav-icon" />
-                </button>
-                <button type="button" className="active">
-                  1
-                </button>
-                <button type="button">2</button>
-                <button type="button" className="voucher-page-nav-btn" aria-label="Next page">
-                  <img src={PaginationRight} alt="" aria-hidden="true" className="voucher-page-nav-icon" />
-                </button>
+            {!loading && vouchers.length > 0 && (
+              <div className="vouchers-pagination">
+                <span>
+                  Showing{" "}
+                  <strong>
+                    {(pagination.current_page - 1) * pagination.per_page + 1}-
+                    {Math.min(pagination.current_page * pagination.per_page, pagination.total)}
+                  </strong>{" "}
+                  of {pagination.total} vouchers
+                </span>
+                <div className="vouchers-pagination-controls">
+                  <button
+                    type="button"
+                    className="voucher-page-nav-btn"
+                    aria-label="Previous page"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    <img src={PaginationLeft} alt="" aria-hidden="true" className="voucher-page-nav-icon" />
+                  </button>
+                  
+                  {[...Array(pagination.last_page)].map((_, i) => (
+                    <button
+                      key={i + 1}
+                      type="button"
+                      className={currentPage === i + 1 ? "active" : ""}
+                      onClick={() => handlePageChange(i + 1)}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  
+                  <button
+                    type="button"
+                    className="voucher-page-nav-btn"
+                    aria-label="Next page"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === pagination.last_page}
+                  >
+                    <img src={PaginationRight} alt="" aria-hidden="true" className="voucher-page-nav-icon" />
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </section>
         </main>
       </div>
-
     </>
   );
 };
