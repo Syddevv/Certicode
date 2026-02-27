@@ -345,9 +345,6 @@ const AdminAddVoucher = () => {
             <img src={notifBell} alt="Notifications" className="notification-icon" />
             <span className="notification-dot" />
           </Link>
-          <Link to="/add-asset" className="btn primary">
-            + Add New Asset
-          </Link>
         </AdminTopbar>
 
         <section className="add-voucher-header">
@@ -384,7 +381,7 @@ const AdminAddVoucher = () => {
               </label>
 
               <label>
-                Voucher Code <span className="required">*</span>
+                Voucher Code
                 <input
                   type="text"
                   name="code"
@@ -399,7 +396,7 @@ const AdminAddVoucher = () => {
               </label>
 
               <label>
-                Discount Type <span className="required">*</span>
+                Discount Type
                 <select
                   name="type"
                   value={formData.type}
@@ -412,7 +409,7 @@ const AdminAddVoucher = () => {
               </label>
 
               <label>
-                Discount Value <span className="required">*</span>
+                Discount Value
                 <input
                   type="number"
                   name="value"
