@@ -536,7 +536,7 @@ const BuyerDashboard = () => {
                 </div>
               </div>
 
-              <div className="buyer-pro">
+              {/* <div className="buyer-pro">
                 <img
                   className="buyer-pro__icon"
                   src={OrangeStar}
@@ -554,7 +554,7 @@ const BuyerDashboard = () => {
                   alt=""
                   aria-hidden="true"
                 />
-              </div>
+              </div> */}
             </aside>
           </div>
         </div>
