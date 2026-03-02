@@ -4,7 +4,10 @@ import Sidebar from "../../components/Sidebar";
 import AdminTopbar from "../../components/AdminTopbar";
 import "../../styles/adminSetting.css";
 import notifBell from "../../assets/NotifBell.png";
+import DefaultProfileImg from "../../assets/default-profile.png";
 import { ProfileAPI } from "../../services/ProfileAPI";
+import { resolveAvatarUrl } from "../../utils/avatar";
+import { emitProfileUpdated } from "../../utils/profileSync";
 import {
   IconClock,
   IconPencil,
@@ -260,6 +263,12 @@ const AdminSetting = () => {
       setLoading(true);
       const data = await ProfileAPI.getCurrentUser();
       setUser(data);
+      if (data?.name) {
+        localStorage.setItem("user_name", data.name);
+      }
+      if (data?.role) {
+        localStorage.setItem("user_role", data.role);
+      }
       setProfileData({
         name: data.name || "",
         email: data.email || "",
@@ -332,7 +341,21 @@ const AdminSetting = () => {
           text: result.message || "Avatar updated successfully",
         });
 
-        setUser((prev) => ({ ...prev, avatar_url: result.avatar_url }));
+        const nextAvatarUrl =
+          result?.avatar_url ||
+          result?.user?.avatar_url ||
+          result?.data?.avatar_url ||
+          "";
+
+        const nextUser = {
+          ...(user || {}),
+          avatar_url: nextAvatarUrl,
+          name: profileData.name || user?.name || "",
+          role: profileData.role || user?.role || "Admin",
+        };
+
+        setUser((prev) => ({ ...prev, avatar_url: nextAvatarUrl }));
+        emitProfileUpdated(nextUser);
 
         e.target.value = "";
 
@@ -378,9 +401,29 @@ const AdminSetting = () => {
         text: result.message || "Profile updated successfully",
       });
 
-      if (result.user) {
-        setUser((prev) => ({ ...prev, ...result.user }));
+      const updatedUser = {
+        ...(user || {}),
+        ...(result?.user || {}),
+        name: result?.user?.name || profileData.name,
+        email: result?.user?.email || profileData.email,
+      };
+
+      setUser(updatedUser);
+      setProfileData((prev) => ({
+        ...prev,
+        name: updatedUser.name || prev.name,
+        email: updatedUser.email || prev.email,
+        role: updatedUser.role || prev.role,
+      }));
+
+      if (updatedUser.name) {
+        localStorage.setItem("user_name", updatedUser.name);
       }
+      if (updatedUser.role) {
+        localStorage.setItem("user_role", updatedUser.role);
+      }
+
+      emitProfileUpdated(updatedUser);
 
       setTimeout(() => {
         setMessage({ type: "", text: "" });
@@ -597,12 +640,12 @@ const AdminSetting = () => {
               <div className="profile-row">
                 <div className="avatar-section">
                   <img
-                    src={user?.avatar_url || "https://i.pravatar.cc/150?u=alex"}
+                    src={resolveAvatarUrl(user?.avatar_url) || DefaultProfileImg}
                     alt="Profile"
                     className="avatar-large"
                     onError={(e) => {
                       console.error("Image failed to load:", user?.avatar_url);
-                      e.target.src = "https://i.pravatar.cc/150?u=alex";
+                      e.target.src = DefaultProfileImg;
                       e.target.onerror = null;
                     }}
                   />

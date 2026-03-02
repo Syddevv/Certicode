@@ -10,7 +10,10 @@ import CustomersAdmin from "../assets/CustomersAdmin.png";
 import AdminVoucher from "../assets/AdminVoucher.png";
 import SettingsAdmin from "../assets/SettingsAdmin.png";
 import SupportAdmin from "../assets/SupportAdmin.png";
+import DefaultProfileImg from "../assets/default-profile.png";
 import LogoutModalDialog from "./LogoutModal";
+import { resolveAvatarUrl } from "../utils/avatar";
+import { PROFILE_UPDATED_EVENT } from "../utils/profileSync";
 
 const Icons = {
   Dashboard: <img src={DashboardAdmin} alt="Dashboard" width={20} height={20} />,
@@ -24,11 +27,40 @@ const Icons = {
 
 const Sidebar = ({ activePage }) => {
   const [showLogout, setShowLogout] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => ({
+    name: localStorage.getItem("user_name") || "",
+    role: localStorage.getItem("user_role") || "Admin",
+    avatar_url: "",
+  }));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    const handleProfileUpdated = (event) => {
+      const nextUser = event?.detail || {};
+      if (!nextUser || typeof nextUser !== "object") return;
+
+      setUser((prev) => ({
+        ...prev,
+        ...nextUser,
+      }));
+
+      if (nextUser.name) {
+        localStorage.setItem("user_name", nextUser.name);
+      }
+      if (nextUser.role) {
+        localStorage.setItem("user_role", nextUser.role);
+      }
+    };
+
+    window.addEventListener(PROFILE_UPDATED_EVENT, handleProfileUpdated);
+
+    return () => {
+      window.removeEventListener(PROFILE_UPDATED_EVENT, handleProfileUpdated);
+    };
   }, []);
 
   const fetchUserData = async () => {
@@ -63,7 +95,14 @@ const Sidebar = ({ activePage }) => {
         return;
       }
 
-      setUser(data.user || data);
+      const nextUser = data.user || data;
+      setUser((prev) => ({ ...prev, ...nextUser }));
+      if (nextUser?.name) {
+        localStorage.setItem("user_name", nextUser.name);
+      }
+      if (nextUser?.role) {
+        localStorage.setItem("user_role", nextUser.role);
+      }
     } catch (error) {
       console.error("Failed to fetch user data in sidebar:", error);
     } finally {
@@ -187,14 +226,10 @@ const Sidebar = ({ activePage }) => {
               ) : (
                 <>
                   <img
-                    src={
-                      user?.avatar_url ||
-                      "https://i.pravatar.cc/150?u=a042581f4e29026024d"
-                    }
+                    src={resolveAvatarUrl(user?.avatar_url) || DefaultProfileImg}
                     alt="Admin"
                     onError={(e) => {
-                      e.target.src =
-                        "https://i.pravatar.cc/150?u=a042581f4e29026024d";
+                      e.target.src = DefaultProfileImg;
                       e.target.onerror = null;
                     }}
                   />
