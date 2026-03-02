@@ -382,6 +382,10 @@ input:checked + .slider:before {
   gap: 10px;
 }
 
+.mfa-modal-box .modal-actions {
+  margin-top: 12px;
+}
+
 .mfa-modal-box {
   max-width: 460px;
 }
