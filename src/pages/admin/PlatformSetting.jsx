@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import AdminTopbar from "../../components/AdminTopbar";
@@ -11,7 +11,95 @@ import {
   saveAdminPlatformPreferences,
   SUPPORTED_CURRENCIES,
 } from "../../utils/adminPlatformPreferences";
-import { showSuccessToast } from "../../utils/toast";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
+import { ProfileAPI } from "../../services/ProfileAPI";
+
+const MfaSetupModal = ({
+  onClose,
+  onConfirm,
+  onCodeChange,
+  onCopyUrl,
+  code,
+  error,
+  loading,
+  otpauthUrl,
+  copied,
+  isPreparing,
+}) => {
+  const qrUrl = otpauthUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(otpauthUrl)}`
+    : "";
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-box mfa-modal-box" onClick={(e) => e.stopPropagation()}>
+        <h3>Set Up Multi-Factor Authentication</h3>
+        <p className="mfa-modal-subtitle">
+          {isPreparing
+            ? "Preparing enrollment..."
+            : "Scan this QR code in Google or Microsoft Authenticator, then enter the 6-digit code."}
+        </p>
+
+        {qrUrl ? (
+          <div className="mfa-qr-wrap">
+            <img src={qrUrl} alt="MFA QR code" className="mfa-qr-image" />
+          </div>
+        ) : null}
+
+        <div className="mfa-url-wrap">
+          <input
+            type="text"
+            value={otpauthUrl || "Waiting for enrollment URL..."}
+            readOnly
+          />
+          <button
+            type="button"
+            className="btn secondary"
+            onClick={onCopyUrl}
+            disabled={!otpauthUrl || isPreparing}
+          >
+            {copied ? "Copied" : "Copy"}
+          </button>
+        </div>
+
+        <form onSubmit={onConfirm}>
+          <div className="input-group">
+            <label>Authentication Code</label>
+            <input
+              type="text"
+              value={code}
+              onChange={onCodeChange}
+              placeholder="123456"
+              inputMode="numeric"
+              maxLength={6}
+              autoFocus
+            />
+          </div>
+
+          {error ? <p className="mfa-error">{error}</p> : null}
+
+          <div className="modal-actions">
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn primary"
+              disabled={loading || isPreparing || !otpauthUrl}
+            >
+              {isPreparing ? "Loading..." : loading ? "Verifying..." : "Enable MFA"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
 
 const PlatformSetting = () => {
   const navigate = useNavigate();
@@ -23,7 +111,7 @@ const PlatformSetting = () => {
     supportEmail: initialPreferences.supportEmail,
     currency: initialPreferences.currency,
     timezone: initialPreferences.timezone,
-    mfaRequired: true,
+    mfaRequired: false,
     sessionTimeout: "30minutes",
     ipWhitelisting: false,
   }));
@@ -33,10 +121,30 @@ const PlatformSetting = () => {
   const [newIP, setNewIP] = useState("");
   const [showEnableModal, setShowEnableModal] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [mfaBusy, setMfaBusy] = useState(false);
+  const [mfaPreparing, setMfaPreparing] = useState(false);
+  const [showMfaModal, setShowMfaModal] = useState(false);
+  const [mfaCode, setMfaCode] = useState("");
+  const [mfaOtpAuthUrl, setMfaOtpAuthUrl] = useState("");
+  const [mfaSetupError, setMfaSetupError] = useState("");
+  const [mfaUrlCopied, setMfaUrlCopied] = useState(false);
 
   const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
+
+  useEffect(() => {
+    const loadCurrentMfaState = async () => {
+      try {
+        const user = await ProfileAPI.getCurrentUser();
+        setForm((prev) => ({ ...prev, mfaRequired: Boolean(user?.mfa_enabled) }));
+      } catch (error) {
+        console.error("Failed to load current MFA state:", error);
+      }
+    };
+
+    loadCurrentMfaState();
+  }, []);
 
   // When the toggle is clicked:
   // - turning ON → show confirmation modal before enabling
@@ -88,6 +196,92 @@ const PlatformSetting = () => {
       showSuccessToast("Platform settings saved.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const closeMfaModal = (force = false) => {
+    if (mfaBusy && !force) return;
+    setShowMfaModal(false);
+    setMfaCode("");
+    setMfaOtpAuthUrl("");
+    setMfaSetupError("");
+    setMfaPreparing(false);
+    setMfaUrlCopied(false);
+  };
+
+  const handleMfaToggle = async (checked) => {
+    if (!checked) {
+      if (form.mfaRequired) {
+        showErrorToast("Disabling MFA is not available yet.");
+      }
+      return;
+    }
+
+    if (form.mfaRequired) {
+      showSuccessToast("MFA is already enabled.");
+      return;
+    }
+
+    try {
+      setMfaBusy(true);
+      setMfaPreparing(true);
+      setShowMfaModal(true);
+      setMfaSetupError("");
+      setMfaOtpAuthUrl("");
+
+      const result = await ProfileAPI.enrollAdminMfa();
+      setMfaOtpAuthUrl(result?.otpauth_url || "");
+      setMfaPreparing(false);
+    } catch (error) {
+      console.error("Failed to start MFA enrollment:", error);
+      setMfaPreparing(false);
+      setMfaSetupError(error?.message || "Failed to start MFA enrollment.");
+      showErrorToast(error?.message || "Failed to start MFA enrollment.");
+    } finally {
+      setMfaBusy(false);
+    }
+  };
+
+  const handleMfaCodeChange = (event) => {
+    const nextValue = event.target.value.replace(/\D/g, "").slice(0, 6);
+    setMfaCode(nextValue);
+    setMfaSetupError("");
+  };
+
+  const handleCopyMfaUrl = async () => {
+    if (!mfaOtpAuthUrl) return;
+
+    try {
+      await navigator.clipboard.writeText(mfaOtpAuthUrl);
+      setMfaUrlCopied(true);
+    } catch (error) {
+      console.error("Failed to copy MFA URL:", error);
+      setMfaSetupError("Unable to copy URL. Please copy manually.");
+    }
+  };
+
+  const handleConfirmMfa = async (event) => {
+    event.preventDefault();
+
+    if (mfaCode.length !== 6) {
+      setMfaSetupError("Enter the 6-digit code from your authenticator app.");
+      return;
+    }
+
+    try {
+      setMfaBusy(true);
+      setMfaSetupError("");
+
+      const result = await ProfileAPI.confirmAdminMfa(mfaCode);
+      setForm((prev) => ({ ...prev, mfaRequired: Boolean(result?.mfa_enabled) }));
+      showSuccessToast(result?.message || "MFA enabled successfully.");
+      closeMfaModal(true);
+    } catch (error) {
+      console.error("Failed to confirm MFA enrollment:", error);
+      setMfaSetupError(error?.message || "Invalid MFA code.");
+      showErrorToast(error?.message || "Invalid MFA code.");
+    } finally {
+      setMfaBusy(false);
     }
   };
 
@@ -273,15 +467,18 @@ const PlatformSetting = () => {
               <div className="security-item">
                 <div className="sec-info">
                   <strong>Multi-Factor Authentication (MFA)</strong>
-                  <p>Require MFA for all administrative accounts</p>
+                  <p>
+                    {form.mfaRequired
+                      ? "MFA is enabled for this admin account"
+                      : "Require MFA for all administrative accounts"}
+                  </p>
                 </div>
                 <label className="switch">
                   <input
                     type="checkbox"
                     checked={form.mfaRequired}
-                    onChange={(e) =>
-                      handleChange("mfaRequired", e.target.checked)
-                    }
+                    onChange={(e) => handleMfaToggle(e.target.checked)}
+                    disabled={mfaBusy}
                   />
                   <span className="slider"></span>
                 </label>
@@ -439,6 +636,21 @@ const PlatformSetting = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {showMfaModal && (
+        <MfaSetupModal
+          onClose={closeMfaModal}
+          onConfirm={handleConfirmMfa}
+          onCodeChange={handleMfaCodeChange}
+          onCopyUrl={handleCopyMfaUrl}
+          code={mfaCode}
+          error={mfaSetupError}
+          loading={mfaBusy}
+          otpauthUrl={mfaOtpAuthUrl}
+          copied={mfaUrlCopied}
+          isPreparing={mfaPreparing}
+        />
       )}
     </div>
   );

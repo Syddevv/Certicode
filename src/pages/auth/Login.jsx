@@ -16,6 +16,10 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [mfaChallenge, setMfaChallenge] = useState(null);
+  const [mfaCode, setMfaCode] = useState("");
+  const [mfaLoading, setMfaLoading] = useState(false);
+  const [mfaError, setMfaError] = useState("");
   const navigate = useNavigate();
 
   const togglePassword = () => setPasswordVisible(!passwordVisible);
@@ -32,13 +36,24 @@ const Login = () => {
 
       const data = await api.login(credentials);
 
+      if (data?.mfa_required && data?.mfa_token) {
+        setMfaChallenge({
+          mfaToken: data.mfa_token,
+          userId: data.user_id,
+        });
+        setMfaCode("");
+        setMfaError("");
+        setIsLoading(false);
+        return;
+      }
+
       if (data.token && data.user) {
         localStorage.setItem("auth_token", data.token);
         localStorage.setItem("user_id", data.user.id);
         localStorage.setItem("user_role", data.user.role);
         localStorage.setItem("user_name", data.user.name || "");
 
-        if (data.user.role === "Admin") {
+        if (String(data.user.role).toLowerCase() === "admin") {
           navigate("/dashboard");
         } else {
           navigate("/");
@@ -67,6 +82,55 @@ const Login = () => {
     } catch (error) {
       showErrorToast("Facebook login failed. Please try again.");
       setIsLoading(false);
+    }
+  };
+
+  const closeMfaModal = () => {
+    if (mfaLoading) return;
+    setMfaChallenge(null);
+    setMfaCode("");
+    setMfaError("");
+  };
+
+  const handleMfaCodeChange = (event) => {
+    const nextValue = event.target.value.replace(/\D/g, "").slice(0, 6);
+    setMfaCode(nextValue);
+    setMfaError("");
+  };
+
+  const handleVerifyMfa = async (event) => {
+    event.preventDefault();
+
+    if (!mfaChallenge?.mfaToken) {
+      setMfaError("MFA session has expired. Please log in again.");
+      return;
+    }
+
+    if (mfaCode.length !== 6) {
+      setMfaError("Please enter the 6-digit code from your authenticator app.");
+      return;
+    }
+
+    try {
+      setMfaLoading(true);
+      const data = await api.verifyAdminMfaLogin({
+        mfa_token: mfaChallenge.mfaToken,
+        code: mfaCode,
+      });
+
+      setMfaChallenge(null);
+      setMfaCode("");
+      setMfaError("");
+
+      if (String(data?.user?.role).toLowerCase() === "admin") {
+        navigate("/dashboard");
+      } else {
+        navigate("/");
+      }
+    } catch (error) {
+      setMfaError(error.message || "MFA verification failed. Please try again.");
+    } finally {
+      setMfaLoading(false);
     }
   };
 
@@ -220,6 +284,51 @@ const Login = () => {
         <img src={arrowLeft} alt="" className="back-home-icon" />
         Back to Home
       </Link>
+
+      {mfaChallenge && (
+        <div className="auth-mfa-overlay" onClick={closeMfaModal}>
+          <div className="auth-mfa-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Two-Factor Verification</h3>
+            <p>
+              Enter the 6-digit code from your authenticator app to complete
+              admin sign in.
+            </p>
+
+            <form onSubmit={handleVerifyMfa}>
+              <input
+                type="text"
+                className="auth-mfa-input"
+                placeholder="123456"
+                value={mfaCode}
+                onChange={handleMfaCodeChange}
+                inputMode="numeric"
+                maxLength={6}
+                autoFocus
+              />
+
+              {mfaError ? <p className="auth-mfa-error">{mfaError}</p> : null}
+
+              <div className="auth-mfa-actions">
+                <button
+                  type="button"
+                  className="auth-mfa-btn auth-mfa-btn--ghost"
+                  onClick={closeMfaModal}
+                  disabled={mfaLoading}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="auth-mfa-btn auth-mfa-btn--primary"
+                  disabled={mfaLoading}
+                >
+                  {mfaLoading ? "Verifying..." : "Verify"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
