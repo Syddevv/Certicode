@@ -78,7 +78,7 @@ export const api = {
   },
 
   async verifyAdminMfaLogin(payload) {
-    const response = await fetch(`${API_URL}/admin/mfa/verify-login`, {
+    const response = await fetch(`${API_URL}/mfa/verify-login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -101,6 +101,10 @@ export const api = {
     }
 
     return data;
+  },
+
+  async verifyMfaLogin(payload) {
+    return this.verifyAdminMfaLogin(payload);
   },
 
   async googleRedirect() {

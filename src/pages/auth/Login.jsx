@@ -291,7 +291,7 @@ const Login = () => {
             <h3>Two-Factor Verification</h3>
             <p>
               Enter the 6-digit code from your authenticator app to complete
-              admin sign in.
+              sign in.
             </p>
 
             <form onSubmit={handleVerifyMfa}>

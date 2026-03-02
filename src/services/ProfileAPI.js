@@ -204,7 +204,7 @@ export const ProfileAPI = {
         };
       }
 
-      const response = await fetch(`${API_URL}/admin/mfa/enroll`, {
+      const response = await fetch(`${API_URL}/mfa/enroll`, {
         method: 'POST',
         headers: {
           'Accept': 'application/json',
@@ -251,7 +251,7 @@ export const ProfileAPI = {
         };
       }
 
-      const response = await fetch(`${API_URL}/admin/mfa/confirm`, {
+      const response = await fetch(`${API_URL}/mfa/confirm`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

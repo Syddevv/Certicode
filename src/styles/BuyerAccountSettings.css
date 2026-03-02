@@ -599,6 +599,121 @@
   box-shadow: 0 10px 18px rgba(239, 68, 68, 0.2);
 }
 
+.account-mfa-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: grid;
+  place-items: center;
+  z-index: 1001;
+  padding: 20px;
+}
+
+.account-mfa-modal {
+  width: min(500px, 94vw);
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 24px 52px rgba(15, 23, 42, 0.25);
+  padding: 20px;
+}
+
+.account-mfa-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.account-mfa-header h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.account-mfa-close {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.account-mfa-subtitle {
+  margin: 8px 0 14px;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.account-mfa-qr-wrap {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  justify-content: center;
+  background: #fff;
+}
+
+.account-mfa-qr {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+}
+
+.account-mfa-url {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.account-mfa-url input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 12px;
+  color: #475569;
+}
+
+.account-mfa-form {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.account-mfa-form label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.account-mfa-form input {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #0f172a;
+}
+
+.account-mfa-error {
+  margin: 0;
+  font-size: 12px;
+  color: #dc2626;
+}
+
+.account-mfa-actions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 /*update billing modal */
 
 .ebd-overlay {

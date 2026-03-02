@@ -17,6 +17,114 @@ import EditBillingDetailsModal from "../../components/Editbillingdetailsmodal ";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
 import LogoutModal from "../../components/LogoutModal";
 
+const MfaSetupModal = ({
+  onClose,
+  onConfirm,
+  onCodeChange,
+  onCopyUrl,
+  code,
+  error,
+  loading,
+  otpauthUrl,
+  copied,
+  isPreparing,
+}) => {
+  const qrUrl = otpauthUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(otpauthUrl)}`
+    : "";
+
+  return (
+    <div
+      className="account-mfa-backdrop"
+      role="presentation"
+      onClick={onClose}
+    >
+      <div
+        className="account-mfa-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="account-mfa-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="account-mfa-header">
+          <h3 id="account-mfa-title">Set Up Two-Factor Authentication</h3>
+          <button
+            type="button"
+            className="account-mfa-close"
+            onClick={onClose}
+            disabled={loading}
+            aria-label="Close 2FA setup modal"
+          >
+            ×
+          </button>
+        </div>
+
+        <p className="account-mfa-subtitle">
+          {isPreparing
+            ? "Preparing your authenticator enrollment..."
+            : "Scan this QR using Google or Microsoft Authenticator, then enter the 6-digit code."}
+        </p>
+
+        {qrUrl ? (
+          <div className="account-mfa-qr-wrap">
+            <img src={qrUrl} alt="2FA QR code" className="account-mfa-qr" />
+          </div>
+        ) : null}
+
+        <div className="account-mfa-url">
+          <input
+            type="text"
+            value={otpauthUrl || "Waiting for enrollment URL..."}
+            readOnly
+          />
+          <button
+            type="button"
+            className="account-secondary"
+            onClick={onCopyUrl}
+            disabled={!otpauthUrl || isPreparing}
+          >
+            {copied ? "Copied" : "Copy"}
+          </button>
+        </div>
+
+        <form onSubmit={onConfirm} className="account-mfa-form">
+          <label htmlFor="account-mfa-code">Authentication Code</label>
+          <input
+            id="account-mfa-code"
+            type="text"
+            value={code}
+            onChange={onCodeChange}
+            placeholder="123456"
+            inputMode="numeric"
+            maxLength={6}
+            autoFocus
+          />
+
+          {error ? <p className="account-mfa-error">{error}</p> : null}
+
+          <div className="account-mfa-actions">
+            <button
+              type="button"
+              className="account-secondary"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="account-primary"
+              disabled={loading || isPreparing || !otpauthUrl}
+            >
+              {isPreparing ? "Loading..." : loading ? "Verifying..." : "Enable 2FA"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 const BuyerAccountSettings = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [user, setUser] = useState(null);
@@ -41,6 +149,14 @@ const BuyerAccountSettings = () => {
   const [isLogoutModal, setLogoutModal] = useState(false);
   const [isUpdateBillingModal, setUpdateBillingModal] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [mfaBusy, setMfaBusy] = useState(false);
+  const [showMfaSetupModal, setShowMfaSetupModal] = useState(false);
+  const [mfaCode, setMfaCode] = useState("");
+  const [mfaSetupError, setMfaSetupError] = useState("");
+  const [mfaOtpAuthUrl, setMfaOtpAuthUrl] = useState("");
+  const [mfaUrlCopied, setMfaUrlCopied] = useState(false);
+  const [mfaPreparing, setMfaPreparing] = useState(false);
 
   const notifyUser = (type, text) => {
     setMessage({ type, text });
@@ -75,7 +191,7 @@ const BuyerAccountSettings = () => {
   }, [isDeleteOpen]);
 
   useEffect(() => {
-    if (isUpdateBillingModal || isDeleteOpen || isLogoutModal) {
+    if (isUpdateBillingModal || isDeleteOpen || isLogoutModal || showMfaSetupModal) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -83,7 +199,7 @@ const BuyerAccountSettings = () => {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isUpdateBillingModal, isDeleteOpen, isLogoutModal]);
+  }, [isUpdateBillingModal, isDeleteOpen, isLogoutModal, showMfaSetupModal]);
 
   const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
@@ -179,6 +295,7 @@ const BuyerAccountSettings = () => {
         company_name: data.company_name || "",
         avatar_url: data.avatar_url || "",
       });
+      setMfaEnabled(Boolean(data?.mfa_enabled));
     } catch (error) {
       console.error("Failed to fetch user data:", error);
       notifyUser("error", "Failed to load user data");
@@ -294,6 +411,96 @@ const BuyerAccountSettings = () => {
       );
     } finally {
       setChangingPassword(false);
+    }
+  };
+
+  const closeMfaSetupModal = (force = false) => {
+    if (mfaBusy && !force) return;
+    setShowMfaSetupModal(false);
+    setMfaCode("");
+    setMfaSetupError("");
+    setMfaOtpAuthUrl("");
+    setMfaUrlCopied(false);
+    setMfaPreparing(false);
+  };
+
+  const handleMfaToggle = async (event) => {
+    const wantsEnabled = event.target.checked;
+
+    if (!wantsEnabled) {
+      if (mfaEnabled) {
+        notifyUser("error", "Disabling 2FA is not available yet.");
+      }
+      return;
+    }
+
+    if (mfaEnabled) {
+      notifyUser("success", "2FA is already enabled for this account.");
+      return;
+    }
+
+    try {
+      setMfaBusy(true);
+      setMfaPreparing(true);
+      setMfaSetupError("");
+      setMfaOtpAuthUrl("");
+      setMfaUrlCopied(false);
+      setShowMfaSetupModal(true);
+
+      const result = await ProfileAPI.enrollAdminMfa();
+      setMfaOtpAuthUrl(result?.otpauth_url || "");
+      setMfaPreparing(false);
+    } catch (error) {
+      console.error("Failed to start 2FA setup:", error);
+      setMfaPreparing(false);
+      setMfaSetupError(error?.message || "Failed to start 2FA setup.");
+      notifyUser("error", error?.message || "Failed to start 2FA setup.");
+    } finally {
+      setMfaBusy(false);
+    }
+  };
+
+  const handleMfaCodeChange = (event) => {
+    const nextValue = event.target.value.replace(/\D/g, "").slice(0, 6);
+    setMfaCode(nextValue);
+    setMfaSetupError("");
+  };
+
+  const handleCopyMfaUrl = async () => {
+    if (!mfaOtpAuthUrl) return;
+    try {
+      await navigator.clipboard.writeText(mfaOtpAuthUrl);
+      setMfaUrlCopied(true);
+    } catch (error) {
+      console.error("Failed to copy 2FA URL:", error);
+      setMfaSetupError("Unable to copy URL. Please copy it manually.");
+    }
+  };
+
+  const handleConfirmMfaSetup = async (event) => {
+    event.preventDefault();
+
+    if (mfaCode.length !== 6) {
+      setMfaSetupError("Please enter the 6-digit code from your authenticator app.");
+      return;
+    }
+
+    try {
+      setMfaBusy(true);
+      setMfaSetupError("");
+
+      const result = await ProfileAPI.confirmAdminMfa(mfaCode);
+      setMfaEnabled(Boolean(result?.mfa_enabled));
+      setUser((prev) => (prev ? { ...prev, mfa_enabled: true } : prev));
+      notifyUser("success", result?.message || "Two-factor authentication enabled.");
+      closeMfaSetupModal(true);
+    } catch (error) {
+      console.error("Failed to confirm 2FA setup:", error);
+      const text = error?.message || "Invalid 2FA code.";
+      setMfaSetupError(text);
+      notifyUser("error", text);
+    } finally {
+      setMfaBusy(false);
     }
   };
 
@@ -613,11 +820,18 @@ const BuyerAccountSettings = () => {
                   <div>
                     <strong>Two-Factor Authentication</strong>
                     <span>
-                      Secure your account with a secondary verification method.
+                      {mfaEnabled
+                        ? "Enabled for this account."
+                        : "Secure your account with a secondary verification method."}
                     </span>
                   </div>
                   <label className="account-switch">
-                    <input type="checkbox" defaultChecked />
+                    <input
+                      type="checkbox"
+                      checked={mfaEnabled}
+                      onChange={handleMfaToggle}
+                      disabled={mfaBusy}
+                    />
                     <span className="account-slider" />
                   </label>
                 </div>
@@ -846,6 +1060,20 @@ const BuyerAccountSettings = () => {
         isOpen={isUpdateBillingModal}
         onClose={() => setUpdateBillingModal(false)}
       />
+      {showMfaSetupModal && (
+        <MfaSetupModal
+          onClose={closeMfaSetupModal}
+          onConfirm={handleConfirmMfaSetup}
+          onCodeChange={handleMfaCodeChange}
+          onCopyUrl={handleCopyMfaUrl}
+          code={mfaCode}
+          error={mfaSetupError}
+          loading={mfaBusy}
+          otpauthUrl={mfaOtpAuthUrl}
+          copied={mfaUrlCopied}
+          isPreparing={mfaPreparing}
+        />
+      )}
       <Footer />
     </div>
   );
