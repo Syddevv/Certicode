@@ -17,6 +17,7 @@ const PlatformSetting = () => {
   const navigate = useNavigate();
   const initialPreferences = useMemo(() => loadAdminPlatformPreferences(), []);
   const [saving, setSaving] = useState(false);
+
   const [form, setForm] = useState(() => ({
     platformName: initialPreferences.platformName,
     supportEmail: initialPreferences.supportEmail,
@@ -24,11 +25,55 @@ const PlatformSetting = () => {
     timezone: initialPreferences.timezone,
     mfaRequired: true,
     sessionTimeout: "30minutes",
-    ipWhitelisting: true,
+    ipWhitelisting: false,
   }));
+
+  // IP Whitelisting state
+  const [allowedIPs, setAllowedIPs] = useState(["192.168.1.1"]);
+  const [newIP, setNewIP] = useState("");
+  const [showEnableModal, setShowEnableModal] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
 
   const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  // When the toggle is clicked:
+  // - turning ON → show confirmation modal before enabling
+  // - turning OFF → disable immediately
+  const handleIPWhitelistToggle = (checked) => {
+    if (checked) {
+      setShowEnableModal(true);
+    } else {
+      handleChange("ipWhitelisting", false);
+    }
+  };
+
+  const confirmEnableWhitelist = () => {
+    handleChange("ipWhitelisting", true);
+    setShowEnableModal(false);
+  };
+
+  const handleAddIP = () => {
+    const trimmed = newIP.trim();
+    if (trimmed && !allowedIPs.includes(trimmed)) {
+      setAllowedIPs((prev) => [...prev, trimmed]);
+      setNewIP("");
+    }
+  };
+
+  const handleRemoveIP = (ip) => {
+    setAllowedIPs((prev) => prev.filter((i) => i !== ip));
+  };
+
+  const handleSaveIPs = () => {
+    setShowSaveModal(true);
+  };
+
+  const confirmSaveIPs = () => {
+    // Persist IPs here if needed (e.g. API call)
+    showSuccessToast("IP Whitelist saved.");
+    setShowSaveModal(false);
   };
 
   const handleSaveChanges = () => {
@@ -64,7 +109,11 @@ const PlatformSetting = () => {
             <img src={notifBell} alt="Notifications" className="topbar-icon" />
             <span className="notification-dot" />
           </Link>
-          <button className="btn primary" onClick={handleSaveChanges} disabled={saving}>
+          <button
+            className="btn primary"
+            onClick={handleSaveChanges}
+            disabled={saving}
+          >
             {saving ? "Saving..." : "Save Changes"}
           </button>
         </AdminTopbar>
@@ -85,6 +134,7 @@ const PlatformSetting = () => {
 
         <div className="settings-grid">
           <div className="settings-left">
+            {/* Platform Identity Card */}
             <div className="settings-card">
               <div className="card-header-start">
                 <div
@@ -118,7 +168,9 @@ const PlatformSetting = () => {
                   <input
                     type="text"
                     value={form.platformName}
-                    onChange={(e) => handleChange("platformName", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("platformName", e.target.value)
+                    }
                   />
                   <span className="input-hint">
                     Appears in email footers and browser tabs.
@@ -129,7 +181,9 @@ const PlatformSetting = () => {
                   <input
                     type="email"
                     value={form.supportEmail}
-                    onChange={(e) => handleChange("supportEmail", e.target.value)}
+                    onChange={(e) =>
+                      handleChange("supportEmail", e.target.value)
+                    }
                   />
                   <span className="input-hint">
                     Used for automated system communications.
@@ -185,6 +239,7 @@ const PlatformSetting = () => {
               </div>
             </div>
 
+            {/* Security & Access Card */}
             <div className="settings-card">
               <div className="card-header-between">
                 <div className="header-group">
@@ -214,6 +269,7 @@ const PlatformSetting = () => {
                 <span className="badge success">ENFORCED</span>
               </div>
 
+              {/* MFA */}
               <div className="security-item">
                 <div className="sec-info">
                   <strong>Multi-Factor Authentication (MFA)</strong>
@@ -223,22 +279,27 @@ const PlatformSetting = () => {
                   <input
                     type="checkbox"
                     checked={form.mfaRequired}
-                    onChange={(e) => handleChange("mfaRequired", e.target.checked)}
+                    onChange={(e) =>
+                      handleChange("mfaRequired", e.target.checked)
+                    }
                   />
                   <span className="slider"></span>
                 </label>
               </div>
 
+              {/* Session Timeout */}
               <div className="security-item">
                 <div className="sec-info">
                   <strong>Automatic Session Timeout</strong>
-                  <p>Require MFA for all administrative accounts</p>
+                  <p>Automatically log out inactive admin sessions</p>
                 </div>
                 <select
                   className="full-select"
                   style={{ width: "auto", padding: "6px 12px" }}
                   value={form.sessionTimeout}
-                  onChange={(e) => handleChange("sessionTimeout", e.target.value)}
+                  onChange={(e) =>
+                    handleChange("sessionTimeout", e.target.value)
+                  }
                 >
                   <option value="5minutes">5 Minutes</option>
                   <option value="10minutes">10 Minutes</option>
@@ -252,7 +313,10 @@ const PlatformSetting = () => {
                 </select>
               </div>
 
-              <div className="security-item no-border">
+              {/* IP Whitelisting */}
+              <div
+                className={`security-item${form.ipWhitelisting ? "" : " no-border"}`}
+              >
                 <div className="sec-info">
                   <strong>IP Whitelisting</strong>
                   <p>Limit admin access to specific IP ranges</p>
@@ -261,17 +325,121 @@ const PlatformSetting = () => {
                   <input
                     type="checkbox"
                     checked={form.ipWhitelisting}
-                    onChange={(e) =>
-                      handleChange("ipWhitelisting", e.target.checked)
-                    }
+                    onChange={(e) => handleIPWhitelistToggle(e.target.checked)}
                   />
                   <span className="slider"></span>
                 </label>
               </div>
+
+              {/* Expanded IP Whitelist Panel */}
+              {form.ipWhitelisting && (
+                <div className="ip-whitelist-panel no-border">
+                  <p className="ip-panel-sub">
+                    Secure connections from whitelisted IPs only.
+                  </p>
+
+                  <div className="ip-list">
+                    {allowedIPs.map((ip) => (
+                      <div key={ip} className="ip-entry">
+                        <span>{ip}</span>
+                        <button
+                          className="ip-remove-btn"
+                          onClick={() => handleRemoveIP(ip)}
+                          aria-label={`Remove ${ip}`}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    className="ip-add-link"
+                    onClick={() => setAllowedIPs((prev) => [...prev, ""])}
+                  >
+                    + Add Another IP Address
+                  </button>
+
+                  {/* Inline input for new IP */}
+                  <div className="ip-input-row">
+                    <input
+                      type="text"
+                      className="ip-input"
+                      placeholder="e.g. 203.0.113.0"
+                      value={newIP}
+                      onChange={(e) => setNewIP(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleAddIP()}
+                    />
+                    <button className="btn secondary" onClick={handleAddIP}>
+                      Add
+                    </button>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      marginTop: "12px",
+                    }}
+                  >
+                    <button className="btn primary" onClick={handleSaveIPs}>
+                      Save IP Address
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </main>
+
+      {/* Modal: Activate IP Whitelist confirmation */}
+      {showEnableModal && (
+        <div className="modal-overlay">
+          <div className="modal-box">
+            <h3>Activate IP Whitelist?</h3>
+            <p>
+              Are you sure you want to enable IP Whitelisting? Once enabled,
+              only the IPs on the whitelist will have access.
+            </p>
+            <div className="modal-actions">
+              <button
+                className="btn secondary"
+                onClick={() => setShowEnableModal(false)}
+              >
+                Cancel
+              </button>
+              <button className="btn primary" onClick={confirmEnableWhitelist}>
+                Enable
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Save IP Whitelist confirmation */}
+      {showSaveModal && (
+        <div className="modal-overlay">
+          <div className="modal-box">
+            <h3>Save IP Whitelist?</h3>
+            <p>
+              Are you sure you want to save the IP Whitelist? Only the IPs you
+              add will have access.
+            </p>
+            <div className="modal-actions">
+              <button
+                className="btn secondary"
+                onClick={() => setShowSaveModal(false)}
+              >
+                Cancel
+              </button>
+              <button className="btn primary" onClick={confirmSaveIPs}>
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
