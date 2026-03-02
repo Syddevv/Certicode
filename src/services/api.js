@@ -77,6 +77,36 @@ export const api = {
     return data;
   },
 
+  async verifyAdminMfaLogin(payload) {
+    const response = await fetch(`${API_URL}/mfa/verify-login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'MFA verification failed');
+    }
+
+    if (data.token && data.user) {
+      localStorage.setItem('auth_token', data.token);
+      localStorage.setItem('user_id', data.user.id);
+      localStorage.setItem('user_role', data.user.role);
+      localStorage.setItem('user_name', data.user.name || '');
+    }
+
+    return data;
+  },
+
+  async verifyMfaLogin(payload) {
+    return this.verifyAdminMfaLogin(payload);
+  },
+
   async googleRedirect() {
     window.location.href = `${API_URL}/auth/google`;
   },

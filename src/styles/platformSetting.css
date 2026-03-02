@@ -381,3 +381,53 @@ input:checked + .slider:before {
   justify-content: flex-end;
   gap: 10px;
 }
+
+.mfa-modal-box {
+  max-width: 460px;
+}
+
+.mfa-modal-subtitle {
+  margin: 0 0 14px;
+  color: #6b7280;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.mfa-qr-wrap {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.mfa-qr-image {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+}
+
+.mfa-url-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.mfa-url-wrap input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #374151;
+}
+
+.mfa-error {
+  margin: 8px 0 0;
+  font-size: 13px;
+  color: #b91c1c;
+}

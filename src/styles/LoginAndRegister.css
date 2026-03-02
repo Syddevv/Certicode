@@ -1403,3 +1403,87 @@ tr:hover {
     grid-template-columns: 1fr;
   }
 }
+
+.auth-mfa-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(17, 24, 39, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.auth-mfa-modal {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e4e7ec;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.2);
+  padding: 22px;
+}
+
+.auth-mfa-modal h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+  color: #111827;
+}
+
+.auth-mfa-modal p {
+  margin: 0 0 14px;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.auth-mfa-input {
+  width: 100%;
+  border: 1px solid #e4e7ec;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 15px;
+}
+
+.auth-mfa-input:focus {
+  outline: none;
+  border-color: #ff7a1a;
+  box-shadow: 0 0 0 3px rgba(255, 122, 26, 0.15);
+}
+
+.auth-mfa-error {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 13px;
+}
+
+.auth-mfa-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.auth-mfa-btn {
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.auth-mfa-btn--ghost {
+  background: #fff;
+  border-color: #e5e7eb;
+  color: #374151;
+}
+
+.auth-mfa-btn--primary {
+  background: #ff7a1a;
+  color: #fff;
+}

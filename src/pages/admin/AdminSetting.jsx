@@ -8,6 +8,7 @@ import DefaultProfileImg from "../../assets/default-profile.png";
 import { ProfileAPI } from "../../services/ProfileAPI";
 import { resolveAvatarUrl } from "../../utils/avatar";
 import { emitProfileUpdated } from "../../utils/profileSync";
+import { showErrorToast, showSuccessToast } from "../../utils/toast";
 import {
   IconClock,
   IconPencil,
@@ -225,6 +226,105 @@ const ChangePasswordModal = ({
   );
 };
 
+const MfaSetupModal = ({
+  onClose,
+  onConfirm,
+  onCodeChange,
+  onCopyUrl,
+  code,
+  error,
+  loading,
+  otpauthUrl,
+  copied,
+  isPreparing,
+}) => {
+  const qrUrl = otpauthUrl
+    ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(otpauthUrl)}`
+    : "";
+
+  return (
+    <div className="mfa-modal-overlay" onClick={onClose}>
+      <div className="mfa-modal-box" onClick={(e) => e.stopPropagation()}>
+        <div className="mfa-modal-header">
+          <h3>Set Up Two-Factor Authentication</h3>
+          <button
+            type="button"
+            className="mfa-modal-close"
+            onClick={onClose}
+            disabled={loading}
+            aria-label="Close MFA setup modal"
+          >
+            ✕
+          </button>
+        </div>
+
+        <p className="mfa-modal-subtitle">
+          {isPreparing
+            ? "Preparing your authenticator enrollment..."
+            : "Scan this QR using Google or Microsoft Authenticator, then enter the 6-digit code."}
+        </p>
+
+        {qrUrl ? (
+          <div className="mfa-qr-wrap">
+            <img src={qrUrl} alt="MFA QR code" className="mfa-qr-image" />
+          </div>
+        ) : null}
+
+        <div className="mfa-url-wrap">
+          <input
+            type="text"
+            value={otpauthUrl || "Waiting for enrollment URL..."}
+            readOnly
+          />
+          <button
+            type="button"
+            className="btn outline"
+            onClick={onCopyUrl}
+            disabled={!otpauthUrl || isPreparing}
+          >
+            {copied ? "Copied" : "Copy"}
+          </button>
+        </div>
+
+        <form className="mfa-modal-form" onSubmit={onConfirm}>
+          <div className="input-group">
+            <label>Authentication Code</label>
+            <input
+              type="text"
+              value={code}
+              onChange={onCodeChange}
+              placeholder="123456"
+              inputMode="numeric"
+              maxLength={6}
+              autoFocus
+            />
+          </div>
+
+          {error ? <p className="modal-error">{error}</p> : null}
+
+          <div className="mfa-modal-actions">
+            <button
+              type="button"
+              className="btn outline"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn primary"
+              disabled={loading || isPreparing || !otpauthUrl}
+            >
+              {isPreparing ? "Loading..." : loading ? "Verifying..." : "Enable 2FA"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 const AdminSetting = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -245,6 +345,14 @@ const AdminSetting = () => {
   });
   const [passwordModalError, setPasswordModalError] = useState("");
   const [requireCurrentPassword, setRequireCurrentPassword] = useState(true);
+  const [mfaEnabled, setMfaEnabled] = useState(false);
+  const [mfaBusy, setMfaBusy] = useState(false);
+  const [showMfaSetupModal, setShowMfaSetupModal] = useState(false);
+  const [mfaCode, setMfaCode] = useState("");
+  const [mfaSetupError, setMfaSetupError] = useState("");
+  const [mfaOtpAuthUrl, setMfaOtpAuthUrl] = useState("");
+  const [mfaUrlCopied, setMfaUrlCopied] = useState(false);
+  const [mfaPreparing, setMfaPreparing] = useState(false);
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     fetchUserData();
@@ -282,6 +390,7 @@ const AdminSetting = () => {
         email: data.email || "",
         role: data.role || "",
       });
+      setMfaEnabled(Boolean(data?.mfa_enabled));
     } catch (error) {
       console.error("Failed to fetch user data:", error);
       setMessage({ type: "error", text: "Failed to load user data" });
@@ -484,6 +593,115 @@ const AdminSetting = () => {
     }
 
     return error?.message || "Failed to update password. Please try again.";
+  };
+
+  const closeMfaSetupModal = (force = false) => {
+    if (mfaBusy && !force) return;
+    setShowMfaSetupModal(false);
+    setMfaCode("");
+    setMfaSetupError("");
+    setMfaOtpAuthUrl("");
+    setMfaUrlCopied(false);
+    setMfaPreparing(false);
+  };
+
+  const handleMfaToggle = async (event) => {
+    const wantsEnabled = event.target.checked;
+
+    if (!wantsEnabled) {
+      if (mfaEnabled) {
+        setMessage({
+          type: "info",
+          text: "Disabling MFA is not available yet in the settings panel.",
+        });
+        showErrorToast("Disabling MFA is not available yet.");
+      }
+      return;
+    }
+
+    if (mfaEnabled) {
+      showSuccessToast("MFA is already enabled for this account.");
+      return;
+    }
+
+    try {
+      setMfaBusy(true);
+      setMfaPreparing(true);
+      setMfaSetupError("");
+      setMessage({ type: "", text: "" });
+      setMfaOtpAuthUrl("");
+      setMfaUrlCopied(false);
+      setShowMfaSetupModal(true);
+
+      const result = await ProfileAPI.enrollAdminMfa();
+      setMfaOtpAuthUrl(result?.otpauth_url || "");
+      setMfaCode("");
+      setMfaUrlCopied(false);
+      setMfaPreparing(false);
+    } catch (error) {
+      console.error("Failed to start MFA setup:", error);
+      setMfaPreparing(false);
+      setMfaSetupError(
+        error?.message || "Failed to start MFA setup. Please try again.",
+      );
+      setMessage({
+        type: "error",
+        text: error?.message || "Failed to start MFA setup. Please try again.",
+      });
+      showErrorToast(error?.message || "Failed to start MFA setup.");
+    } finally {
+      setMfaBusy(false);
+    }
+  };
+
+  const handleMfaCodeChange = (event) => {
+    const nextValue = event.target.value.replace(/\D/g, "").slice(0, 6);
+    setMfaCode(nextValue);
+    setMfaSetupError("");
+  };
+
+  const handleCopyMfaUrl = async () => {
+    if (!mfaOtpAuthUrl) return;
+
+    try {
+      await navigator.clipboard.writeText(mfaOtpAuthUrl);
+      setMfaUrlCopied(true);
+    } catch (error) {
+      console.error("Failed to copy MFA URL:", error);
+      setMfaSetupError("Unable to copy URL. Please copy it manually.");
+    }
+  };
+
+  const handleConfirmMfaSetup = async (event) => {
+    event.preventDefault();
+
+    if (mfaCode.length !== 6) {
+      setMfaSetupError("Please enter the 6-digit code from your authenticator app.");
+      return;
+    }
+
+    try {
+      setMfaBusy(true);
+      setMfaSetupError("");
+
+      const result = await ProfileAPI.confirmAdminMfa(mfaCode);
+
+      setMfaEnabled(Boolean(result?.mfa_enabled));
+      setUser((prev) => (prev ? { ...prev, mfa_enabled: true } : prev));
+      setMessage({
+        type: "success",
+        text: result?.message || "Two-factor authentication enabled successfully.",
+      });
+      showSuccessToast(result?.message || "Two-factor authentication enabled.");
+
+      closeMfaSetupModal(true);
+    } catch (error) {
+      console.error("Failed to confirm MFA setup:", error);
+      setMfaSetupError(getValidationMessage(error));
+      showErrorToast(getValidationMessage(error));
+    } finally {
+      setMfaBusy(false);
+    }
   };
 
   const handleChangePassword = async (e) => {
@@ -764,11 +982,18 @@ const AdminSetting = () => {
                 <div className="sec-info">
                   <strong>Two-Factor Authentication</strong>
                   <p>
-                    Secure your account with an additional layer of security
+                    {mfaEnabled
+                      ? "Enabled for this admin account"
+                      : "Secure your account with an additional layer of security"}
                   </p>
                 </div>
                 <label className="switch">
-                  <input type="checkbox" defaultChecked />
+                  <input
+                    type="checkbox"
+                    checked={mfaEnabled}
+                    onChange={handleMfaToggle}
+                    disabled={mfaBusy}
+                  />
                   <span className="slider"></span>
                 </label>
               </div>
@@ -912,6 +1137,20 @@ const AdminSetting = () => {
           error={passwordModalError}
           loading={changingPassword}
           showCurrentPasswordField={requireCurrentPassword}
+        />
+      )}
+      {showMfaSetupModal && (
+        <MfaSetupModal
+          onClose={closeMfaSetupModal}
+          onConfirm={handleConfirmMfaSetup}
+          onCodeChange={handleMfaCodeChange}
+          onCopyUrl={handleCopyMfaUrl}
+          code={mfaCode}
+          error={mfaSetupError}
+          loading={mfaBusy}
+          otpauthUrl={mfaOtpAuthUrl}
+          copied={mfaUrlCopied}
+          isPreparing={mfaPreparing}
         />
       )}
     </div>

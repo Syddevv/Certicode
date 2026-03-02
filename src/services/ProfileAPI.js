@@ -193,6 +193,102 @@ export const ProfileAPI = {
     }
   },
 
+  enrollAdminMfa: async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+
+      if (!token) {
+        throw {
+          response: { status: 401 },
+          message: 'No authentication token found. Please log in.'
+        };
+      }
+
+      const response = await fetch(`${API_URL}/mfa/enroll`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const responseText = await response.text();
+
+      if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+        throw {
+          response: { status: response.status },
+          message: 'Server error. Please try again.'
+        };
+      }
+
+      const data = JSON.parse(responseText);
+
+      if (!response.ok) {
+        throw {
+          response: {
+            status: response.status,
+            data: data
+          },
+          message: data.message || `Error ${response.status}`
+        };
+      }
+
+      return data;
+    } catch (error) {
+      console.error('ProfileAPI - Error enrolling admin MFA:', error);
+      throw error;
+    }
+  },
+
+  confirmAdminMfa: async (code) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+
+      if (!token) {
+        throw {
+          response: { status: 401 },
+          message: 'No authentication token found. Please log in.'
+        };
+      }
+
+      const response = await fetch(`${API_URL}/mfa/confirm`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ code })
+      });
+
+      const responseText = await response.text();
+
+      if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+        throw {
+          response: { status: response.status },
+          message: 'Server error. Please try again.'
+        };
+      }
+
+      const data = JSON.parse(responseText);
+
+      if (!response.ok) {
+        throw {
+          response: {
+            status: response.status,
+            data: data
+          },
+          message: data.message || `Error ${response.status}`
+        };
+      }
+
+      return data;
+    } catch (error) {
+      console.error('ProfileAPI - Error confirming admin MFA:', error);
+      throw error;
+    }
+  },
+
   deleteAccount: async (password) => {
     try {
       const token = localStorage.getItem('auth_token');
