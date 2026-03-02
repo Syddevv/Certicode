@@ -290,64 +290,6 @@ input:checked + .slider:before {
   font-size: 0.7rem;
   font-weight: 800;
 }
-/* IP Whitelist Panel */
-.ip-whitelist-panel {
-  padding: 16px 0 8px 0;
-  border-top: 1px solid #f0f0f0;
-}
-.ip-panel-sub {
-  font-size: 13px;
-  color: #888;
-  margin-bottom: 12px;
-}
-.ip-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-.ip-entry {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #f9f9f9;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 14px;
-}
-.ip-remove-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #aaa;
-  font-size: 14px;
-  padding: 0 4px;
-}
-.ip-remove-btn:hover {
-  color: #e53e3e;
-}
-.ip-add-link {
-  background: none;
-  border: none;
-  color: #f97316;
-  cursor: pointer;
-  font-size: 13px;
-  padding: 0;
-  margin-bottom: 10px;
-}
-.ip-input-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-.ip-input {
-  flex: 1;
-  padding: 8px 12px;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  font-size: 14px;
-}
 
 /* Modals */
 .modal-overlay {

@@ -32,7 +32,10 @@ const MfaSetupModal = ({
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box mfa-modal-box" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-box mfa-modal-box"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h3>Set Up Multi-Factor Authentication</h3>
         <p className="mfa-modal-subtitle">
           {isPreparing
@@ -92,7 +95,11 @@ const MfaSetupModal = ({
               className="btn primary"
               disabled={loading || isPreparing || !otpauthUrl}
             >
-              {isPreparing ? "Loading..." : loading ? "Verifying..." : "Enable MFA"}
+              {isPreparing
+                ? "Loading..."
+                : loading
+                  ? "Verifying..."
+                  : "Enable MFA"}
             </button>
           </div>
         </form>
@@ -114,7 +121,10 @@ const MfaDisableModal = ({
 }) => {
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-box mfa-modal-box" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="modal-box mfa-modal-box"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h3>Disable Multi-Factor Authentication</h3>
         <p className="mfa-modal-subtitle">
           Enter your authenticator code to confirm disabling MFA.
@@ -180,14 +190,8 @@ const PlatformSetting = () => {
     timezone: initialPreferences.timezone,
     mfaRequired: false,
     sessionTimeout: "30minutes",
-    ipWhitelisting: false,
   }));
 
-  // IP Whitelisting state
-  const [allowedIPs, setAllowedIPs] = useState(["192.168.1.1"]);
-  const [newIP, setNewIP] = useState("");
-  const [showEnableModal, setShowEnableModal] = useState(false);
-  const [showSaveModal, setShowSaveModal] = useState(false);
   const [mfaBusy, setMfaBusy] = useState(false);
   const [mfaPreparing, setMfaPreparing] = useState(false);
   const [showMfaModal, setShowMfaModal] = useState(false);
@@ -201,7 +205,7 @@ const PlatformSetting = () => {
   const [mfaDisableError, setMfaDisableError] = useState("");
   const [requiresCurrentPassword, setRequiresCurrentPassword] = useState(true);
   const normalizeTwoFactorMessage = (text, fallback) =>
-    (text ? text.replace(/\bmfa\b/gi, "2FA") : fallback);
+    text ? text.replace(/\bmfa\b/gi, "2FA") : fallback;
 
   const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -211,7 +215,10 @@ const PlatformSetting = () => {
     const loadCurrentMfaState = async () => {
       try {
         const user = await ProfileAPI.getCurrentUser();
-        setForm((prev) => ({ ...prev, mfaRequired: Boolean(user?.mfa_enabled) }));
+        setForm((prev) => ({
+          ...prev,
+          mfaRequired: Boolean(user?.mfa_enabled),
+        }));
         setRequiresCurrentPassword(
           user?.requires_current_password ?? !user?.provider,
         );
@@ -222,44 +229,6 @@ const PlatformSetting = () => {
 
     loadCurrentMfaState();
   }, []);
-
-  // When the toggle is clicked:
-  // - turning ON → show confirmation modal before enabling
-  // - turning OFF → disable immediately
-  const handleIPWhitelistToggle = (checked) => {
-    if (checked) {
-      setShowEnableModal(true);
-    } else {
-      handleChange("ipWhitelisting", false);
-    }
-  };
-
-  const confirmEnableWhitelist = () => {
-    handleChange("ipWhitelisting", true);
-    setShowEnableModal(false);
-  };
-
-  const handleAddIP = () => {
-    const trimmed = newIP.trim();
-    if (trimmed && !allowedIPs.includes(trimmed)) {
-      setAllowedIPs((prev) => [...prev, trimmed]);
-      setNewIP("");
-    }
-  };
-
-  const handleRemoveIP = (ip) => {
-    setAllowedIPs((prev) => prev.filter((i) => i !== ip));
-  };
-
-  const handleSaveIPs = () => {
-    setShowSaveModal(true);
-  };
-
-  const confirmSaveIPs = () => {
-    // Persist IPs here if needed (e.g. API call)
-    showSuccessToast("IP Whitelist saved.");
-    setShowSaveModal(false);
-  };
 
   const handleSaveChanges = () => {
     setSaving(true);
@@ -365,14 +334,20 @@ const PlatformSetting = () => {
       setMfaSetupError("");
 
       const result = await ProfileAPI.confirmAdminMfa(mfaCode);
-      setForm((prev) => ({ ...prev, mfaRequired: Boolean(result?.mfa_enabled) }));
+      setForm((prev) => ({
+        ...prev,
+        mfaRequired: Boolean(result?.mfa_enabled),
+      }));
       showSuccessToast(
         normalizeTwoFactorMessage(result?.message, "2FA enabled successfully."),
       );
       closeMfaModal(true);
     } catch (error) {
       console.error("Failed to confirm MFA enrollment:", error);
-      const text = normalizeTwoFactorMessage(error?.message, "Invalid 2FA code.");
+      const text = normalizeTwoFactorMessage(
+        error?.message,
+        "Invalid 2FA code.",
+      );
       setMfaSetupError(text);
       showErrorToast(text);
     } finally {
@@ -414,9 +389,15 @@ const PlatformSetting = () => {
       }
 
       const result = await ProfileAPI.disableMfa(payload);
-      setForm((prev) => ({ ...prev, mfaRequired: Boolean(result?.mfa_enabled) }));
+      setForm((prev) => ({
+        ...prev,
+        mfaRequired: Boolean(result?.mfa_enabled),
+      }));
       showSuccessToast(
-        normalizeTwoFactorMessage(result?.message, "2FA disabled successfully."),
+        normalizeTwoFactorMessage(
+          result?.message,
+          "2FA disabled successfully.",
+        ),
       );
       closeMfaDisableModal(true);
     } catch (error) {
@@ -655,134 +636,10 @@ const PlatformSetting = () => {
                   <option value="2hours">2 Hours</option>
                 </select>
               </div>
-
-              {/* IP Whitelisting */}
-              <div
-                className={`security-item${form.ipWhitelisting ? "" : " no-border"}`}
-              >
-                <div className="sec-info">
-                  <strong>IP Whitelisting</strong>
-                  <p>Limit admin access to specific IP ranges</p>
-                </div>
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    checked={form.ipWhitelisting}
-                    onChange={(e) => handleIPWhitelistToggle(e.target.checked)}
-                  />
-                  <span className="slider"></span>
-                </label>
-              </div>
-
-              {/* Expanded IP Whitelist Panel */}
-              {form.ipWhitelisting && (
-                <div className="ip-whitelist-panel no-border">
-                  <p className="ip-panel-sub">
-                    Secure connections from whitelisted IPs only.
-                  </p>
-
-                  <div className="ip-list">
-                    {allowedIPs.map((ip) => (
-                      <div key={ip} className="ip-entry">
-                        <span>{ip}</span>
-                        <button
-                          className="ip-remove-btn"
-                          onClick={() => handleRemoveIP(ip)}
-                          aria-label={`Remove ${ip}`}
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <button
-                    className="ip-add-link"
-                    onClick={() => setAllowedIPs((prev) => [...prev, ""])}
-                  >
-                    + Add Another IP Address
-                  </button>
-
-                  {/* Inline input for new IP */}
-                  <div className="ip-input-row">
-                    <input
-                      type="text"
-                      className="ip-input"
-                      placeholder="e.g. 203.0.113.0"
-                      value={newIP}
-                      onChange={(e) => setNewIP(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleAddIP()}
-                    />
-                    <button className="btn secondary" onClick={handleAddIP}>
-                      Add
-                    </button>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "flex-end",
-                      marginTop: "12px",
-                    }}
-                  >
-                    <button className="btn primary" onClick={handleSaveIPs}>
-                      Save IP Address
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
       </main>
-
-      {/* Modal: Activate IP Whitelist confirmation */}
-      {showEnableModal && (
-        <div className="modal-overlay">
-          <div className="modal-box">
-            <h3>Activate IP Whitelist?</h3>
-            <p>
-              Are you sure you want to enable IP Whitelisting? Once enabled,
-              only the IPs on the whitelist will have access.
-            </p>
-            <div className="modal-actions">
-              <button
-                className="btn secondary"
-                onClick={() => setShowEnableModal(false)}
-              >
-                Cancel
-              </button>
-              <button className="btn primary" onClick={confirmEnableWhitelist}>
-                Enable
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal: Save IP Whitelist confirmation */}
-      {showSaveModal && (
-        <div className="modal-overlay">
-          <div className="modal-box">
-            <h3>Save IP Whitelist?</h3>
-            <p>
-              Are you sure you want to save the IP Whitelist? Only the IPs you
-              add will have access.
-            </p>
-            <div className="modal-actions">
-              <button
-                className="btn secondary"
-                onClick={() => setShowSaveModal(false)}
-              >
-                Cancel
-              </button>
-              <button className="btn primary" onClick={confirmSaveIPs}>
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {showMfaModal && (
         <MfaSetupModal
