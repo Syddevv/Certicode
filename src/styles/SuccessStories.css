@@ -129,10 +129,10 @@
 }
 
 .stories-spotlight__link img {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   display: block;
-  transform: translateY(1px);
+  object-fit: contain;
 }
 
 .stories-spotlight__metrics {
@@ -328,7 +328,7 @@
   width: 8px;
   height: 8px;
   display: block;
-  transform: translateY(1px);
+  object-fit: contain;
 }
 
 .stories-card__link:hover {
@@ -338,7 +338,7 @@
 
 .stories-grid__more {
   margin: 0 auto;
-  border: 1px solid #eef2f6;
+  border: 1px solid #d2d4d5;
   background: #ffffff;
   color: #64748b;
   font-size: 12px;
@@ -347,9 +347,10 @@
   border-radius: 999px;
   cursor: pointer;
   transition:
-    border-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
+  border-color 0.2s ease,
+  color 0.2s ease,
+  transform 0.2s ease;
+  text-decoration: none;
 }
 
 .stories-grid__more:hover {
