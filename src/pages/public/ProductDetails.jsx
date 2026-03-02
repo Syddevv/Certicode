@@ -550,6 +550,7 @@ const ProductDetails = () => {
                   <Link 
                     key={item.id} 
                     to={`/marketplace/${item.id}`}
+                    className="product__relatedLink"
                     state={{ fromRelated: true }}
                   >
                     <article className="product__relatedCard">

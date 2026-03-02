@@ -1239,6 +1239,15 @@
   gap: 18px;
 }
 
+.product__relatedLink,
+.product__relatedLink:visited,
+.product__relatedLink:hover,
+.product__relatedLink:active {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
 .product__relatedCard {
   background: #fff;
   border-radius: 14px;
