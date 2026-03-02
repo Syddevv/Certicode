@@ -67,7 +67,7 @@ const Register = () => {
         name: name,
         email: email,
         password: password,
-        password_confirmation: confirmPassword
+        password_confirmation: confirmPassword,
       };
 
       const requiresOtp = email.trim().toLowerCase().endsWith("@gmail.com");
@@ -133,18 +133,22 @@ const Register = () => {
   };
 
   const handleGoogleLogin = async () => {
+    setIsSubmitting(true);
     try {
-        await api.googleRedirect();
-        } catch (error) {
-          showErrorToast("Google login failed. Please try again.");
+      await api.googleRedirect();
+    } catch (error) {
+      showErrorToast("Google login failed. Please try again.");
+      setIsSubmitting(false);
     }
   };
 
   const handleFacebookLogin = async () => {
+    setIsSubmitting(true);
     try {
       await api.facebookRedirect();
-      } catch (error) {
-        showErrorToast("Facebook login failed. Please try again.");
+    } catch (error) {
+      showErrorToast("Facebook login failed. Please try again.");
+      setIsSubmitting(false);
     }
   };
 
@@ -171,6 +175,7 @@ const Register = () => {
                 placeholder="Enter your name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                disabled={isSubmitting}
                 required
               />
             </div>
@@ -186,6 +191,7 @@ const Register = () => {
                 placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={isSubmitting}
                 required
               />
             </div>
@@ -202,12 +208,14 @@ const Register = () => {
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={isSubmitting}
                   required
                 />
                 <button
                   type="button"
                   className="password-toggle"
                   onClick={togglePassword}
+                  disabled={isSubmitting}
                 >
                   <img
                     src={passwordVisible ? eye2 : eye1}
@@ -230,12 +238,14 @@ const Register = () => {
                   placeholder="Confirm your password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isSubmitting}
                   required
                 />
                 <button
                   type="button"
                   className="password-toggle"
                   onClick={toggleConfirmPassword}
+                  disabled={isSubmitting}
                 >
                   <img
                     src={confirmPasswordVisible ? eye2 : eye1}
@@ -253,6 +263,7 @@ const Register = () => {
                   id="terms"
                   checked={acceptTerms}
                   onChange={(e) => setAcceptTerms(e.target.checked)}
+                  disabled={isSubmitting}
                   required
                 />
                 <span className="terms-text">
@@ -263,8 +274,23 @@ const Register = () => {
               </label>
             </div>
 
-            <button type="submit" className="login-button" disabled={isSubmitting}>
-              {isSubmitting ? "Processing..." : "Sign Up"}
+            <button
+              type="submit"
+              className="login-button"
+              disabled={isSubmitting}
+              style={{
+                opacity: isSubmitting ? 0.7 : 1,
+                cursor: isSubmitting ? "not-allowed" : "pointer",
+              }}
+            >
+              {isSubmitting ? (
+                <>
+                  <span className="loading-spinner"></span>
+                  Processing...
+                </>
+              ) : (
+                "Sign Up"
+              )}
             </button>
 
             <div className="divider">
@@ -272,21 +298,35 @@ const Register = () => {
             </div>
 
             <div className="social-buttons">
-              <button type="button" className="social-button" onClick={handleGoogleLogin}>
-                <img 
-              src={googleIcon} 
-              alt="Google" 
-              className="google-icon"
-              />
-                <span>Google</span>
+              <button
+                type="button"
+                className="social-button"
+                onClick={handleGoogleLogin}
+                disabled={isSubmitting}
+                style={{
+                  opacity: isSubmitting ? 0.7 : 1,
+                  cursor: isSubmitting ? "not-allowed" : "pointer",
+                }}
+              >
+                <img src={googleIcon} alt="Google" className="google-icon" />
+                <span>{isSubmitting ? "Loading..." : "Google"}</span>
               </button>
-              <button type="button" className="social-button" onClick={handleFacebookLogin}>
+              <button
+                type="button"
+                className="social-button"
+                onClick={handleFacebookLogin}
+                disabled={isSubmitting}
+                style={{
+                  opacity: isSubmitting ? 0.7 : 1,
+                  cursor: isSubmitting ? "not-allowed" : "pointer",
+                }}
+              >
                 <img
                   src={facebookLogo}
                   alt="Facebook"
                   className="facebook-icon"
                 />
-                <span>Facebook</span>
+                <span>{isSubmitting ? "Loading..." : "Facebook"}</span>
               </button>
             </div>
           </form>
@@ -294,7 +334,6 @@ const Register = () => {
           <div className="signup-link">
             Already have an account? <Link to="/login">Login</Link>
           </div>
-
         </div>
 
         <div className="right-panel">

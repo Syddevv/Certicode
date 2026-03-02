@@ -1,9 +1,9 @@
 import "../styles/logoutModal.css";
 import logo from "../assets/certicodeicon.png";
 
-const LogoutModal = ({ onClose, onConfirm }) => {
+const LogoutModal = ({ onClose, onConfirm, isLoading = false }) => {
   return (
-    <div  className="modal-overlay">   
+    <div className="modal-overlay">
       <div className="logout-modal">
         <img src={logo} alt="Certicode" className="modal-logo" />
 
@@ -16,11 +16,34 @@ const LogoutModal = ({ onClose, onConfirm }) => {
         </p>
 
         <div className="modal-actions">
-          <button className="cancel-btn" onClick={onClose}>
+          <button
+            className="cancel-btn"
+            onClick={onClose}
+            disabled={isLoading}
+            style={{
+              opacity: isLoading ? 0.7 : 1,
+              cursor: isLoading ? "not-allowed" : "pointer",
+            }}
+          >
             Cancel
           </button>
-          <button className="logout-btn" onClick={onConfirm}>
-            Log Out
+          <button
+            className="logout-btn"
+            onClick={onConfirm}
+            disabled={isLoading}
+            style={{
+              opacity: isLoading ? 0.7 : 1,
+              cursor: isLoading ? "not-allowed" : "pointer",
+            }}
+          >
+            {isLoading ? (
+              <>
+                <span className="loading-spinner"></span>
+                Logging out...
+              </>
+            ) : (
+              "Log Out"
+            )}
           </button>
         </div>
 

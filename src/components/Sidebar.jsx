@@ -16,10 +16,16 @@ import { resolveAvatarUrl } from "../utils/avatar";
 import { PROFILE_UPDATED_EVENT } from "../utils/profileSync";
 
 const Icons = {
-  Dashboard: <img src={DashboardAdmin} alt="Dashboard" width={20} height={20} />,
-  Inventory: <img src={InventoryAdmin} alt="Inventory" width={20} height={20} />,
+  Dashboard: (
+    <img src={DashboardAdmin} alt="Dashboard" width={20} height={20} />
+  ),
+  Inventory: (
+    <img src={InventoryAdmin} alt="Inventory" width={20} height={20} />
+  ),
   Sales: <img src={SalesAdmin} alt="Sales" width={20} height={20} />,
-  Customers: <img src={CustomersAdmin} alt="Customers" width={20} height={20} />,
+  Customers: (
+    <img src={CustomersAdmin} alt="Customers" width={20} height={20} />
+  ),
   Settings: <img src={SettingsAdmin} alt="Settings" width={20} height={20} />,
   Vouchers: <img src={AdminVoucher} alt="Vouchers" width={20} height={20} />,
   Support: <img src={SupportAdmin} alt="Support" width={20} height={20} />,
@@ -27,6 +33,7 @@ const Icons = {
 
 const Sidebar = ({ activePage }) => {
   const [showLogout, setShowLogout] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [user, setUser] = useState(() => ({
     name: localStorage.getItem("user_name") || "",
     role: localStorage.getItem("user_role") || "Admin",
@@ -66,32 +73,41 @@ const Sidebar = ({ activePage }) => {
   const fetchUserData = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('auth_token');
-      
+      const token = localStorage.getItem("auth_token");
+
       if (!token) {
         console.error("No authentication token found");
         return;
       }
-      
-      const response = await fetch('http://127.0.0.1:8000/api/profile/current-user', {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
+
+      const response = await fetch(
+        "http://127.0.0.1:8000/api/profile/current-user",
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
 
       const responseText = await response.text();
-      
-      if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
-        console.error('Server error response');
+
+      if (
+        responseText.includes("<!DOCTYPE") ||
+        responseText.includes("<html")
+      ) {
+        console.error("Server error response");
         return;
       }
 
       const data = JSON.parse(responseText);
-      
+
       if (!response.ok) {
-        console.error('Failed to fetch user:', data.message || `Error ${response.status}`);
+        console.error(
+          "Failed to fetch user:",
+          data.message || `Error ${response.status}`,
+        );
         return;
       }
 
@@ -111,27 +127,28 @@ const Sidebar = ({ activePage }) => {
   };
 
   const handleLogout = async () => {
-    const token = localStorage.getItem('auth_token');
-    
+    setLoggingOut(true);
+    const token = localStorage.getItem("auth_token");
+
     if (token) {
       try {
-        await fetch('http://127.0.0.1:8000/api/logout', {
-          method: 'POST',
+        await fetch("http://127.0.0.1:8000/api/logout", {
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         });
       } catch (error) {
-        console.error('Logout error:', error);
+        console.error("Logout error:", error);
       }
     }
-    
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_id');
-    localStorage.removeItem('user_role');
-    localStorage.removeItem('user_name');
-    window.location.href = '/login';
+
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("user_id");
+    localStorage.removeItem("user_role");
+    localStorage.removeItem("user_name");
+    window.location.href = "/login";
   };
 
   const LogoutModal = ({ onClose }) => (
@@ -140,16 +157,10 @@ const Sidebar = ({ activePage }) => {
         <h3>Logout</h3>
         <p>Are you sure you want to log out?</p>
         <div className="modal-actions">
-          <button 
-            className="modal-btn modal-btn-secondary"
-            onClick={onClose}
-          >   
+          <button className="modal-btn modal-btn-secondary" onClick={onClose}>
             Cancel
           </button>
-          <button 
-            className="modal-btn modal-btn-danger"
-            onClick={handleLogout}
-          >
+          <button className="modal-btn modal-btn-danger" onClick={handleLogout}>
             Logout
           </button>
         </div>
@@ -194,7 +205,7 @@ const Sidebar = ({ activePage }) => {
                 <span>Customers</span>
               </Link>
             </li>
-                <li className={activePage === "vouchers" ? "active" : ""}>
+            <li className={activePage === "vouchers" ? "active" : ""}>
               <Link to="/vouchers">
                 <span className="icon">{Icons.Vouchers}</span>
                 <span>Vouchers</span>
@@ -226,7 +237,9 @@ const Sidebar = ({ activePage }) => {
               ) : (
                 <>
                   <img
-                    src={resolveAvatarUrl(user?.avatar_url) || DefaultProfileImg}
+                    src={
+                      resolveAvatarUrl(user?.avatar_url) || DefaultProfileImg
+                    }
                     alt="Admin"
                     onError={(e) => {
                       e.target.src = DefaultProfileImg;
@@ -258,6 +271,7 @@ const Sidebar = ({ activePage }) => {
         <LogoutModalDialog
           onClose={() => setShowLogout(false)}
           onConfirm={handleLogout}
+          isLoading={loggingOut}
         />
       )}
     </>

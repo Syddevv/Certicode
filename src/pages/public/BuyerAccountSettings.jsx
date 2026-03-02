@@ -40,6 +40,7 @@ const BuyerAccountSettings = () => {
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [isLogoutModal, setLogoutModal] = useState(false);
   const [isUpdateBillingModal, setUpdateBillingModal] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const notifyUser = (type, text) => {
     setMessage({ type, text });
@@ -242,7 +243,10 @@ const BuyerAccountSettings = () => {
       setChangingPassword(true);
       setMessage({ type: "", text: "" });
 
-      if (!passwordData.new_password || !passwordData.new_password_confirmation) {
+      if (
+        !passwordData.new_password ||
+        !passwordData.new_password_confirmation
+      ) {
         notifyUser("error", "Please fill in all password fields");
         return;
       }
@@ -325,9 +329,10 @@ const BuyerAccountSettings = () => {
     } finally {
       setDeletingAccount(false);
     }
-  }; 
+  };
 
   const handleLogout = async () => {
+    setLoggingOut(true);
     const token = localStorage.getItem("auth_token");
 
     if (token) {
@@ -556,7 +561,11 @@ const BuyerAccountSettings = () => {
               <div className="account-security">
                 <div className="account-security__row">
                   <div>
-                    <strong>{requiresCurrentPassword ? "Update Password" : "Set Password"}</strong>
+                    <strong>
+                      {requiresCurrentPassword
+                        ? "Update Password"
+                        : "Set Password"}
+                    </strong>
                   </div>
                   <div className="account-security__inputs">
                     {requiresCurrentPassword && (
@@ -830,6 +839,7 @@ const BuyerAccountSettings = () => {
         <LogoutModal
           onClose={() => setLogoutModal(false)}
           onConfirm={handleLogout}
+          isLoading={loggingOut}
         />
       )}
       <EditBillingDetailsModal

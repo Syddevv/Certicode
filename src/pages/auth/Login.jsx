@@ -15,52 +15,58 @@ const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const togglePassword = () => setPasswordVisible(!passwordVisible);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setIsLoading(true);
+
     try {
       const credentials = {
         email: email,
-        password: password
+        password: password,
       };
 
       const data = await api.login(credentials);
-      
+
       if (data.token && data.user) {
-        localStorage.setItem('auth_token', data.token);
-        localStorage.setItem('user_id', data.user.id);
-        localStorage.setItem('user_role', data.user.role);
-        localStorage.setItem('user_name', data.user.name || '');
-        
+        localStorage.setItem("auth_token", data.token);
+        localStorage.setItem("user_id", data.user.id);
+        localStorage.setItem("user_role", data.user.role);
+        localStorage.setItem("user_name", data.user.name || "");
+
         if (data.user.role === "Admin") {
           navigate("/dashboard");
         } else {
           navigate("/");
         }
       }
-      
     } catch (error) {
       showErrorToast(error.message || "Login failed. Please try again.");
+      setIsLoading(false);
     }
   };
 
   const handleGoogleLogin = async () => {
+    setIsLoading(true);
     try {
       await api.googleRedirect();
     } catch (error) {
       showErrorToast("Google login failed. Please try again.");
+      setIsLoading(false);
     }
   };
 
   const handleFacebookLogin = async () => {
+    setIsLoading(true);
     try {
       await api.facebookRedirect();
     } catch (error) {
       showErrorToast("Facebook login failed. Please try again.");
+      setIsLoading(false);
     }
   };
 
@@ -125,8 +131,23 @@ const Login = () => {
               </Link>
             </div>
 
-            <button type="submit" className="login-button">
-              Log in
+            <button
+              type="submit"
+              className="login-button"
+              disabled={isLoading}
+              style={{
+                opacity: isLoading ? 0.7 : 1,
+                cursor: isLoading ? "not-allowed" : "pointer",
+              }}
+            >
+              {isLoading ? (
+                <>
+                  <span className="loading-spinner"></span>
+                  Logging in...
+                </>
+              ) : (
+                "Log in"
+              )}
             </button>
 
             <div className="divider">
@@ -134,25 +155,35 @@ const Login = () => {
             </div>
 
             <div className="social-buttons">
-              <button 
-                type="button" 
-                className="social-button" 
+              <button
+                type="button"
+                className="social-button"
                 onClick={handleGoogleLogin}
+                disabled={isLoading}
+                style={{
+                  opacity: isLoading ? 0.7 : 1,
+                  cursor: isLoading ? "not-allowed" : "pointer",
+                }}
               >
                 <img src={googleIcon} alt="Google" className="google-icon" />
-                <span>Google</span>
+                <span>{isLoading ? "Loading..." : "Google"}</span>
               </button>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="social-button"
                 onClick={handleFacebookLogin}
+                disabled={isLoading}
+                style={{
+                  opacity: isLoading ? 0.7 : 1,
+                  cursor: isLoading ? "not-allowed" : "pointer",
+                }}
               >
                 <img
                   src={facebookLogo}
                   alt="Facebook"
                   className="facebook-icon"
                 />
-                <span>Facebook</span>
+                <span>{isLoading ? "Loading..." : "Facebook"}</span>
               </button>
             </div>
           </form>
@@ -160,7 +191,6 @@ const Login = () => {
           <div className="signup-link">
             Don&apos;t have account? <Link to="/register">Sign up</Link>
           </div>
-
         </div>
 
         <div className="right-panel">
