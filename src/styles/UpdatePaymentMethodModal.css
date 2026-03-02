@@ -183,3 +183,97 @@
     min-height: 20px;
   }
 }
+
+.upm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.upm-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.upm-btn--delete {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+.upm-btn--delete:hover {
+  background-color: #fecaca;
+}
+
+.upm-btn--delete:disabled {
+  background-color: #fee2e2;
+  color: #fca5a5;
+  cursor: not-allowed;
+}
+
+.upm-btn--default {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.upm-btn--default:hover {
+  background-color: #e5e7eb;
+}
+
+.upm-btn--default:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.upm-btn--update {
+  background-color: #f97316;
+  color: white;
+}
+
+.upm-btn--update:hover {
+  background-color: #ea580c;
+}
+
+.upm-btn--update:disabled {
+  background-color: #fdba74;
+  cursor: not-allowed;
+}
+
+.upm-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background-color: white;
+  cursor: pointer;
+}
+
+.upm-select:focus {
+  outline: none;
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.upm-card-info {
+  background-color: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: 1px solid #e5e7eb;
+}
+
+.upm-card-info p {
+  margin: 4px 0;
+  color: #374151;
+}
+
+.upm-card-info strong {
+  color: #111827;
+}

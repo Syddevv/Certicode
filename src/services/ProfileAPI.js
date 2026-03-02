@@ -315,4 +315,341 @@ export const ProfileAPI = {
   }
 },
 
+// BILLING
+  getBillingDetails: async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        throw {
+          response: { status: 401 },
+          message: 'No authentication token found. Please log in.'
+        };
+      }
+      
+      const response = await fetch(`${API_URL}/billing/details`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const responseText = await response.text();
+      
+      if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+        throw {
+          response: { status: response.status },
+          message: 'Server error. Please try again.'
+        };
+      }
+
+      const data = JSON.parse(responseText);
+      
+      if (!response.ok) {
+        throw {
+          response: {
+            status: response.status,
+            data: data
+          },
+          message: data.message || `Error ${response.status}`
+        };
+      }
+
+      return data;
+    } catch (error) {
+      console.error('ProfileAPI - Error fetching billing details:', error);
+      throw error;
+    }
+  },
+
+  updateBillingDetails: async (billingData) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        throw {
+          response: { status: 401 },
+          message: 'No authentication token found. Please log in.'
+        };
+      }
+      
+      const response = await fetch(`${API_URL}/billing/details`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(billingData)
+      });
+
+      const responseText = await response.text();
+      
+      if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+        throw {
+          response: { status: response.status },
+          message: 'Server error. Please try again.'
+        };
+      }
+
+      const data = JSON.parse(responseText);
+      
+      if (!response.ok) {
+        throw {
+          response: {
+            status: response.status,
+            data: data
+          },
+          message: data.message || `Error ${response.status}`
+        };
+      }
+
+      return data;
+    } catch (error) {
+      console.error('ProfileAPI - Error updating billing details:', error);
+      throw error;
+    }
+  },
+
+  // Payment Methods Functions
+  getPaymentMethods: async () => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        throw {
+          response: { status: 401 },
+          message: 'No authentication token found. Please log in.'
+        };
+      }
+      
+      const response = await fetch(`${API_URL}/billing/payment-methods`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const responseText = await response.text();
+      
+      if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+        throw {
+          response: { status: response.status },
+          message: 'Server error. Please try again.'
+        };
+      }
+
+      const data = JSON.parse(responseText);
+      
+      if (!response.ok) {
+        throw {
+          response: {
+            status: response.status,
+            data: data
+          },
+          message: data.message || `Error ${response.status}`
+        };
+      }
+
+      return data;
+    } catch (error) {
+      console.error('ProfileAPI - Error fetching payment methods:', error);
+      throw error;
+    }
+  },
+
+  addPaymentMethod: async (paymentData) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        throw {
+          response: { status: 401 },
+          message: 'No authentication token found. Please log in.'
+        };
+      }
+      
+      const response = await fetch(`${API_URL}/billing/payment-methods`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(paymentData)
+      });
+
+      const responseText = await response.text();
+      
+      if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+        throw {
+          response: { status: response.status },
+          message: 'Server error. Please try again.'
+        };
+      }
+
+      const data = JSON.parse(responseText);
+      
+      if (!response.ok) {
+        throw {
+          response: {
+            status: response.status,
+            data: data
+          },
+          message: data.message || `Error ${response.status}`
+        };
+      }
+
+      return data;
+    } catch (error) {
+      console.error('ProfileAPI - Error adding payment method:', error);
+      throw error;
+    }
+  },
+
+  updatePaymentMethod: async (paymentMethodId, paymentData) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        throw {
+          response: { status: 401 },
+          message: 'No authentication token found. Please log in.'
+        };
+      }
+      
+      const response = await fetch(`${API_URL}/billing/payment-methods/${paymentMethodId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(paymentData)
+      });
+
+      const responseText = await response.text();
+      
+      if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+        throw {
+          response: { status: response.status },
+          message: 'Server error. Please try again.'
+        };
+      }
+
+      const data = JSON.parse(responseText);
+      
+      if (!response.ok) {
+        throw {
+          response: {
+            status: response.status,
+            data: data
+          },
+          message: data.message || `Error ${response.status}`
+        };
+      }
+
+      return data;
+    } catch (error) {
+      console.error('ProfileAPI - Error updating payment method:', error);
+      throw error;
+    }
+  },
+
+  deletePaymentMethod: async (paymentMethodId) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        throw {
+          response: { status: 401 },
+          message: 'No authentication token found. Please log in.'
+        };
+      }
+      
+      const response = await fetch(`${API_URL}/billing/payment-methods/${paymentMethodId}`, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const responseText = await response.text();
+      
+      if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+        throw {
+          response: { status: response.status },
+          message: 'Server error. Please try again.'
+        };
+      }
+
+      const data = JSON.parse(responseText);
+      
+      if (!response.ok) {
+        throw {
+          response: {
+            status: response.status,
+            data: data
+          },
+          message: data.message || `Error ${response.status}`
+        };
+      }
+
+      return data;
+    } catch (error) {
+      console.error('ProfileAPI - Error deleting payment method:', error);
+      throw error;
+    }
+  },
+
+  setDefaultPaymentMethod: async (paymentMethodId) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        throw {
+          response: { status: 401 },
+          message: 'No authentication token found. Please log in.'
+        };
+      }
+      
+      const response = await fetch(`${API_URL}/billing/payment-methods/${paymentMethodId}/default`, {
+        method: 'PATCH',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      const responseText = await response.text();
+      
+      if (responseText.includes('<!DOCTYPE') || responseText.includes('<html')) {
+        throw {
+          response: { status: response.status },
+          message: 'Server error. Please try again.'
+        };
+      }
+
+      const data = JSON.parse(responseText);
+      
+      if (!response.ok) {
+        throw {
+          response: {
+            status: response.status,
+            data: data
+          },
+          message: data.message || `Error ${response.status}`
+        };
+      }
+
+      return data;
+    } catch (error) {
+      console.error('ProfileAPI - Error setting default payment method:', error);
+      throw error;
+    }
+  },
+
 };

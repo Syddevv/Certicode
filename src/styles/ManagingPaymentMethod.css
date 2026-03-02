@@ -216,3 +216,128 @@
   cursor: pointer;
   font-family: 'DM Sans', sans-serif;
 }
+
+.ebd-add-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: #f97316;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 0;
+  margin-bottom: 16px;
+}
+
+.ebd-add-link:hover {
+  color: #ea580c;
+  text-decoration: underline;
+}
+
+.ebd-plus {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.ebd-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.ebd-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.ebd-btn--cancel {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.ebd-btn--cancel:hover {
+  background-color: #e5e7eb;
+}
+
+.ebd-btn--save {
+  background-color: #f97316;
+  color: white;
+}
+
+.ebd-btn--save:hover {
+  background-color: #ea580c;
+}
+
+.ebd-btn--save:disabled {
+  background-color: #fdba74;
+  cursor: not-allowed;
+}
+
+.ebd-checkbox {
+  margin: 16px 0;
+}
+
+.ebd-checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: #374151;
+  cursor: pointer;
+}
+
+.ebd-checkbox input[type="checkbox"] {
+  width: auto;
+  cursor: pointer;
+}
+
+.ebd-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background-color: white;
+  cursor: pointer;
+}
+
+.ebd-select:focus {
+  outline: none;
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+.ebd-default-badge {
+  display: inline-block;
+  background-color: #10b981;
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 8px;
+  font-weight: 500;
+}
+
+.ebd-no-methods {
+  text-align: center;
+  padding: 32px;
+  color: #6b7280;
+  font-size: 0.95rem;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  border: 1px dashed #d1d5db;
+}
+
+.ebd-loading {
+  text-align: center;
+  padding: 32px;
+  color: #6b7280;
+}
