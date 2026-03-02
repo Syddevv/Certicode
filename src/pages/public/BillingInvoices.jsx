@@ -26,6 +26,7 @@ const BillingInvoices = () => {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [isUpdateBillingModal, setUpdateBillingModal] = useState(false);
+  const [primaryPaymentMethod, setPrimaryPaymentMethod] = useState(null);
   const [stats, setStats] = useState([
     { label: "Total Invoices", value: "0", icon: InvoiceIcon },
     { label: "Total Volume", value: "$0.00", icon: ChartBar },
@@ -36,6 +37,7 @@ const BillingInvoices = () => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     fetchUserData();
     fetchPurchases();
+    fetchPrimaryPaymentMethod();
   }, []);
 
   useEffect(() => {
@@ -138,6 +140,25 @@ const BillingInvoices = () => {
       setPurchases([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPrimaryPaymentMethod = async () => {
+    try {
+      const response = await ProfileAPI.getPaymentMethods();
+      const methods = Array.isArray(response?.data)
+        ? response.data
+        : Array.isArray(response)
+          ? response
+          : [];
+
+      const nextPrimary =
+        methods.find((method) => Boolean(method?.is_default)) || methods[0] || null;
+
+      setPrimaryPaymentMethod(nextPrimary);
+    } catch (error) {
+      console.error("Failed to fetch payment methods:", error);
+      setPrimaryPaymentMethod(null);
     }
   };
 
@@ -512,11 +533,14 @@ const BillingInvoices = () => {
                     </span>
                     <div>
                       <strong>
-                        {user?.payment_method || "No payment method on file"}
+                        {primaryPaymentMethod
+                          ? `${primaryPaymentMethod.cardholder_name} •••• ${primaryPaymentMethod.last_four}`
+                          : "No payment method on file"}
                       </strong>
                       <span>
-                        {user?.payment_expiry ||
-                          "Add payment method in Account Settings"}
+                        {primaryPaymentMethod
+                          ? `Expires ${primaryPaymentMethod.expiry_month}/${primaryPaymentMethod.expiry_year}`
+                          : "Add payment method in Account Settings"}
                       </span>
                     </div>
                     <button
@@ -562,10 +586,17 @@ const BillingInvoices = () => {
 
       <EditBillingDetailsModal
         isOpen={isUpdateBillingModal}
-        onClose={() => setUpdateBillingModal(false)}
+        onClose={() => {
+          setUpdateBillingModal(false);
+          fetchPrimaryPaymentMethod();
+        }}
       />
       <Footer />
-      <ManagingPaymentMethod open={open} setOpen={setOpen} />
+      <ManagingPaymentMethod
+        open={open}
+        setOpen={setOpen}
+        onSuccess={fetchPrimaryPaymentMethod}
+      />
     </div>
   );
 };
