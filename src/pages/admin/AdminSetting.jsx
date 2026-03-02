@@ -325,6 +325,85 @@ const MfaSetupModal = ({
   );
 };
 
+const MfaDisableModal = ({
+  onClose,
+  onSubmit,
+  onCodeChange,
+  onPasswordChange,
+  code,
+  currentPassword,
+  requireCurrentPassword,
+  error,
+  loading,
+}) => {
+  return (
+    <div className="mfa-modal-overlay" onClick={onClose}>
+      <div className="mfa-modal-box" onClick={(e) => e.stopPropagation()}>
+        <div className="mfa-modal-header">
+          <h3>Disable Two-Factor Authentication</h3>
+          <button
+            type="button"
+            className="mfa-modal-close"
+            onClick={onClose}
+            disabled={loading}
+            aria-label="Close 2FA disable modal"
+          >
+            ✕
+          </button>
+        </div>
+
+        <p className="mfa-modal-subtitle">
+          Enter your authenticator code to confirm disabling 2FA.
+        </p>
+
+        <form className="mfa-modal-form" onSubmit={onSubmit}>
+          {requireCurrentPassword ? (
+            <div className="input-group">
+              <label>Current Password</label>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={onPasswordChange}
+                placeholder="Enter current password"
+                autoComplete="current-password"
+              />
+            </div>
+          ) : null}
+
+          <div className="input-group">
+            <label>Authentication Code</label>
+            <input
+              type="text"
+              value={code}
+              onChange={onCodeChange}
+              placeholder="123456"
+              inputMode="numeric"
+              maxLength={6}
+              autoFocus
+            />
+          </div>
+
+          {error ? <p className="modal-error">{error}</p> : null}
+
+          <div className="mfa-modal-actions">
+            <button
+              type="button"
+              className="btn outline"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+            <button type="submit" className="btn primary" disabled={loading}>
+              {loading ? "Disabling..." : "Disable 2FA"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 const AdminSetting = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
@@ -353,6 +432,12 @@ const AdminSetting = () => {
   const [mfaOtpAuthUrl, setMfaOtpAuthUrl] = useState("");
   const [mfaUrlCopied, setMfaUrlCopied] = useState(false);
   const [mfaPreparing, setMfaPreparing] = useState(false);
+  const [showMfaDisableModal, setShowMfaDisableModal] = useState(false);
+  const [mfaDisableCode, setMfaDisableCode] = useState("");
+  const [mfaDisablePassword, setMfaDisablePassword] = useState("");
+  const [mfaDisableError, setMfaDisableError] = useState("");
+  const normalizeTwoFactorMessage = (text, fallback) =>
+    (text ? text.replace(/\bmfa\b/gi, "2FA") : fallback);
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     fetchUserData();
@@ -605,22 +690,29 @@ const AdminSetting = () => {
     setMfaPreparing(false);
   };
 
+  const closeMfaDisableModal = (force = false) => {
+    if (mfaBusy && !force) return;
+    setShowMfaDisableModal(false);
+    setMfaDisableCode("");
+    setMfaDisablePassword("");
+    setMfaDisableError("");
+  };
+
   const handleMfaToggle = async (event) => {
     const wantsEnabled = event.target.checked;
 
     if (!wantsEnabled) {
       if (mfaEnabled) {
-        setMessage({
-          type: "info",
-          text: "Disabling MFA is not available yet in the settings panel.",
-        });
-        showErrorToast("Disabling MFA is not available yet.");
+        setMfaDisableCode("");
+        setMfaDisablePassword("");
+        setMfaDisableError("");
+        setShowMfaDisableModal(true);
       }
       return;
     }
 
     if (mfaEnabled) {
-      showSuccessToast("MFA is already enabled for this account.");
+      showSuccessToast("2FA is already enabled for this account.");
       return;
     }
 
@@ -642,13 +734,24 @@ const AdminSetting = () => {
       console.error("Failed to start MFA setup:", error);
       setMfaPreparing(false);
       setMfaSetupError(
-        error?.message || "Failed to start MFA setup. Please try again.",
+        normalizeTwoFactorMessage(
+          error?.message,
+          "Failed to start 2FA setup. Please try again.",
+        ),
       );
       setMessage({
         type: "error",
-        text: error?.message || "Failed to start MFA setup. Please try again.",
+        text: normalizeTwoFactorMessage(
+          error?.message,
+          "Failed to start 2FA setup. Please try again.",
+        ),
       });
-      showErrorToast(error?.message || "Failed to start MFA setup.");
+      showErrorToast(
+        normalizeTwoFactorMessage(
+          error?.message,
+          "Failed to start 2FA setup.",
+        ),
+      );
     } finally {
       setMfaBusy(false);
     }
@@ -688,17 +791,83 @@ const AdminSetting = () => {
 
       setMfaEnabled(Boolean(result?.mfa_enabled));
       setUser((prev) => (prev ? { ...prev, mfa_enabled: true } : prev));
+      const successMessage = normalizeTwoFactorMessage(
+        result?.message,
+        "Two-factor authentication enabled successfully.",
+      );
       setMessage({
         type: "success",
-        text: result?.message || "Two-factor authentication enabled successfully.",
+        text: successMessage,
       });
-      showSuccessToast(result?.message || "Two-factor authentication enabled.");
+      showSuccessToast(successMessage);
 
       closeMfaSetupModal(true);
     } catch (error) {
       console.error("Failed to confirm MFA setup:", error);
-      setMfaSetupError(getValidationMessage(error));
-      showErrorToast(getValidationMessage(error));
+      const errorMessage = normalizeTwoFactorMessage(
+        getValidationMessage(error),
+        "Invalid 2FA code.",
+      );
+      setMfaSetupError(errorMessage);
+      showErrorToast(errorMessage);
+    } finally {
+      setMfaBusy(false);
+    }
+  };
+
+  const handleMfaDisableCodeChange = (event) => {
+    const nextValue = event.target.value.replace(/\D/g, "").slice(0, 6);
+    setMfaDisableCode(nextValue);
+    setMfaDisableError("");
+  };
+
+  const handleMfaDisablePasswordChange = (event) => {
+    setMfaDisablePassword(event.target.value);
+    setMfaDisableError("");
+  };
+
+  const handleDisableMfa = async (event) => {
+    event.preventDefault();
+
+    if (mfaDisableCode.length !== 6) {
+      setMfaDisableError("Please enter the 6-digit code from your authenticator app.");
+      return;
+    }
+
+    if (requireCurrentPassword && !mfaDisablePassword) {
+      setMfaDisableError("Please enter your current password.");
+      return;
+    }
+
+    try {
+      setMfaBusy(true);
+      setMfaDisableError("");
+
+      const payload = { code: mfaDisableCode };
+      if (requireCurrentPassword) {
+        payload.current_password = mfaDisablePassword;
+      }
+
+      const result = await ProfileAPI.disableMfa(payload);
+      setMfaEnabled(Boolean(result?.mfa_enabled));
+      setUser((prev) => (prev ? { ...prev, mfa_enabled: false } : prev));
+      const successMessage = normalizeTwoFactorMessage(
+        result?.message,
+        "Two-factor authentication disabled successfully.",
+      );
+      setMessage({
+        type: "success",
+        text: successMessage,
+      });
+      showSuccessToast(successMessage);
+      closeMfaDisableModal(true);
+    } catch (error) {
+      const errorText = normalizeTwoFactorMessage(
+        getValidationMessage(error),
+        "Failed to disable 2FA.",
+      );
+      setMfaDisableError(errorText);
+      showErrorToast(errorText);
     } finally {
       setMfaBusy(false);
     }
@@ -1151,6 +1320,19 @@ const AdminSetting = () => {
           otpauthUrl={mfaOtpAuthUrl}
           copied={mfaUrlCopied}
           isPreparing={mfaPreparing}
+        />
+      )}
+      {showMfaDisableModal && (
+        <MfaDisableModal
+          onClose={closeMfaDisableModal}
+          onSubmit={handleDisableMfa}
+          onCodeChange={handleMfaDisableCodeChange}
+          onPasswordChange={handleMfaDisablePasswordChange}
+          code={mfaDisableCode}
+          currentPassword={mfaDisablePassword}
+          requireCurrentPassword={requireCurrentPassword}
+          error={mfaDisableError}
+          loading={mfaBusy}
         />
       )}
     </div>

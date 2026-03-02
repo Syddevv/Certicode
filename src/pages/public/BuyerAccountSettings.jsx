@@ -125,6 +125,99 @@ const MfaSetupModal = ({
   );
 };
 
+const MfaDisableModal = ({
+  onClose,
+  onSubmit,
+  onCodeChange,
+  onPasswordChange,
+  code,
+  currentPassword,
+  requireCurrentPassword,
+  error,
+  loading,
+}) => {
+  return (
+    <div
+      className="account-mfa-backdrop"
+      role="presentation"
+      onClick={onClose}
+    >
+      <div
+        className="account-mfa-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="account-mfa-disable-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="account-mfa-header">
+          <h3 id="account-mfa-disable-title">Disable Two-Factor Authentication</h3>
+          <button
+            type="button"
+            className="account-mfa-close"
+            onClick={onClose}
+            disabled={loading}
+            aria-label="Close 2FA disable modal"
+          >
+            ×
+          </button>
+        </div>
+
+        <p className="account-mfa-subtitle">
+          Enter your authenticator code to confirm disabling 2FA.
+        </p>
+
+        <form onSubmit={onSubmit} className="account-mfa-form">
+          {requireCurrentPassword ? (
+            <>
+              <label htmlFor="account-mfa-disable-password">Current Password</label>
+              <input
+                id="account-mfa-disable-password"
+                type="password"
+                value={currentPassword}
+                onChange={onPasswordChange}
+                placeholder="Enter current password"
+                autoComplete="current-password"
+              />
+            </>
+          ) : null}
+
+          <label htmlFor="account-mfa-disable-code">Authentication Code</label>
+          <input
+            id="account-mfa-disable-code"
+            type="text"
+            value={code}
+            onChange={onCodeChange}
+            placeholder="123456"
+            inputMode="numeric"
+            maxLength={6}
+            autoFocus
+          />
+
+          {error ? <p className="account-mfa-error">{error}</p> : null}
+
+          <div className="account-mfa-actions">
+            <button
+              type="button"
+              className="account-secondary"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="account-primary"
+              disabled={loading}
+            >
+              {loading ? "Disabling..." : "Disable 2FA"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 const BuyerAccountSettings = () => {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [user, setUser] = useState(null);
@@ -157,17 +250,22 @@ const BuyerAccountSettings = () => {
   const [mfaOtpAuthUrl, setMfaOtpAuthUrl] = useState("");
   const [mfaUrlCopied, setMfaUrlCopied] = useState(false);
   const [mfaPreparing, setMfaPreparing] = useState(false);
+  const [showMfaDisableModal, setShowMfaDisableModal] = useState(false);
+  const [mfaDisableCode, setMfaDisableCode] = useState("");
+  const [mfaDisablePassword, setMfaDisablePassword] = useState("");
+  const [mfaDisableError, setMfaDisableError] = useState("");
 
   const notifyUser = (type, text) => {
-    setMessage({ type, text });
+    const normalizedText = text ? text.replace(/\bmfa\b/gi, "2FA") : text;
+    setMessage({ type, text: normalizedText });
 
-    if (!text) return;
+    if (!normalizedText) return;
     if (type === "success") {
-      showSuccessToast(text);
+      showSuccessToast(normalizedText);
       return;
     }
     if (type === "error") {
-      showErrorToast(text);
+      showErrorToast(normalizedText);
     }
   };
 
@@ -191,7 +289,7 @@ const BuyerAccountSettings = () => {
   }, [isDeleteOpen]);
 
   useEffect(() => {
-    if (isUpdateBillingModal || isDeleteOpen || isLogoutModal || showMfaSetupModal) {
+    if (isUpdateBillingModal || isDeleteOpen || isLogoutModal || showMfaSetupModal || showMfaDisableModal) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
@@ -199,7 +297,7 @@ const BuyerAccountSettings = () => {
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isUpdateBillingModal, isDeleteOpen, isLogoutModal, showMfaSetupModal]);
+  }, [isUpdateBillingModal, isDeleteOpen, isLogoutModal, showMfaSetupModal, showMfaDisableModal]);
 
   const handleAvatarUpload = async (e) => {
     const file = e.target.files[0];
@@ -424,12 +522,23 @@ const BuyerAccountSettings = () => {
     setMfaPreparing(false);
   };
 
+  const closeMfaDisableModal = (force = false) => {
+    if (mfaBusy && !force) return;
+    setShowMfaDisableModal(false);
+    setMfaDisableCode("");
+    setMfaDisablePassword("");
+    setMfaDisableError("");
+  };
+
   const handleMfaToggle = async (event) => {
     const wantsEnabled = event.target.checked;
 
     if (!wantsEnabled) {
       if (mfaEnabled) {
-        notifyUser("error", "Disabling 2FA is not available yet.");
+        setMfaDisableCode("");
+        setMfaDisablePassword("");
+        setMfaDisableError("");
+        setShowMfaDisableModal(true);
       }
       return;
     }
@@ -498,6 +607,53 @@ const BuyerAccountSettings = () => {
       console.error("Failed to confirm 2FA setup:", error);
       const text = error?.message || "Invalid 2FA code.";
       setMfaSetupError(text);
+      notifyUser("error", text);
+    } finally {
+      setMfaBusy(false);
+    }
+  };
+
+  const handleMfaDisableCodeChange = (event) => {
+    const nextValue = event.target.value.replace(/\D/g, "").slice(0, 6);
+    setMfaDisableCode(nextValue);
+    setMfaDisableError("");
+  };
+
+  const handleMfaDisablePasswordChange = (event) => {
+    setMfaDisablePassword(event.target.value);
+    setMfaDisableError("");
+  };
+
+  const handleDisableMfa = async (event) => {
+    event.preventDefault();
+
+    if (mfaDisableCode.length !== 6) {
+      setMfaDisableError("Please enter the 6-digit code from your authenticator app.");
+      return;
+    }
+
+    if (requiresCurrentPassword && !mfaDisablePassword) {
+      setMfaDisableError("Please enter your current password.");
+      return;
+    }
+
+    try {
+      setMfaBusy(true);
+      setMfaDisableError("");
+
+      const payload = { code: mfaDisableCode };
+      if (requiresCurrentPassword) {
+        payload.current_password = mfaDisablePassword;
+      }
+
+      const result = await ProfileAPI.disableMfa(payload);
+      setMfaEnabled(Boolean(result?.mfa_enabled));
+      setUser((prev) => (prev ? { ...prev, mfa_enabled: false } : prev));
+      notifyUser("success", result?.message || "Two-factor authentication disabled.");
+      closeMfaDisableModal(true);
+    } catch (error) {
+      const text = error?.message || "Failed to disable 2FA.";
+      setMfaDisableError(text);
       notifyUser("error", text);
     } finally {
       setMfaBusy(false);
@@ -1072,6 +1228,19 @@ const BuyerAccountSettings = () => {
           otpauthUrl={mfaOtpAuthUrl}
           copied={mfaUrlCopied}
           isPreparing={mfaPreparing}
+        />
+      )}
+      {showMfaDisableModal && (
+        <MfaDisableModal
+          onClose={closeMfaDisableModal}
+          onSubmit={handleDisableMfa}
+          onCodeChange={handleMfaDisableCodeChange}
+          onPasswordChange={handleMfaDisablePasswordChange}
+          code={mfaDisableCode}
+          currentPassword={mfaDisablePassword}
+          requireCurrentPassword={requiresCurrentPassword}
+          error={mfaDisableError}
+          loading={mfaBusy}
         />
       )}
       <Footer />
