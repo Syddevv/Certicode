@@ -32,6 +32,7 @@ const BuyerAccountSettings = () => {
     new_password: "",
     new_password_confirmation: "",
   });
+  const [requiresCurrentPassword, setRequiresCurrentPassword] = useState(true);
   const [deletePassword, setDeletePassword] = useState("");
   const [message, setMessage] = useState({ type: "", text: "" });
   const [saving, setSaving] = useState(false);
@@ -168,6 +169,9 @@ const BuyerAccountSettings = () => {
       setLoading(true);
       const data = await ProfileAPI.getCurrentUser();
       setUser(data);
+      setRequiresCurrentPassword(
+        data?.requires_current_password ?? !data?.provider,
+      );
       setProfileData({
         name: data.name || "",
         email: data.email || "",
@@ -192,14 +196,10 @@ const BuyerAccountSettings = () => {
   };
 
   const handlePasswordChange = (e) => {
-    const { placeholder, value } = e.target;
+    const { name, value } = e.target;
     setPasswordData((prev) => ({
       ...prev,
-      [placeholder === "Old Password"
-        ? "current_password"
-        : placeholder === "New Password"
-          ? "new_password"
-          : "new_password_confirmation"]: value,
+      [name]: value,
     }));
   };
 
@@ -242,12 +242,13 @@ const BuyerAccountSettings = () => {
       setChangingPassword(true);
       setMessage({ type: "", text: "" });
 
-      if (
-        !passwordData.current_password ||
-        !passwordData.new_password ||
-        !passwordData.new_password_confirmation
-      ) {
+      if (!passwordData.new_password || !passwordData.new_password_confirmation) {
         notifyUser("error", "Please fill in all password fields");
+        return;
+      }
+
+      if (requiresCurrentPassword && !passwordData.current_password) {
+        notifyUser("error", "Please enter your current password");
         return;
       }
 
@@ -258,13 +259,19 @@ const BuyerAccountSettings = () => {
         return;
       }
 
-      const result = await ProfileAPI.updatePassword({
-        current_password: passwordData.current_password,
+      const payload = {
         new_password: passwordData.new_password,
         new_password_confirmation: passwordData.new_password_confirmation,
-      });
+      };
+
+      if (requiresCurrentPassword) {
+        payload.current_password = passwordData.current_password;
+      }
+
+      const result = await ProfileAPI.updatePassword(payload);
 
       notifyUser("success", result.message || "Password updated successfully");
+      setRequiresCurrentPassword(true);
 
       setPasswordData({
         current_password: "",
@@ -549,26 +556,34 @@ const BuyerAccountSettings = () => {
               <div className="account-security">
                 <div className="account-security__row">
                   <div>
-                    <strong>Update Password</strong>
+                    <strong>{requiresCurrentPassword ? "Update Password" : "Set Password"}</strong>
                   </div>
                   <div className="account-security__inputs">
+                    {requiresCurrentPassword && (
+                      <input
+                        type="password"
+                        name="current_password"
+                        placeholder="Current Password"
+                        value={passwordData.current_password}
+                        onChange={handlePasswordChange}
+                        autoComplete="current-password"
+                      />
+                    )}
                     <input
                       type="password"
-                      placeholder="Old Password"
-                      value={passwordData.current_password}
-                      onChange={handlePasswordChange}
-                    />
-                    <input
-                      type="password"
+                      name="new_password"
                       placeholder="New Password"
                       value={passwordData.new_password}
                       onChange={handlePasswordChange}
+                      autoComplete="new-password"
                     />
                     <input
                       type="password"
+                      name="new_password_confirmation"
                       placeholder="Confirm New Password"
                       value={passwordData.new_password_confirmation}
                       onChange={handlePasswordChange}
+                      autoComplete="new-password"
                     />
                   </div>
                   <button
@@ -577,7 +592,11 @@ const BuyerAccountSettings = () => {
                     onClick={handleChangePassword}
                     disabled={changingPassword}
                   >
-                    {changingPassword ? "Changing..." : "Change Password"}
+                    {changingPassword
+                      ? "Changing..."
+                      : requiresCurrentPassword
+                        ? "Change Password"
+                        : "Set Password"}
                   </button>
                 </div>
                 <div className="account-divider" />

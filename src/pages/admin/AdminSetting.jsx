@@ -30,6 +30,7 @@ const PasswordInputField = ({
   value,
   onChange,
   placeholder,
+  autoComplete,
   autoFocus = false,
 }) => {
   const [visible, setVisible] = useState(false);
@@ -44,6 +45,7 @@ const PasswordInputField = ({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
+          autoComplete={autoComplete}
           autoFocus={autoFocus}
         />
         <button
@@ -92,6 +94,7 @@ const ChangePasswordModal = ({
               value={form.currentPassword}
               onChange={onFieldChange}
               placeholder="Enter current password"
+              autoComplete="current-password"
               autoFocus
             />
           )}
@@ -102,6 +105,7 @@ const ChangePasswordModal = ({
             value={form.newPassword}
             onChange={onFieldChange}
             placeholder="Enter new password"
+            autoComplete="new-password"
             autoFocus={!showCurrentPasswordField}
           />
 
@@ -111,6 +115,7 @@ const ChangePasswordModal = ({
             value={form.confirmPassword}
             onChange={onFieldChange}
             placeholder="Confirm new password"
+            autoComplete="new-password"
           />
 
           {error && <p className="modal-error">{error}</p>}
@@ -269,6 +274,9 @@ const AdminSetting = () => {
       if (data?.role) {
         localStorage.setItem("user_role", data.role);
       }
+      setRequireCurrentPassword(
+        data?.requires_current_password ?? !data?.provider,
+      );
       setProfileData({
         name: data.name || "",
         email: data.email || "",
@@ -441,7 +449,9 @@ const AdminSetting = () => {
 
   const openPasswordModal = () => {
     setPasswordModalError("");
-    setRequireCurrentPassword(true);
+    setRequireCurrentPassword(
+      user?.requires_current_password ?? user?.has_local_password ?? !user?.provider,
+    );
     setPasswordForm({
       currentPassword: "",
       newPassword: "",
@@ -481,8 +491,13 @@ const AdminSetting = () => {
 
     const { currentPassword, newPassword, confirmPassword } = passwordForm;
 
-    if (!currentPassword || !newPassword || !confirmPassword) {
+    if (!newPassword || !confirmPassword) {
       setPasswordModalError("Please fill in all password fields");
+      return;
+    }
+
+    if (requireCurrentPassword && !currentPassword) {
+      setPasswordModalError("Please enter your current password");
       return;
     }
 
@@ -497,10 +512,13 @@ const AdminSetting = () => {
       setPasswordModalError("");
 
       const payload = {
-        current_password: currentPassword,
         new_password: newPassword,
         new_password_confirmation: confirmPassword,
       };
+
+      if (requireCurrentPassword) {
+        payload.current_password = currentPassword;
+      }
 
       const result = await ProfileAPI.updatePassword(payload);
 
@@ -510,6 +528,7 @@ const AdminSetting = () => {
       });
 
       setShowPasswordModal(false);
+      setRequireCurrentPassword(true);
       setPasswordForm({
         currentPassword: "",
         newPassword: "",
