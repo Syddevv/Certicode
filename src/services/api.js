@@ -30,6 +30,25 @@ export const api = {
     return data;
   },
 
+  async sendRegistrationOtp(email) {
+    const response = await fetch(`${API_URL}/register/send-otp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to send OTP');
+    }
+
+    return data;
+  },
+
   async login(credentials) {
     const response = await fetch(`${API_URL}/login`, {
       method: 'POST',
