@@ -15,6 +15,8 @@ import LogoutModalDialog from "./LogoutModal";
 import { resolveAvatarUrl } from "../utils/avatar";
 import { PROFILE_UPDATED_EVENT } from "../utils/profileSync";
 
+const API_URL = `${(import.meta.env.VITE_API_URL || "").replace(/\/+$/, "")}/api`;
+
 const Icons = {
   Dashboard: (
     <img src={DashboardAdmin} alt="Dashboard" width={20} height={20} />
@@ -81,7 +83,7 @@ const Sidebar = ({ activePage }) => {
       }
 
       const response = await fetch(
-        "http://127.0.0.1:8000/api/profile/current-user",
+        `${API_URL}/profile/current-user`,
         {
           method: "GET",
           headers: {
@@ -132,7 +134,7 @@ const Sidebar = ({ activePage }) => {
 
     if (token) {
       try {
-        await fetch("http://127.0.0.1:8000/api/logout", {
+        await fetch(`${API_URL}/logout`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,

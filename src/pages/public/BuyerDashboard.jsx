@@ -19,7 +19,7 @@ import WhiteDownload from "../../assets/whiteDownload.png";
 import { ProfileAPI } from "../../services/ProfileAPI";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
-const API_URL = 'http://127.0.0.1:8000/api';
+const API_URL = `${(import.meta.env.VITE_API_URL || "").replace(/\/+$/, "")}/api`;
 
 const BuyerDashboard = () => {
   const navigate = useNavigate();

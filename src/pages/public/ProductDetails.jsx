@@ -18,6 +18,8 @@ import ProductReviews from "../../components/ProductReviews";
 import { api } from "../../services/api";
 import { CartAPI } from "../../services/CartAPI";
 
+const API_URL = `${(import.meta.env.VITE_API_URL || "").replace(/\/+$/, "")}/api`;
+
 const ProductDetails = () => {
   const { id } = useParams();
   const location = useLocation();
@@ -77,7 +79,7 @@ const ProductDetails = () => {
 
   const fetchReviewsCount = async (productId) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/products/${productId}/reviews`);
+      const response = await fetch(`${API_URL}/products/${productId}/reviews`);
       if (response.ok) {
         const reviews = await response.json();
         return reviews.length;

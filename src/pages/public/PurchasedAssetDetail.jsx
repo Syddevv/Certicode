@@ -18,7 +18,7 @@ import ViewProductIcon from "../../assets/ViewProduct.png";
 import OrangeStar from "../../assets/orangestar.png";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
-const API_URL = "http://127.0.0.1:8000/api";
+const API_URL = `${(import.meta.env.VITE_API_URL || "").replace(/\/+$/, "")}/api`;
 
 const PurchasedAssetDetail = () => {
   const [activeTab, setActiveTab] = useState("version");

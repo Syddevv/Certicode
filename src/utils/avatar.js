@@ -1,4 +1,4 @@
-const API_ORIGIN = "http://127.0.0.1:8000";
+const API_ORIGIN = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
 
 export const resolveAvatarUrl = (avatarUrl) => {
   if (!avatarUrl || typeof avatarUrl !== "string") return "";

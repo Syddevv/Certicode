@@ -19,6 +19,8 @@ import attachFileIcon from "../../assets/attachfile.png";
 import { SupportTicketAPI } from "../../services/SupportTicketAPI";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
 
+const API_ORIGIN = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
+
 const TicketDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -282,7 +284,7 @@ const TicketDetail = () => {
                           <span className="filename">Attachment</span>
                           <span className="filesize">Click to view</span>
                         </div>
-                        <a href={`http://127.0.0.1:8000/storage/${ticket.attachment_path}`} target="_blank" rel="noopener noreferrer" className="btn-download">
+                        <a href={`${API_ORIGIN}/storage/${ticket.attachment_path}`} target="_blank" rel="noopener noreferrer" className="btn-download">
                           <img src={vectorDownloadIcon} alt="Download" className="download-icon" />
                         </a>
                       </div>
@@ -311,7 +313,7 @@ const TicketDetail = () => {
                             <span className="filename">Attachment</span>
                             <span className="filesize">Click to view</span>
                           </div>
-                          <a href={`http://127.0.0.1:8000/storage/${reply.attachment_path}`} target="_blank" rel="noopener noreferrer" className="btn-download">
+                          <a href={`${API_ORIGIN}/storage/${reply.attachment_path}`} target="_blank" rel="noopener noreferrer" className="btn-download">
                             <img src={vectorDownloadIcon} alt="Download" className="download-icon" />
                           </a>
                         </div>

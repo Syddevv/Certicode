@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "../../styles/ForgotPassword.css";
 
+const API_URL = `${(import.meta.env.VITE_API_URL || "").replace(/\/+$/, "")}/api`;
+
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -20,7 +22,7 @@ const ForgotPassword = () => {
       setLoading(true);
       setMessage({ type: "", text: "" });
       
-      const response = await fetch('http://127.0.0.1:8000/api/forgot-password', {
+      const response = await fetch(`${API_URL}/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

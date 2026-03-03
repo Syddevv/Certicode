@@ -1,6 +1,6 @@
 // src/services/ReviewAPI.js
 
-const API_URL = "http://127.0.0.1:8000/api";
+const API_URL = `${(import.meta.env.VITE_API_URL || "").replace(/\/+$/, "")}/api`;
 
 const getAuthHeaders = (isFormData = false) => {
   const token = localStorage.getItem("auth_token");

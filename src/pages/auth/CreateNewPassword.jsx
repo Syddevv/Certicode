@@ -3,6 +3,8 @@ import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import certicodeIcon from "../../assets/certicodeicon.png";
 import "../../styles/CreateNewPassword.css";
 
+const API_URL = `${(import.meta.env.VITE_API_URL || "").replace(/\/+$/, "")}/api`;
+
 const EyeIcon = ({ closed = false }) => (
   <svg
     viewBox="0 0 24 24"
@@ -118,7 +120,7 @@ const CreateNewPassword = () => {
         token_preview: token.substring(0, 20) + '...'
       });
 
-      const response = await fetch('http://127.0.0.1:8000/api/reset-password', {
+      const response = await fetch(`${API_URL}/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

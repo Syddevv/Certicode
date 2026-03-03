@@ -17,6 +17,8 @@ import EditBillingDetailsModal from "../../components/Editbillingdetailsmodal ";
 import { showErrorToast, showSuccessToast } from "../../utils/toast";
 import LogoutModal from "../../components/LogoutModal";
 
+const API_URL = `${(import.meta.env.VITE_API_URL || "").replace(/\/+$/, "")}/api`;
+
 const MfaSetupModal = ({
   onClose,
   onConfirm,
@@ -700,7 +702,7 @@ const BuyerAccountSettings = () => {
 
     if (token) {
       try {
-        await fetch("http://127.0.0.1:8000/api/logout", {
+        await fetch(`${API_URL}/logout`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
