@@ -385,6 +385,25 @@
   gap: 16px;
 }
 
+.account-grid--settings {
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 1fr);
+  align-items: stretch;
+}
+
+.account-card--preferences .account-card__body {
+  min-height: auto;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.account-card--billing {
+  height: 100%;
+}
+
+.account-card--billing .account-card__header {
+  flex: 1;
+}
+
 .account-preference {
   display: flex;
   flex-direction: column;
@@ -1011,6 +1030,14 @@
 
   .account-grid {
     grid-template-columns: 1fr;
+  }
+
+  .account-grid--settings {
+    grid-template-columns: 1fr;
+  }
+
+  .account-card--billing {
+    height: auto;
   }
 
   .account-card--inline {

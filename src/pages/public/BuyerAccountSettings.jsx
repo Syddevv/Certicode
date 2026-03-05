@@ -8,7 +8,6 @@ import OrangeBadge from "../../assets/orangeBadge.png";
 import DeleteIcon from "../../assets/Delete.png";
 import AlertTriangle from "../../assets/AlertTriangle.png";
 import ProfileIcon from "../../assets/orangeprofile.png";
-import NotificationIcon from "../../assets/NotifBell.png";
 import MoonIcon from "../../assets/OrangeMoon.png";
 import WalletIcon from "../../assets/wallet.png";
 import { ProfileAPI } from "../../services/ProfileAPI";
@@ -997,57 +996,8 @@ const BuyerAccountSettings = () => {
             </div>
           </div>
 
-          <div className="account-grid">
-            <div className="account-card">
-              <div className="account-card__header">
-                <span className="account-card__icon">
-                  <img src={NotificationIcon} alt="" aria-hidden="true" />
-                </span>
-                <div>
-                  <h4>Notifications</h4>
-                  <p>
-                    Manage alerts for system updates, transactions, and support
-                    activity.
-                  </p>
-                </div>
-              </div>
-              <div className="account-card__body">
-                <div className="account-toggleRow">
-                  <div>
-                    <strong>Asset Updates</strong>
-                    <span>When new content is added to your library.</span>
-                  </div>
-                  <label className="account-switch">
-                    <input type="checkbox" defaultChecked />
-                    <span className="account-slider" />
-                  </label>
-                </div>
-                <div className="account-divider" />
-                <div className="account-toggleRow">
-                  <div>
-                    <strong>License Reminders</strong>
-                    <span>Get alerts 30 days before expiration.</span>
-                  </div>
-                  <label className="account-switch">
-                    <input type="checkbox" defaultChecked />
-                    <span className="account-slider" />
-                  </label>
-                </div>
-                <div className="account-divider" />
-                <div className="account-toggleRow">
-                  <div>
-                    <strong>Payment Emails</strong>
-                    <span>Invoices and billing confirmations.</span>
-                  </div>
-                  <label className="account-switch">
-                    <input type="checkbox" />
-                    <span className="account-slider" />
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="account-card">
+          <div className="account-grid account-grid--settings">
+            <div className="account-card account-card--preferences">
               <div className="account-card__header">
                 <span className="account-card__icon">
                   <img src={MoonIcon} alt="" aria-hidden="true" />
@@ -1060,21 +1010,6 @@ const BuyerAccountSettings = () => {
                 </div>
               </div>
               <div className="account-card__body">
-                {/* <div className="account-preference">
-                  <strong>Display Theme</strong>
-                  <div className="account-choice">
-                    <button
-                      className="account-choice__btn is-active"
-                      type="button"
-                    >
-                      Light
-                    </button>
-                    <button className="account-choice__btn" type="button">
-                      Dark
-                    </button>
-                  </div>
-                </div> */}
-                <div className="account-divider" />
                 <div className="account-preference">
                   <strong>Timezone</strong>
                   <select>
@@ -1085,28 +1020,28 @@ const BuyerAccountSettings = () => {
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="account-card account-card--inline">
-            <div className="account-card__header">
-              <span className="account-card__icon">
-                <img src={WalletIcon} alt="" aria-hidden="true" />
-              </span>
-              <div>
-                <h4>Billing Summary</h4>
-                <p>
-                  {user?.company_name || "No company name set"} •
-                  <span>Update your billing details in settings</span>
-                </p>
+            <div className="account-card account-card--inline account-card--billing">
+              <div className="account-card__header">
+                <span className="account-card__icon">
+                  <img src={WalletIcon} alt="" aria-hidden="true" />
+                </span>
+                <div>
+                  <h4>Billing Summary</h4>
+                  <p>
+                    {user?.company_name || "No company name set"} •
+                    <span>Update your billing details in settings</span>
+                  </p>
+                </div>
               </div>
+              <button
+                onClick={() => setUpdateBillingModal(true)}
+                className="account-primary"
+                type="button"
+              >
+                Update Billing Details
+              </button>
             </div>
-            <button
-              onClick={() => setUpdateBillingModal(true)}
-              className="account-primary"
-              type="button"
-            >
-              Update Billing Details
-            </button>
           </div>
 
           <div className="account-card account-card--danger">
