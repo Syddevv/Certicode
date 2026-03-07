@@ -63,5 +63,10 @@ Then open the development server shown in the terminal.
 This project is open-source and available under the **MIT License**.
 
 ---
+## 📸 Preview
+
+<img width="1897" height="945" alt="Screenshot 2026-03-07 180412" src="https://github.com/user-attachments/assets/ce912836-10a1-42fd-93bc-328bfc3782b7" />
+
+<img width="1894" height="944" alt="Screenshot 2026-03-07 180422" src="https://github.com/user-attachments/assets/fb32356e-2d2b-4bdb-9b9c-e779a164bb09" />
 
 
