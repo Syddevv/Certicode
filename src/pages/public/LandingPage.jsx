@@ -33,25 +33,25 @@ const heroCategories = [
 
 const getToneColor = (tech) => {
   const colorMap = {
-    'React': 'blue',
-    'Node.js': 'green',
-    'Python': 'gold',
-    'Django': 'green',
-    'Flutter': 'purple',
-    'Firebase': 'pink',
-    'Swift': 'indigo',
-    'Figma': 'rose',
-    'Adobe XD': 'violet',
-    'Tailwind': 'orange',
-    'Laravel': 'red',
-    'Vue.js': 'green',
-    'HTML': 'orange',
-    'CSS': 'blue',
-    'JavaScript': 'yellow',
-    'Stripe': 'violet',
+    React: "blue",
+    "Node.js": "green",
+    Python: "gold",
+    Django: "green",
+    Flutter: "purple",
+    Firebase: "pink",
+    Swift: "indigo",
+    Figma: "rose",
+    "Adobe XD": "violet",
+    Tailwind: "orange",
+    Laravel: "red",
+    "Vue.js": "green",
+    HTML: "orange",
+    CSS: "blue",
+    JavaScript: "yellow",
+    Stripe: "violet",
   };
-  
-  return colorMap[tech] || 'green';
+
+  return colorMap[tech] || "green";
 };
 
 function debounce(func, wait) {
@@ -87,6 +87,9 @@ const getReviewDisplayName = (review) => {
 const LandingPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [viewportWidth, setViewportWidth] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth : 1440,
+  );
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [openFaqIndex, setOpenFaqIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
@@ -109,6 +112,10 @@ const LandingPage = () => {
     };
 
     updateLoginStatus();
+
+    // Reset body overflow when location changes to ensure mobile menu is properly closed
+    document.body.style.overflow = "";
+
     window.addEventListener("storage", updateLoginStatus);
     window.addEventListener("focus", updateLoginStatus);
 
@@ -146,11 +153,27 @@ const LandingPage = () => {
     fetchTopReviews();
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setViewportWidth(window.innerWidth);
+    };
+
+    // Ensure body overflow is properly reset on component mount
+    document.body.style.overflow = "";
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      // Cleanup: ensure overflow is reset when component unmounts
+      document.body.style.overflow = "";
+    };
+  }, []);
+
   const fetchTopReviews = async () => {
     try {
       setReviewsLoading(true);
       const reviewsData = await ReviewAPI.getTopReviews();
-      
+
       const formattedReviews = reviewsData.map((review, index) => ({
         id: review.id,
         quote: review.description,
@@ -158,9 +181,9 @@ const LandingPage = () => {
         role: "Verified Buyer",
         rating: review.rating,
         avatar: Avatar,
-        featured: index === 1 || index === 4 || index === 7
+        featured: index === 1 || index === 4 || index === 7,
       }));
-      
+
       if (formattedReviews.length === 0) {
         setAllReviews(getFallbackReviews());
       } else {
@@ -178,7 +201,8 @@ const LandingPage = () => {
     return [
       {
         id: 1,
-        quote: "Their SaaS templates saved us months of build time. The code quality was exceptional.",
+        quote:
+          "Their SaaS templates saved us months of build time. The code quality was exceptional.",
         name: "Alex Johnson",
         role: "CTO, TechFlow",
         rating: 5,
@@ -187,7 +211,8 @@ const LandingPage = () => {
       },
       {
         id: 2,
-        quote: "As a buyer, the verification process is rigorous but worth it. Best B2B marketplace out there.",
+        quote:
+          "As a buyer, the verification process is rigorous but worth it. Best B2B marketplace out there.",
         name: "Sarah Chen",
         role: "Senior UI Designer",
         rating: 5,
@@ -196,7 +221,8 @@ const LandingPage = () => {
       },
       {
         id: 3,
-        quote: "Support was outstanding and helped us through a complex integration. We shipped on time.",
+        quote:
+          "Support was outstanding and helped us through a complex integration. We shipped on time.",
         name: "Marcus Rodriguez",
         role: "Product Manager",
         rating: 5,
@@ -205,7 +231,8 @@ const LandingPage = () => {
       },
       {
         id: 4,
-        quote: "The UI kits are production-ready and saved our design team weeks of work.",
+        quote:
+          "The UI kits are production-ready and saved our design team weeks of work.",
         name: "Emily Wilson",
         role: "Lead Designer",
         rating: 5,
@@ -214,7 +241,8 @@ const LandingPage = () => {
       },
       {
         id: 5,
-        quote: "Purchased a mobile app template and customized it for our needs. Excellent documentation!",
+        quote:
+          "Purchased a mobile app template and customized it for our needs. Excellent documentation!",
         name: "David Kim",
         role: "Mobile Developer",
         rating: 5,
@@ -223,7 +251,8 @@ const LandingPage = () => {
       },
       {
         id: 6,
-        quote: "Fast delivery and excellent support. Will definitely buy again.",
+        quote:
+          "Fast delivery and excellent support. Will definitely buy again.",
         name: "Lisa Thompson",
         role: "Startup Founder",
         rating: 5,
@@ -232,7 +261,8 @@ const LandingPage = () => {
       },
       {
         id: 7,
-        quote: "Code was clean and well-structured. Easy to integrate with our existing systems.",
+        quote:
+          "Code was clean and well-structured. Easy to integrate with our existing systems.",
         name: "Michael Brown",
         role: "Backend Engineer",
         rating: 5,
@@ -241,7 +271,8 @@ const LandingPage = () => {
       },
       {
         id: 8,
-        quote: "The marketplace has high-quality assets that are actually production-ready.",
+        quote:
+          "The marketplace has high-quality assets that are actually production-ready.",
         name: "Jessica Lee",
         role: "Product Manager",
         rating: 5,
@@ -250,7 +281,8 @@ const LandingPage = () => {
       },
       {
         id: 9,
-        quote: "Saved 3 months of development time with their e-commerce template.",
+        quote:
+          "Saved 3 months of development time with their e-commerce template.",
         name: "Robert Garcia",
         role: "CTO",
         rating: 5,
@@ -304,11 +336,11 @@ const LandingPage = () => {
       }
 
       const result = await api.getProducts(query, assetType, 1, "newest", 5);
-      
+
       // Add null/undefined check here
       const products = result?.data || [];
-      
-      const formattedResults = products.map(product => ({
+
+      const formattedResults = products.map((product) => ({
         id: product.id,
         title: product.name,
         description: product.description || "",
@@ -316,12 +348,12 @@ const LandingPage = () => {
         asset_type: product.asset_type || "Uncategorized",
         technologies: product.technologies || [], // Add fallback
         image: product.featured_image,
-        techTags: (product.technologies || []).map(tech => ({
+        techTags: (product.technologies || []).map((tech) => ({
           label: tech,
-          tone: getToneColor(tech)
-        }))
+          tone: getToneColor(tech),
+        })),
       }));
-      
+
       setSearchResults(formattedResults);
     } catch (error) {
       console.error("Search error:", error);
@@ -335,7 +367,7 @@ const LandingPage = () => {
     debounce((query, category) => {
       performSearch(query, category);
     }, 300),
-    []
+    [],
   );
 
   const handleSearchChange = (e) => {
@@ -453,8 +485,16 @@ const LandingPage = () => {
     },
   ];
 
+  const isCompactLayout = viewportWidth <= 1100;
+  const isMobileLayout = viewportWidth <= 820;
+  const isTinyLayout = viewportWidth <= 479;
+
   return (
-    <div>
+    <div
+      className={`landingPage${isCompactLayout ? " landingPage--compact" : ""}${
+        isMobileLayout ? " landingPage--mobile" : ""
+      }${isTinyLayout ? " landingPage--tiny" : ""}`}
+    >
       <Navbar />
       <section className="hero" id="hero">
         <div className="container hero__inner">
@@ -509,14 +549,15 @@ const LandingPage = () => {
                   Search
                 </button>
               </div>
-              
+
               {showDropdown && (
                 <div className="search__dropdown" ref={dropdownRef}>
                   {isSearching ? (
                     <div className="search__dropdownItem search__dropdownItem--loading">
                       Searching...
                     </div>
-                  ) : searchQuery.trim() && (searchResults?.length === 0 || !searchResults) ? ( // Add ?.
+                  ) : searchQuery.trim() &&
+                    (searchResults?.length === 0 || !searchResults) ? ( // Add ?.
                     <div className="search__dropdownItem search__dropdownItem--empty">
                       No results found for "{searchQuery}"
                     </div>
@@ -524,8 +565,8 @@ const LandingPage = () => {
                     <>
                       <div className="search__dropdownHeader">
                         <span>Search Results ({searchResults.length})</span>
-                        <Link 
-                          to={`/marketplace?search=${encodeURIComponent(searchQuery)}${selectedCategory !== "All Categories" ? `&category=${selectedCategory}` : ''}`}
+                        <Link
+                          to={`/marketplace?search=${encodeURIComponent(searchQuery)}${selectedCategory !== "All Categories" ? `&category=${selectedCategory}` : ""}`}
                           className="search__dropdownViewAll"
                           onClick={() => setShowDropdown(false)}
                         >
@@ -543,8 +584,8 @@ const LandingPage = () => {
                               {result.title}
                             </div>
                             <div className="search__dropdownItemDesc">
-                              {(result.description || "").length > 80  // Add fallback
-                                ? `${result.description.substring(0, 80)}...` 
+                              {(result.description || "").length > 80 // Add fallback
+                                ? `${result.description.substring(0, 80)}...`
                                 : result.description}
                             </div>
                             <div className="search__dropdownItemMeta">
@@ -552,11 +593,19 @@ const LandingPage = () => {
                                 {result.price}
                               </span>
                               <div className="search__dropdownItemTechs">
-                                {(result.techTags || []).slice(0, 3).map((tag, index) => ( // Add fallback
-                                  <span key={index} className={`search__dropdownItemTech search__dropdownItemTech--${tag.tone}`}>
-                                    {tag.label}
-                                  </span>
-                                ))}
+                                {(result.techTags || []).slice(0, 3).map(
+                                  (
+                                    tag,
+                                    index, // Add fallback
+                                  ) => (
+                                    <span
+                                      key={index}
+                                      className={`search__dropdownItemTech search__dropdownItemTech--${tag.tone}`}
+                                    >
+                                      {tag.label}
+                                    </span>
+                                  ),
+                                )}
                                 {(result.techTags || []).length > 3 && (
                                   <span className="search__dropdownItemTechMore">
                                     +{(result.techTags || []).length - 3}
@@ -572,7 +621,6 @@ const LandingPage = () => {
                 </div>
               )}
             </div>
-
           </div>
 
           <div className="hero__right">
@@ -729,7 +777,7 @@ const LandingPage = () => {
 
           <div className="testimonials__pagination" aria-label="Pagination">
             {Array.from({ length: getTotalReviewPages() }).map((_, index) => (
-              <button 
+              <button
                 key={index}
                 className={`pagerDot ${currentReviewPage === index ? "pagerDot--active" : ""}`}
                 type="button"

@@ -1,4 +1,3 @@
-
 .sidebar {
   width: 260px;
   background: #ffffff;
@@ -20,11 +19,10 @@
   }
 }
 
-
 .logo {
   display: flex;
   align-items: center;
-  margin-bottom: 2px; 
+  margin-bottom: 2px;
   padding-top: 8px;
 }
 
@@ -33,7 +31,6 @@
   height: 70px !important;
   display: block;
 }
-
 
 .menu {
   display: flex;
@@ -56,16 +53,18 @@
   font-size: 14px;
   color: #6b7280;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .menu-top li a,
 .menu-bottom li a {
   text-decoration: none;
   color: inherit;
-  display: flex;     
+  display: flex;
   align-items: center;
-  gap: 12px;         
+  gap: 12px;
   width: 100%;
 }
 
@@ -83,7 +82,7 @@
 
 .menu-top li.active {
   background: #fff1e6;
-  color: #f97316; 
+  color: #f97316;
   font-weight: 600;
 }
 
@@ -91,7 +90,6 @@
 .menu-bottom li svg {
   transition: stroke 0.2s;
 }
-
 
 .menu-section-label {
   margin: 20px 0 8px 12px; /* Adjusted spacing */
@@ -101,15 +99,14 @@
   color: #9ca3af;
 }
 
-
 .profile-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 10px 12px;
   border-radius: 10px;
-  
-  margin-top: auto; 
+
+  margin-top: auto;
 }
 
 .profile {
@@ -136,7 +133,6 @@
   color: #9ca3af;
 }
 
-
 .logout {
   background: none;
   border: none;
@@ -152,14 +148,15 @@
   height: 18px;
   object-fit: contain;
   opacity: 0.6;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .logout:hover img {
   opacity: 1;
   transform: scale(1.05);
 }
-
 
 .close-btn {
   display: none;
@@ -186,6 +183,139 @@
     right: 16px;
     font-size: 22px;
     cursor: pointer;
+  }
+}
+
+@media (max-width: 640px) {
+  .sidebar {
+    width: 240px;
+    padding: 0 12px 8px;
+  }
+
+  .logo img {
+    width: 150px !important;
+    height: 60px !important;
+  }
+
+  .menu-top li,
+  .menu-bottom li {
+    padding: 7px 10px;
+    border-radius: 6px;
+    margin-bottom: 3px;
+    font-size: 13px;
+  }
+
+  .menu-top li a,
+  .menu-bottom li a {
+    gap: 10px;
+  }
+
+  .menu-section-label {
+    margin: 16px 0 6px 10px;
+    font-size: 10px;
+  }
+
+  .profile-item {
+    padding: 8px 10px;
+  }
+
+  .profile img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .profile strong {
+    font-size: 12px;
+  }
+
+  .profile small {
+    font-size: 10px;
+  }
+
+  .logout img {
+    width: 16px;
+    height: 16px;
+  }
+
+  .close-btn {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 220px;
+    padding: 0 10px 6px;
+  }
+
+  .logo {
+    margin-bottom: 1px;
+    padding-top: 6px;
+  }
+
+  .logo img {
+    width: 130px !important;
+    height: 52px !important;
+  }
+
+  .menu {
+    flex: 1;
+  }
+
+  .menu-top li,
+  .menu-bottom li {
+    padding: 6px 8px;
+    border-radius: 4px;
+    margin-bottom: 2px;
+    font-size: 12px;
+  }
+
+  .menu-top li a,
+  .menu-bottom li a {
+    gap: 8px;
+  }
+
+  .menu-section-label {
+    margin: 12px 0 4px 8px;
+    font-size: 9px;
+    letter-spacing: 0.04em;
+  }
+
+  .profile-item {
+    padding: 6px 8px;
+    border-radius: 6px;
+  }
+
+  .profile {
+    gap: 8px;
+  }
+
+  .profile img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .profile strong {
+    font-size: 11px;
+  }
+
+  .profile small {
+    font-size: 9px;
+  }
+
+  .logout {
+    padding: 4px;
+  }
+
+  .logout img {
+    width: 14px;
+    height: 14px;
+  }
+
+  .close-btn {
+    top: 12px;
+    right: 12px;
+    font-size: 18px;
   }
 }
 .modal-overlay {
@@ -270,5 +400,3 @@
   color: #999;
   font-size: 12px;
 }
-
-

@@ -4,11 +4,12 @@
    ========================= */
 
 .container {
-  width: 1512px;
+  width: 100%;
   max-width: 1512px;
   margin: 0 auto;
   padding-left: 100px;
   padding-right: 100px;
+  box-sizing: border-box;
 }
 
 /* ================= HERO ================= */
@@ -75,6 +76,8 @@
   line-height: 1.05;
   letter-spacing: -1.2px;
   font-weight: 900;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .accent {
@@ -207,6 +210,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  min-width: 0;
 }
 
 .heroCard {
@@ -242,10 +246,11 @@
 
 .phoneOnly {
   position: relative;
+  width: min(100%, 560px);
 }
 
 .phoneOnly__img {
-  width: 560px; /* match Figma scale */
+  width: min(560px, 100%); /* match Figma scale */
   height: auto;
   display: block;
 }
@@ -1118,4 +1123,581 @@
 .btn.btn--secondary:hover {
   background: #4f46e5;
   color: white;
+}
+
+.landingPage--compact .container {
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+.landingPage--compact .hero__inner {
+  grid-template-columns: 1fr;
+  gap: 28px;
+  padding-top: 72px;
+  padding-bottom: 72px;
+  text-align: center;
+}
+
+.landingPage--compact .hero__left {
+  display: grid;
+  justify-items: center;
+}
+
+.landingPage--compact .hero__title {
+  font-size: 44px;
+  max-width: 12ch;
+}
+
+.landingPage--compact .hero__desc {
+  max-width: 680px;
+}
+
+.landingPage--compact .hero__search {
+  width: min(100%, 760px);
+}
+
+.landingPage--compact .hero__search .search {
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 14px;
+}
+
+.landingPage--compact .hero__search .search__input {
+  min-width: 0;
+  flex: 1 1 100%;
+}
+
+.landingPage--compact .hero__search .search__selectWrap {
+  flex: 1 1 220px;
+}
+
+.landingPage--compact .hero__search .search__select {
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding-left: 14px;
+  padding-right: 38px;
+}
+
+.landingPage--compact .hero__search .search__cta {
+  flex: 1 1 180px;
+  width: 100%;
+  height: 44px;
+}
+
+.landingPage--compact .hero__right {
+  order: -1;
+}
+
+.landingPage--compact .phoneOnly {
+  display: inline-flex;
+  justify-content: center;
+  width: min(100%, 420px);
+}
+
+.landingPage--compact .phoneOnly__img {
+  width: min(100%, 420px);
+}
+
+.landingPage--compact .floatBadge {
+  left: 8px;
+  top: auto;
+  bottom: 32px;
+  transform: none;
+}
+
+.landingPage--compact .logos__row {
+  gap: 28px;
+}
+
+.landingPage--compact .stats__inner,
+.landingPage--compact .process__steps,
+.landingPage--compact .testimonials__grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.landingPage--compact .categories__header {
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.landingPage--compact .process__steps::before {
+  display: none;
+}
+
+.landingPage--compact .ctaCard {
+  padding: 56px 36px;
+}
+
+.landingPage--mobile .container {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.landingPage--mobile .hero__inner {
+  padding-top: 56px;
+  padding-bottom: 56px;
+  gap: 24px;
+}
+
+.landingPage--mobile .pill {
+  min-height: 28px;
+  text-align: center;
+}
+
+.landingPage--mobile .hero__title {
+  font-size: 38px;
+  letter-spacing: -0.8px;
+  max-width: 10ch;
+}
+
+.landingPage--mobile .hero__desc {
+  font-size: 14px;
+}
+
+.landingPage--mobile .hero__search .search {
+  gap: 10px;
+  border-radius: 18px;
+}
+
+.landingPage--mobile .hero__search .search__icon {
+  display: none;
+}
+
+.landingPage--mobile .hero__search .search__input,
+.landingPage--mobile .hero__search .search__select,
+.landingPage--mobile .hero__search .search__cta {
+  width: 100%;
+}
+
+.landingPage--mobile .search__dropdown {
+  max-height: 70vh;
+}
+
+.landingPage--mobile .search__dropdownHeader,
+.landingPage--mobile .search__dropdownItemMeta {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.landingPage--mobile .search__dropdownItemTechs {
+  justify-content: flex-start;
+}
+
+.landingPage--mobile .phoneOnly__img {
+  width: min(100%, 320px);
+}
+
+.landingPage--mobile .floatBadge {
+  left: 0;
+  right: 0;
+  bottom: 16px;
+  margin: 0 auto;
+  width: fit-content;
+  max-width: calc(100% - 24px);
+}
+
+.landingPage--mobile .logos {
+  padding-top: 12px;
+}
+
+.landingPage--mobile .logoItem {
+  font-size: 16px;
+}
+
+.landingPage--mobile .logoItem__icon {
+  width: 24px;
+  height: 30px;
+}
+
+.landingPage--mobile .stats__inner,
+.landingPage--mobile .categories__grid,
+.landingPage--mobile .process__steps,
+.landingPage--mobile .testimonials__grid {
+  grid-template-columns: 1fr;
+}
+
+.landingPage--mobile .stats__inner {
+  padding: 32px 0;
+  gap: 24px;
+}
+
+.landingPage--mobile .stat__value {
+  font-size: 30px;
+}
+
+.landingPage--mobile .categories__inner,
+.landingPage--mobile .process__inner,
+.landingPage--mobile .testimonials__inner,
+.landingPage--mobile .faq__inner,
+.landingPage--mobile .cta__inner {
+  padding-top: 48px;
+  padding-bottom: 64px;
+}
+
+.landingPage--mobile .categories__title,
+.landingPage--mobile .process__title,
+.landingPage--mobile .testimonials__title,
+.landingPage--mobile .faq__title,
+.landingPage--mobile .ctaCard__title {
+  font-size: 24px;
+}
+
+.landingPage--mobile .faq__subtitle {
+  font-size: 13px;
+}
+
+.landingPage--mobile .faqItem__trigger {
+  padding: 18px;
+}
+
+.landingPage--mobile .faqItem__text {
+  font-size: 14px;
+}
+
+.landingPage--mobile .faqItem__answer {
+  padding: 0 18px 18px;
+  font-size: 13px;
+}
+
+.landingPage--mobile .ctaCard {
+  border-radius: 22px;
+  padding: 44px 24px;
+}
+
+.landingPage--mobile .ctaCard::before,
+.landingPage--mobile .ctaCard::after {
+  width: 180px;
+  height: 180px;
+}
+
+.landingPage--tiny .hero__title {
+  font-size: 32px;
+}
+
+.landingPage--tiny .search__dropdownHeader,
+.landingPage--tiny .search__dropdownItem {
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.landingPage--tiny .testimonialCard,
+.landingPage--tiny .categoryCard {
+  padding: 20px;
+}
+
+.landingPage--tiny .faq__button,
+.landingPage--tiny .ctaCard__button {
+  width: 100%;
+}
+
+@media (max-width: 1279px) {
+  .container {
+    padding-left: 48px;
+    padding-right: 48px;
+  }
+
+  .hero__inner {
+    min-height: auto;
+    gap: 40px;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .hero__title {
+    font-size: 54px;
+  }
+
+  .phoneOnly__img {
+    width: min(100%, 500px);
+  }
+
+  .floatBadge {
+    left: -12px;
+  }
+
+  .categories__inner {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .categories__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1100px) {
+  .container {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .hero__inner {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding-top: 72px;
+    padding-bottom: 72px;
+    text-align: center;
+  }
+
+  .hero__left {
+    display: grid;
+    justify-items: center;
+  }
+
+  .hero__title {
+    font-size: 44px;
+    max-width: 12ch;
+  }
+
+  .hero__desc {
+    max-width: 680px;
+  }
+
+  .hero__search {
+    width: min(100%, 760px);
+  }
+
+  .hero__search .search {
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 14px;
+  }
+
+  .hero__search .search__input {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+
+  .hero__search .search__selectWrap {
+    flex: 1 1 220px;
+  }
+
+  .hero__search .search__select {
+    width: 100%;
+    height: 44px;
+    border-radius: 12px;
+    background: #f8fafc;
+    padding-left: 14px;
+    padding-right: 38px;
+  }
+
+  .hero__search .search__cta {
+    flex: 1 1 180px;
+    width: 100%;
+    height: 44px;
+  }
+
+  .hero__right {
+    order: -1;
+  }
+
+  .phoneOnly {
+    display: inline-flex;
+    justify-content: center;
+    width: min(100%, 420px);
+  }
+
+  .phoneOnly__img {
+    width: min(100%, 420px);
+  }
+
+  .floatBadge {
+    left: 8px;
+    top: auto;
+    bottom: 32px;
+    transform: none;
+  }
+
+  .logos__row {
+    gap: 28px;
+  }
+
+  .stats__inner,
+  .process__steps,
+  .testimonials__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .categories__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .process__steps::before {
+    display: none;
+  }
+
+  .ctaCard {
+    padding: 56px 36px;
+  }
+}
+
+@media (max-width: 820px) {
+  .container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .hero__inner {
+    padding-top: 56px;
+    padding-bottom: 56px;
+    gap: 24px;
+  }
+
+  .pill {
+    min-height: 28px;
+    text-align: center;
+  }
+
+  .hero__title {
+    font-size: 38px;
+    letter-spacing: -0.8px;
+    max-width: 10ch;
+  }
+
+  .hero__desc {
+    font-size: 14px;
+  }
+
+  .hero__search .search {
+    gap: 10px;
+    border-radius: 18px;
+  }
+
+  .hero__search .search__icon {
+    display: none;
+  }
+
+  .hero__search .search__input,
+  .hero__search .search__select,
+  .hero__search .search__cta {
+    width: 100%;
+  }
+
+  .search__dropdown {
+    max-height: 70vh;
+  }
+
+  .search__dropdownHeader,
+  .search__dropdownItemMeta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .search__dropdownItemTechs {
+    justify-content: flex-start;
+  }
+
+  .phoneOnly__img {
+    width: min(100%, 320px);
+  }
+
+  .floatBadge {
+    left: 0;
+    right: 0;
+    bottom: 16px;
+    margin: 0 auto;
+    width: fit-content;
+    max-width: calc(100% - 24px);
+  }
+
+  .logos {
+    padding-top: 12px;
+  }
+
+  .logoItem {
+    font-size: 16px;
+  }
+
+  .logoItem__icon {
+    width: 24px;
+    height: 30px;
+  }
+
+  .stats__inner,
+  .categories__grid,
+  .process__steps,
+  .testimonials__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats__inner {
+    padding: 32px 0;
+    gap: 24px;
+  }
+
+  .stat__value {
+    font-size: 30px;
+  }
+
+  .categories__inner,
+  .process__inner,
+  .testimonials__inner,
+  .faq__inner,
+  .cta__inner {
+    padding-top: 48px;
+    padding-bottom: 64px;
+  }
+
+  .categories__title,
+  .process__title,
+  .testimonials__title,
+  .faq__title,
+  .ctaCard__title {
+    font-size: 24px;
+  }
+
+  .faq__subtitle {
+    font-size: 13px;
+  }
+
+  .faqItem__trigger {
+    padding: 18px;
+  }
+
+  .faqItem__text {
+    font-size: 14px;
+  }
+
+  .faqItem__answer {
+    padding: 0 18px 18px;
+    font-size: 13px;
+  }
+
+  .ctaCard {
+    border-radius: 22px;
+    padding: 44px 24px;
+  }
+
+  .ctaCard::before,
+  .ctaCard::after {
+    width: 180px;
+    height: 180px;
+  }
+}
+
+@media (max-width: 479px) {
+  .hero__title {
+    font-size: 32px;
+  }
+
+  .search__dropdownHeader,
+  .search__dropdownItem {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .testimonialCard,
+  .categoryCard {
+    padding: 20px;
+  }
+
+  .faq__button,
+  .ctaCard__button {
+    width: 100%;
+  }
 }

@@ -6,6 +6,7 @@
   align-items: center;
   justify-content: center;
   z-index: 2000;
+  padding: 20px;
 }
 
 .logout-modal {
@@ -58,4 +59,93 @@
 
 .logout-btn:hover {
   background: #f97316;
+}
+
+@media (max-width: 768px) {
+  .logout-modal {
+    width: min(90vw, 400px);
+    padding: 28px 24px;
+  }
+
+  .logout-modal h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .logout-modal p {
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+
+  .modal-actions {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .cancel-btn,
+  .logout-btn {
+    padding: 10px;
+    font-size: 13px;
+    border-radius: 9px;
+  }
+}
+
+@media (max-width: 640px) {
+  .logout-modal {
+    width: min(88vw, 360px);
+    padding: 24px 20px;
+  }
+
+  .logout-modal h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .logout-modal p {
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 18px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .cancel-btn,
+  .logout-btn {
+    padding: 9px;
+    font-size: 12px;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logout-modal {
+    width: min(85vw, 320px);
+    padding: 20px 16px;
+  }
+
+  .logout-modal h3 {
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+
+  .logout-modal p {
+    font-size: 11px;
+    margin-bottom: 16px;
+  }
+
+  .modal-actions {
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .cancel-btn,
+  .logout-btn {
+    padding: 8px;
+    font-size: 11px;
+    border-radius: 8px;
+  }
 }

@@ -129,14 +129,30 @@
   color: #9ca3af;
 }
 
-@media (max-width: 520px) {
+@media (max-width: 768px) {
   .otp-modal {
-    width: 100%;
-    padding: 28px 18px;
+    width: min(90vw, 400px);
+    padding: 28px 24px;
+  }
+
+  .otp-modal-logo {
+    width: 120px;
+    margin-bottom: 14px;
+  }
+
+  .otp-modal h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .otp-modal p {
+    font-size: 13px;
+    margin-bottom: 18px;
   }
 
   .otp-inputs {
     gap: 8px;
+    margin-bottom: 10px;
   }
 
   .otp-input-box {
@@ -144,5 +160,135 @@
     height: 48px;
     font-size: 20px;
   }
+
+  .otp-resend-btn {
+    font-size: 12px;
+    margin-bottom: 16px;
+  }
+
+  .otp-modal-actions {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .otp-cancel-btn,
+  .otp-verify-btn {
+    padding: 10px;
+    font-size: 13px;
+    border-radius: 9px;
+  }
+
+  .otp-modal-footer {
+    font-size: 10px;
+  }
 }
 
+@media (max-width: 640px) {
+  .otp-modal {
+    width: min(88vw, 360px);
+    padding: 24px 20px;
+  }
+
+  .otp-modal-logo {
+    width: 110px;
+    margin-bottom: 12px;
+  }
+
+  .otp-modal h3 {
+    font-size: 16px;
+    margin-bottom: 8px;
+  }
+
+  .otp-modal p {
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+  }
+
+  .otp-inputs {
+    gap: 7px;
+    margin-bottom: 8px;
+  }
+
+  .otp-input-box {
+    width: 38px;
+    height: 44px;
+    font-size: 18px;
+  }
+
+  .otp-resend-btn {
+    font-size: 11px;
+    margin-bottom: 14px;
+  }
+
+  .otp-modal-actions {
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .otp-cancel-btn,
+  .otp-verify-btn {
+    padding: 9px;
+    font-size: 12px;
+    border-radius: 8px;
+  }
+
+  .otp-modal-footer {
+    font-size: 9px;
+  }
+}
+
+@media (max-width: 480px) {
+  .otp-modal {
+    width: min(85vw, 320px);
+    padding: 20px 16px;
+  }
+
+  .otp-modal-logo {
+    width: 100px;
+    margin-bottom: 10px;
+  }
+
+  .otp-modal h3 {
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+
+  .otp-modal p {
+    font-size: 11px;
+    margin-bottom: 14px;
+  }
+
+  .otp-inputs {
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .otp-input-box {
+    width: 35px;
+    height: 40px;
+    font-size: 16px;
+  }
+
+  .otp-resend-btn {
+    font-size: 10px;
+    margin-bottom: 12px;
+  }
+
+  .otp-modal-actions {
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .otp-cancel-btn,
+  .otp-verify-btn {
+    padding: 8px;
+    font-size: 11px;
+    border-radius: 8px;
+  }
+
+  .otp-modal-footer {
+    font-size: 8px;
+  }
+}

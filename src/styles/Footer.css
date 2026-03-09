@@ -4,10 +4,11 @@
 }
 
 .footer__inner {
-  width: 1512px;
+  width: 100%;
   max-width: 1512px;
   margin: 0 auto;
   padding: 60px 100px 28px;
+  box-sizing: border-box;
 }
 
 .footer__top {

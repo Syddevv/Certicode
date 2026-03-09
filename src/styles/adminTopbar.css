@@ -4,6 +4,10 @@
   padding: 14px var(--admin-topbar-edge-x, 0px);
   border: none;
   border-bottom: 1px solid #edf2f7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .admin-topbar .search-wrapper {
@@ -24,6 +28,9 @@
 
 .admin-topbar .topbar-actions {
   align-items: center;
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
 }
 
 .admin-topbar .topbar-actions .btn {
@@ -31,6 +38,8 @@
   align-items: center;
   justify-content: center;
   text-decoration: none;
+  transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .notification-link {
@@ -38,17 +47,20 @@
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  border: none;
-  background: transparent;
+  border: 1px solid #e5e7eb;
+  background: #fff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   text-decoration: none;
+  transition: all 0.2s;
+  flex-shrink: 0;
 }
 
 .notification-link:hover {
   background: #f3f4f6;
+  border-color: #d1d5db;
 }
 
 .notification-link .notification-icon,
@@ -60,8 +72,8 @@
 
 .notification-dot {
   position: absolute;
-  top: 9px;
-  right: 9px;
+  top: 8px;
+  right: 8px;
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -73,5 +85,68 @@
   .admin-topbar.topbar {
     margin: 0 calc(-1 * var(--admin-topbar-edge-x, 0px)) 20px;
     padding: 12px var(--admin-topbar-edge-x, 0px);
+    gap: 12px;
+  }
+
+  .admin-topbar .topbar-actions {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-topbar.topbar {
+    margin: 0 calc(-1 * var(--admin-topbar-edge-x, 0px)) 16px;
+    padding: 10px var(--admin-topbar-edge-x, 0px);
+    gap: 10px;
+  }
+
+  .admin-topbar .topbar-actions {
+    gap: 8px;
+  }
+
+  .notification-link {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+  }
+
+  .notification-link .notification-icon,
+  .notification-link .topbar-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .admin-topbar .topbar-actions .btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-topbar.topbar {
+    margin: 0 calc(-1 * var(--admin-topbar-edge-x, 0px)) 12px;
+    padding: 8px var(--admin-topbar-edge-x, 0px);
+    gap: 8px;
+  }
+
+  .admin-topbar .topbar-actions {
+    gap: 6px;
+  }
+
+  .notification-link {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+  }
+
+  .notification-link .notification-icon,
+  .notification-link .topbar-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .admin-topbar .btn.primary {
+    padding: 6px 10px;
+    font-size: 11px;
   }
 }

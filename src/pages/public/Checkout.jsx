@@ -14,10 +14,12 @@ import {
   Elements,
   CardElement,
   useStripe,
-  useElements
+  useElements,
 } from "@stripe/react-stripe-js";
 
-const stripePromise = loadStripe("pk_test_51SuOSqBxaeRiDCkhh3cSl1fXqOcfJwRwM03TZlYXqYpqYBtBlaj0mNstAP2JlrFg8tEWvCvtJp4wP8SGsqLcbPWC00K7wU9ufv");
+const stripePromise = loadStripe(
+  "pk_test_51T6mxP3KVbQ8FKlk1QBQdRrzNgfQkpv9mcw2UqsGlIE3EqbDT9CiqtntOJqtUu5ZaH3LZVgs9xFywG3DW43kMB05005FqyMo8x",
+);
 
 const Checkout = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -52,53 +54,62 @@ const Checkout = () => {
 
   const getToneColor = (tech) => {
     const colorMap = {
-      'React': 'blue', 'Node.js': 'green', 'Python': 'gold',
-      'Django': 'green', 'Flutter': 'purple', 'Firebase': 'pink',
-      'Swift': 'indigo', 'Figma': 'rose', 'Adobe XD': 'violet',
-      'Tailwind': 'orange', 'Laravel': 'red', 'Vue.js': 'green',
-      'HTML': 'orange', 'CSS': 'blue', 'JavaScript': 'yellow',
-      'Stripe': 'violet',
+      React: "blue",
+      "Node.js": "green",
+      Python: "gold",
+      Django: "green",
+      Flutter: "purple",
+      Firebase: "pink",
+      Swift: "indigo",
+      Figma: "rose",
+      "Adobe XD": "violet",
+      Tailwind: "orange",
+      Laravel: "red",
+      "Vue.js": "green",
+      HTML: "orange",
+      CSS: "blue",
+      JavaScript: "yellow",
+      Stripe: "violet",
     };
-    return colorMap[tech] || 'green';
+    return colorMap[tech] || "green";
   };
 
   const fetchCartData = async () => {
     try {
       setLoading(true);
       setError("");
-      
+
       const items = await CartAPI.getCart();
-      
+
       if (!items || items.length === 0) {
         setError("Your cart is empty. Add items before checkout.");
         setCartItems([]);
         setLoading(false);
         return;
       }
-      
+
       setCartItems(items);
-      
+
       const subtotalAmount = items.reduce((sum, item) => {
         return sum + (parseFloat(item.product?.price) || 0);
       }, 0);
-      
+
       setSubtotal(subtotalAmount);
-      
+
       const taxAmount = subtotalAmount * 0.1;
       setTax(taxAmount);
-      
-      const savedPromo = localStorage.getItem('appliedPromo');
-      const savedDiscount = localStorage.getItem('appliedDiscount');
-      
+
+      const savedPromo = localStorage.getItem("appliedPromo");
+      const savedDiscount = localStorage.getItem("appliedDiscount");
+
       let discountAmount = savedDiscount ? parseFloat(savedDiscount) : 0;
       let promo = savedPromo ? JSON.parse(savedPromo) : null;
-      
+
       setAppliedPromo(promo);
       setDiscount(discountAmount);
-      
+
       const totalAmount = subtotalAmount + taxAmount - discountAmount;
       setTotal(totalAmount);
-      
     } catch (error) {
       if (error.response?.status === 401) {
         setError("Please login to checkout");
@@ -114,9 +125,9 @@ const Checkout = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -146,18 +157,18 @@ const Checkout = () => {
       return;
     }
 
-    if (paymentMethod === 'card') {
+    if (paymentMethod === "card") {
       if (!stripe || !elements) {
         setError("Stripe is not loaded yet. Please wait.");
         return;
       }
-      
+
       const cardElement = elements.getElement(CardElement);
       if (!cardElement) {
         setError("Card details are not complete");
         return;
       }
-      
+
       if (!cardComplete) {
         setError("Please complete your card details");
         return;
@@ -177,35 +188,39 @@ const Checkout = () => {
         customer_info: {
           full_name: formData.fullName,
           email: formData.email,
-          company_name: formData.companyName || null
+          company_name: formData.companyName || null,
         },
         billing_info: {
           country: formData.country,
           tax_id: formData.taxId || null,
           street_address: formData.streetAddress || null,
           city: formData.city || null,
-          postal: formData.postal || null
+          postal: formData.postal || null,
         },
         payment_method: paymentMethod,
         promo_code: appliedPromo?.code || null,
-        cart_items: cartItems.map(item => ({
+        cart_items: cartItems.map((item) => ({
           product_id: item.product_id,
-          price: item.product?.price || 0
+          price: item.product?.price || 0,
         })),
         subtotal: subtotal,
         tax_amount: tax,
         discount_amount: discount,
-        total_amount: total
+        total_amount: total,
       };
 
       const result = await CartAPI.checkout(checkoutData);
 
       if (result.success) {
-        localStorage.removeItem('appliedPromo');
-        localStorage.removeItem('appliedDiscount');
-        
-        if (paymentMethod === 'card' && result.client_secret) {
-          await handleStripePayment(result.client_secret, result.order_id, result.payment_intent_id);
+        localStorage.removeItem("appliedPromo");
+        localStorage.removeItem("appliedDiscount");
+
+        if (paymentMethod === "card" && result.client_secret) {
+          await handleStripePayment(
+            result.client_secret,
+            result.order_id,
+            result.payment_intent_id,
+          );
         } else {
           navigate("/order-success");
         }
@@ -219,7 +234,11 @@ const Checkout = () => {
     }
   };
 
-  const handleStripePayment = async (clientSecret, orderId, paymentIntentId) => {
+  const handleStripePayment = async (
+    clientSecret,
+    orderId,
+    paymentIntentId,
+  ) => {
     try {
       if (!stripe || !elements) {
         setError("Stripe is not loaded");
@@ -227,10 +246,9 @@ const Checkout = () => {
       }
 
       const cardElement = elements.getElement(CardElement);
-      
-      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
-        clientSecret,
-        {
+
+      const { error: stripeError, paymentIntent } =
+        await stripe.confirmCardPayment(clientSecret, {
           payment_method: {
             card: cardElement,
             billing_details: {
@@ -240,35 +258,37 @@ const Checkout = () => {
                 line1: formData.streetAddress,
                 city: formData.city,
                 postal_code: formData.postal,
-                country: formData.country
-              }
-            }
-          }
-        }
-      );
+                country: formData.country,
+              },
+            },
+          },
+        });
 
       if (stripeError) {
         setError(stripeError.message);
         return;
       }
 
-      if (paymentIntent.status === 'succeeded') {
-        await CartAPI.confirmPayment(orderId, paymentIntent.id || paymentIntentId);
-        
-        localStorage.removeItem('appliedPromo');
-        localStorage.removeItem('appliedDiscount');
-        
+      if (paymentIntent.status === "succeeded") {
+        await CartAPI.confirmPayment(
+          orderId,
+          paymentIntent.id || paymentIntentId,
+        );
+
+        localStorage.removeItem("appliedPromo");
+        localStorage.removeItem("appliedDiscount");
+
         navigate("/order-success");
-      } else if (paymentIntent.status === 'requires_action') {
-        const { error: confirmError, paymentIntent: confirmedPaymentIntent } = 
+      } else if (paymentIntent.status === "requires_action") {
+        const { error: confirmError, paymentIntent: confirmedPaymentIntent } =
           await stripe.confirmCardPayment(clientSecret);
-          
+
         if (confirmError) {
           setError(confirmError.message);
-        } else if (confirmedPaymentIntent.status === 'succeeded') {
+        } else if (confirmedPaymentIntent.status === "succeeded") {
           await CartAPI.confirmPayment(orderId, confirmedPaymentIntent.id);
-          localStorage.removeItem('appliedPromo');
-          localStorage.removeItem('appliedDiscount');
+          localStorage.removeItem("appliedPromo");
+          localStorage.removeItem("appliedDiscount");
           navigate("/order-success");
         }
       } else {
@@ -330,9 +350,9 @@ const Checkout = () => {
                 <div className="checkout__fields checkout__fields--two">
                   <label className="checkout__field">
                     <span>Full Name</span>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. John Doe" 
+                    <input
+                      type="text"
+                      placeholder="e.g. John Doe"
                       name="fullName"
                       value={formData.fullName}
                       onChange={handleInputChange}
@@ -341,9 +361,9 @@ const Checkout = () => {
                   </label>
                   <label className="checkout__field">
                     <span>Email</span>
-                    <input 
-                      type="email" 
-                      placeholder="johndoe@email.com" 
+                    <input
+                      type="email"
+                      placeholder="johndoe@email.com"
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
@@ -353,9 +373,9 @@ const Checkout = () => {
                 </div>
                 <label className="checkout__field">
                   <span>Company Name (Optional)</span>
-                  <input 
-                    type="text" 
-                    placeholder="Enter a legal company name" 
+                  <input
+                    type="text"
+                    placeholder="Enter a legal company name"
                     name="companyName"
                     value={formData.companyName}
                     onChange={handleInputChange}
@@ -372,7 +392,7 @@ const Checkout = () => {
                 <div className="checkout__fields checkout__fields--two">
                   <label className="checkout__field">
                     <span>Country</span>
-                    <select 
+                    <select
                       className="checkout__select"
                       name="country"
                       value={formData.country}
@@ -388,9 +408,9 @@ const Checkout = () => {
                   </label>
                   <label className="checkout__field">
                     <span>VAT / Tax ID (Optional)</span>
-                    <input 
-                      type="text" 
-                      placeholder="DE1233456789" 
+                    <input
+                      type="text"
+                      placeholder="DE1233456789"
                       name="taxId"
                       value={formData.taxId}
                       onChange={handleInputChange}
@@ -398,8 +418,8 @@ const Checkout = () => {
                   </label>
                 </div>
                 <label className="checkout__switch">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     name="requestInvoice"
                     checked={formData.requestInvoice}
                     onChange={handleInputChange}
@@ -415,9 +435,9 @@ const Checkout = () => {
                   </div>
                   <div className="checkout__fields checkout__fields--stack">
                     <label className="checkout__field">
-                      <input 
-                        type="text" 
-                        placeholder="Street Address" 
+                      <input
+                        type="text"
+                        placeholder="Street Address"
                         name="streetAddress"
                         value={formData.streetAddress}
                         onChange={handleInputChange}
@@ -425,18 +445,18 @@ const Checkout = () => {
                     </label>
                     <div className="checkout__fields checkout__fields--two">
                       <label className="checkout__field">
-                        <input 
-                          type="text" 
-                          placeholder="City" 
+                        <input
+                          type="text"
+                          placeholder="City"
                           name="city"
                           value={formData.city}
                           onChange={handleInputChange}
                         />
                       </label>
                       <label className="checkout__field">
-                        <input 
-                          type="text" 
-                          placeholder="Postal" 
+                        <input
+                          type="text"
+                          placeholder="Postal"
                           name="postal"
                           value={formData.postal}
                           onChange={handleInputChange}
@@ -451,37 +471,51 @@ const Checkout = () => {
                 <div className="checkout__cardHeader">
                   <span className="checkout__step">3</span>
                   <h3>Payment Method</h3>
-                  <img src={SafeLock} className="checkout__secureIcon" alt="" aria-hidden="true" />
+                  <img
+                    src={SafeLock}
+                    className="checkout__secureIcon"
+                    alt=""
+                    aria-hidden="true"
+                  />
                 </div>
-              
-                <div className={`checkout__payOption ${paymentMethod === 'card' ? 'checkout__payOption--active' : ''}`}
-                     onClick={() => handlePaymentMethodChange('card')}>
+
+                <div
+                  className={`checkout__payOption ${paymentMethod === "card" ? "checkout__payOption--active" : ""}`}
+                  onClick={() => handlePaymentMethodChange("card")}
+                >
                   <div className="checkout__payTop">
                     <div className="checkout__payLeft">
-                      <span className={`checkout__radio ${paymentMethod === 'card' ? 'checkout__radio--active' : ''}`} />
+                      <span
+                        className={`checkout__radio ${paymentMethod === "card" ? "checkout__radio--active" : ""}`}
+                      />
                       <div>
-                        <div className="checkout__payTitle">Credit / Debit Card</div>
-                        <div className="checkout__paySub">Visa, Master Card, Amex</div>
+                        <div className="checkout__payTitle">
+                          Credit / Debit Card
+                        </div>
+                        <div className="checkout__paySub">
+                          Visa, Master Card, Amex
+                        </div>
                       </div>
                     </div>
                     <img src={WalletIcon} alt="" aria-hidden="true" />
                   </div>
-                  
-                  {paymentMethod === 'card' && (
+
+                  {paymentMethod === "card" && (
                     <div className="checkout__payFields">
                       <label className="checkout__field">
                         <span>Card Details</span>
                         <div className="checkout__stripeContainer">
                           <div className="checkout__cardInputWrapper">
-                            <CardElement 
+                            <CardElement
                               onChange={handleCardElementChange}
                               className="checkout__cardElement"
                             />
                           </div>
-                          <div className="checkout__cardSecure">
-                          </div>
+                          <div className="checkout__cardSecure"></div>
                         </div>
-                        {cardError && <div className="checkout__cardError">{cardError}</div>}
+                        {cardError && (
+                          <div className="checkout__cardError">{cardError}</div>
+                        )}
                       </label>
                     </div>
                   )}
@@ -511,37 +545,41 @@ const Checkout = () => {
             <aside className="checkout__aside">
               <div className="checkout__summary">
                 <h3>Order Summary</h3>
-                
+
                 {cartItems.map((item) => (
                   <div key={item.id} className="checkout__summaryItem">
                     <div className="checkout__thumb">
                       {item.product?.featured_image ? (
-                        <img 
-                          src={item.product.featured_image} 
+                        <img
+                          src={item.product.featured_image}
                           alt={item.product.name}
                           className="checkout__thumbImage"
                           onError={(e) => {
                             e.target.onerror = null;
-                            e.target.src = '';
-                            e.target.parentElement.innerHTML = '<div class="checkout__thumbPlaceholder">' + 
-                              (item.product?.name?.charAt(0) || 'P') + '</div>';
+                            e.target.src = "";
+                            e.target.parentElement.innerHTML =
+                              '<div class="checkout__thumbPlaceholder">' +
+                              (item.product?.name?.charAt(0) || "P") +
+                              "</div>";
                           }}
                         />
                       ) : item.product?.images?.[0] ? (
-                        <img 
-                          src={item.product.images[0]} 
+                        <img
+                          src={item.product.images[0]}
                           alt={item.product.name}
                           className="checkout__thumbImage"
                           onError={(e) => {
                             e.target.onerror = null;
-                            e.target.src = '';
-                            e.target.parentElement.innerHTML = '<div class="checkout__thumbPlaceholder">' + 
-                              (item.product?.name?.charAt(0) || 'P') + '</div>';
+                            e.target.src = "";
+                            e.target.parentElement.innerHTML =
+                              '<div class="checkout__thumbPlaceholder">' +
+                              (item.product?.name?.charAt(0) || "P") +
+                              "</div>";
                           }}
                         />
                       ) : (
                         <div className="checkout__thumbPlaceholder">
-                          {item.product?.name?.charAt(0) || 'P'}
+                          {item.product?.name?.charAt(0) || "P"}
                         </div>
                       )}
                     </div>
@@ -550,17 +588,20 @@ const Checkout = () => {
                         {item.product?.name || "Product"}
                       </div>
                       <div className="checkout__summarySub">
-                        {item.product?.asset_type || "Digital Asset"} • Version 1.0
+                        {item.product?.asset_type || "Digital Asset"} • Version
+                        1.0
                       </div>
                       <div className="checkout__tags">
-                        {item.product?.technologies?.slice(0, 2).map((tech, index) => (
-                          <span 
-                            key={index}
-                            className={`checkout__tag checkout__tag--${getToneColor(tech)}`}
-                          >
-                            {tech}
-                          </span>
-                        ))}
+                        {item.product?.technologies
+                          ?.slice(0, 2)
+                          .map((tech, index) => (
+                            <span
+                              key={index}
+                              className={`checkout__tag checkout__tag--${getToneColor(tech)}`}
+                            >
+                              {tech}
+                            </span>
+                          ))}
                       </div>
                     </div>
                   </div>
@@ -592,13 +633,17 @@ const Checkout = () => {
                   </span>
                 </div>
 
-                <button 
-                  className="checkout__cta" 
+                <button
+                  className="checkout__cta"
                   type="button"
                   onClick={handleCompletePurchase}
-                  disabled={processingPayment || cartItems.length === 0 || (paymentMethod === 'card' && !cardComplete)}
+                  disabled={
+                    processingPayment ||
+                    cartItems.length === 0 ||
+                    (paymentMethod === "card" && !cardComplete)
+                  }
                 >
-                  {processingPayment ? "Processing..." : "Complete Purchase"} 
+                  {processingPayment ? "Processing..." : "Complete Purchase"}
                   <span aria-hidden="true">›</span>
                 </button>
 

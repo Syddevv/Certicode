@@ -44,6 +44,11 @@ const Marketplace = () => {
   const [selectedPriceRange, setSelectedPriceRange] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState({
+    techStack: false,
+    priceRange: false,
+    ratings: true,
+  });
   const [pagination, setPagination] = useState({
     current_page: 1,
     last_page: 1,
@@ -268,6 +273,13 @@ const Marketplace = () => {
     fetchProducts(searchTerm, assetType, 1, value);
   };
 
+  const toggleFilterGroup = (group) => {
+    setExpandedGroups((prev) => ({
+      ...prev,
+      [group]: !prev[group],
+    }));
+  };
+
   const renderPagination = () => {
     const { current_page, last_page } = pagination;
     const pages = [];
@@ -402,46 +414,109 @@ const Marketplace = () => {
               </div>
 
               <div className="marketplace__filterGroup">
-                <h4>Tech Stack</h4>
-                {availableTechs.map((tech) => (
-                  <label key={tech} className="marketplace__check">
-                    <input
-                      type="checkbox"
-                      checked={selectedTechs.includes(tech)}
-                      onChange={() => handleTechChange(tech)}
-                    />
-                    <span>{tech}</span>
-                  </label>
-                ))}
-              </div>
-
-              <div className="marketplace__filterGroup">
-                <h4>Price Range</h4>
-                {["Under $500", "$500 - $2,000", "$2,000 - $5,000"].map(
-                  (range) => (
-                    <label key={range} className="marketplace__check">
-                      <input
-                        type="checkbox"
-                        checked={selectedPriceRange === range}
-                        onChange={() => handlePriceChange(range)}
-                      />
-                      <span>{range}</span>
-                    </label>
-                  ),
+                <div className="marketplace__filterGroupHeader">
+                  <h4>Tech Stack</h4>
+                  <button
+                    type="button"
+                    className={`marketplace__filterToggle ${expandedGroups.techStack ? "marketplace__filterToggle--expanded" : ""}`}
+                    onClick={() => toggleFilterGroup("techStack")}
+                    aria-expanded={expandedGroups.techStack}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </button>
+                </div>
+                {expandedGroups.techStack && (
+                  <div className="marketplace__filterGroupContent">
+                    {availableTechs.map((tech) => (
+                      <label key={tech} className="marketplace__check">
+                        <input
+                          type="checkbox"
+                          checked={selectedTechs.includes(tech)}
+                          onChange={() => handleTechChange(tech)}
+                        />
+                        <span>{tech}</span>
+                      </label>
+                    ))}
+                  </div>
                 )}
               </div>
 
               <div className="marketplace__filterGroup">
-                <h4>Ratings</h4>
-                {["4.5 & Up", "4.0 & Up"].map((item) => (
-                  <label key={item} className="marketplace__check">
-                    <input type="checkbox" />
-                    <span>
-                      {item}
-                      <span className="marketplace__stars">★★★★★</span>
-                    </span>
-                  </label>
-                ))}
+                <div className="marketplace__filterGroupHeader">
+                  <h4>Price Range</h4>
+                  <button
+                    type="button"
+                    className={`marketplace__filterToggle ${expandedGroups.priceRange ? "marketplace__filterToggle--expanded" : ""}`}
+                    onClick={() => toggleFilterGroup("priceRange")}
+                    aria-expanded={expandedGroups.priceRange}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </button>
+                </div>
+                {expandedGroups.priceRange && (
+                  <div className="marketplace__filterGroupContent">
+                    {["Under $500", "$500 - $2,000", "$2,000 - $5,000"].map(
+                      (range) => (
+                        <label key={range} className="marketplace__check">
+                          <input
+                            type="checkbox"
+                            checked={selectedPriceRange === range}
+                            onChange={() => handlePriceChange(range)}
+                          />
+                          <span>{range}</span>
+                        </label>
+                      ),
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="marketplace__filterGroup">
+                <div className="marketplace__filterGroupHeader">
+                  <h4>Ratings</h4>
+                  <button
+                    type="button"
+                    className={`marketplace__filterToggle ${expandedGroups.ratings ? "marketplace__filterToggle--expanded" : ""}`}
+                    onClick={() => toggleFilterGroup("ratings")}
+                    aria-expanded={expandedGroups.ratings}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M6 9l6 6 6-6" />
+                    </svg>
+                  </button>
+                </div>
+                {expandedGroups.ratings && (
+                  <div className="marketplace__filterGroupContent">
+                    {["4.5 & Up", "4.0 & Up"].map((item) => (
+                      <label key={item} className="marketplace__check">
+                        <input type="checkbox" />
+                        <span>
+                          {item}
+                          <span className="marketplace__stars">★★★★★</span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
               </div>
             </aside>
 

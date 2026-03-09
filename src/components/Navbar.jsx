@@ -10,6 +10,10 @@ import { resolveAvatarUrl } from "../utils/avatar";
 const Navbar = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [viewportWidth, setViewportWidth] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth : 1440,
+  );
   const location = useLocation();
   const isLanding = location.pathname === "/";
 
@@ -28,6 +32,50 @@ const Navbar = () => {
   useEffect(() => {
     fetchUserData();
   }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setViewportWidth(window.innerWidth);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname, location.hash]);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) {
+      document.body.style.overflow = "";
+      return undefined;
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    const handleResize = () => {
+      const nextWidth = window.innerWidth;
+      setViewportWidth(nextWidth);
+      if (nextWidth > 1100) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [isMobileMenuOpen]);
 
   const fetchUserData = async () => {
     try {
@@ -51,102 +99,218 @@ const Navbar = () => {
 
   // Check if user is logged in
   const isLoggedIn = !!user;
+  const isCompactNav = viewportWidth <= 1100;
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
 
   return (
-    <header className="nav">
+    <header className={`nav${isCompactNav ? " nav--compact" : ""}`}>
       <div className="nav__inner">
         <div className="nav__brand">
           <img src={CerticodeLogo} alt="certicode" className="certicode-logo" />
         </div>
 
-        <nav className="nav__links">
-          <Link
-            className={`nav__link${isActiveHash("#hero") ? " is-active" : ""}`}
-            to="/#hero"
-            onClick={() => handleSectionClick("hero")}
-          >
-            Home
-          </Link>
-          <NavLink
-            className={({ isActive }) =>
-              `nav__link${isActive ? " is-active" : ""}`
-            }
-            to="/marketplace"
-          >
-            Marketplace
-          </NavLink>
-          <Link
-            className={`nav__link${
-              isActiveHash("#categories") ? " is-active" : ""
-            }`}
-            to="/#categories"
-            onClick={() => handleSectionClick("categories")}
-          >
-            Categories
-          </Link>
-          <Link
-            className={`nav__link${
-              isActiveHash("#process") ? " is-active" : ""
-            }`}
-            to="/#process"
-            onClick={() => handleSectionClick("process")}
-          >
-            How It Works
-          </Link>
-          <Link
-            className={`nav__link${isActiveHash("#faq") ? " is-active" : ""}`}
-            to="/#faq"
-            onClick={() => handleSectionClick("faq")}
-          >
-            FAQ
-          </Link>
-        </nav>
+        {!isCompactNav ? (
+          <nav className="nav__links">
+            <Link
+              className={`nav__link${isActiveHash("#hero") ? " is-active" : ""}`}
+              to="/#hero"
+              onClick={() => handleSectionClick("hero")}
+            >
+              Home
+            </Link>
+            <NavLink
+              className={({ isActive }) =>
+                `nav__link${isActive ? " is-active" : ""}`
+              }
+              to="/marketplace"
+            >
+              Marketplace
+            </NavLink>
+            <Link
+              className={`nav__link${
+                isActiveHash("#categories") ? " is-active" : ""
+              }`}
+              to="/#categories"
+              onClick={() => handleSectionClick("categories")}
+            >
+              Categories
+            </Link>
+            <Link
+              className={`nav__link${
+                isActiveHash("#process") ? " is-active" : ""
+              }`}
+              to="/#process"
+              onClick={() => handleSectionClick("process")}
+            >
+              How It Works
+            </Link>
+            <Link
+              className={`nav__link${isActiveHash("#faq") ? " is-active" : ""}`}
+              to="/#faq"
+              onClick={() => handleSectionClick("faq")}
+            >
+              FAQ
+            </Link>
+          </nav>
+        ) : null}
 
-        <div className="nav__actions">
-          {isLoggedIn && (
-            <button className="iconBtn" aria-label="Cart" type="button">
-              <Link to="/cart">
-                <img className="iconImg" src={CartIcon} alt="" />
-              </Link>
-            </button>
-          )}
+        {!isCompactNav ? (
+          <div className="nav__actions nav__actions--desktop">
+            {isLoggedIn && (
+              <button className="iconBtn" aria-label="Cart" type="button">
+                <Link to="/cart">
+                  <img className="iconImg" src={CartIcon} alt="" />
+                </Link>
+              </button>
+            )}
 
-          {isLoggedIn && !loading && (
-            <button className="iconBtn" aria-label="Profile" type="button">
-              <Link to="/buyer-dashboard">
-                <img 
-                  className="iconImg nav__avatar" 
-                  src={resolveAvatarUrl(user?.avatar_url) || AvatarImg} 
-                  alt={user?.name || "User"}
-                  style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    objectFit: 'cover',
-                    border: '2px solid #e8e8e8'
-                  }}
-                  onError={(e) => {
-                    console.error('Navbar avatar failed to load:', user?.avatar_url);
-                    e.target.src = AvatarImg;
-                    e.target.onerror = null;
-                  }}
-                />
-              </Link>
-            </button>
-          )}
+            {isLoggedIn && !loading && (
+              <button className="iconBtn" aria-label="Profile" type="button">
+                <Link to="/buyer-dashboard">
+                  <img 
+                    className="iconImg nav__avatar" 
+                    src={resolveAvatarUrl(user?.avatar_url) || AvatarImg} 
+                    alt={user?.name || "User"}
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '2px solid #e8e8e8'
+                    }}
+                    onError={(e) => {
+                      console.error('Navbar avatar failed to load:', user?.avatar_url);
+                      e.target.src = AvatarImg;
+                      e.target.onerror = null;
+                    }}
+                  />
+                </Link>
+              </button>
+            )}
 
-          {!isLoggedIn && !loading && (
-            <>
-              <Link className="btn btn--ghost" to="/login">
-                Login
-              </Link>
-              <Link className="btn btn--light" to="/register">
-                Sign Up
-              </Link>
-            </>
-          )}
-        </div>
+            {!isLoggedIn && !loading && (
+              <>
+                <Link className="btn btn--ghost" to="/login">
+                  Login
+                </Link>
+                <Link className="btn btn--light" to="/register">
+                  Sign Up
+                </Link>
+              </>
+            )}
+          </div>
+        ) : null}
+
+        {isCompactNav ? (
+          <button
+            className={`nav__menuToggle${isMobileMenuOpen ? " is-open" : ""}`}
+            type="button"
+            aria-label="Toggle navigation menu"
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-navigation"
+            onClick={() => setIsMobileMenuOpen((open) => !open)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        ) : null}
       </div>
+
+      {isCompactNav && isMobileMenuOpen ? (
+        <div className="nav__mobilePanel" id="mobile-navigation">
+          <nav className="nav__mobileLinks" aria-label="Mobile navigation">
+            <Link
+              className={`nav__mobileLink${isActiveHash("#hero") ? " is-active" : ""}`}
+              to="/#hero"
+              onClick={() => {
+                handleSectionClick("hero");
+                closeMobileMenu();
+              }}
+            >
+              Home
+            </Link>
+            <NavLink
+              className={({ isActive }) =>
+                `nav__mobileLink${isActive ? " is-active" : ""}`
+              }
+              to="/marketplace"
+              onClick={closeMobileMenu}
+            >
+              Marketplace
+            </NavLink>
+            <Link
+              className={`nav__mobileLink${
+                isActiveHash("#categories") ? " is-active" : ""
+              }`}
+              to="/#categories"
+              onClick={() => {
+                handleSectionClick("categories");
+                closeMobileMenu();
+              }}
+            >
+              Categories
+            </Link>
+            <Link
+              className={`nav__mobileLink${
+                isActiveHash("#process") ? " is-active" : ""
+              }`}
+              to="/#process"
+              onClick={() => {
+                handleSectionClick("process");
+                closeMobileMenu();
+              }}
+            >
+              How It Works
+            </Link>
+            <Link
+              className={`nav__mobileLink${isActiveHash("#faq") ? " is-active" : ""}`}
+              to="/#faq"
+              onClick={() => {
+                handleSectionClick("faq");
+                closeMobileMenu();
+              }}
+            >
+              FAQ
+            </Link>
+          </nav>
+
+          <div className="nav__mobileActions">
+            {isLoggedIn && !loading ? (
+              <>
+                <Link className="nav__mobileAction" to="/cart" onClick={closeMobileMenu}>
+                  Cart
+                </Link>
+                <Link
+                  className="nav__mobileAction nav__mobileAction--primary"
+                  to="/buyer-dashboard"
+                  onClick={closeMobileMenu}
+                >
+                  Dashboard
+                </Link>
+              </>
+            ) : null}
+
+            {!isLoggedIn && !loading ? (
+              <>
+                <Link className="nav__mobileAction" to="/login" onClick={closeMobileMenu}>
+                  Login
+                </Link>
+                <Link
+                  className="nav__mobileAction nav__mobileAction--primary"
+                  to="/register"
+                  onClick={closeMobileMenu}
+                >
+                  Sign Up
+                </Link>
+              </>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </header>
   );
 };
