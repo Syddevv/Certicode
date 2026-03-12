@@ -5,6 +5,7 @@ import Footer from "../../components/Footer";
 import { Link } from "react-router-dom";
 import ViewProduct from "../../assets/ViewProduct.png";
 import { api } from "../../services/api";
+import { ReviewAPI } from "../../services/ReviewAPI";
 import WebsiteAppsIcon from "../../assets/website-apps.png";
 import MobileAppsIcon from "../../assets/mobile-apps.png";
 import UiUxDesignIcon from "../../assets/ui-ux-design.png";
@@ -42,6 +43,7 @@ const Marketplace = () => {
   const [selectedTechs, setSelectedTechs] = useState([]);
   const [availableTechs, setAvailableTechs] = useState([]);
   const [selectedPriceRange, setSelectedPriceRange] = useState("");
+  const [selectedRatingThreshold, setSelectedRatingThreshold] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState({
@@ -88,7 +90,7 @@ const Marketplace = () => {
 
   useEffect(() => {
     applyFilters();
-  }, [selectedTechs, selectedPriceRange, assets, activeTab]);
+  }, [selectedTechs, selectedPriceRange, selectedRatingThreshold, assets, activeTab]);
 
   const fetchAllTechs = async () => {
     try {
@@ -116,41 +118,61 @@ const Marketplace = () => {
     try {
       setLoading(true);
       const result = await api.getProducts(search, assetType, page, sortOrder);
-      const formattedAssets = result.data.map((product) => {
-        const assetType = product.asset_type || "Uncategorized";
-        let mappedAssetType;
+      const formattedAssets = await Promise.all(
+        result.data.map(async (product) => {
+          const assetType = product.asset_type || "Uncategorized";
+          let mappedAssetType;
 
-        if (
-          assetType === "Mobile App" ||
-          assetType === "Website" ||
-          assetType === "UI Kit"
-        ) {
-          mappedAssetType = assetType;
-        } else {
-          mappedAssetType = "Custom Projects";
-        }
+          if (
+            assetType === "Mobile App" ||
+            assetType === "Website" ||
+            assetType === "UI Kit"
+          ) {
+            mappedAssetType = assetType;
+          } else {
+            mappedAssetType = "Custom Projects";
+          }
 
-        return {
-          id: product.id,
-          title: product.name,
-          description: product.description,
-          price: parseFloat(product.price),
-          originalPrice: `$${product.price}`,
-          path: `/marketplace/${product.id}`,
-          featured_image: product.featured_image,
-          asset_type: mappedAssetType,
-          tags: product.technologies
-            ? product.technologies.map((tech) => ({
-                label: tech,
-                tone: getToneColor(tech),
-              }))
-            : [],
-          technologies: product.technologies || [],
-          rating: product.rating || "4.8",
-          image_urls: product.images || [],
-          features: product.features || [],
-        };
-      });
+          const apiRating = Number.parseFloat(
+            product.average_rating ?? product.rating ?? 0,
+          );
+          let resolvedRating = Number.isFinite(apiRating) ? apiRating : 0;
+
+          if (resolvedRating <= 0 && product.id) {
+            try {
+              const stats = await ReviewAPI.getReviewStats(product.id);
+              const statsRating = Number.parseFloat(stats?.averageRating ?? 0);
+              resolvedRating = Number.isFinite(statsRating) ? statsRating : 0;
+            } catch (reviewError) {
+              console.error(
+                `Error fetching review stats for product ${product.id}:`,
+                reviewError,
+              );
+            }
+          }
+
+          return {
+            id: product.id,
+            title: product.name,
+            description: product.description,
+            price: parseFloat(product.price),
+            originalPrice: `$${product.price}`,
+            path: `/marketplace/${product.id}`,
+            featured_image: product.featured_image,
+            asset_type: mappedAssetType,
+            tags: product.technologies
+              ? product.technologies.map((tech) => ({
+                  label: tech,
+                  tone: getToneColor(tech),
+                }))
+              : [],
+            technologies: product.technologies || [],
+            rating: resolvedRating,
+            image_urls: product.images || [],
+            features: product.features || [],
+          };
+        }),
+      );
 
       setAssets(formattedAssets);
       setFilteredAssets(formattedAssets);
@@ -207,6 +229,13 @@ const Marketplace = () => {
       });
     }
 
+    if (selectedRatingThreshold) {
+      const minimumRating = parseFloat(selectedRatingThreshold);
+      filtered = filtered.filter(
+        (asset) => parseFloat(asset.rating || 0) >= minimumRating,
+      );
+    }
+
     setFilteredAssets(filtered);
   };
 
@@ -243,6 +272,12 @@ const Marketplace = () => {
 
   const handlePriceChange = (range) => {
     setSelectedPriceRange(range === selectedPriceRange ? "" : range);
+  };
+
+  const handleRatingChange = (threshold) => {
+    setSelectedRatingThreshold(
+      threshold === selectedRatingThreshold ? "" : threshold,
+    );
   };
 
   const handlePageChange = (page) => {
@@ -506,11 +541,18 @@ const Marketplace = () => {
                 </div>
                 {expandedGroups.ratings && (
                   <div className="marketplace__filterGroupContent">
-                    {["4.5 & Up", "4.0 & Up"].map((item) => (
-                      <label key={item} className="marketplace__check">
-                        <input type="checkbox" />
+                    {[
+                      { label: "4.5 & Up", value: "4.5" },
+                      { label: "4.0 & Up", value: "4.0" },
+                    ].map((item) => (
+                      <label key={item.value} className="marketplace__check">
+                        <input
+                          type="checkbox"
+                          checked={selectedRatingThreshold === item.value}
+                          onChange={() => handleRatingChange(item.value)}
+                        />
                         <span>
-                          {item}
+                          {item.label}
                           <span className="marketplace__stars">★★★★★</span>
                         </span>
                       </label>
