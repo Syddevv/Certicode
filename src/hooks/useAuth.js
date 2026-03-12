@@ -1,30 +1,46 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../services/api';
+import { ProfileAPI } from '../services/ProfileAPI';
 
 export const useAuth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkAuth = async () => {
+    let isActive = true;
+
+    const syncAuth = async () => {
       const token = localStorage.getItem('auth_token');
       if (!token) return;
 
       try {
-        // Try to validate token on app load
-        const isValid = await api.validateToken();
-        if (!isValid) {
-          api.clearAuthData();
-          navigate('/login?error=Session expired');
+        const currentUser = await ProfileAPI.getCurrentUser();
+
+        if (!isActive) return;
+
+        if (currentUser?.id !== undefined) {
+          localStorage.setItem('user_id', String(currentUser.id));
         }
+        localStorage.setItem('user_name', currentUser?.name || '');
+        localStorage.setItem('user_role', currentUser?.role || '');
       } catch (error) {
         console.error('Auth check failed:', error);
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_id');
+        localStorage.removeItem('user_role');
+        localStorage.removeItem('user_name');
+
+        if (!isActive) return;
+
+        navigate('/login?error=Session expired', { replace: true });
       }
     };
 
-    checkAuth();
-    const interval = setInterval(checkAuth, 5 * 60 * 1000);
+    syncAuth();
+    const interval = setInterval(syncAuth, 5 * 60 * 1000);
     
-    return () => clearInterval(interval);
+    return () => {
+      isActive = false;
+      clearInterval(interval);
+    };
   }, [navigate]);
 };

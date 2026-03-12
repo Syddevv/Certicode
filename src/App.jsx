@@ -56,6 +56,7 @@ import AdminAddVoucher from "./pages/admin/AdminAddVoucher";
 // Components
 import ProtectedRoute from "./components/ProtectedRoute";
 import ToastContainer from "./components/ToastContainer";
+import { useAuth } from "./hooks/useAuth";
 
 import AdminAddNewAsset from "./pages/admin/AdminAddNewAsset";
 
@@ -75,6 +76,8 @@ function App() {
 }
 
 function AppContent() {
+  useAuth();
+
   return (
     <Routes>
       {/* Auth */}
@@ -322,7 +325,14 @@ function AppContent() {
           </ProtectedRoute>
         }
       />
-      <Route path="/add-asset" element={<AdminAddNewAsset />} />
+      <Route
+        path="/add-asset"
+        element={
+          <ProtectedRoute allowedRoles={["Admin"]}>
+            <AdminAddNewAsset />
+          </ProtectedRoute>
+        }
+      />
       {/* 404 */}
       <Route path="*" element={<NotFound />} />
     </Routes>
