@@ -100,7 +100,7 @@ const LandingPage = () => {
   const [allReviews, setAllReviews] = useState([]);
   const [currentReviewPage, setCurrentReviewPage] = useState(0);
   const [reviewsLoading, setReviewsLoading] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [sessionRole, setSessionRole] = useState("");
   const searchRef = useRef(null);
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
@@ -108,7 +108,8 @@ const LandingPage = () => {
   useEffect(() => {
     const updateLoginStatus = () => {
       const token = localStorage.getItem("auth_token");
-      setIsLoggedIn(!!token);
+      const nextRole = token ? localStorage.getItem("user_role") || "" : "";
+      setSessionRole(nextRole);
     };
 
     updateLoginStatus();
@@ -488,6 +489,7 @@ const LandingPage = () => {
   const isCompactLayout = viewportWidth <= 1100;
   const isMobileLayout = viewportWidth <= 820;
   const isTinyLayout = viewportWidth <= 479;
+  const isCustomerLoggedIn = sessionRole.trim().toLowerCase() === "customer";
 
   return (
     <div
@@ -839,7 +841,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {!isLoggedIn && (
+      {!isCustomerLoggedIn && (
         <section className="cta">
           <div className="container cta__inner">
             <div className="ctaCard">

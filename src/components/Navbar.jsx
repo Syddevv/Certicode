@@ -16,6 +16,10 @@ const Navbar = () => {
   );
   const location = useLocation();
   const isLanding = location.pathname === "/";
+  const normalizedUserRole = String(user?.role || "").trim().toLowerCase();
+  const isAdminSession = normalizedUserRole === "admin";
+  const isCustomerSession = !!user && normalizedUserRole === "customer";
+  const profileDestination = isAdminSession ? "/dashboard" : "/buyer-dashboard";
 
   const isActiveHash = (hash) =>
     isLanding &&
@@ -31,6 +35,20 @@ const Navbar = () => {
 
   useEffect(() => {
     fetchUserData();
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const syncNavbarSession = () => {
+      fetchUserData();
+    };
+
+    window.addEventListener("focus", syncNavbarSession);
+    window.addEventListener("storage", syncNavbarSession);
+
+    return () => {
+      window.removeEventListener("focus", syncNavbarSession);
+      window.removeEventListener("storage", syncNavbarSession);
+    };
   }, []);
 
   useEffect(() => {
@@ -83,6 +101,7 @@ const Navbar = () => {
       const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
       
       if (!token) {
+        setUser(null);
         setLoading(false);
         return;
       }
@@ -91,6 +110,7 @@ const Navbar = () => {
       setUser(userData);
     } catch (error) {
       console.error("Failed to fetch user data for navbar:", error);
+      setUser(null);
       // User might not be logged in or token expired
     } finally {
       setLoading(false);
@@ -159,9 +179,15 @@ const Navbar = () => {
 
         {!isCompactNav ? (
           <div className="nav__actions nav__actions--desktop">
-            {isLoggedIn && (
+            {isCustomerSession && (
               <Link className="iconBtn nav__actionLink" aria-label="Cart" to="/cart">
                 <img className="iconImg" src={CartIcon} alt="" />
+              </Link>
+            )}
+
+            {isAdminSession && !loading && (
+              <Link className="btn btn--light" to="/dashboard">
+                Admin Panel
               </Link>
             )}
 
@@ -169,7 +195,7 @@ const Navbar = () => {
               <Link
                 className="iconBtn nav__actionLink"
                 aria-label="Profile"
-                to="/buyer-dashboard"
+                to={profileDestination}
               >
                 <img
                   className="iconImg nav__avatar"
@@ -284,15 +310,17 @@ const Navbar = () => {
           <div className="nav__mobileActions">
             {isLoggedIn && !loading ? (
               <>
-                <Link className="nav__mobileAction" to="/cart" onClick={closeMobileMenu}>
-                  Cart
-                </Link>
+                {isCustomerSession ? (
+                  <Link className="nav__mobileAction" to="/cart" onClick={closeMobileMenu}>
+                    Cart
+                  </Link>
+                ) : null}
                 <Link
                   className="nav__mobileAction nav__mobileAction--primary"
-                  to="/buyer-dashboard"
+                  to={profileDestination}
                   onClick={closeMobileMenu}
                 >
-                  Dashboard
+                  {isAdminSession ? "Admin Panel" : "Dashboard"}
                 </Link>
               </>
             ) : null}
