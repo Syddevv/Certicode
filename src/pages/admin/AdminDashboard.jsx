@@ -160,7 +160,7 @@ const AdminDashboard = () => {
         <Sidebar activePage="dashboard" />
 
         <main className="main">
-          <AdminTopbar showHamburger showSearch={false}>
+          <AdminTopbar showSearch={false}>
             <Link
               to="/admin-notification"
               className="notification-link"

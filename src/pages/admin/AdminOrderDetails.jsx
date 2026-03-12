@@ -90,7 +90,8 @@ const normalizeTags = (tags) => {
     return tags
       .map((tag) => {
         if (typeof tag === "string") return tag;
-        if (tag && typeof tag === "object") return tag.name || tag.label || tag.value;
+        if (tag && typeof tag === "object")
+          return tag.name || tag.label || tag.value;
         return "";
       })
       .filter(Boolean);
@@ -114,12 +115,19 @@ const formatAddress = (address) => {
   }
 
   const lineOne = [address.line1, address.line2].filter(Boolean).join(", ");
-  const lineTwo = [address.city, address.state, address.postal_code || address.zip_code]
+  const lineTwo = [
+    address.city,
+    address.state,
+    address.postal_code || address.zip_code,
+  ]
     .filter(Boolean)
     .join(", ");
   const lineThree = address.country;
 
-  return [lineOne, lineTwo, lineThree].filter(Boolean).join("\n") || "No billing address available";
+  return (
+    [lineOne, lineTwo, lineThree].filter(Boolean).join("\n") ||
+    "No billing address available"
+  );
 };
 
 const pickTimelineIcon = (title, index) => {
@@ -127,9 +135,15 @@ const pickTimelineIcon = (title, index) => {
   if (key.includes("payment")) return pricingIcon;
   if (key.includes("file")) return filesIcon;
   if (key.includes("license")) return licenseGenIcon;
-  if (key.includes("complete") || key.includes("final")) return transactionCompIcon;
+  if (key.includes("complete") || key.includes("final"))
+    return transactionCompIcon;
 
-  const fallback = [pricingIcon, filesIcon, licenseGenIcon, transactionCompIcon];
+  const fallback = [
+    pricingIcon,
+    filesIcon,
+    licenseGenIcon,
+    transactionCompIcon,
+  ];
   return fallback[index] || pricingIcon;
 };
 
@@ -171,12 +185,27 @@ const buildFallbackTimeline = (order, isCompleted) => {
 const normalizeOrderPayload = (data) => {
   const payload = data?.data ?? data ?? {};
   const order = payload.order ?? payload.order_details ?? payload;
-  const customer = payload.customer ?? order?.customer ?? payload.user ?? order?.user ?? {};
+  const customer =
+    payload.customer ?? order?.customer ?? payload.user ?? order?.user ?? {};
   const asset = payload.asset ?? order?.asset ?? order?.product ?? {};
-  const payment = payload.payment_method ?? payload.payment ?? order?.payment_method ?? order?.payment ?? {};
-  const security = payload.security_log ?? order?.security_log ?? payload.security ?? order?.security ?? {};
+  const payment =
+    payload.payment_method ??
+    payload.payment ??
+    order?.payment_method ??
+    order?.payment ??
+    {};
+  const security =
+    payload.security_log ??
+    order?.security_log ??
+    payload.security ??
+    order?.security ??
+    {};
   const transactionHistory =
-    payload.transaction_history ?? order?.transaction_history ?? payload.timeline ?? order?.timeline ?? [];
+    payload.transaction_history ??
+    order?.transaction_history ??
+    payload.timeline ??
+    order?.timeline ??
+    [];
 
   return {
     order: order || {},
@@ -184,7 +213,9 @@ const normalizeOrderPayload = (data) => {
     asset: asset || {},
     payment: payment || {},
     security: security || {},
-    transactionHistory: Array.isArray(transactionHistory) ? transactionHistory : [],
+    transactionHistory: Array.isArray(transactionHistory)
+      ? transactionHistory
+      : [],
     invoiceUrl:
       payload.invoice_url ||
       order?.invoice_url ||
@@ -251,13 +282,16 @@ const AdminOrderDetails = () => {
 
       const hasCoreCustomerDetails = Boolean(
         details?.customer?.email &&
-          (details?.customer?.billing_address || details?.customer?.address || details?.customer?.company),
+        (details?.customer?.billing_address ||
+          details?.customer?.address ||
+          details?.customer?.company),
       );
 
       if (hasCoreCustomerDetails) return;
 
       try {
-        const customerResponse = await AdminCustomersAPI.getCustomerDetails(customerId);
+        const customerResponse =
+          await AdminCustomersAPI.getCustomerDetails(customerId);
         const payload = customerResponse?.data ?? customerResponse ?? {};
         const normalizedCustomer =
           payload.customer ?? payload.user ?? payload.data ?? payload ?? {};
@@ -273,12 +307,19 @@ const AdminOrderDetails = () => {
           };
         });
       } catch (customerError) {
-        console.error("Failed to load customer details for order:", customerError);
+        console.error(
+          "Failed to load customer details for order:",
+          customerError,
+        );
       }
     };
 
     fetchCustomerDetails();
-  }, [details?.customer?.id, details?.customer?.customer_id, details?.order?.customer_id]);
+  }, [
+    details?.customer?.id,
+    details?.customer?.customer_id,
+    details?.order?.customer_id,
+  ]);
 
   useEffect(() => {
     setPlatformPreferences(loadAdminPlatformPreferences());
@@ -309,9 +350,7 @@ const AdminOrderDetails = () => {
       details?.order?.email ||
       "";
     const customerName =
-      details?.customer?.name ||
-      details?.order?.customer_name ||
-      "";
+      details?.customer?.name || details?.order?.customer_name || "";
 
     const query = String(customerEmail || customerName).trim();
     if (!query) return;
@@ -388,29 +427,52 @@ const AdminOrderDetails = () => {
   const viewModel = useMemo(() => {
     if (!details) return null;
 
-    const { order, customer, asset, payment, security, transactionHistory, invoiceUrl } = details;
+    const {
+      order,
+      customer,
+      asset,
+      payment,
+      security,
+      transactionHistory,
+      invoiceUrl,
+    } = details;
 
-    const statusRaw = String(order.status || order.payment_status || "pending").toLowerCase();
+    const statusRaw = String(
+      order.status || order.payment_status || "pending",
+    ).toLowerCase();
     const isCompleted = COMPLETED_STATUSES.includes(statusRaw);
 
     const assetTags = normalizeTags(
-      asset.tags || asset.tech_stack || order.tech_stack || order.asset_tags || order.tags,
+      asset.tags ||
+        asset.tech_stack ||
+        order.tech_stack ||
+        order.asset_tags ||
+        order.tags,
     );
 
     const resolvedTimeline = transactionHistory.length
       ? transactionHistory.map((entry, index) => {
-          const title = entry.title || entry.event || entry.name || `Step ${index + 1}`;
-          const timestamp = entry.timestamp || entry.created_at || entry.date || entry.time;
+          const title =
+            entry.title || entry.event || entry.name || `Step ${index + 1}`;
+          const timestamp =
+            entry.timestamp || entry.created_at || entry.date || entry.time;
           const eventStatus = String(entry.status || "").toLowerCase();
           const completed =
             entry.completed === true ||
-            ["completed", "done", "success", "paid", "succeeded"].includes(eventStatus);
+            ["completed", "done", "success", "paid", "succeeded"].includes(
+              eventStatus,
+            );
 
           return {
             title,
             icon: pickTimelineIcon(title, index),
-            color: completed && index === transactionHistory.length - 1 ? "green" : "orange",
-            timeLabel: entry.subtitle || formatDateTime(timestamp, completed ? "Completed" : "Pending"),
+            color:
+              completed && index === transactionHistory.length - 1
+                ? "green"
+                : "orange",
+            timeLabel:
+              entry.subtitle ||
+              formatDateTime(timestamp, completed ? "Completed" : "Pending"),
           };
         })
       : buildFallbackTimeline(order, isCompleted);
@@ -430,12 +492,22 @@ const AdminOrderDetails = () => {
       .join(", ");
 
     const paymentBrand =
-      payment.brand || payment.card_brand || order.card_brand || order.payment_card_brand || "VISA";
-    const paymentLast4 = payment.last4 || payment.card_last4 || order.card_last4 || order.payment_last4;
+      payment.brand ||
+      payment.card_brand ||
+      order.card_brand ||
+      order.payment_card_brand ||
+      "VISA";
+    const paymentLast4 =
+      payment.last4 ||
+      payment.card_last4 ||
+      order.card_last4 ||
+      order.payment_last4;
 
     return {
       orderId: order.order_number || order.order_id || `#ORD-${id}`,
-      placedLabel: formatPlacedLabel(order.purchased_at || order.paid_at || order.created_at),
+      placedLabel: formatPlacedLabel(
+        order.purchased_at || order.paid_at || order.created_at,
+      ),
       totalAmount: formatCurrency(
         order.total_amount || order.amount || order.grand_total,
         platformPreferences.currency,
@@ -443,7 +515,12 @@ const AdminOrderDetails = () => {
       statusLabel: statusRaw.toUpperCase(),
       statusClass: normalizeStatusClass(statusRaw),
       paymentVerified: isCompleted,
-      assetName: asset.name || order.asset_name || order.product_name || order.product?.name || "Digital Asset",
+      assetName:
+        asset.name ||
+        order.asset_name ||
+        order.product_name ||
+        order.product?.name ||
+        "Digital Asset",
       assetLicense:
         asset.license_name ||
         order.license_type ||
@@ -465,18 +542,27 @@ const AdminOrderDetails = () => {
         null,
       customerName: customer.name || order.customer_name || "Customer",
       customerSubline,
-      customerAvatar: resolveAvatarUrl(customer.avatar_url || customer.avatar || order.customer_avatar) || fallbackAvatar,
-      customerEmail: customer.email || order.customer_email || "No email available",
+      customerAvatar:
+        resolveAvatarUrl(
+          customer.avatar_url || customer.avatar || order.customer_avatar,
+        ) || fallbackAvatar,
+      customerEmail:
+        customer.email || order.customer_email || "No email available",
       customerAddress: formatAddress(customerAddress),
       taxId: customer.tax_id || customer.vat_id || order.tax_id || "N/A",
       paymentMethod: paymentLast4
         ? `${String(paymentBrand).toUpperCase()} Ending in ${paymentLast4}`
         : String(paymentBrand).toUpperCase(),
       paymentAuthCode:
-        payment.auth_code || payment.authorization_code || order.auth_code || order.payment_auth_code || "Not available",
+        payment.auth_code ||
+        payment.authorization_code ||
+        order.auth_code ||
+        order.payment_auth_code ||
+        "Not available",
       securityIp: security.ip_address || order.ip_address || "Not available",
       securityBrowser: security.browser || order.browser || "Not available",
-      securityHash: security.security_hash || order.security_hash || "Not available",
+      securityHash:
+        security.security_hash || order.security_hash || "Not available",
       timeline: resolvedTimeline,
       invoiceUrl,
       orderPk: order.id || id,
@@ -498,14 +584,18 @@ const AdminOrderDetails = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      showSuccessToast(`Invoice download started: invoice_${viewModel.orderPk}.pdf`);
+      showSuccessToast(
+        `Invoice download started: invoice_${viewModel.orderPk}.pdf`,
+      );
       return;
     }
 
     try {
       setDownloading(true);
       await AdminSalesAPI.downloadInvoice(viewModel.orderPk);
-      showSuccessToast(`Invoice download started: invoice_${viewModel.orderPk}.pdf`);
+      showSuccessToast(
+        `Invoice download started: invoice_${viewModel.orderPk}.pdf`,
+      );
     } catch (downloadError) {
       try {
         const filename = downloadInvoicePdf({
@@ -532,9 +622,7 @@ const AdminOrderDetails = () => {
         );
       } catch (fallbackError) {
         console.error("Admin invoice fallback export failed:", fallbackError);
-        showErrorToast(
-          downloadError.message || "Failed to download invoice.",
-        );
+        showErrorToast(downloadError.message || "Failed to download invoice.");
       }
     } finally {
       setDownloading(false);
@@ -549,15 +637,13 @@ const AdminOrderDetails = () => {
         <Sidebar activePage="sales" />
 
         <main className="main admin-order-main">
-          <AdminTopbar
-            showHamburger
-            showSearch={false}
-            className="admin-order-topbar"
-          >
+          <AdminTopbar showSearch={false} className="admin-order-topbar">
             {viewModel && (
               <span className="verified-badge">
                 <span className="dot-green">●</span>
-                {viewModel.paymentVerified ? "Payment Verified" : "Payment Pending"}
+                {viewModel.paymentVerified
+                  ? "Payment Verified"
+                  : "Payment Pending"}
               </span>
             )}
             <button
@@ -597,7 +683,9 @@ const AdminOrderDetails = () => {
                       <div className="text-right">
                         <span className="label-sm">TOTAL AMOUNT</span>
                         <h2 className="price-large">{viewModel.totalAmount}</h2>
-                        <span className={`status-pill ${viewModel.statusClass}`}>
+                        <span
+                          className={`status-pill ${viewModel.statusClass}`}
+                        >
                           ● {viewModel.statusLabel}
                         </span>
                       </div>
@@ -626,7 +714,9 @@ const AdminOrderDetails = () => {
                             </div>
                           )}
                         </div>
-                        <div className="asset-price">{viewModel.assetPrice}</div>
+                        <div className="asset-price">
+                          {viewModel.assetPrice}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -686,7 +776,9 @@ const AdminOrderDetails = () => {
                       <div>
                         <h4>{viewModel.customerName}</h4>
                         {viewModel.customerSubline && (
-                          <p className="role-text">{viewModel.customerSubline}</p>
+                          <p className="role-text">
+                            {viewModel.customerSubline}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -704,7 +796,9 @@ const AdminOrderDetails = () => {
 
                     <div className="info-group">
                       <label>BILLING ADDRESS</label>
-                      <p className="multiline-value">{viewModel.customerAddress}</p>
+                      <p className="multiline-value">
+                        {viewModel.customerAddress}
+                      </p>
                     </div>
 
                     <div className="info-group">
@@ -713,19 +807,28 @@ const AdminOrderDetails = () => {
                     </div>
 
                     {customerProfileId ? (
-                      <Link to={`/customers/${customerProfileId}`} className="btn-outline">
+                      <Link
+                        to={`/customers/${customerProfileId}`}
+                        className="btn-outline"
+                      >
                         View Customer Profile
                       </Link>
                     ) : (
                       <button className="btn-outline" type="button" disabled>
-                        {resolvingCustomerId ? "Locating Customer..." : "View Customer Profile"}
+                        {resolvingCustomerId
+                          ? "Locating Customer..."
+                          : "View Customer Profile"}
                       </button>
                     )}
                   </div>
 
                   <div className="refund-section">
                     <button className="btn-refund" type="button">
-                      <img src={refundArrowIcon} alt="" className="refund-icon" />
+                      <img
+                        src={refundArrowIcon}
+                        alt=""
+                        className="refund-icon"
+                      />
                       Refund Order
                     </button>
                   </div>
@@ -738,19 +841,27 @@ const AdminOrderDetails = () => {
                     </div>
                     <div className="log-row">
                       <span className="log-label">Browser</span>
-                      <span className="log-value">{viewModel.securityBrowser}</span>
+                      <span className="log-value">
+                        {viewModel.securityBrowser}
+                      </span>
                     </div>
                     <div className="log-row">
                       <span className="log-label">Security Hash</span>
-                      <span className="log-value">{viewModel.securityHash}</span>
+                      <span className="log-value">
+                        {viewModel.securityHash}
+                      </span>
                     </div>
                   </div>
                 </aside>
               </div>
             ) : loading ? (
-              <div className="card order-message-card">Loading order details...</div>
+              <div className="card order-message-card">
+                Loading order details...
+              </div>
             ) : error ? (
-              <div className="card order-message-card order-message-error">{error}</div>
+              <div className="card order-message-card order-message-error">
+                {error}
+              </div>
             ) : (
               <div className="card order-message-card order-message-error">
                 Unable to load order details.

@@ -32,7 +32,7 @@ const AdminVouchers = () => {
     active_vouchers: 0,
     total_uses: 0,
     expiring_soon: 0,
-    expired_vouchers: 0
+    expired_vouchers: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -42,9 +42,9 @@ const AdminVouchers = () => {
     current_page: 1,
     last_page: 1,
     per_page: 5,
-    total: 0
+    total: 0,
   });
-  
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -56,7 +56,7 @@ const AdminVouchers = () => {
   useEffect(() => {
     const incomingVoucher = location.state?.newVoucher;
     const updatedVoucher = location.state?.updatedVoucher;
-    
+
     if (incomingVoucher || updatedVoucher) {
       fetchVouchers();
       fetchStats();
@@ -71,8 +71,13 @@ const AdminVouchers = () => {
       if (selectedFilter === "Active") status = "active";
       else if (selectedFilter === "Expiring Soon") status = "expiring";
       else if (selectedFilter === "Used") status = "used";
-      
-      const response = await AdminPromoAPI.getVouchers(currentPage, 5, '', status);
+
+      const response = await AdminPromoAPI.getVouchers(
+        currentPage,
+        5,
+        "",
+        status,
+      );
       setVouchers(response.vouchers);
       setPagination(response.pagination);
     } catch (error) {
@@ -95,56 +100,60 @@ const AdminVouchers = () => {
   const formatDate = (dateString) => {
     if (!dateString) return "No expiry";
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const getStatusAndTone = (voucher) => {
     const now = new Date();
-    const validUntil = voucher.valid_until ? new Date(voucher.valid_until) : null;
+    const validUntil = voucher.valid_until
+      ? new Date(voucher.valid_until)
+      : null;
     const validFrom = voucher.valid_from ? new Date(voucher.valid_from) : null;
-    
+
     if (!voucher.is_active) {
       return { status: "INACTIVE", tone: "used" };
     }
-    
+
     if (validFrom && validFrom > now) {
       return { status: "SCHEDULED", tone: "expiring" };
     }
-    
+
     if (validUntil && validUntil < now) {
       return { status: "EXPIRED", tone: "used" };
     }
-    
+
     if (voucher.max_uses && voucher.used_count >= voucher.max_uses) {
       return { status: "USED UP", tone: "used" };
     }
-    
+
     if (validUntil) {
-      const daysUntilExpiry = Math.ceil((validUntil - now) / (1000 * 60 * 60 * 24));
+      const daysUntilExpiry = Math.ceil(
+        (validUntil - now) / (1000 * 60 * 60 * 24),
+      );
       if (daysUntilExpiry <= 7) {
         return { status: "EXPIRING SOON", tone: "expiring" };
       }
     }
-    
+
     return { status: "ACTIVE", tone: "active" };
   };
 
   const formatDiscount = (voucher) => {
-    if (voucher.type === 'percentage') {
+    if (voucher.type === "percentage") {
       return `${voucher.value}% OFF`;
-    } else if (voucher.type === 'fixed') {
+    } else if (voucher.type === "fixed") {
       return `$${parseFloat(voucher.value).toFixed(2)} OFF`;
     }
-    return '';
+    return "";
   };
 
   const handleEdit = (voucher) => {
     navigate("/vouchers/edit", {
-      state: { voucher: voucher }
+      state: { voucher: voucher },
     });
   };
 
@@ -185,7 +194,7 @@ const AdminVouchers = () => {
       <div className="layout">
         <Sidebar activePage="vouchers" />
         <main className="main vouchers-main">
-          <AdminTopbar showHamburger>
+          <AdminTopbar>
             <Link
               to="/admin-notification"
               className="notification-link"
@@ -198,11 +207,10 @@ const AdminVouchers = () => {
               />
               <span className="notification-dot" />
             </Link>
-            <Link
-              to="/vouchers/new"
-              className="btn primary vouchers-add-btn"
-            >
-              <span className="vouchers-add-plus" aria-hidden="true">+</span>
+            <Link to="/vouchers/new" className="btn primary vouchers-add-btn">
+              <span className="vouchers-add-plus" aria-hidden="true">
+                +
+              </span>
               Add New Coupon
             </Link>
           </AdminTopbar>
@@ -291,7 +299,8 @@ const AdminVouchers = () => {
                     {vouchers.length === 0 ? (
                       <tr>
                         <td colSpan="8" className="voucher-empty-cell">
-                          No vouchers found. Click "Add New Coupon" to create one.
+                          No vouchers found. Click "Add New Coupon" to create
+                          one.
                         </td>
                       </tr>
                     ) : (
@@ -300,19 +309,41 @@ const AdminVouchers = () => {
                         return (
                           <tr key={voucher.id}>
                             <td className="voucher-name-cell">
-                              <strong>{voucher.description || `Voucher ${voucher.code}`}</strong>
-                              <span>Updated {new Date(voucher.updated_at).toLocaleDateString()}</span>
+                              <strong>
+                                {voucher.description ||
+                                  `Voucher ${voucher.code}`}
+                              </strong>
+                              <span>
+                                Updated{" "}
+                                {new Date(
+                                  voucher.updated_at,
+                                ).toLocaleDateString()}
+                              </span>
                             </td>
                             <td>
-                              <span className="voucher-code">{voucher.code}</span>
+                              <span className="voucher-code">
+                                {voucher.code}
+                              </span>
                             </td>
                             <td>
-                              <span className="voucher-discount">{formatDiscount(voucher)}</span>
+                              <span className="voucher-discount">
+                                {formatDiscount(voucher)}
+                              </span>
                             </td>
-                            <td>{voucher.valid_from ? formatDate(voucher.valid_from) : 'Immediate'}</td>
-                            <td>{voucher.valid_until ? formatDate(voucher.valid_until) : 'No expiry'}</td>
+                            <td>
+                              {voucher.valid_from
+                                ? formatDate(voucher.valid_from)
+                                : "Immediate"}
+                            </td>
+                            <td>
+                              {voucher.valid_until
+                                ? formatDate(voucher.valid_until)
+                                : "No expiry"}
+                            </td>
                             <td className="voucher-usage-limit">
-                              {voucher.max_uses ? `${voucher.used_count || 0}/${voucher.max_uses}` : 'Unlimited'}
+                              {voucher.max_uses
+                                ? `${voucher.used_count || 0}/${voucher.max_uses}`
+                                : "Unlimited"}
                             </td>
                             <td>
                               <span className={`voucher-status ${tone}`}>
@@ -326,14 +357,24 @@ const AdminVouchers = () => {
                                   aria-label={`View details for ${voucher.code}`}
                                   onClick={() => handleViewDetails(voucher)}
                                 >
-                                  <img src={VouchRemove} alt="" aria-hidden="true" className="voucher-action-icon" />
+                                  <img
+                                    src={VouchRemove}
+                                    alt=""
+                                    aria-hidden="true"
+                                    className="voucher-action-icon"
+                                  />
                                 </button>
                                 <button
                                   type="button"
                                   aria-label={`Edit ${voucher.code}`}
                                   onClick={() => handleEdit(voucher)}
                                 >
-                                  <img src={VouchEdit} alt="" aria-hidden="true" className="voucher-action-icon" />
+                                  <img
+                                    src={VouchEdit}
+                                    alt=""
+                                    aria-hidden="true"
+                                    className="voucher-action-icon"
+                                  />
                                 </button>
                               </div>
                             </td>
@@ -352,7 +393,10 @@ const AdminVouchers = () => {
                   Showing{" "}
                   <strong>
                     {(pagination.current_page - 1) * pagination.per_page + 1}-
-                    {Math.min(pagination.current_page * pagination.per_page, pagination.total)}
+                    {Math.min(
+                      pagination.current_page * pagination.per_page,
+                      pagination.total,
+                    )}
                   </strong>{" "}
                   of {pagination.total} vouchers
                 </span>
@@ -364,9 +408,14 @@ const AdminVouchers = () => {
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                   >
-                    <img src={PaginationLeft} alt="" aria-hidden="true" className="voucher-page-nav-icon" />
+                    <img
+                      src={PaginationLeft}
+                      alt=""
+                      aria-hidden="true"
+                      className="voucher-page-nav-icon"
+                    />
                   </button>
-                  
+
                   {[...Array(pagination.last_page)].map((_, i) => (
                     <button
                       key={i + 1}
@@ -377,7 +426,7 @@ const AdminVouchers = () => {
                       {i + 1}
                     </button>
                   ))}
-                  
+
                   <button
                     type="button"
                     className="voucher-page-nav-btn"
@@ -385,7 +434,12 @@ const AdminVouchers = () => {
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === pagination.last_page}
                   >
-                    <img src={PaginationRight} alt="" aria-hidden="true" className="voucher-page-nav-icon" />
+                    <img
+                      src={PaginationRight}
+                      alt=""
+                      aria-hidden="true"
+                      className="voucher-page-nav-icon"
+                    />
                   </button>
                 </div>
               </div>

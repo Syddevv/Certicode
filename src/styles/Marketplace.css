@@ -4,7 +4,7 @@
 }
 
 .marketplace__inner {
-  width: min(1200px, 92%);
+  width: min(1200px, calc(100% - 48px));
   margin: 0 auto;
 }
 
@@ -88,7 +88,7 @@
 .marketplace__content {
   margin-top: 26px;
   display: grid;
-  grid-template-columns: 270px 1fr;
+  grid-template-columns: minmax(240px, 270px) minmax(0, 1fr);
   gap: 30px;
   align-items: start;
 }
@@ -284,6 +284,10 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px;
+}
+
+.marketplace__results {
+  min-width: 0;
 }
 
 .marketplace__card {
@@ -487,11 +491,15 @@
   }
 
   .marketplace__content {
-    grid-template-columns: 240px 1fr;
+    grid-template-columns: minmax(220px, 240px) minmax(0, 1fr);
   }
 }
 
 @media (max-width: 900px) {
+  .marketplace__inner {
+    width: min(1200px, calc(100% - 40px));
+  }
+
   .marketplace__content {
     grid-template-columns: 1fr;
   }
@@ -502,6 +510,10 @@
 }
 
 @media (max-width: 720px) {
+  .marketplace__inner {
+    width: min(1200px, calc(100% - 32px));
+  }
+
   .marketplace__cards {
     grid-template-columns: 1fr;
   }
@@ -676,18 +688,7 @@
   }
 }
 
-/* Desktop: Show toggle button but always expanded - hide it visually */
-@media (min-width: 901px) {
-  .marketplace__filterToggle {
-    display: none;
-  }
-
-  .marketplace__filterGroupContent {
-    margin-top: 8px;
-  }
-}
-
-/* Mobile: Show toggle button and allow collapse */
+/* Keep filter toggles visible on every screen size */
 @media (max-width: 900px) {
   .marketplace__filterToggle {
     display: flex;

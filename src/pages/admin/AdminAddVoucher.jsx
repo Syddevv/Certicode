@@ -17,7 +17,11 @@ const formatDateForInput = (dateString) => {
 };
 
 const normalizeProductOption = (product, index = 0) => ({
-  id: product?.id ?? product?.product_id ?? product?.asset_id ?? `product-${index + 1}`,
+  id:
+    product?.id ??
+    product?.product_id ??
+    product?.asset_id ??
+    `product-${index + 1}`,
   title: product?.title ?? product?.name ?? `Product ${index + 1}`,
   category:
     product?.category ??
@@ -45,7 +49,9 @@ const parsePossibleIds = (value) => {
   if (Array.isArray(value)) {
     return value
       .map((item) =>
-        typeof item === "object" ? item?.id ?? item?.product_id ?? item?.asset_id : item,
+        typeof item === "object"
+          ? (item?.id ?? item?.product_id ?? item?.asset_id)
+          : item,
       )
       .filter((item) => item !== undefined && item !== null && item !== "");
   }
@@ -74,7 +80,9 @@ const extractVoucherProducts = (voucher) => {
   ];
 
   const list = candidates.find((candidate) => Array.isArray(candidate)) || [];
-  return dedupeProducts(list.map((product, index) => normalizeProductOption(product, index)));
+  return dedupeProducts(
+    list.map((product, index) => normalizeProductOption(product, index)),
+  );
 };
 
 const extractVoucherProductIds = (voucher) => {
@@ -97,7 +105,15 @@ const resolveApplicableTo = (voucher, hasSpecificProducts) => {
     .trim()
     .toLowerCase();
 
-  if (["specific", "specific_product", "specific_products", "product", "products"].includes(value)) {
+  if (
+    [
+      "specific",
+      "specific_product",
+      "specific_products",
+      "product",
+      "products",
+    ].includes(value)
+  ) {
     return "specific_product";
   }
   if (["all", "all_products", "global"].includes(value)) {
@@ -112,14 +128,15 @@ const AdminAddVoucher = () => {
   const location = useLocation();
   const isEditing = location.state?.voucher ? true : false;
   const existingVoucher = location.state?.voucher || null;
-  
+
   const [loading, setLoading] = useState(false);
   const [productsLoading, setProductsLoading] = useState(false);
   const [isProductSelectorOpen, setIsProductSelectorOpen] = useState(false);
   const [availableProducts, setAvailableProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [initialProductIds, setInitialProductIds] = useState([]);
-  const [didHydrateExistingProducts, setDidHydrateExistingProducts] = useState(false);
+  const [didHydrateExistingProducts, setDidHydrateExistingProducts] =
+    useState(false);
   const [formData, setFormData] = useState({
     code: "",
     description: "",
@@ -149,14 +166,19 @@ const AdminAddVoucher = () => {
           });
           const pageProducts = response?.products || response?.data || [];
           products.push(...pageProducts);
-          totalPages = response?.pagination?.total_pages || response?.pagination?.last_page || 1;
+          totalPages =
+            response?.pagination?.total_pages ||
+            response?.pagination?.last_page ||
+            1;
           page += 1;
         } while (page <= totalPages && page <= 100);
 
         if (!isMounted) return;
 
         const normalizedProducts = dedupeProducts(
-          products.map((product, index) => normalizeProductOption(product, index)),
+          products.map((product, index) =>
+            normalizeProductOption(product, index),
+          ),
         );
         setAvailableProducts(normalizedProducts);
       } catch (error) {
@@ -195,13 +217,21 @@ const AdminAddVoucher = () => {
         max_uses: existingVoucher.max_uses || "",
         valid_from: formatDateForInput(existingVoucher.valid_from),
         valid_until: formatDateForInput(existingVoucher.valid_until),
-        is_active: existingVoucher.is_active !== undefined ? existingVoucher.is_active : true,
-        applicable_to: resolveApplicableTo(existingVoucher, hasSpecificProducts),
+        is_active:
+          existingVoucher.is_active !== undefined
+            ? existingVoucher.is_active
+            : true,
+        applicable_to: resolveApplicableTo(
+          existingVoucher,
+          hasSpecificProducts,
+        ),
       });
 
       setSelectedProducts(explicitProducts);
       setInitialProductIds(voucherProductIds);
-      setDidHydrateExistingProducts(explicitProducts.length > 0 || voucherProductIds.length === 0);
+      setDidHydrateExistingProducts(
+        explicitProducts.length > 0 || voucherProductIds.length === 0,
+      );
     }
   }, [existingVoucher]);
 
@@ -226,7 +256,7 @@ const AdminAddVoucher = () => {
     const { name, value, type, checked } = event.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -252,12 +282,15 @@ const AdminAddVoucher = () => {
       return;
     }
 
-    if (formData.type === 'percentage' && parseFloat(formData.value) > 100) {
+    if (formData.type === "percentage" && parseFloat(formData.value) > 100) {
       showErrorToast("Percentage discount cannot exceed 100%.");
       return;
     }
 
-    if (formData.applicable_to === "specific_product" && selectedProducts.length === 0) {
+    if (
+      formData.applicable_to === "specific_product" &&
+      selectedProducts.length === 0
+    ) {
       showErrorToast("Please select at least one applicable product.");
       return;
     }
@@ -275,7 +308,9 @@ const AdminAddVoucher = () => {
 
       const specificScope = formData.applicable_to === "specific_product";
       const scopeValue = specificScope ? "specific" : "all";
-      const appliesToValue = specificScope ? "specific_product" : "all_products";
+      const appliesToValue = specificScope
+        ? "specific_product"
+        : "all_products";
       const productsAsObjects = selectedProductIds.map((id) => ({ id }));
 
       const submitData = {
@@ -283,7 +318,9 @@ const AdminAddVoucher = () => {
         description: formData.description || null,
         type: formData.type,
         value: parseFloat(formData.value),
-        min_order_amount: formData.min_order_amount ? parseFloat(formData.min_order_amount) : null,
+        min_order_amount: formData.min_order_amount
+          ? parseFloat(formData.min_order_amount)
+          : null,
         max_uses: formData.max_uses ? parseInt(formData.max_uses) : null,
         valid_from: formData.valid_from || null,
         valid_until: formData.valid_until || null,
@@ -301,8 +338,7 @@ const AdminAddVoucher = () => {
             ? selectedProductIds[0]
             : null,
         is_global: !specificScope,
-        product_ids:
-          specificScope ? selectedProductIds : [],
+        product_ids: specificScope ? selectedProductIds : [],
         applicable_product_ids: specificScope ? selectedProductIds : [],
         selected_product_ids: specificScope ? selectedProductIds : [],
         applicable_products: specificScope ? productsAsObjects : [],
@@ -316,18 +352,20 @@ const AdminAddVoucher = () => {
         await AdminPromoAPI.createVoucher(submitData);
         showSuccessToast("Voucher created successfully.");
       }
-      
+
       navigate("/vouchers");
     } catch (error) {
-      showErrorToast(error.message || `Failed to ${isEditing ? 'update' : 'create'} voucher`);
+      showErrorToast(
+        error.message || `Failed to ${isEditing ? "update" : "create"} voucher`,
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const getDiscountPlaceholder = () => {
-    if (formData.type === 'percentage') return "e.g 20";
-    if (formData.type === 'fixed') return "e.g 50.00";
+    if (formData.type === "percentage") return "e.g 20";
+    if (formData.type === "fixed") return "e.g 50.00";
     return "0";
   };
 
@@ -336,35 +374,48 @@ const AdminAddVoucher = () => {
       <Sidebar activePage="vouchers" />
 
       <main className="add-voucher-main">
-        <AdminTopbar showHamburger>
+        <AdminTopbar>
           <Link
             to="/admin-notification"
             className="notification-link"
             aria-label="Notifications"
           >
-            <img src={notifBell} alt="Notifications" className="notification-icon" />
+            <img
+              src={notifBell}
+              alt="Notifications"
+              className="notification-icon"
+            />
             <span className="notification-dot" />
           </Link>
         </AdminTopbar>
 
         <section className="add-voucher-header">
           <nav className="add-voucher-breadcrumbs">
-            <Link to="/vouchers" className="crumb-link">Vouchers</Link>
+            <Link to="/vouchers" className="crumb-link">
+              Vouchers
+            </Link>
             <span className="separator">›</span>
-            <span className="current">{isEditing ? 'Edit Voucher' : 'Add New Voucher'}</span>
+            <span className="current">
+              {isEditing ? "Edit Voucher" : "Add New Voucher"}
+            </span>
           </nav>
-          <h1>{isEditing ? 'Edit Voucher' : 'Create New Voucher'}</h1>
+          <h1>{isEditing ? "Edit Voucher" : "Create New Voucher"}</h1>
           <p className="subtitle">
-            {isEditing 
-              ? 'Update the voucher details below.' 
-              : 'Populate the details below to create a new promo code in the system.'}
+            {isEditing
+              ? "Update the voucher details below."
+              : "Populate the details below to create a new promo code in the system."}
           </p>
         </section>
 
         <form onSubmit={handleSubmit} className="add-voucher-form">
           <section className="add-voucher-card">
             <header className="add-voucher-card-header">
-              <img src={GenDetails} alt="" aria-hidden="true" className="add-voucher-header-icon" />
+              <img
+                src={GenDetails}
+                alt=""
+                aria-hidden="true"
+                className="add-voucher-header-icon"
+              />
               <h2>General Details</h2>
             </header>
 
@@ -392,7 +443,9 @@ const AdminAddVoucher = () => {
                   maxLength="50"
                   disabled={isEditing}
                 />
-                <small className="field-hint">Will be automatically uppercase</small>
+                <small className="field-hint">
+                  Will be automatically uppercase
+                </small>
               </label>
 
               <label>
@@ -417,11 +470,11 @@ const AdminAddVoucher = () => {
                   value={formData.value}
                   onChange={handleInputChange}
                   min="0"
-                  max={formData.type === 'percentage' ? 100 : null}
+                  max={formData.type === "percentage" ? 100 : null}
                   step="0.01"
                   required
                 />
-                {formData.type === 'percentage' && (
+                {formData.type === "percentage" && (
                   <small className="field-hint">Maximum 100%</small>
                 )}
               </label>
@@ -461,7 +514,9 @@ const AdminAddVoucher = () => {
                   value={formData.valid_from}
                   onChange={handleInputChange}
                 />
-                <small className="field-hint">Leave empty to start immediately</small>
+                <small className="field-hint">
+                  Leave empty to start immediately
+                </small>
               </label>
 
               <label>
@@ -502,20 +557,34 @@ const AdminAddVoucher = () => {
                   <h3>Select (Select Multiple)</h3>
 
                   {productsLoading && (
-                    <p className="voucher-products-state">Loading products...</p>
+                    <p className="voucher-products-state">
+                      Loading products...
+                    </p>
                   )}
 
                   {!productsLoading && selectedProducts.length === 0 && (
-                    <p className="voucher-products-state">No products selected yet.</p>
+                    <p className="voucher-products-state">
+                      No products selected yet.
+                    </p>
                   )}
 
                   {selectedProducts.length > 0 && (
                     <div className="voucher-products-grid">
                       {selectedProducts.map((product) => (
-                        <article key={product.id} className="voucher-product-card">
-                          <div className="voucher-product-thumb" aria-hidden="true">
+                        <article
+                          key={product.id}
+                          className="voucher-product-card"
+                        >
+                          <div
+                            className="voucher-product-thumb"
+                            aria-hidden="true"
+                          >
                             {product.featured_image && (
-                              <img src={product.featured_image} alt="" aria-hidden="true" />
+                              <img
+                                src={product.featured_image}
+                                alt=""
+                                aria-hidden="true"
+                              />
                             )}
                           </div>
                           <div className="voucher-product-info">
@@ -546,7 +615,9 @@ const AdminAddVoucher = () => {
                     + Add More
                   </button>
                   {!productsLoading && availableProducts.length === 0 && (
-                    <small className="field-hint">No products available in inventory.</small>
+                    <small className="field-hint">
+                      No products available in inventory.
+                    </small>
                   )}
                 </div>
               )}
@@ -565,7 +636,11 @@ const AdminAddVoucher = () => {
                 Cancel
               </button>
               <button type="submit" className="btn primary" disabled={loading}>
-                {loading ? "Saving..." : (isEditing ? "Update Voucher" : "Create Voucher")}
+                {loading
+                  ? "Saving..."
+                  : isEditing
+                    ? "Update Voucher"
+                    : "Create Voucher"}
               </button>
             </div>
           </footer>

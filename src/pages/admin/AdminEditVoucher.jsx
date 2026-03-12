@@ -21,8 +21,18 @@ const PRODUCT_OPTIONS = [
     meta: "Website Template",
     version: "v2.4.1",
   },
-  { id: "uiux-kit", title: "UI/UX Kit", meta: "UI/UX Design", version: "v2.4.1" },
-  { id: "foodie-app", title: "Foodie App", meta: "Website App", version: "v2.4.1" },
+  {
+    id: "uiux-kit",
+    title: "UI/UX Kit",
+    meta: "UI/UX Design",
+    version: "v2.4.1",
+  },
+  {
+    id: "foodie-app",
+    title: "Foodie App",
+    meta: "Website App",
+    version: "v2.4.1",
+  },
   {
     id: "mobile-finance",
     title: "Mobile Finance App",
@@ -89,7 +99,9 @@ const AdminEditVoucher = () => {
 
   const [loading, setLoading] = useState(false);
   const [isProductSelectorOpen, setIsProductSelectorOpen] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState(PRODUCT_OPTIONS.slice(0, 4));
+  const [selectedProducts, setSelectedProducts] = useState(
+    PRODUCT_OPTIONS.slice(0, 4),
+  );
   const [formData, setFormData] = useState({
     name: voucher?.name || "Valid on all UI Kits",
     code: voucher?.code || "CERT50UIKIT",
@@ -155,7 +167,9 @@ const AdminEditVoucher = () => {
     };
 
     showSuccessToast("Voucher updated.");
-    navigate("/vouchers", { state: { updatedVoucher, previousCode: voucher?.code } });
+    navigate("/vouchers", {
+      state: { updatedVoucher, previousCode: voucher?.code },
+    });
   };
 
   return (
@@ -163,13 +177,17 @@ const AdminEditVoucher = () => {
       <Sidebar activePage="vouchers" />
 
       <main className="add-voucher-main">
-        <AdminTopbar showHamburger>
+        <AdminTopbar>
           <Link
             to="/admin-notification"
             className="notification-link"
             aria-label="Notifications"
           >
-            <img src={notifBell} alt="Notifications" className="notification-icon" />
+            <img
+              src={notifBell}
+              alt="Notifications"
+              className="notification-icon"
+            />
             <span className="notification-dot" />
           </Link>
         </AdminTopbar>
@@ -184,8 +202,8 @@ const AdminEditVoucher = () => {
           </nav>
           <h1>Edit Voucher</h1>
           <p className="subtitle">
-            Update the selected voucher&apos;s information by modifying its details,
-            validity, and discount settings as needed.
+            Update the selected voucher&apos;s information by modifying its
+            details, validity, and discount settings as needed.
           </p>
         </section>
 
@@ -331,8 +349,14 @@ const AdminEditVoucher = () => {
 
                   <div className="voucher-products-grid">
                     {selectedProducts.map((product) => (
-                      <article key={product.id} className="voucher-product-card">
-                        <div className="voucher-product-thumb" aria-hidden="true" />
+                      <article
+                        key={product.id}
+                        className="voucher-product-card"
+                      >
+                        <div
+                          className="voucher-product-thumb"
+                          aria-hidden="true"
+                        />
                         <div className="voucher-product-info">
                           <strong>{product.title}</strong>
                           <span>

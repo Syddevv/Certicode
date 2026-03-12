@@ -7,18 +7,17 @@
 }
 
 .nav__inner {
-  width: 1512px;
+  width: 100%;
   max-width: 1512px;
   margin: 0 auto;
-  padding-left: 100px;
-  padding-right: 100px;
-
-  display: flex;
+  padding-left: clamp(24px, 4vw, 100px);
+  padding-right: clamp(24px, 4vw, 100px);
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-
   height: 72px;
-  gap: 14px;
+  gap: 24px;
 }
 
 .certicode-logo {
@@ -31,12 +30,16 @@
   display: flex;
   align-items: center;
   min-width: 0;
+  justify-self: start;
 }
 
 .nav__links {
   display: flex;
   gap: 26px;
   align-items: center;
+  justify-self: center;
+  justify-content: center;
+  min-width: 0;
 }
 
 .nav__link {
@@ -70,6 +73,12 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+}
+
+.nav__actions--desktop {
+  justify-self: end;
+  justify-content: flex-end;
 }
 
 .nav__actions .btn {
@@ -78,6 +87,11 @@
   align-items: center;
   justify-content: center;
   white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.nav__actionLink {
+  text-decoration: none;
   flex-shrink: 0;
 }
 
@@ -187,9 +201,10 @@
 
 .nav--compact .nav__inner {
   width: 100%;
-  max-width: 100%;
-  padding-left: 24px;
-  padding-right: 24px;
+  max-width: 1512px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding-left: clamp(20px, 4vw, 32px);
+  padding-right: clamp(20px, 4vw, 32px);
 }
 
 .nav--compact .nav__mobilePanel {
@@ -258,9 +273,10 @@
 
   .nav__inner {
     width: 100%;
-    max-width: 100%;
-    padding-left: 24px;
-    padding-right: 24px;
+    max-width: 1512px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-left: clamp(20px, 4vw, 32px);
+    padding-right: clamp(20px, 4vw, 32px);
   }
 
   .nav__links {

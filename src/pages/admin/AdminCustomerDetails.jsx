@@ -62,7 +62,11 @@ const formatAddress = (address) => {
   }
 
   const line1 = [address.line1, address.line2].filter(Boolean).join(", ");
-  const line2 = [address.city, address.state, address.postal_code || address.zip_code]
+  const line2 = [
+    address.city,
+    address.state,
+    address.postal_code || address.zip_code,
+  ]
     .filter(Boolean)
     .join(", ");
   const line3 = address.country;
@@ -79,7 +83,8 @@ const getCategoryBadgeClass = (category) => {
 
 const getStatusClass = (status) => {
   const key = String(status || "pending").toLowerCase();
-  if (["completed", "paid", "success", "succeeded"].includes(key)) return "completed";
+  if (["completed", "paid", "success", "succeeded"].includes(key))
+    return "completed";
   if (["refunded", "cancelled", "failed"].includes(key)) return "refunded";
   return "pending";
 };
@@ -145,7 +150,8 @@ const AdminCustomerDetails = () => {
           ...(normalized || {}),
         }));
       } catch (fetchError) {
-        const message = fetchError?.message || "Failed to load customer details.";
+        const message =
+          fetchError?.message || "Failed to load customer details.";
         if (!routeCustomer) {
           setError(message);
           showErrorToast(message);
@@ -168,7 +174,10 @@ const AdminCustomerDetails = () => {
       setLoadingOrders(true);
 
       try {
-        const response = await AdminCustomersAPI.getCustomerOrders(id, currentPage);
+        const response = await AdminCustomersAPI.getCustomerOrders(
+          id,
+          currentPage,
+        );
         const normalized = normalizeOrders(response);
         setOrders(normalized.items || []);
         setTotalPages(normalized.totalPages || 1);
@@ -198,7 +207,11 @@ const AdminCustomerDetails = () => {
 
     const totalSpent =
       toNumber(customer.total_spent) ??
-      orders.reduce((sum, order) => sum + (toNumber(order.total_amount || order.amount) ?? 0), 0);
+      orders.reduce(
+        (sum, order) =>
+          sum + (toNumber(order.total_amount || order.amount) ?? 0),
+        0,
+      );
 
     const orderCount =
       toNumber(customer.total_orders) ??
@@ -222,13 +235,24 @@ const AdminCustomerDetails = () => {
       id: customer.id || customer.customer_id || id,
       name: customer.name || "Customer",
       email: customer.email || "No email provided",
-      joinedAt: formatDate(customer.created_at || customer.joined_at, "Not available"),
+      joinedAt: formatDate(
+        customer.created_at || customer.joined_at,
+        "Not available",
+      ),
       avatar:
         resolveAvatarUrl(customer.avatar_url || customer.avatar) ||
         `https://ui-avatars.com/api/?name=${encodeURIComponent(customer.name || "Customer")}&background=E5E7EB&color=111827&size=128`,
-      phone: customer.phone || customer.phone_number || customer.mobile || "Not provided",
+      phone:
+        customer.phone ||
+        customer.phone_number ||
+        customer.mobile ||
+        "Not provided",
       company: customer.company || customer.company_name || "Not provided",
-      address: formatAddress(customer.address || customer.billing_address || customer.delivery_address),
+      address: formatAddress(
+        customer.address ||
+          customer.billing_address ||
+          customer.delivery_address,
+      ),
       statusLabel: isActive ? "ACTIVE" : "INACTIVE",
       statusClass: isActive ? "active" : "inactive",
       totalSpent: formatCurrency(totalSpent, platformPreferences.currency),
@@ -242,12 +266,18 @@ const AdminCustomerDetails = () => {
       const orderId = order.id || order.order_id || order.order_number;
       const orderDate = order.purchased_at || order.created_at || order.paid_at;
       const category = order.category || order.asset_category || "Website";
-      const statusRaw = String(order.status || order.payment_status || "pending").toUpperCase();
+      const statusRaw = String(
+        order.status || order.payment_status || "pending",
+      ).toUpperCase();
 
       return {
         id: orderId,
         orderNumber: order.order_number || `#ORD-${orderId}`,
-        assetName: order.asset_name || order.product_name || order.product?.name || "Digital Asset",
+        assetName:
+          order.asset_name ||
+          order.product_name ||
+          order.product?.name ||
+          "Digital Asset",
         category,
         amount: formatCurrency(
           order.total_amount || order.amount,
@@ -295,8 +325,12 @@ const AdminCustomerDetails = () => {
         <Sidebar activePage="customers" />
 
         <main className="main">
-          <AdminTopbar showHamburger>
-            <Link to="/admin-notification" className="notification-link" aria-label="Notifications">
+          <AdminTopbar>
+            <Link
+              to="/admin-notification"
+              className="notification-link"
+              aria-label="Notifications"
+            >
               <img
                 src={notifBell}
                 alt="Notifications"
@@ -324,7 +358,9 @@ const AdminCustomerDetails = () => {
               Customers
             </Link>
             <span className="separator">›</span>
-            <span className="current">{viewModel?.name || "Customer Details"}</span>
+            <span className="current">
+              {viewModel?.name || "Customer Details"}
+            </span>
           </div>
 
           {viewModel ? (
@@ -342,7 +378,10 @@ const AdminCustomerDetails = () => {
                   />
                   <h2>{viewModel.name}</h2>
                   {viewModel.email.includes("@") ? (
-                    <a href={`mailto:${viewModel.email}`} className="profile-email">
+                    <a
+                      href={`mailto:${viewModel.email}`}
+                      className="profile-email"
+                    >
                       {viewModel.email}
                     </a>
                   ) : (
@@ -380,7 +419,9 @@ const AdminCustomerDetails = () => {
 
                 <div className="info-section">
                   <h4>Delivery Address</h4>
-                  <p className="address-text multiline-value">{viewModel.address}</p>
+                  <p className="address-text multiline-value">
+                    {viewModel.address}
+                  </p>
                 </div>
               </aside>
 
@@ -419,11 +460,15 @@ const AdminCustomerDetails = () => {
                       <tbody>
                         {loadingOrders ? (
                           <tr>
-                            <td colSpan="5" className="table-message">Loading transactions...</td>
+                            <td colSpan="5" className="table-message">
+                              Loading transactions...
+                            </td>
                           </tr>
                         ) : mappedOrders.length === 0 ? (
                           <tr>
-                            <td colSpan="5" className="table-message">No transactions found.</td>
+                            <td colSpan="5" className="table-message">
+                              No transactions found.
+                            </td>
                           </tr>
                         ) : (
                           mappedOrders.map((order) => (
@@ -435,14 +480,19 @@ const AdminCustomerDetails = () => {
                                     <Link
                                       to={`/sales/order-details/${order.id}`}
                                       state={{ order: order.rawOrder }}
-                                      style={{ textDecoration: "none", color: "inherit" }}
+                                      style={{
+                                        textDecoration: "none",
+                                        color: "inherit",
+                                      }}
                                     >
                                       <strong>{order.assetName}</strong>
                                     </Link>
                                   ) : (
                                     <strong>{order.assetName}</strong>
                                   )}
-                                  <span className={`mini-badge ${getCategoryBadgeClass(order.category)}`}>
+                                  <span
+                                    className={`mini-badge ${getCategoryBadgeClass(order.category)}`}
+                                  >
                                     {String(order.category).toUpperCase()}
                                   </span>
                                 </div>
@@ -453,7 +503,9 @@ const AdminCustomerDetails = () => {
                               </td>
                               <td className="amount">{order.amount}</td>
                               <td>
-                                <span className={`status-pill ${order.statusClass}`}>
+                                <span
+                                  className={`status-pill ${order.statusClass}`}
+                                >
                                   ● {order.statusLabel}
                                 </span>
                               </td>
@@ -466,14 +518,29 @@ const AdminCustomerDetails = () => {
 
                   <div className="details-pagination">
                     <span>
-                      Showing <strong>{mappedOrders.length > 0 ? (currentPage - 1) * PER_PAGE + 1 : 0}-{Math.min(currentPage * PER_PAGE, totalItems)}</strong> of {totalItems} transactions
+                      Showing{" "}
+                      <strong>
+                        {mappedOrders.length > 0
+                          ? (currentPage - 1) * PER_PAGE + 1
+                          : 0}
+                        -{Math.min(currentPage * PER_PAGE, totalItems)}
+                      </strong>{" "}
+                      of {totalItems} transactions
                     </span>
                     <div className="nav-controls">
-                      <button className="nav-btn" onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+                      <button
+                        className="nav-btn"
+                        onClick={() => handlePageChange(currentPage - 1)}
+                        disabled={currentPage === 1}
+                      >
                         ‹
                       </button>
                       <button className="nav-btn active">{currentPage}</button>
-                      <button className="nav-btn" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+                      <button
+                        className="nav-btn"
+                        onClick={() => handlePageChange(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                      >
                         ›
                       </button>
                     </div>
@@ -482,11 +549,17 @@ const AdminCustomerDetails = () => {
               </div>
             </div>
           ) : loadingCustomer ? (
-            <div className="details-message-card">Loading customer details...</div>
+            <div className="details-message-card">
+              Loading customer details...
+            </div>
           ) : error ? (
-            <div className="details-message-card details-message-error">{error}</div>
+            <div className="details-message-card details-message-error">
+              {error}
+            </div>
           ) : (
-            <div className="details-message-card details-message-error">Unable to load customer details.</div>
+            <div className="details-message-card details-message-error">
+              Unable to load customer details.
+            </div>
           )}
         </main>
       </div>

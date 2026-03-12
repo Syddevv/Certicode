@@ -491,7 +491,7 @@ const AdminInventory = ({ statusView = "active" }) => {
         <Sidebar activePage="inventory" />
 
         <main className="main">
-          <AdminTopbar showHamburger onSearch={handleSearch}>
+          <AdminTopbar onSearch={handleSearch}>
             <Link
               to="/admin-notification"
               className="notification-link"
@@ -735,7 +735,9 @@ const AdminInventory = ({ statusView = "active" }) => {
                             </button>
                             {canArchive && (
                               <button
-                                onClick={() => openStatusActionModal("archive", product)}
+                                onClick={() =>
+                                  openStatusActionModal("archive", product)
+                                }
                                 title="Archive"
                                 disabled={isBusy}
                                 className="action-btn action-btn--archive"

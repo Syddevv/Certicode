@@ -171,9 +171,9 @@ const AdminSales = () => {
       cancelled: "refunded",
       failed: "refunded",
     };
-    
-    const badgeClass = statusMap[statusKey] || 'pending';
-    
+
+    const badgeClass = statusMap[statusKey] || "pending";
+
     return (
       <span className={`status-pill ${badgeClass}`}>
         {Icons.Dot} {statusKey.toUpperCase()}
@@ -191,9 +191,9 @@ const AdminSales = () => {
       "desktop app": "blue",
       "web app": "blue",
     };
-    
-    const badgeClass = categoryMap[categoryKey] || 'blue';
-    
+
+    const badgeClass = categoryMap[categoryKey] || "blue";
+
     return (
       <span className={`mini-badge ${badgeClass}`}>
         {categoryKey.toUpperCase()}
@@ -272,7 +272,7 @@ const AdminSales = () => {
         <Sidebar activePage="sales" />
 
         <main className="main">
-          <AdminTopbar showHamburger onSearch={handleSearch}>
+          <AdminTopbar onSearch={handleSearch}>
             <Link
               to="/admin-notification"
               className="notification-link"
@@ -442,52 +442,57 @@ const AdminSales = () => {
                   </tr>
                 ) : (
                   orders.map((order) => {
-                    const orderId = order.id || order.order_id || order.order_number;
-                    const rowKey = orderId || `${order.order_number}-${order.asset_name}`;
+                    const orderId =
+                      order.id || order.order_id || order.order_number;
+                    const rowKey =
+                      orderId || `${order.order_number}-${order.asset_name}`;
                     return (
-                    <tr key={rowKey}>
-                      <td className="order-id">{order.order_number}</td>
-                      <td>
-                        <div className="asset-info">
-                          {orderId ? (
-                            <Link 
-                              to={`/sales/order-details/${orderId}`}
-                              state={{ order }}
-                              style={{ textDecoration: 'none', color: 'inherit' }}
-                            >
+                      <tr key={rowKey}>
+                        <td className="order-id">{order.order_number}</td>
+                        <td>
+                          <div className="asset-info">
+                            {orderId ? (
+                              <Link
+                                to={`/sales/order-details/${orderId}`}
+                                state={{ order }}
+                                style={{
+                                  textDecoration: "none",
+                                  color: "inherit",
+                                }}
+                              >
+                                <strong>{order.asset_name}</strong>
+                              </Link>
+                            ) : (
                               <strong>{order.asset_name}</strong>
-                            </Link>
-                          ) : (
-                            <strong>{order.asset_name}</strong>
-                          )}
-                          {getCategoryBadge(order.category)}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="customer-info">
-                          <Avatar
-                            name={order.customer_name}
-                            avatarUrl={order.customer_avatar}
-                          />
-                          <span>{order.customer_name}</span>
-                        </div>
-                      </td>
-                      <td className="date-cell">
-                        <div>{formatDate(order.purchased_at)}</div>
-                        <small>{formatTime(order.purchased_at)}</small>
-                      </td>
-                      <td className="amount">
-                        {formatCurrency(order.total_amount)}
-                      </td>
-                      <td>{getStatusBadge(order.status)}</td>
-                      {/* <td className="actions-cell">
+                            )}
+                            {getCategoryBadge(order.category)}
+                          </div>
+                        </td>
+                        <td>
+                          <div className="customer-info">
+                            <Avatar
+                              name={order.customer_name}
+                              avatarUrl={order.customer_avatar}
+                            />
+                            <span>{order.customer_name}</span>
+                          </div>
+                        </td>
+                        <td className="date-cell">
+                          <div>{formatDate(order.purchased_at)}</div>
+                          <small>{formatTime(order.purchased_at)}</small>
+                        </td>
+                        <td className="amount">
+                          {formatCurrency(order.total_amount)}
+                        </td>
+                        <td>{getStatusBadge(order.status)}</td>
+                        {/* <td className="actions-cell">
                         <Link to={`/sales/order-details/${orderId}`}>
                           <button>{Icons.Edit}</button>
                         </Link>
                         <button>{Icons.Settings}</button>
                       </td> */}
-                    </tr>
-                  );
+                      </tr>
+                    );
                   })
                 )}
               </tbody>

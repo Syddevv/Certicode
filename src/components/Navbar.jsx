@@ -160,35 +160,38 @@ const Navbar = () => {
         {!isCompactNav ? (
           <div className="nav__actions nav__actions--desktop">
             {isLoggedIn && (
-              <button className="iconBtn" aria-label="Cart" type="button">
-                <Link to="/cart">
-                  <img className="iconImg" src={CartIcon} alt="" />
-                </Link>
-              </button>
+              <Link className="iconBtn nav__actionLink" aria-label="Cart" to="/cart">
+                <img className="iconImg" src={CartIcon} alt="" />
+              </Link>
             )}
 
             {isLoggedIn && !loading && (
-              <button className="iconBtn" aria-label="Profile" type="button">
-                <Link to="/buyer-dashboard">
-                  <img 
-                    className="iconImg nav__avatar" 
-                    src={resolveAvatarUrl(user?.avatar_url) || AvatarImg} 
-                    alt={user?.name || "User"}
-                    style={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '50%',
-                      objectFit: 'cover',
-                      border: '2px solid #e8e8e8'
-                    }}
-                    onError={(e) => {
-                      console.error('Navbar avatar failed to load:', user?.avatar_url);
-                      e.target.src = AvatarImg;
-                      e.target.onerror = null;
-                    }}
-                  />
-                </Link>
-              </button>
+              <Link
+                className="iconBtn nav__actionLink"
+                aria-label="Profile"
+                to="/buyer-dashboard"
+              >
+                <img
+                  className="iconImg nav__avatar"
+                  src={resolveAvatarUrl(user?.avatar_url) || AvatarImg}
+                  alt={user?.name || "User"}
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "2px solid #e8e8e8",
+                  }}
+                  onError={(e) => {
+                    console.error(
+                      "Navbar avatar failed to load:",
+                      user?.avatar_url,
+                    );
+                    e.target.src = AvatarImg;
+                    e.target.onerror = null;
+                  }}
+                />
+              </Link>
             )}
 
             {!isLoggedIn && !loading && (

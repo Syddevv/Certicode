@@ -271,7 +271,7 @@ const AdminCustomers = () => {
         <Sidebar activePage="customers" />
 
         <main className="main">
-          <AdminTopbar showHamburger onSearch={handleSearch}>
+          <AdminTopbar onSearch={handleSearch}>
             <Link
               to="/admin-notification"
               className="notification-link"

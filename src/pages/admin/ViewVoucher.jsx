@@ -15,7 +15,9 @@ const parsePossibleIds = (value) => {
   if (Array.isArray(value)) {
     return value
       .map((item) =>
-        typeof item === "object" ? item?.id ?? item?.product_id ?? item?.asset_id : item,
+        typeof item === "object"
+          ? (item?.id ?? item?.product_id ?? item?.asset_id)
+          : item,
       )
       .filter((item) => item !== undefined && item !== null && item !== "");
   }
@@ -39,7 +41,11 @@ const getVoucherPayload = (response) =>
   response?.voucher ?? response?.data ?? response?.promo ?? response;
 
 const normalizeProduct = (product, index = 0) => ({
-  id: product?.id ?? product?.product_id ?? product?.asset_id ?? `product-${index + 1}`,
+  id:
+    product?.id ??
+    product?.product_id ??
+    product?.asset_id ??
+    `product-${index + 1}`,
   title: product?.title ?? product?.name ?? `Product ${index + 1}`,
   category:
     product?.category ??
@@ -86,7 +92,9 @@ const normalizeVoucher = (voucher) => {
     used_count: voucher?.used_count ?? 0,
     is_active: voucher?.is_active !== undefined ? voucher.is_active : true,
     applicable_to:
-      voucher?.applicable_to ?? voucher?.applies_to ?? (productIds.length ? "specific_products" : "all_products"),
+      voucher?.applicable_to ??
+      voucher?.applies_to ??
+      (productIds.length ? "specific_products" : "all_products"),
     products: normalizedProducts,
     productIds,
   };
@@ -135,7 +143,9 @@ const getStatusMeta = (voucher) => {
   }
 
   if (validUntil) {
-    const daysUntilExpiry = Math.ceil((validUntil - now) / (1000 * 60 * 60 * 24));
+    const daysUntilExpiry = Math.ceil(
+      (validUntil - now) / (1000 * 60 * 60 * 24),
+    );
     if (daysUntilExpiry <= 7) {
       return { label: "EXPIRING SOON", tone: "expiring" };
     }
@@ -167,7 +177,15 @@ const getApplicableToLabel = (value, hasProducts) => {
     .trim()
     .toLowerCase();
 
-  if (["specific", "specific_product", "specific_products", "products", "product"].includes(normalized)) {
+  if (
+    [
+      "specific",
+      "specific_product",
+      "specific_products",
+      "products",
+      "product",
+    ].includes(normalized)
+  ) {
     return "Specific Product";
   }
 
@@ -197,7 +215,9 @@ export default function ViewVoucher() {
   const { id: voucherIdParam } = useParams();
   const incomingVoucher = location.state?.voucher;
 
-  const [voucher, setVoucher] = useState(incomingVoucher ? normalizeVoucher(incomingVoucher) : null);
+  const [voucher, setVoucher] = useState(
+    incomingVoucher ? normalizeVoucher(incomingVoucher) : null,
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -221,20 +241,26 @@ export default function ViewVoucher() {
         const payload = getVoucherPayload(response);
         const normalizedVoucher = normalizeVoucher(payload);
 
-        if (normalizedVoucher.products.length === 0 && normalizedVoucher.productIds.length > 0) {
-          const productRequests = normalizedVoucher.productIds.map(async (productId, index) => {
-            try {
-              const productResponse = await AdminInventoryAPI.getProductById(productId);
-              return normalizeProduct(productResponse, index);
-            } catch {
-              return {
-                id: productId,
-                title: `Product #${productId}`,
-                category: "Unknown",
-                version: "N/A",
-              };
-            }
-          });
+        if (
+          normalizedVoucher.products.length === 0 &&
+          normalizedVoucher.productIds.length > 0
+        ) {
+          const productRequests = normalizedVoucher.productIds.map(
+            async (productId, index) => {
+              try {
+                const productResponse =
+                  await AdminInventoryAPI.getProductById(productId);
+                return normalizeProduct(productResponse, index);
+              } catch {
+                return {
+                  id: productId,
+                  title: `Product #${productId}`,
+                  category: "Unknown",
+                  version: "N/A",
+                };
+              }
+            },
+          );
 
           normalizedVoucher.products = await Promise.all(productRequests);
         }
@@ -245,7 +271,8 @@ export default function ViewVoucher() {
       } catch (fetchError) {
         console.error("Error fetching voucher details:", fetchError);
         if (isMounted) {
-          const message = fetchError.message || "Failed to load voucher details.";
+          const message =
+            fetchError.message || "Failed to load voucher details.";
           setError(message);
           showErrorToast(message);
         }
@@ -276,7 +303,7 @@ export default function ViewVoucher() {
         <Sidebar activePage="vouchers" />
 
         <main className="main view-voucher-wrapper">
-          <AdminTopbar showHamburger>
+          <AdminTopbar>
             <Link
               to="/admin-notification"
               className="notification-link"
@@ -301,7 +328,8 @@ export default function ViewVoucher() {
             <div>
               <h2>View Voucher Details</h2>
               <p className="header-subtitle">
-                The information below displays the complete details of the selected voucher.
+                The information below displays the complete details of the
+                selected voucher.
               </p>
             </div>
             <button
@@ -336,7 +364,9 @@ export default function ViewVoucher() {
           {loading ? (
             <div className="voucher-state-card">Loading voucher details...</div>
           ) : error ? (
-            <div className="voucher-state-card voucher-state-card--error">{error}</div>
+            <div className="voucher-state-card voucher-state-card--error">
+              {error}
+            </div>
           ) : !voucher ? (
             <div className="voucher-state-card voucher-state-card--error">
               Voucher details are unavailable.
@@ -379,19 +409,31 @@ export default function ViewVoucher() {
                   label="Maximum Discount (for % type)"
                   value={formatMoney(voucher.max_discount)}
                 />
-                <Field label="Available from" value={formatDate(voucher.valid_from)} />
-                <Field label="Available to" value={formatDate(voucher.valid_until)} />
+                <Field
+                  label="Available from"
+                  value={formatDate(voucher.valid_from)}
+                />
+                <Field
+                  label="Available to"
+                  value={formatDate(voucher.valid_until)}
+                />
               </div>
 
               <div className="voucher-fields-row">
                 <Field
                   label="Usage Limit"
-                  value={voucher.max_uses ? `${voucher.used_count}/${voucher.max_uses}` : "Unlimited"}
+                  value={
+                    voucher.max_uses
+                      ? `${voucher.used_count}/${voucher.max_uses}`
+                      : "Unlimited"
+                  }
                 />
 
                 <div className="voucher-field">
                   <label>Status</label>
-                  <span className={`status-badge status-badge--${statusMeta.tone}`}>
+                  <span
+                    className={`status-badge status-badge--${statusMeta.tone}`}
+                  >
                     <span className="status-dot" />
                     {statusMeta.label}
                   </span>
@@ -400,7 +442,10 @@ export default function ViewVoucher() {
                 <div className="voucher-field">
                   <label>Applicable to:</label>
                   <span className="field-value">
-                    {getApplicableToLabel(voucher.applicable_to, voucher.products.length > 0)}
+                    {getApplicableToLabel(
+                      voucher.applicable_to,
+                      voucher.products.length > 0,
+                    )}
                   </span>
                 </div>
               </div>
@@ -408,7 +453,9 @@ export default function ViewVoucher() {
               <div className="products-section">
                 <p className="products-label">Select (Select Multiple)</p>
                 {voucher.products.length === 0 ? (
-                  <p className="products-empty">No specific products attached to this voucher.</p>
+                  <p className="products-empty">
+                    No specific products attached to this voucher.
+                  </p>
                 ) : (
                   <div className="products-grid">
                     {voucher.products.map((product) => (
