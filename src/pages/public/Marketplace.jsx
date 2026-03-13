@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../../styles/Marketplace.css";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import ViewProduct from "../../assets/ViewProduct.png";
 import { api } from "../../services/api";
 import { ReviewAPI } from "../../services/ReviewAPI";
@@ -34,7 +34,37 @@ const getToneColor = (tech) => {
   return colorMap[tech] || "green";
 };
 
+const normalizeCategory = (category) => {
+  const normalizedCategory = String(category || "")
+    .trim()
+    .toLowerCase();
+
+  const categoryMap = {
+    all: "All Assets",
+    "all assets": "All Assets",
+    website: "Website",
+    "websites & apps": "Website",
+    "website & apps": "Website",
+    "mobile app": "Mobile App",
+    "mobile apps": "Mobile App",
+    "mobile solutions": "Mobile App",
+    "ui kit": "UI Kit",
+    "ui kits": "UI Kit",
+    "ui/ux design kits": "UI Kit",
+    "custom project": "Custom Projects",
+    "custom projects": "Custom Projects",
+  };
+
+  return categoryMap[normalizedCategory] || "All Assets";
+};
+
+const normalizeSortOrder = (sortOrder) => {
+  const allowedSorts = ["newest", "oldest", "highest", "lowest"];
+  return allowedSorts.includes(sortOrder) ? sortOrder : "newest";
+};
+
 const Marketplace = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState("All Assets");
   const [assets, setAssets] = useState([]);
   const [filteredAssets, setFilteredAssets] = useState([]);
@@ -85,8 +115,25 @@ const Marketplace = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     fetchAllTechs();
-    fetchProducts();
   }, []);
+
+  useEffect(() => {
+    const categoryFromUrl = normalizeCategory(searchParams.get("category"));
+    const searchFromUrl = searchParams.get("search") || "";
+    const sortFromUrl = normalizeSortOrder(searchParams.get("sort") || "newest");
+    const parsedPage = Number.parseInt(searchParams.get("page") || "1", 10);
+    const pageFromUrl = Number.isFinite(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+    const assetType =
+      categoryFromUrl === "All Assets" || categoryFromUrl === "Custom Projects"
+        ? ""
+        : categoryFromUrl;
+
+    setActiveTab(categoryFromUrl);
+    setSearchTerm(searchFromUrl);
+    setSortBy(sortFromUrl);
+
+    fetchProducts(searchFromUrl, assetType, pageFromUrl, sortFromUrl);
+  }, [searchParams]);
 
   useEffect(() => {
     applyFilters();
@@ -242,24 +289,30 @@ const Marketplace = () => {
   const handleSearch = (e) => {
     const value = e.target.value;
     setSearchTerm(value);
-    let assetType = activeTab === "All Assets" ? "" : activeTab;
+    const nextParams = new URLSearchParams(searchParams);
 
-    if (assetType === "Custom Projects") {
-      assetType = "";
+    if (value.trim()) {
+      nextParams.set("search", value);
+    } else {
+      nextParams.delete("search");
     }
 
-    fetchProducts(value, assetType, 1, sortBy);
+    nextParams.delete("page");
+    setSearchParams(nextParams);
   };
 
   const handleTabClick = (tab) => {
     setActiveTab(tab);
-    let assetType = tab === "All Assets" ? "" : tab;
+    const nextParams = new URLSearchParams(searchParams);
 
-    if (assetType === "Custom Projects") {
-      assetType = "";
+    if (tab === "All Assets") {
+      nextParams.delete("category");
+    } else {
+      nextParams.set("category", tab);
     }
 
-    fetchProducts(searchTerm, assetType, 1, sortBy);
+    nextParams.delete("page");
+    setSearchParams(nextParams);
   };
 
   const handleTechChange = (tech) => {
@@ -287,25 +340,25 @@ const Marketplace = () => {
       page === pagination.current_page
     )
       return;
-    let assetType = activeTab === "All Assets" ? "" : activeTab;
 
-    if (assetType === "Custom Projects") {
-      assetType = "";
-    }
-
-    fetchProducts(searchTerm, assetType, page, sortBy);
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set("page", String(page));
+    setSearchParams(nextParams);
   };
 
   const handleSortSelect = (value) => {
     setSortBy(value);
     setShowSortDropdown(false);
+    const nextParams = new URLSearchParams(searchParams);
 
-    let assetType = activeTab === "All Assets" ? "" : activeTab;
-    if (assetType === "Custom Projects") {
-      assetType = "";
+    if (value === "newest") {
+      nextParams.delete("sort");
+    } else {
+      nextParams.set("sort", value);
     }
 
-    fetchProducts(searchTerm, assetType, 1, value);
+    nextParams.delete("page");
+    setSearchParams(nextParams);
   };
 
   const toggleFilterGroup = (group) => {

@@ -5,8 +5,39 @@ import MailIcon from "../assets/mail-gray.png";
 import LinkedInIcon from "../assets/linkedin-gray.png";
 import SendIcon from "../assets/send-icon.png";
 import { Link } from "react-router-dom";
+import { showSuccessToast } from "../utils/toast";
+import { useState } from "react";
 
 const Footer = () => {
+  const [email, setEmail] = useState("");
+  const gmailComposeUrl =
+    "https://mail.google.com/mail/?view=cm&fs=1&to=certicodecc@gmail.com";
+  const marketplaceLinks = [
+    {
+      label: "Websites & Apps",
+      to: "/marketplace?category=Website",
+    },
+    {
+      label: "Mobile Solutions",
+      to: "/marketplace?category=Mobile%20App",
+    },
+    {
+      label: "UI/UX Design Kits",
+      to: "/marketplace?category=UI%20Kit",
+    },
+    {
+      label: "Custom Projects",
+      to: "/marketplace?category=Custom%20Projects",
+    },
+  ];
+
+  const handleSubmit = () => {
+    showSuccessToast(
+      "Newsletter signup is coming soon. For now, contact us at certicodecc@gmail.com.",
+    );
+    setEmail("");
+  };
+
   return (
     <footer className="footer">
       <div className="footer__inner">
@@ -18,13 +49,27 @@ const Footer = () => {
               systems.
             </p>
             <div className="footer__socials">
-              <a className="footer__social" href="#" aria-label="Facebook">
+              <a
+                className="footer__social"
+                href="https://www.facebook.com/CertiCode"
+                aria-label="Facebook"
+              >
                 <img src={FacebookIcon} alt="" />
               </a>
-              <a className="footer__social" href="#" aria-label="LinkedIn">
+              <a
+                className="footer__social"
+                href="https://www.linkedin.com/company/autopilot-virtual-assist-agency/"
+                aria-label="LinkedIn"
+              >
                 <img src={LinkedInIcon} alt="" />
               </a>
-              <a className="footer__social" href="#" aria-label="Email">
+              <a
+                className="footer__social"
+                href={gmailComposeUrl}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Email"
+              >
                 <img src={MailIcon} alt="" />
               </a>
             </div>
@@ -32,18 +77,11 @@ const Footer = () => {
 
           <div className="footer__col">
             <div className="footer__heading">Marketplace</div>
-            <a className="footer__link" href="#">
-              Websites & Apps
-            </a>
-            <a className="footer__link" href="#">
-              Mobile Solutions
-            </a>
-            <a className="footer__link" href="#">
-              UI/UX Design Kits
-            </a>
-            <Link className="footer__link" to="/custom-projects">
-              Custom Projects
-            </Link>
+            {marketplaceLinks.map((item) => (
+              <Link key={item.label} className="footer__link" to={item.to}>
+                {item.label}
+              </Link>
+            ))}
           </div>
 
           <div className="footer__col">
@@ -70,8 +108,15 @@ const Footer = () => {
                 type="email"
                 placeholder="Email"
                 aria-label="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
-              <button className="footer__send" type="button" aria-label="Send">
+              <button
+                className="footer__send"
+                type="button"
+                aria-label="Send"
+                onClick={() => handleSubmit()}
+              >
                 <img src={SendIcon} alt="" />
               </button>
             </div>
