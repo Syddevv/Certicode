@@ -538,3 +538,152 @@ td {
   color: #111827;
   font-size: 14px;
 }
+
+.customers-page {
+  min-width: 0;
+}
+
+.customers-main {
+  min-width: 0;
+  padding: 0 clamp(16px, 3vw, 32px) 24px;
+}
+
+.customers-page .stats-grid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.customers-page .stat-card {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.customers-page .customer-stat-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.customers-page .card-top {
+  gap: 12px;
+}
+
+.customers-page .badge {
+  flex-shrink: 0;
+}
+
+.customers-page .stat-card small {
+  line-height: 1.4;
+}
+
+.customers-page .stat-card h3 {
+  flex-shrink: 0;
+  text-align: right;
+  line-height: 1.1;
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  overflow-wrap: anywhere;
+}
+
+.customers-page .content-box {
+  min-width: 0;
+}
+
+.customers-page .customers-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.customers-page .customers-table-scroll table {
+  min-width: 820px;
+}
+
+.customers-page .toolbar,
+.customers-page .left-controls,
+.customers-page .tab-switcher,
+.customers-page .pagination-bar,
+.customers-page .pagination-controls {
+  flex-wrap: wrap;
+}
+
+.customers-page .tab-switcher {
+  row-gap: 6px;
+}
+
+.customers-page .user-cell {
+  min-width: 0;
+  align-items: flex-start;
+}
+
+.customers-page .user-meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.customers-page .user-cell strong,
+.customers-page .user-cell .email,
+.customers-page .join-date {
+  overflow-wrap: anywhere;
+}
+
+.customers-page .pagination-bar {
+  gap: 12px;
+}
+
+@media (max-width: 1024px) {
+  .customers-main {
+    padding-inline: 20px;
+  }
+
+  .customers-page .customers-table-scroll table {
+    min-width: 760px;
+  }
+}
+
+@media (max-width: 768px) {
+  .customers-main {
+    padding-inline: 16px;
+  }
+
+  .customers-page .customers-table-scroll th:nth-child(2),
+  .customers-page .customers-table-scroll td:nth-child(2),
+  .customers-page .customers-table-scroll th:nth-child(3),
+  .customers-page .customers-table-scroll td:nth-child(3) {
+    display: table-cell;
+  }
+
+  .customers-page .customers-table-scroll table {
+    min-width: 680px;
+  }
+}
+
+@media (max-width: 560px) {
+  .customers-page .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .customers-page .stat-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .customers-page .stat-card h3 {
+    text-align: left;
+  }
+
+  .customers-page .content-box {
+    padding: 16px;
+  }
+
+  .customers-page .tab-switcher {
+    width: 100%;
+  }
+
+  .customers-page .tab-btn {
+    flex: 1 1 0;
+  }
+}

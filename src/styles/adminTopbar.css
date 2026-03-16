@@ -1,6 +1,8 @@
 .admin-topbar.topbar {
   background: #ffffff;
-  margin: 0 calc(-1 * var(--admin-topbar-edge-x, 0px)) 24px;
+  width: calc(100% + (var(--admin-topbar-edge-x, 0px) * 2));
+  margin: 0 0 24px;
+  margin-left: calc(-1 * var(--admin-topbar-edge-x, 0px));
   padding: 14px var(--admin-topbar-edge-x, 0px);
   border: none;
   border-bottom: 1px solid #edf2f7;
@@ -83,7 +85,7 @@
 
 @media (max-width: 768px) {
   .admin-topbar.topbar {
-    margin: 0 calc(-1 * var(--admin-topbar-edge-x, 0px)) 20px;
+    margin: 0 0 20px;
     padding: 12px var(--admin-topbar-edge-x, 0px);
     gap: 12px;
   }
@@ -95,7 +97,7 @@
 
 @media (max-width: 640px) {
   .admin-topbar.topbar {
-    margin: 0 calc(-1 * var(--admin-topbar-edge-x, 0px)) 16px;
+    margin: 0 0 16px;
     padding: 10px var(--admin-topbar-edge-x, 0px);
     gap: 10px;
   }
@@ -124,7 +126,7 @@
 
 @media (max-width: 480px) {
   .admin-topbar.topbar {
-    margin: 0 calc(-1 * var(--admin-topbar-edge-x, 0px)) 12px;
+    margin: 0 0 12px;
     padding: 8px var(--admin-topbar-edge-x, 0px);
     gap: 8px;
   }

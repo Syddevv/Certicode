@@ -267,10 +267,10 @@ const AdminCustomers = () => {
     <>
       <input type="checkbox" id="sidebar-toggle" />
 
-      <div className="layout">
+      <div className="layout customers-page">
         <Sidebar activePage="customers" />
 
-        <main className="main">
+        <main className="main customers-main">
           <AdminTopbar onSearch={handleSearch}>
             <Link
               to="/admin-notification"
@@ -303,80 +303,88 @@ const AdminCustomers = () => {
             </div>
           </div>
 
-          <div className="stats-grid">
+          <div className="stats-grid customers-stats-grid">
             <div className="stat-card">
-              <div className="card-top">
-                <div className="icon-box green">
-                  <img
-                    src={totalCustomersIcon}
-                    alt="Total Customers"
-                    className="stat-icon-img"
-                  />
+              <div className="customer-stat-main">
+                <div className="card-top">
+                  <div className="icon-box green">
+                    <img
+                      src={totalCustomersIcon}
+                      alt="Total Customers"
+                      className="stat-icon-img"
+                    />
+                  </div>
+                  <span
+                    className={`badge ${stats.total_customers_change >= 0 ? "positive" : "negative"}`}
+                  >
+                    {formatPercentage(stats.total_customers_change)}
+                  </span>
                 </div>
-                <span
-                  className={`badge ${stats.total_customers_change >= 0 ? "positive" : "negative"}`}
-                >
-                  {formatPercentage(stats.total_customers_change)}
-                </span>
+                <small>TOTAL CUSTOMERS</small>
               </div>
-              <small>TOTAL CUSTOMERS</small>
               <h3>{stats.total_customers}</h3>
             </div>
 
             <div className="stat-card">
-              <div className="card-top">
-                <div className="icon-box orange">
-                  <img
-                    src={activeCustomersIcon}
-                    alt="Active Customers"
-                    className="stat-icon-img"
-                  />
+              <div className="customer-stat-main">
+                <div className="card-top">
+                  <div className="icon-box orange">
+                    <img
+                      src={activeCustomersIcon}
+                      alt="Active Customers"
+                      className="stat-icon-img"
+                    />
+                  </div>
+                  <span
+                    className={`badge ${stats.active_customers_change >= 0 ? "positive" : "negative"}`}
+                  >
+                    {formatPercentage(stats.active_customers_change)}
+                  </span>
                 </div>
-                <span
-                  className={`badge ${stats.active_customers_change >= 0 ? "positive" : "negative"}`}
-                >
-                  {formatPercentage(stats.active_customers_change)}
-                </span>
+                <small>ACTIVE CUSTOMERS</small>
               </div>
-              <small>ACTIVE CUSTOMERS</small>
               <h3>{stats.active_customers}</h3>
             </div>
 
             <div className="stat-card">
-              <div className="card-top">
-                <div className="icon-box blue">
-                  <img
-                    src={totalRevenueIcon}
-                    alt="Total Revenue"
-                    className="stat-icon-img"
-                  />
+              <div className="customer-stat-main">
+                <div className="card-top">
+                  <div className="icon-box blue">
+                    <img
+                      src={totalRevenueIcon}
+                      alt="Total Revenue"
+                      className="stat-icon-img"
+                    />
+                  </div>
+                  <span
+                    className={`badge ${stats.total_revenue_change >= 0 ? "positive" : "negative"}`}
+                  >
+                    {formatPercentage(stats.total_revenue_change)}
+                  </span>
                 </div>
-                <span
-                  className={`badge ${stats.total_revenue_change >= 0 ? "positive" : "negative"}`}
-                >
-                  {formatPercentage(stats.total_revenue_change)}
-                </span>
+                <small>TOTAL REVENUE</small>
               </div>
-              <small>TOTAL REVENUE</small>
               <h3>{formatCurrency(stats.total_revenue)}</h3>
             </div>
 
             <div className="stat-card">
-              <div className="card-top">
-                <div className="icon-box purple">
-                  <img
-                    src={avgCustomerSpentIcon}
-                    alt="Avg Customer Spent"
-                    className="stat-icon-img"
-                  />
+              <div className="customer-stat-main">
+                <div className="card-top">
+                  <div className="icon-box purple">
+                    <img
+                      src={avgCustomerSpentIcon}
+                      alt="Avg Customer Spent"
+                      className="stat-icon-img"
+                    />
+                  </div>
+                  <span
+                    className={`badge ${stats.avg_order_value_change >= 0 ? "positive" : "negative"}`}
+                  >
+                    {formatPercentage(stats.avg_order_value_change)}
+                  </span>
                 </div>
-                <span
-                  className={`badge ${stats.avg_order_value_change >= 0 ? "positive" : "negative"}`}
-                >
-                  {formatPercentage(stats.avg_order_value_change)}
-                </span>
+                <small>AVG. CUSTOMER SPENT</small>
               </div>
-              <small>AVG. CUSTOMER SPENT</small>
               <h3>{formatCurrency(stats.avg_order_value)}</h3>
             </div>
           </div>
@@ -407,70 +415,72 @@ const AdminCustomers = () => {
               </div>
             </div>
 
-            <table>
-              <thead>
-                <tr>
-                  <th style={{ width: "35%" }}>CUSTOMER {Icons.Sort}</th>
-                  <th style={{ width: "20%" }}>PURCHASES {Icons.Sort}</th>
-                  <th style={{ width: "20%" }}>TOTAL SPENT {Icons.Sort}</th>
-                  <th style={{ width: "15%" }}>STATUS {Icons.Sort}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
+            <div className="customers-table-scroll">
+              <table>
+                <thead>
                   <tr>
-                    <td colSpan="5" className="loading-cell">
-                      Loading customers...
-                    </td>
+                    <th style={{ width: "35%" }}>CUSTOMER {Icons.Sort}</th>
+                    <th style={{ width: "20%" }}>PURCHASES {Icons.Sort}</th>
+                    <th style={{ width: "20%" }}>TOTAL SPENT {Icons.Sort}</th>
+                    <th style={{ width: "15%" }}>STATUS {Icons.Sort}</th>
                   </tr>
-                ) : customers.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="no-data-cell">
-                      No customers found
-                    </td>
-                  </tr>
-                ) : (
-                  customers.map((customer) => (
-                    <tr key={customer.id}>
-                      <td>
-                        <div className="user-cell">
-                          <Avatar
-                            name={customer.name}
-                            avatarUrl={customer.avatar_url}
-                          />
-                          <div>
-                            <Link
-                              to={`/customers/${customer.id}`}
-                              state={{ customer }}
-                              style={{
-                                textDecoration: "none",
-                                color: "inherit",
-                              }}
-                            >
-                              <strong>{customer.name}</strong>
-                            </Link>
-                            <span className="email">{customer.email}</span>
-                            <span className="join-date">
-                              Joined: {formatDate(customer.created_at)}
-                            </span>
-                          </div>
-                        </div>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan="4" className="loading-cell">
+                        Loading customers...
                       </td>
-                      <td>{getPurchaseBadge(customer.total_orders || 0)}</td>
-                      <td className="amount">
-                        {formatCurrency(customer.total_spent)}
-                      </td>
-                      <td>{getStatusBadge(customer)}</td>
-                      {/* <td className="actions">
-                        <Link to={`/customers/${customer.id}`}>
-                          <button className="more-btn">{Icons.MoreVertical}</button>
-                        </Link>
-                      </td> */}
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : customers.length === 0 ? (
+                    <tr>
+                      <td colSpan="4" className="no-data-cell">
+                        No customers found
+                      </td>
+                    </tr>
+                  ) : (
+                    customers.map((customer) => (
+                      <tr key={customer.id}>
+                        <td>
+                          <div className="user-cell">
+                            <Avatar
+                              name={customer.name}
+                              avatarUrl={customer.avatar_url}
+                            />
+                            <div className="user-meta">
+                              <Link
+                                to={`/customers/${customer.id}`}
+                                state={{ customer }}
+                                style={{
+                                  textDecoration: "none",
+                                  color: "inherit",
+                                }}
+                              >
+                                <strong>{customer.name}</strong>
+                              </Link>
+                              <span className="email">{customer.email}</span>
+                              <span className="join-date">
+                                Joined: {formatDate(customer.created_at)}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>{getPurchaseBadge(customer.total_orders || 0)}</td>
+                        <td className="amount">
+                          {formatCurrency(customer.total_spent)}
+                        </td>
+                        <td>{getStatusBadge(customer)}</td>
+                        {/* <td className="actions">
+                          <Link to={`/customers/${customer.id}`}>
+                            <button className="more-btn">{Icons.MoreVertical}</button>
+                          </Link>
+                        </td> */}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
 
             <div className="pagination-bar">
               <span>

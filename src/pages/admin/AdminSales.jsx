@@ -268,10 +268,10 @@ const AdminSales = () => {
     <>
       <input type="checkbox" id="sidebar-toggle" />
 
-      <div className="layout">
+      <div className="layout sales-page">
         <Sidebar activePage="sales" />
 
-        <main className="main">
+        <main className="main sales-main">
           <AdminTopbar onSearch={handleSearch}>
             <Link
               to="/admin-notification"
@@ -305,12 +305,14 @@ const AdminSales = () => {
             </div>
           </div>
 
-          <div className="stats-grid">
+          <div className="stats-grid sales-stats-grid">
             <div className="stat-card">
-              <div className="stat-header">
-                <small>GROSS VOLUME</small>
+              <div className="stat-card-content">
+                <div className="stat-header">
+                  <small>GROSS VOLUME</small>
+                </div>
+                <h3>{formatCurrency(stats.gross_volume)}</h3>
               </div>
-              <h3>{formatCurrency(stats.gross_volume)}</h3>
               <span
                 className={`trend-badge ${stats.gross_volume_change >= 0 ? "positive" : "negative"}`}
               >
@@ -319,10 +321,12 @@ const AdminSales = () => {
             </div>
 
             <div className="stat-card">
-              <div className="stat-header">
-                <small>NET REVENUE</small>
+              <div className="stat-card-content">
+                <div className="stat-header">
+                  <small>NET REVENUE</small>
+                </div>
+                <h3>{formatCurrency(stats.net_revenue)}</h3>
               </div>
-              <h3>{formatCurrency(stats.net_revenue)}</h3>
               <span
                 className={`trend-badge ${stats.net_revenue_change >= 0 ? "positive" : "negative"}`}
               >
@@ -331,10 +335,12 @@ const AdminSales = () => {
             </div>
 
             <div className="stat-card">
-              <div className="stat-header">
-                <small>REFUND RATE</small>
+              <div className="stat-card-content">
+                <div className="stat-header">
+                  <small>REFUND RATE</small>
+                </div>
+                <h3>{stats.refund_rate.toFixed(1)}%</h3>
               </div>
-              <h3>{stats.refund_rate.toFixed(1)}%</h3>
               <span
                 className={`trend-badge ${stats.refund_rate_change <= 0 ? "positive" : "negative"}`}
               >
@@ -343,10 +349,12 @@ const AdminSales = () => {
             </div>
 
             <div className="stat-card">
-              <div className="stat-header">
-                <small>AVG. TRANSACTION</small>
+              <div className="stat-card-content">
+                <div className="stat-header">
+                  <small>AVG. TRANSACTION</small>
+                </div>
+                <h3>{formatCurrency(stats.avg_transaction)}</h3>
               </div>
-              <h3>{formatCurrency(stats.avg_transaction)}</h3>
               <span
                 className={`trend-badge ${stats.avg_transaction_change >= 0 ? "positive" : "negative"}`}
               >
@@ -415,88 +423,90 @@ const AdminSales = () => {
               </button> */}
             </div>
 
-            <table>
-              <thead>
-                <tr>
-                  <th style={{ width: "10%" }}>Order ID</th>
-                  <th style={{ width: "25%" }}>Asset Name</th>
-                  <th style={{ width: "20%" }}>Customer Name</th>
-                  <th style={{ width: "15%" }}>Date / Time</th>
-                  <th style={{ width: "10%" }}>Amount</th>
-                  <th style={{ width: "12%" }}>Payment Status</th>
-                  {/* <th style={{ width: "8%", textAlign: "center" }}>Actions</th> */}
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
+            <div className="sales-table-scroll">
+              <table>
+                <thead>
                   <tr>
-                    <td colSpan="7" className="loading-cell">
-                      Loading orders...
-                    </td>
+                    <th style={{ width: "10%" }}>Order ID</th>
+                    <th style={{ width: "25%" }}>Asset Name</th>
+                    <th style={{ width: "20%" }}>Customer Name</th>
+                    <th style={{ width: "15%" }}>Date / Time</th>
+                    <th style={{ width: "10%" }}>Amount</th>
+                    <th style={{ width: "12%" }}>Payment Status</th>
+                    {/* <th style={{ width: "8%", textAlign: "center" }}>Actions</th> */}
                   </tr>
-                ) : orders.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" className="no-data-cell">
-                      No orders found
-                    </td>
-                  </tr>
-                ) : (
-                  orders.map((order) => {
-                    const orderId =
-                      order.id || order.order_id || order.order_number;
-                    const rowKey =
-                      orderId || `${order.order_number}-${order.asset_name}`;
-                    return (
-                      <tr key={rowKey}>
-                        <td className="order-id">{order.order_number}</td>
-                        <td>
-                          <div className="asset-info">
-                            {orderId ? (
-                              <Link
-                                to={`/sales/order-details/${orderId}`}
-                                state={{ order }}
-                                style={{
-                                  textDecoration: "none",
-                                  color: "inherit",
-                                }}
-                              >
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan="7" className="loading-cell">
+                        Loading orders...
+                      </td>
+                    </tr>
+                  ) : orders.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" className="no-data-cell">
+                        No orders found
+                      </td>
+                    </tr>
+                  ) : (
+                    orders.map((order) => {
+                      const orderId =
+                        order.id || order.order_id || order.order_number;
+                      const rowKey =
+                        orderId || `${order.order_number}-${order.asset_name}`;
+                      return (
+                        <tr key={rowKey}>
+                          <td className="order-id">{order.order_number}</td>
+                          <td>
+                            <div className="asset-info">
+                              {orderId ? (
+                                <Link
+                                  to={`/sales/order-details/${orderId}`}
+                                  state={{ order }}
+                                  style={{
+                                    textDecoration: "none",
+                                    color: "inherit",
+                                  }}
+                                >
+                                  <strong>{order.asset_name}</strong>
+                                </Link>
+                              ) : (
                                 <strong>{order.asset_name}</strong>
-                              </Link>
-                            ) : (
-                              <strong>{order.asset_name}</strong>
-                            )}
-                            {getCategoryBadge(order.category)}
-                          </div>
-                        </td>
-                        <td>
-                          <div className="customer-info">
-                            <Avatar
-                              name={order.customer_name}
-                              avatarUrl={order.customer_avatar}
-                            />
-                            <span>{order.customer_name}</span>
-                          </div>
-                        </td>
-                        <td className="date-cell">
-                          <div>{formatDate(order.purchased_at)}</div>
-                          <small>{formatTime(order.purchased_at)}</small>
-                        </td>
-                        <td className="amount">
-                          {formatCurrency(order.total_amount)}
-                        </td>
-                        <td>{getStatusBadge(order.status)}</td>
-                        {/* <td className="actions-cell">
-                        <Link to={`/sales/order-details/${orderId}`}>
-                          <button>{Icons.Edit}</button>
-                        </Link>
-                        <button>{Icons.Settings}</button>
-                      </td> */}
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+                              )}
+                              {getCategoryBadge(order.category)}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="customer-info">
+                              <Avatar
+                                name={order.customer_name}
+                                avatarUrl={order.customer_avatar}
+                              />
+                              <span>{order.customer_name}</span>
+                            </div>
+                          </td>
+                          <td className="date-cell">
+                            <div>{formatDate(order.purchased_at)}</div>
+                            <small>{formatTime(order.purchased_at)}</small>
+                          </td>
+                          <td className="amount">
+                            {formatCurrency(order.total_amount)}
+                          </td>
+                          <td>{getStatusBadge(order.status)}</td>
+                          {/* <td className="actions-cell">
+                          <Link to={`/sales/order-details/${orderId}`}>
+                            <button>{Icons.Edit}</button>
+                          </Link>
+                          <button>{Icons.Settings}</button>
+                        </td> */}
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
 
             <div className="pagination-bar">
               <span>
