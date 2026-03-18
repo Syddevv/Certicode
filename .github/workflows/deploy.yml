@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # 🔥 Build with ENV (VERY IMPORTANT FIX)
+      # 🔥 Build with ENV
       - name: Build project
         run: npm run build
         env:
@@ -35,7 +35,7 @@ jobs:
           script: |
             rm -rf ~/domains/commerce.certicode.tech/public_html/*
 
-      # 🚀 Upload build files (NO dist folder issue)
+      # 🚀 Upload build files
       - name: Upload build files
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -45,4 +45,3 @@ jobs:
           port: ${{ secrets.PORT }}
           source: "dist/*"
           target: "~/domains/commerce.certicode.tech/public_html"
-          strip_components: 1
