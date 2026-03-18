@@ -26,4 +26,4 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           port: ${{ secrets.PORT }}
           source: "dist/*"
-          target: "~/domains/staging.tmc-automatedigital.cloud/public_html"
+          target: "~/domains/commerce.certicode.tech/public_html"
