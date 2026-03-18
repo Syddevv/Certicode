@@ -18,8 +18,8 @@ jobs:
       - name: Build project
         run: npm run build
 
-      # 🧹 Clean old files in public_html
-      - name: Clean old files
+      # 🧹 Clean old files
+      - name: Clean public_html
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.HOST }}
@@ -29,8 +29,8 @@ jobs:
           script: |
             rm -rf ~/domains/commerce.certicode.tech/public_html/*
 
-      # 🚀 Upload new build
-      - name: Upload to Hostinger
+      # 🚀 Upload ONLY contents of dist (not the folder itself)
+      - name: Upload build files
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}
@@ -39,3 +39,4 @@ jobs:
           port: ${{ secrets.PORT }}
           source: "dist/*"
           target: "~/domains/commerce.certicode.tech/public_html"
+          strip_components: 1
