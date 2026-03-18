@@ -9,14 +9,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 📦 Checkout repo
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 📦 Install dependencies
       - name: Install dependencies
         run: npm install
 
+      # 🔥 Build with ENV (VERY IMPORTANT FIX)
       - name: Build project
         run: npm run build
+        env:
+          VITE_API_URL: https://api.commerce.certicode.tech
+          VITE_FRONTEND_URL: https://commerce.certicode.tech
 
       # 🧹 Clean old files
       - name: Clean public_html
@@ -29,7 +35,7 @@ jobs:
           script: |
             rm -rf ~/domains/commerce.certicode.tech/public_html/*
 
-      # 🚀 Upload ONLY contents of dist (not the folder itself)
+      # 🚀 Upload build files (NO dist folder issue)
       - name: Upload build files
         uses: appleboy/scp-action@v0.1.7
         with:
